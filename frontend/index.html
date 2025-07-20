@@ -32,6 +32,7 @@
             color: white;
             padding: 30px;
             text-align: center;
+            position: relative;
         }
 
         .header h1 {
@@ -42,6 +43,95 @@
         .header p {
             font-size: 1.1em;
             opacity: 0.9;
+        }
+
+        /* Auth buttons in header */
+        .auth-buttons {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .auth-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .auth-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 20px;
+            border-radius: 15px 15px 0 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+
+        .close {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+        }
+
+        .close:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-body {
+            padding: 30px;
         }
 
         .content {
@@ -106,6 +196,7 @@
             margin-right: 10px;
             margin-bottom: 10px;
             transition: transform 0.2s;
+            width: 100%;
         }
 
         .btn:hover {
@@ -127,6 +218,15 @@
 
         .btn-info:hover {
             box-shadow: 0 5px 15px rgba(33, 150, 243, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #545b62);
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
         }
 
         .products-grid {
@@ -222,6 +322,66 @@
             border-radius: 5px;
             margin: 10px 0;
         }
+
+        .toggle-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #4CAF50;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .toggle-link:hover {
+            color: #45a049;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* User info display */
+        .user-info {
+            display: none;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 15px;
+            border-radius: 25px;
+            color: white;
+        }
+
+        .user-info .welcome {
+            margin-right: 15px;
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -229,9 +389,22 @@
         <div class="header">
             <h1>🚀 Demo RESTful API</h1>
             <p>Khung project cơ bản với kiến trúc MVC - Mock Data</p>
+            
+            <!-- Auth buttons -->
+            <div class="auth-buttons" id="authButtons">
+                <a href="login.html" class="auth-btn">🔑 Đăng nhập</a>
+                <a href="signup.html" class="auth-btn">📝 Đăng ký</a>
+            </div>
+
+            <!-- User info (hidden by default) -->
+            <div class="user-info" id="userInfo">
+                <span class="welcome" id="welcomeText">Chào mừng, User!</span>
+                <button class="logout-btn" onclick="logout()">Đăng xuất</button>
+            </div>
         </div>
 
         <div class="content">
+            <!-- ...existing code... (các section sản phẩm giữ nguyên) -->
             <!-- Hiển thị tất cả sản phẩm -->
             <div class="section">
                 <div class="section-header">
@@ -318,6 +491,36 @@
 
     <script>
         const API_BASE_URL = 'http://localhost:3000/api/demo';
+
+        // Remove all modal-related functions and keep only product functions
+        // Check if user is logged in on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const userData = localStorage.getItem('userData');
+            if (userData) {
+                updateAuthUI(JSON.parse(userData));
+            }
+            getAllProducts();
+        });
+
+        function updateAuthUI(userData) {
+            const authButtons = document.getElementById('authButtons');
+            const userInfo = document.getElementById('userInfo');
+            const welcomeText = document.getElementById('welcomeText');
+
+            if (userData) {
+                authButtons.style.display = 'none';
+                userInfo.style.display = 'flex';
+                welcomeText.textContent = `Chào ${userData.name}!`;
+            } else {
+                authButtons.style.display = 'flex';
+                userInfo.style.display = 'none';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('userData');
+            updateAuthUI(null);
+        }
 
         // Hàm hiển thị thông báo
         function showMessage(container, message, type = 'info') {
@@ -520,11 +723,6 @@
                 responseContainer.textContent = `Lỗi kết nối: ${error.message}\n\nHãy đảm bảo backend đang chạy trên http://localhost:3000`;
             }
         }
-
-        // Load dữ liệu khi trang được tải
-        document.addEventListener('DOMContentLoaded', function() {
-            getAllProducts();
-        });
     </script>
 </body>
 </html>
