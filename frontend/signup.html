@@ -12,10 +12,10 @@
     <!-- Left side: Form -->
     <div class="w-full lg:w-1/2 p-10">
       <!-- Logo -->
-      <div class="flex items-center gap-2 mb-6">
+      <a href="index.html" class="flex items-center gap-2 mb-6">
         <img src="https://cdn-icons-png.flaticon.com/512/2111/2111320.png" alt="Logo" class="w-8 h-8" />
         <h1 class="text-2xl font-bold text-[#008489]">A2BnB</h1>
-      </div>
+      </a>
 
       <!-- Title -->
       <h2 class="text-3xl font-bold mb-6">Tạo tài khoản</h2>
@@ -84,7 +84,7 @@
 
         <!-- Đăng nhập -->
         <p class="text-sm mt-4 text-center">
-          Đã có tài khoản? <a href="#" class="text-[#FF5A5F] hover:underline">Đăng nhập</a>
+          Đã có tài khoản? <a href="login.html" class="text-[#FF5A5F] hover:underline">Đăng nhập</a>
         </p>
       </form>
     </div>
@@ -94,5 +94,58 @@
       <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c" alt="Resort view" class="w-full h-full object-cover" />
     </div>
   </div>
+
+  <script>
+document.querySelector('form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const firstName = e.target.querySelector('input[placeholder="John"]').value;
+    const lastName = e.target.querySelector('input[placeholder="Doe"]').value;
+    const email = e.target.querySelector('input[type="email"]').value;
+    const phoneNumber = e.target.querySelector('input[placeholder="838038900"]').value;
+    const password = e.target.querySelectorAll('input[type="password"]')[0].value;
+    const confirmPassword = e.target.querySelectorAll('input[type="password"]')[1].value;
+    const agree = e.target.querySelector('#agree').checked;
+    
+    // Validation
+    if (!agree) {
+        alert('Vui lòng đồng ý với điều khoản và chính sách!');
+        return;
+    }
+    
+    if (password !== confirmPassword) {
+        alert('Mật khẩu xác nhận không khớp!');
+        return;
+    }
+    
+    const fullName = `${firstName} ${lastName}`;
+    
+    try {
+        const response = await fetch('http://localhost:3000/user/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                fullName,
+                email,
+                password,
+                phoneNumber
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            alert('Đăng ký thành công!');
+            window.location.href = 'login.html';
+        } else {
+            alert('Lỗi: ' + data.message);
+        }
+    } catch (error) {
+        alert('Lỗi kết nối: ' + error.message);
+    }
+});
+</script>
 </body>
 </html>

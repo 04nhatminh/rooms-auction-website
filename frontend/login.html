@@ -12,10 +12,10 @@
     <!-- Left side: Login form -->
     <div class="w-full lg:w-1/2 p-10">
       <!-- Logo -->
-      <div class="flex items-center gap-2 mb-6">
+      <a href="index.html" class="flex items-center gap-2 mb-6">
         <img src="https://cdn-icons-png.flaticon.com/512/2111/2111320.png" alt="Logo" class="w-8 h-8" />
         <h1 class="text-2xl font-bold text-[#008489]">A2BnB</h1>
-      </div>
+      </a>
 
       <!-- Title -->
       <h2 class="text-3xl font-bold mb-2">Đăng nhập</h2>
@@ -54,7 +54,7 @@
 
         <!-- Sign up -->
         <p class="text-sm mt-4 text-center">
-          Chưa có tài khoản? <a href="#" class="text-[#FF5A5F] hover:underline">Tạo tài khoản</a>
+          Chưa có tài khoản? <a href="signup.html" class="text-[#FF5A5F] hover:underline">Tạo tài khoản</a>
         </p>
       </form>
 
@@ -85,4 +85,41 @@
     </div>
   </div>
 </body>
+
+<script>
+document.querySelector('form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const email = e.target.querySelector('input[type="email"]').value;
+    const password = e.target.querySelector('input[type="password"]').value;
+    
+    try {
+        const response = await fetch('http://localhost:3000/user/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, password })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            alert('Đăng nhập thành công!');
+            // Save user data to localStorage
+            localStorage.setItem('userData', JSON.stringify({
+                name: data.user.fullName,
+                email: data.user.email
+            }));
+            // Redirect to index page
+            window.location.href = 'index.html';
+        } else {
+            alert('Lỗi: ' + data.message);
+        }
+    } catch (error) {
+        alert('Lỗi kết nối: ' + error.message);
+    }
+});
+</script>
+
 </html>
