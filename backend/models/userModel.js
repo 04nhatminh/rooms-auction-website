@@ -16,6 +16,10 @@ class UserModel {
                 conditions.push('UserID = ?');
                 values.push(criteria.id);
             }
+            if (criteria.verificationToken) {
+                conditions.push('VerificationToken = ?');
+                values.push(criteria.verificationToken);
+            }
 
             if (conditions.length === 0) {
                 throw new Error('Không có điều kiện tìm kiếm');
@@ -25,7 +29,6 @@ class UserModel {
             
             const [rows] = await db.execute(query, values);
             if (rows.length > 0) {
-                // Convert database column names to JavaScript camelCase
                 const user = rows[0];
                 return {
                     id: user.UserID,
@@ -35,6 +38,8 @@ class UserModel {
                     phoneNumber: user.PhoneNumber,
                     avatarURL: user.AvatarURL,
                     isVerified: user.IsVerified,
+                    verificationToken: user.VerificationToken,
+                    verificationTokenExpires: user.VerificationTokenExpires,
                     rating: user.Rating,
                     createdAt: user.CreatedAt,
                     updatedAt: user.UpdatedAt
@@ -47,14 +52,14 @@ class UserModel {
         }
     }
 
-    // Tạo user mới
+    // Tạo user mới với verification token
     async create(userData) {
         try {
-            const { fullName, email, hashPassword, phoneNumber, AvatarURL, isVerified, rating } = userData;
+            const { fullName, email, hashPassword, phoneNumber, AvatarURL, isVerified, rating, verificationToken, verificationTokenExpires } = userData;
             
             const query = `
-                INSERT INTO users (FullName, Email, HashPassword, PhoneNumber, AvatarURL, IsVerified, Rating)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO users (FullName, Email, HashPassword, PhoneNumber, AvatarURL, IsVerified, Rating, VerificationToken, VerificationTokenExpires)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
             
             const values = [
@@ -64,20 +69,39 @@ class UserModel {
                 phoneNumber || null,
                 AvatarURL || null,
                 isVerified || false,
-                rating || 0.0
+                rating || 0.0,
+                verificationToken || null,
+                verificationTokenExpires || null
             ];
 
             const [result] = await db.execute(query, values);
             
-            // Lấy user vừa tạo để trả về (không bao gồm password)
+            // Lấy user vừa tạo để trả về (không bao gồm password và token)
             const newUser = await this.findById(result.insertId);
-            const { hashPassword: _, ...userWithoutPassword } = newUser;
-            return userWithoutPassword;
+            const { hashPassword: _, verificationToken: __, ...userWithoutSensitiveData } = newUser;
+            return userWithoutSensitiveData;
         } catch (error) {
             console.error('Error in create:', error);
             if (error.code === 'ER_DUP_ENTRY') {
                 throw new Error('Email đã tồn tại');
             }
+            throw error;
+        }
+    }
+
+    // Xác thực email
+    async verifyUser(verificationToken) {
+        try {
+            const query = `
+                UPDATE users 
+                SET IsVerified = TRUE, VerificationToken = NULL, VerificationTokenExpires = NULL 
+                WHERE VerificationToken = ? AND VerificationTokenExpires > NOW()
+            `;
+            
+            const [result] = await db.execute(query, [verificationToken]);
+            return result.affectedRows > 0;
+        } catch (error) {
+            console.error('Error in verifyUser:', error);
             throw error;
         }
     }
@@ -96,6 +120,8 @@ class UserModel {
                     phoneNumber: user.PhoneNumber,
                     avatarURL: user.AvatarURL,
                     isVerified: user.IsVerified,
+                    verificationToken: user.VerificationToken,
+                    verificationTokenExpires: user.VerificationTokenExpires,
                     rating: user.Rating,
                     createdAt: user.CreatedAt,
                     updatedAt: user.UpdatedAt
@@ -122,6 +148,8 @@ class UserModel {
                 phoneNumber: 'PhoneNumber',
                 avatarURL: 'AvatarURL',
                 isVerified: 'IsVerified',
+                verificationToken: 'VerificationToken',
+                verificationTokenExpires: 'VerificationTokenExpires',
                 rating: 'Rating'
             };
 

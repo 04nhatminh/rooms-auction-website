@@ -118,6 +118,11 @@ document.querySelector('form').addEventListener('submit', async (e) => {
         return;
     }
     
+    if (!firstName || !lastName || !email || !password) {
+        alert('Vui lòng điền đầy đủ thông tin bắt buộc!');
+        return;
+    }
+    
     const fullName = `${firstName} ${lastName}`;
     
     try {
@@ -137,15 +142,41 @@ document.querySelector('form').addEventListener('submit', async (e) => {
         const data = await response.json();
         
         if (response.ok) {
-            alert('Đăng ký thành công!');
-            window.location.href = 'login.html';
+            // Hiển thị thông báo thành công với hướng dẫn
+            alert('🎉 Đăng ký thành công!\n\n📧 Vui lòng kiểm tra email để xác thực tài khoản.\n\n⚠️ Lưu ý: Bạn cần xác thực email trước khi có thể đăng nhập.');
+            
+            // Có thể redirect đến trang thông báo thay vì login
+            const shouldGoToLogin = confirm('Bạn có muốn đi đến trang đăng nhập ngay bây giờ?\n\n(Nhớ xác thực email trước khi đăng nhập)');
+            if (shouldGoToLogin) {
+                window.location.href = 'login.html';
+            }
         } else {
-            alert('Lỗi: ' + data.message);
+            alert('❌ Lỗi: ' + data.message);
         }
     } catch (error) {
-        alert('Lỗi kết nối: ' + error.message);
+        alert('❌ Lỗi kết nối: ' + error.message);
     }
 });
+
+// Thêm function để gửi lại email xác thực
+function resendVerificationEmail(email) {
+    fetch('http://localhost:3000/user/resend-verification', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            alert(data.message);
+        }
+    })
+    .catch(error => {
+        alert('Lỗi kết nối: ' + error.message);
+    });
+}
 </script>
 </body>
 </html>

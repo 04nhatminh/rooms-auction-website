@@ -93,6 +93,11 @@ document.querySelector('form').addEventListener('submit', async (e) => {
     const email = e.target.querySelector('input[type="email"]').value;
     const password = e.target.querySelector('input[type="password"]').value;
     
+    if (!email || !password) {
+        alert('Vui lòng nhập đầy đủ email và mật khẩu!');
+        return;
+    }
+    
     try {
         const response = await fetch('http://localhost:3000/user/login', {
             method: 'POST',
@@ -105,19 +110,40 @@ document.querySelector('form').addEventListener('submit', async (e) => {
         const data = await response.json();
         
         if (response.ok) {
-            alert('Đăng nhập thành công!');
+            alert('✅ Đăng nhập thành công!');
             // Save user data to localStorage
             localStorage.setItem('userData', JSON.stringify({
                 name: data.user.fullName,
-                email: data.user.email
+                email: data.user.email,
+                id: data.user.id
             }));
             // Redirect to index page
             window.location.href = 'index.html';
         } else {
-            alert('Lỗi: ' + data.message);
+            if (data.needsVerification) {
+                const resend = confirm(`❌ ${data.message}\n\nBạn có muốn gửi lại email xác thực không?`);
+                if (resend) {
+                    // Gửi lại email xác thực
+                    try {
+                        const resendResponse = await fetch('http://localhost:3000/user/resend-verification', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ email: data.email || email })
+                        });
+                        const resendData = await resendResponse.json();
+                        alert(resendData.message);
+                    } catch (resendError) {
+                        alert('Lỗi gửi email: ' + resendError.message);
+                    }
+                }
+            } else {
+                alert('❌ ' + data.message);
+            }
         }
     } catch (error) {
-        alert('Lỗi kết nối: ' + error.message);
+        alert('❌ Lỗi kết nối: ' + error.message);
     }
 });
 </script>
