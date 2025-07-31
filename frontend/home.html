@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Azainbinh - Home</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+  <style>
+    .placeholder-box {
+      background: #e0e0e0;
+      border-radius: 10px;
+      height: 150px;
+    }
+    .small-box {
+      height: 100px;
+    }
+    .card-title {
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+    .scroll-x {
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+    .scroll-x .card {
+      display: inline-block;
+      margin-right: 10px;
+    }
+    .roundered {
+      border-radius: 24px;
+    }
+
+    .floating-header {
+        background-color: #D9D9D9;
+        width: 100%;
+        max-width: 1400px;
+        height: 440px;           
+        margin: 30px auto;
+    }
+
+    .logo-text {
+        width: 108px;
+        height: 43px;
+        font-family: 'Montserrat', sans-serif; 
+        font-size: 35px;                  
+        font-weight: 1000;
+        margin: 5px;
+        color: white                
+    }
+
+    #destination-list {
+      white-space: nowrap;
+      overflow-x: hidden;
+    }
+
+  </style>
+  
+</head>
+<body class="bg-white">
+
+  <!-- Header -->
+   <div class="position-relative">
+        <div class="roundered floating-header bg-gray p-3 shadow-sm d-flex justify-content-between">
+            <!-- LOGO + NAME -->
+            <div class="d-flex align-items-start" style="margin: 12px;">
+                    <a href="index.html" class="d-flex align-items-center text-decoration-none">
+                        <img src="https://cdn-icons-png.flaticon.com/512/2111/2111320.png" alt="Logo" width="40" height="40" class="me-2"/>
+                        <h1 class="mb-0" style="font-family: 'Montserrat', sans-serif; font-weight: 800; color: #008489; font-size: 22px; line-height: 1;">A2BnB</h1>
+                    </a>
+            </div>
+            <!-- LOGIN + SIGNUP -->
+            <div>
+                <a href="#" class="me-3 text-decoration-none" style="font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 800; color: white; margin: 12px;">Login</a>
+                <button class="btn btn btn-light btn-lg" style="font-family: 'Montserrat', sans-serif; font-weight: 600; color: black; font-size: 14px; margin: 12px;">Sign up</button>
+            </div>
+        </div>
+   </div>
+  
+
+  <!-- Search Box -->
+
+    <div class="align-items-center" style="margin: 5px auto; margin-top: -75px; z-index: 10; position: relative; width:100%; max-width: 1312px;">
+        <form class="p-4 bg-white rounded-pill shadow d-flex flex-wrap gap-3 align-items-center justify-content-between">
+            
+            <!-- Location -->
+            <div style="width: 300px; margin-left: 25px; font-family: 'Montserrat', sans-serif; font-size: 14px;">
+            <label for="location" class="form-label mb-0" style="font-weight: 600;">Địa điểm</label><br>
+            <input type="text" id="location" name="location" class="form-control border-0 p-0" placeholder="Tìm kiếm điểm đến" style="margin-top: 5px; font-size: 15px;">
+            </div>
+
+            <div class="vr"></div>
+
+            <!-- Check-in -->
+            <div style="width: 130px; margin-left: 5px; font-family: 'Montserrat', sans-serif; font-size: 14px;">
+            <label for="checkin" class="form-label mb-0" style="font-weight: 600;">Nhận phòng</label><br>
+            <input type="date" id="checkin" name="checkin" class="form-control border-0 p-0" style="margin-top: 5px; font-size: 15px;">
+            </div>
+
+            <div class="vr"></div>
+
+            <!-- Check-out -->
+            <div style="width: 130px; margin-left: 5px; font-family: 'Montserrat', sans-serif; font-size: 14px;">
+            <label for="checkout" class="form-label mb-0" style="font-weight: 600;">Trả phòng</label><br>
+            <input type="date" id="checkout" name="checkout" class="form-control border-0 p-0" style="margin-top: 5px; font-size: 15px;">
+            </div>
+
+            <div class="vr"></div>
+
+            <!-- Guests -->
+            <div style="width: 130px; margin-left: 5px; font-family: 'Montserrat', sans-serif; font-size: 14px;">
+            <label for="guests" class="form-label mb-0" style="font-weight: 600;">Khách</label><br>
+            <input type="number" id="guests" name="guests" class="form-control border-0 p-0" placeholder="Thêm khách" style="margin-top: 5px; font-size: 15px;">
+            </div>
+
+            <!-- Submit Button -->
+            <div style="margin-left: 25px; font-family: 'Montserrat', sans-serif; font-size: 14px;">
+            <button type="submit" class="btn btn-outline-secondary rounded-circle d-flex justify-content-center align-items-center" style="width: 40px; height: 40px;">
+                <i class="bi bi-search"></i>
+            </button>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- Tìm theo chỗ nghỉ -->
+    <div class="container mb-5" style="margin-top: 60px;">
+        <h6 class="mb-4" style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px;">
+            Tìm theo loại chỗ nghỉ
+        </h6>
+
+        <div class="d-flex justify-content-center gap-4 flex-wrap">
+            
+            <a href="#" class="text-decoration-none text-dark text-center">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
+                    style="width: 240px; height: 240px;">
+                    </div>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Khách sạn</span>
+                </div>
+            </a>
+
+            <a href="#" class="text-decoration-none text-dark text-center">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
+                    style="width: 240px; height: 240px;">
+                    </div>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Căn hộ</span>
+                </div>
+            </a>
+
+            <a href="#" class="text-decoration-none text-dark text-center">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
+                    style="width: 240px; height: 240px;">
+                    </div>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Homestay</span>
+                </div>
+            </a>
+
+            <a href="#" class="text-decoration-none text-dark text-center">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
+                    style="width: 240px; height: 240px;">
+                    </div>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Resort</span>
+                </div>
+            </a>
+
+            <a href="#" class="text-decoration-none text-dark text-center">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
+                    style="width: 240px; height: 240px;">
+                    </div>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Biệt thự</span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Tìm theo địa điểm -->
+     <!-- Tạm để code html cứng, điều chỉnh sau -->
+    <div class="container mb-5">
+        <h6 class="mb-3 fw-bold d-flex justify-content-between align-items-center">
+            <span style="font-size: 20px;">Điểm đến nổi bật tại Việt Nam</span>
+            <div>
+            <button class="btn btn-outline-secondary rounded-circle me-2" onclick="scrollDestinations(-3)">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <button class="btn btn-light rounded-circle" onclick="scrollDestinations(3)">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+            </div>
+        </h6>
+        <!-- Scrollable horizontal list -->
+        <div id="destination-list" class="d-flex overflow-hidden gap-3" style="scroll-behavior: smooth;">
+            
+            <!-- TP. Hồ Chí Minh -->
+            <a href="#" class="text-decoration-none text-dark text-center">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
+                    style="width: 240px; height: 240px;">
+                    </div>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">TP.Hồ Chí Minh</span>
+                </div>
+            </a>
+
+            <!-- Hà Nội -->
+            <a href="#" class="text-decoration-none text-dark text-center">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
+                    style="width: 240px; height: 240px;">
+                    </div>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Hà Nội</span>
+                </div>
+            </a>
+
+            <!-- Vũng Tàu -->
+            <a href="#" class="text-decoration-none text-dark text-center">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
+                    style="width: 240px; height: 240px;">
+                    </div>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Vũng Tàu</span>
+                </div>
+            </a>
+
+            <!-- Đà Lạt -->
+            <a href="#" class="text-decoration-none text-dark text-center">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
+                    style="width: 240px; height: 240px;">
+                    </div>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Đà Lạt</span>
+                </div>
+            </a>
+
+            <!-- Nha Trang -->
+            <a href="#" class="text-decoration-none text-dark text-center">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
+                    style="width: 240px; height: 240px;">
+                    </div>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Nha Trang</span>
+                </div>
+            </a>
+
+            <a href="#" class="text-decoration-none text-dark text-center">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
+                    style="width: 240px; height: 240px;">
+                    </div>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Hải Phòng</span>
+                </div>
+            </a>
+
+            <!-- TP. Hồ Chí Minh -->
+            <a href="#" class="text-decoration-none text-dark text-center">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
+                    style="width: 240px; height: 240px;">
+                    </div>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">TP.Hồ Chí Minh</span>
+                </div>
+            </a>
+
+            <!-- Hà Nội -->
+            <a href="#" class="text-decoration-none text-dark text-center">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
+                    style="width: 240px; height: 240px;">
+                    </div>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Hà Nội</span>
+                </div>
+            </a>
+
+            <!-- Vũng Tàu -->
+            <a href="#" class="text-decoration-none text-dark text-center">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
+                    style="width: 240px; height: 240px;">
+                    </div>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Vũng Tàu</span>
+                </div>
+            </a>
+
+        </div>
+    </div>
+
+
+
+  <!-- Các phần đấu giá -->
+  <div class="container mb-5">
+    <h6 class="mb-3">Phiên đấu giá sắp kết thúc</h6>
+    <div class="scroll-x">
+      <div class="card p-2" style="width: 200px;">
+        <div class="placeholder-box mb-2"></div>
+        <div class="card-body p-2">
+          <p class="card-title">Resort ven biển Phú Quốc</p>
+          <small>1.200.000 VND - 03:30:59</small>
+        </div>
+      </div>
+      <!-- Repeat 4 more -->
+    </div>
+  </div>
+
+  <div class="container mb-5">
+    <h6 class="mb-3">Phiên đấu giá nổi bật</h6>
+    <div class="scroll-x">
+      <div class="card p-2" style="width: 200px;">
+        <div class="placeholder-box mb-2"></div>
+        <div class="card-body p-2">
+          <p class="card-title">Villa tại Hội An</p>
+          <small>3.400.000 VND - 15:30:59</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container mb-5">
+    <h6 class="mb-3">Phiên đấu giá mới mở</h6>
+    <div class="scroll-x">
+      <div class="card p-2" style="width: 200px;">
+        <div class="placeholder-box mb-2"></div>
+        <div class="card-body p-2">
+          <p class="card-title">Khách sạn tại Đà Nẵng</p>
+          <small>3.400.000 VND - 5:15:30</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nơi lưu trú theo khu vực -->
+  <div class="container mb-5">
+    <h6>Nơi lưu trú tại Nha Trang</h6>
+    <div class="scroll-x">
+      <div class="card p-2" style="width: 180px;">
+        <div class="placeholder-box mb-2"></div>
+        <div class="card-body p-2">
+          <p class="card-title">Khách sạn tại Nha Trang</p>
+          <small>1.000.000 VND/đêm</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-white p-4 mt-5 border-top">
+    <div class="container text-muted small d-flex flex-wrap justify-content-between">
+      <div>
+        <p><strong>Hỗ trợ khách hàng</strong></p>
+        <p>Trung tâm trợ giúp · Hướng dẫn đấu giá</p>
+      </div>
+      <div>
+        <p><strong>Chính sách</strong></p>
+        <p>Điều khoản · Thanh toán · Bảo mật</p>
+      </div>
+      <div>
+        <p><strong>Về chúng tôi</strong></p>
+        <p>Tuyển dụng · Liên hệ công ty</p>
+      </div>
+      <div>
+        <p><strong>Đối tác thanh toán</strong></p>
+        <p>ZaloPay</p>
+      </div>
+    </div>
+    <div class="text-center mt-3 small">© 2025 Azainbinh, Inc.</div>
+  </footer>
+
+</body>
+</html>
+
+<script>
+  function scrollDestinations(direction) {
+    const container = document.getElementById('destination-list');
+    const scrollAmount = 160; // chiều rộng một ô + khoảng cách
+    container.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+  }
+</script>

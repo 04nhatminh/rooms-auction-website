@@ -1,12 +1,17 @@
-require('dotenv').config({ path: '../.env' });
+const fs = require('fs');
+const path = require('path');
+
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
+
 const mysql = require('mysql2/promise');
 
 // Cấu hình kết nối database
 const dbConfig = {
     host: process.env.DB_HOST || 'localhost',
+    port: process.env.DB_PORT || 3308,
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '', 
-    database: process.env.DB_NAME || 'ec_web_db',
+    database: process.env.DB_NAME || 'a2airbnb',
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
@@ -18,6 +23,8 @@ console.log('🔍 Database config:', {
     password: dbConfig.password ? '***hidden***' : 'empty',
     database: dbConfig.database
 });
+
+console.log('✅ Loaded .env DB_PASSWORD =', JSON.stringify(process.env.DB_PASSWORD));
 
 // Tạo connection pool
 const pool = mysql.createPool(dbConfig);
