@@ -36,9 +36,7 @@ def get_valid_hashes(listing_ids):
     for i, listing_id in enumerate(listing_ids):
         try:
             hashes = extract_sha256_hashes(listing_id)
-            # Kiểm tra xem có lấy được hash không
-            valid_hashes = {k: v for k, v in hashes.items() if v is not None}
-            if len(valid_hashes) >= 2:  # Cần ít nhất 2 hash cho listing info và price
+            if hashes.get("StaysPdpSections") and hashes.get("stayCheckout"):
                 return hashes
             else:
                 print(f"[WARNING] Not enough hashes from listing_id: {listing_id}")

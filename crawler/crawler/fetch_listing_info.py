@@ -45,7 +45,6 @@ def fetch_price(listing_id, hash_val, encoded_id, domain):
         (30, 31), # 30-31 ngày tới
         (45, 46), # 45-46 ngày tới
         (60, 61), # 60-61 ngày tới
-        (75, 76), # 75-76 ngày tới
         (90, 91), # 90-91 ngày tới
         (120, 121), # 120-121 ngày tới
         (150, 151), # 150-151 ngày tới

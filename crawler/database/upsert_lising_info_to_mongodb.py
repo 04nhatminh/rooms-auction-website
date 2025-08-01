@@ -234,7 +234,11 @@ def main():
         create_indexes(db)
         
         # Đường dẫn file JSON
-        json_file_path = r'c:\Users\Raa\Downloads\Crawler\output\listing_info.json'
+        json_file_path = r'output\listing_info.json'
+        
+        if not os.path.exists(json_file_path):
+            print(f"Lỗi: File {json_file_path} không tồn tại!")
+            return
         
         # Đọc dữ liệu
         listings_data = load_listing_data(json_file_path)

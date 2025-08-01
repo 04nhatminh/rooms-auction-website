@@ -1,13 +1,14 @@
 import re
 from playwright.sync_api import sync_playwright
 from crawler.config import API_DOMAIN
+from datetime import datetime, timedelta
 
 def extract_sha256_hashes(listing_id):
     hashes = {
         "StaysPdpSections": None,
         "StaysPdpReviewsQuery": None,
         "PdpAvailabilityCalendar": None,
-        "stayCheckout": "b841054b6152f7949015dddb0dcebd2c27f0d4182fe3faad05ff075588808cc3"
+        "stayCheckout": "2ed04d2fd7f8e9cd983bfd47d1057e9280b1f5e34380b8dd7354f67da54178cb"
     }
 
     def on_request(req):
