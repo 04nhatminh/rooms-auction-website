@@ -12,7 +12,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 def main():
     print("=== AIRBNB CRAWLER & DATABASE UPSERT ===\n")
     
-    # # 1. Chạy script fetch_listing_ids.py để lấy listing IDs
+    # 1. Chạy script fetch_listing_ids.py để lấy listing IDs
     # print("1. Starting fetch listing IDs...")
     # try:
     #     from execute.run_fetch_ids import main as fetch_ids_main

@@ -8,7 +8,7 @@ def main():
     print("=== FETCH LISTING IDS ===\n")
     
     try:
-        from crawler.ftech_listing_ids import main as fetch_ids_main
+        from crawler.fetch_listing_ids import main as fetch_ids_main
         fetch_ids_main()
         print("\nFetch listing IDs completed successfully!")
         

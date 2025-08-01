@@ -8,7 +8,7 @@ import os
 MYSQL_CONFIG = {
     'host': 'localhost', 
     'user': 'root', 
-    'password': 'your_password_here',  # Thay bằng mật khẩu của bạn
+    'password': 'your_password_here', # pass user mysql của mn
     'database': 'a2airbnb', 
     'charset': 'utf8mb4'
 }

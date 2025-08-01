@@ -18,12 +18,19 @@ def append_listing_ids_to_txt(listing_ids, filename="output/listing_ids.txt"):
         print("No IDs to save")
         return
 
+    # Lọc bỏ các giá trị None hoặc "None"
+    filtered_ids = [lid for lid in listing_ids if lid is not None and lid != "None" and str(lid).strip() != ""]
+
+    if not filtered_ids:
+        print("No valid IDs to save after filtering")
+        return
+
     existing_ids = set()
     if os.path.exists(filename):
         with open(filename, mode="r", encoding="utf-8") as f:
             existing_ids = set(line.strip() for line in f if line.strip())
 
-    new_ids = [lid for lid in listing_ids if lid not in existing_ids]
+    new_ids = [lid for lid in filtered_ids if lid not in existing_ids]
 
     with open(filename, mode="r", encoding="utf-8") as f:
         old_content = f.read()
@@ -64,7 +71,7 @@ def loop_through_each_page(name):
     listing_ids = set()
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
+        browser = p.chromium.launch(headless=False)
         page = browser.new_page()
 
         # Danh sách response json mỗi trang
@@ -107,7 +114,7 @@ def loop_through_each_page(name):
                                      .get("staysSearch", {})\
                                      .get("mapResults", {})\
                                      .get("staysInViewport", [])
-                new_ids = [stay["listingId"] for stay in stays if "listingId" in stay]
+                new_ids = [stay["listingId"] for stay in stays if "listingId" in stay and stay["listingId"] is not None and stay["listingId"] != "None"]
                 print(f"[INFO] Found {len(new_ids)} listingId(s)")
                 listing_ids.update(new_ids)
             except Exception as e:

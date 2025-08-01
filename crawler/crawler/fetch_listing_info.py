@@ -39,9 +39,14 @@ def fetch_price(listing_id, hash_val, encoded_id, domain):
     date_ranges = [
         # Thử các khoảng thời gian khác nhau
         (7, 8),   # 7-8 ngày tới
+        (10, 11), # 10-11 ngày tới
         (14, 15), # 14-15 ngày tới  
+        (20, 21), # 20-21 ngày tới
         (30, 31), # 30-31 ngày tới
+        (45, 46), # 45-46 ngày tới
         (60, 61), # 60-61 ngày tới
+        (75, 76), # 75-76 ngày tới
+        (90, 91), # 90-91 ngày tới
         (120, 121), # 120-121 ngày tới
         (150, 151), # 150-151 ngày tới
         (180, 181) # 180-181 ngày tới
@@ -49,7 +54,7 @@ def fetch_price(listing_id, hash_val, encoded_id, domain):
     
     for i, (checkin_days, checkout_days) in enumerate(date_ranges):
         try:
-            print(f"[INFO] Tryinng ({checkin_days}-{checkout_days}) for listing {listing_id}")
+            print(f"[INFO] Trying ({checkin_days}-{checkout_days}) for listing {listing_id}")
             
             # Tạo variables cho request
             checkin = (datetime.today() + timedelta(days=checkin_days)).strftime("%Y-%m-%d")
