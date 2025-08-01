@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <title>Demo RESTful API Frontend</title>
     <style>
         * {
@@ -518,8 +519,26 @@
         }
 
         function logout() {
+            const userData = JSON.parse(localStorage.getItem('userData'));
+
+            // Nếu user đăng nhập bằng Google thì revoke
+            if (!userData?.HashPassword) {
+                if (typeof google !== 'undefined' && google.accounts?.id?.revoke) {
+                    google.accounts.id.revoke(userData.email, () => {
+                        console.log('✅ Đã logout khỏi Google');
+                    });
+                } else {
+                    console.warn('⚠️ Google API chưa sẵn sàng, thực hiện logout thông thường');
+                }
+            }
+            
+            cleanupAfterLogout();
+        }
+
+        function cleanupAfterLogout() {
             localStorage.removeItem('userData');
             updateAuthUI(null);
+            window.location.href = 'login.html'; // hoặc reload lại nếu cần
         }
 
         // Hàm hiển thị thông báo

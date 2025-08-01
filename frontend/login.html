@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="google-identity-service:use_fedcm_for_prompt" content="false" />
   <title>Đăng nhập</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -70,7 +71,7 @@
         <button class="bg-white border border-gray-300 rounded-lg p-3 hover:bg-gray-50">
           <img src="https://cdn-icons-png.flaticon.com/512/145/145802.png" class="w-6 h-6" alt="Facebook" />
         </button>
-        <button class="bg-white border border-gray-300 rounded-lg p-3 hover:bg-gray-50">
+        <button id="googleLoginBtn" class="bg-white border border-gray-300 rounded-lg p-3 hover:bg-gray-50">
           <img src="https://cdn-icons-png.flaticon.com/512/281/281764.png" class="w-6 h-6" alt="Google" />
         </button>
         <button class="bg-white border border-gray-300 rounded-lg p-3 hover:bg-gray-50">
@@ -84,6 +85,9 @@
       <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c" alt="Resort view" class="w-full h-full object-cover" />
     </div>
   </div>
+  
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="js/google-login.js"></script>
 </body>
 
 <script>

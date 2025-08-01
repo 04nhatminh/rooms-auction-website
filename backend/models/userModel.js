@@ -65,7 +65,7 @@ class UserModel {
             const values = [
                 fullName,
                 email,
-                hashPassword,
+                hashPassword || null,
                 phoneNumber || null,
                 AvatarURL || null,
                 isVerified || false,
