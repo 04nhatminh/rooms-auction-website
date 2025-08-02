@@ -1,17 +1,12 @@
-const fs = require('fs');
-const path = require('path');
-
-require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
-
+require('dotenv').config({ path: '../.env' });
 const mysql = require('mysql2/promise');
 
 // Cấu hình kết nối database
 const dbConfig = {
     host: process.env.DB_HOST || 'localhost',
-    port: process.env.DB_PORT || 3308,
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '', 
-    database: process.env.DB_NAME || 'a2airbnb',
+    database: process.env.DB_NAME || 'A2B&B',
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
@@ -23,8 +18,6 @@ console.log('🔍 Database config:', {
     password: dbConfig.password ? '***hidden***' : 'empty',
     database: dbConfig.database
 });
-
-console.log('✅ Loaded .env DB_PASSWORD =', JSON.stringify(process.env.DB_PASSWORD));
 
 // Tạo connection pool
 const pool = mysql.createPool(dbConfig);
@@ -47,7 +40,7 @@ async function createUsersTable() {
             UserID INT AUTO_INCREMENT PRIMARY KEY,
             FullName VARCHAR(255) NOT NULL,
             Email VARCHAR(255) UNIQUE NOT NULL,
-            HashPassword VARCHAR(255) NOT NULL,
+            HashPassword VARCHAR(255) NULL,
             PhoneNumber VARCHAR(20),
             AvatarURL TEXT,
             IsVerified BOOLEAN DEFAULT FALSE,
@@ -67,10 +60,33 @@ async function createUsersTable() {
     }
 }
 
+// Tạo bảng OAuthAccounts
+async function createOAuthAccountsTable() {
+    const createTableQuery = `
+        CREATE TABLE IF NOT EXISTS OAuthAccounts (
+            ID INT AUTO_INCREMENT PRIMARY KEY,
+            Provider VARCHAR(50) NOT NULL,
+            ProviderUID VARCHAR(255) NOT NULL,
+            UserID INT NOT NULL,
+            CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (UserID) REFERENCES users(UserID) ON DELETE CASCADE,
+            UNIQUE KEY unique_oauth (Provider, ProviderUID)
+        )
+    `;
+    
+    try {
+        await pool.execute(createTableQuery);
+        console.log('✅ Bảng OAuthAccounts đã sẵn sàng');
+    } catch (error) {
+        console.error('❌ Lỗi tạo bảng OAuthAccounts:', error.message);
+    }
+}
+
 // Khởi tạo database khi import
 async function initDatabase() {
     await testConnection();
     await createUsersTable();
+    await createOAuthAccountsTable();
 }
 
 initDatabase();
