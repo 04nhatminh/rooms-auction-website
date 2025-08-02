@@ -11,11 +11,6 @@ router.use('/api/demo', demoRoutes);
 router.use('/', authRoutes);
 router.use('/user', userRoutes);
 
-router.get('/', (req, res) => {
-    res.status(200).json({
-        success: true,
-        message: 'Hello',
-    });
-});
+
 
 module.exports = router;

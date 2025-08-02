@@ -1,0 +1,1919 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Azainbinh - Home</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+  <style>
+    .placeholder-box {
+      background: #e0e0e0;
+      border-radius: 10px;
+      height: 150px;
+    }
+    .small-box {
+      height: 100px;
+    }
+    .card-title {
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+    .scroll-x {
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+    .scroll-x .card {
+      display: inline-block;
+      margin-right: 10px;
+    }
+    .roundered {
+      border-radius: 24px;
+    }
+
+    .floating-header {
+        background-color: #D9D9D9;
+        width: 100%;
+        max-width: 1400px;
+        height: 440px;           
+        margin: 30px auto;
+    }
+
+    .logo-text {
+        width: 108px;
+        height: 43px;
+        font-family: 'Montserrat', sans-serif; 
+        font-size: 35px;                  
+        font-weight: 1000;
+        margin: 5px;
+        color: white                
+    }
+
+    #destination-list {
+      white-space: nowrap;
+      overflow-x: hidden;
+    }
+    
+
+  </style>
+  
+</head>
+<body class="bg-white">
+
+  <!-- Header -->
+   <div class="position-relative">
+        <div class="roundered floating-header bg-gray p-3 shadow-sm d-flex justify-content-between"
+              style="background-image: url('https://images.pexels.com/photos/412681/pexels-photo-412681.jpeg');
+              background-size: cover;
+              background-position: center;
+              border-radius: 20px;">
+            <!-- LOGO + NAME -->
+            <div class="d-flex align-items-start" style="margin: 12px;">
+                    <a href="index.html" class="d-flex align-items-center text-decoration-none">
+                        <img src="https://cdn-icons-png.flaticon.com/512/2111/2111320.png" alt="Logo" width="40" height="40" class="me-2"/>
+                        <h1 class="mb-0" style="font-family: 'Montserrat', sans-serif; font-weight: 800; color: #008489; font-size: 22px; line-height: 1;">A2BnB</h1>
+                    </a>
+            </div>
+            <!-- LOGIN + SIGNUP -->
+            <div>
+                <a href="login.html" class="me-3 text-decoration-none" style="font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 800; color: white; margin: 12px;">Login</a>
+                <button class="btn btn btn-light btn-lg" 
+                style="font-family: 'Montserrat', sans-serif; font-weight: 600; color: black; font-size: 14px; margin: 12px;"
+                onclick="window.location.href='signup.html'">Sign up</button>
+            </div>
+        </div>
+   </div>
+  
+
+  <!-- Search Box -->
+
+    <div class="align-items-center" style="margin: 5px auto; margin-top: -75px; z-index: 10; position: relative; width:100%; max-width: 1312px;">
+        <form class="p-4 bg-white rounded-pill shadow d-flex flex-wrap gap-3 align-items-center justify-content-between">
+            
+            <!-- Location -->
+            <div style="width: 300px; margin-left: 25px; font-family: 'Montserrat', sans-serif; font-size: 14px;">
+            <label for="location" class="form-label mb-0" style="font-weight: 600;">Địa điểm</label><br>
+            <input type="text" id="location" name="location" class="form-control border-0 p-0" placeholder="Tìm kiếm điểm đến" style="margin-top: 5px; font-size: 15px;">
+            </div>
+
+            <div class="vr"></div>
+
+            <!-- Check-in -->
+            <div style="width: 130px; margin-left: 5px; font-family: 'Montserrat', sans-serif; font-size: 14px;">
+            <label for="checkin" class="form-label mb-0" style="font-weight: 600;">Nhận phòng</label><br>
+            <input type="date" id="checkin" name="checkin" class="form-control border-0 p-0" style="margin-top: 5px; font-size: 15px;">
+            </div>
+
+            <div class="vr"></div>
+
+            <!-- Check-out -->
+            <div style="width: 130px; margin-left: 5px; font-family: 'Montserrat', sans-serif; font-size: 14px;">
+            <label for="checkout" class="form-label mb-0" style="font-weight: 600;">Trả phòng</label><br>
+            <input type="date" id="checkout" name="checkout" class="form-control border-0 p-0" style="margin-top: 5px; font-size: 15px;">
+            </div>
+
+            <div class="vr"></div>
+
+            <!-- Guests -->
+            <div style="width: 130px; margin-left: 5px; font-family: 'Montserrat', sans-serif; font-size: 14px;">
+            <label for="guests" class="form-label mb-0" style="font-weight: 600;">Khách</label><br>
+            <input type="number" id="guests" name="guests" class="form-control border-0 p-0" placeholder="Thêm khách" style="margin-top: 5px; font-size: 15px;">
+            </div>
+
+            <!-- Submit Button -->
+            <div style="margin-left: 25px; font-family: 'Montserrat', sans-serif; font-size: 14px;">
+            <button type="submit" class="btn btn-outline-secondary rounded-circle d-flex justify-content-center align-items-center" style="width: 40px; height: 40px;">
+                <i class="bi bi-search"></i>
+            </button>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- Tìm theo chỗ nghỉ -->
+    <div class="container mb-5" style="margin-top: 60px;">
+        <h6 class="mb-4" style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px;">
+            Tìm theo loại chỗ nghỉ
+        </h6>
+
+        <div class="d-flex justify-content-center gap-4 flex-wrap">
+            
+            <a href="#" class="text-decoration-none text-dark text-center">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
+                    style="width: 240px; height: 240px;
+                    background-image: url('https://images.pexels.com/photos/164595/pexels-photo-164595.jpeg');
+                    background-size: cover;
+                    background-position: center;
+                    border-radius: 20px;">
+                    </div>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Khách sạn</span>
+                </div>
+            </a>
+
+            <a href="#" class="text-decoration-none text-dark text-center">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
+                    style="width: 240px; height: 240px;
+                    background-image: url('https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg');
+                    background-size: cover;
+                    background-position: center;
+                    border-radius: 20px;">
+                    </div>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Căn hộ</span>
+                </div>
+            </a>
+
+            <a href="#" class="text-decoration-none text-dark text-center">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
+                    style="width: 240px; height: 240px;
+                    background-image: url('https://images.pexels.com/photos/13326362/pexels-photo-13326362.jpeg');
+                    background-size: cover;
+                    background-position: bottom;
+                    border-radius: 20px;">
+                    </div>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Homestay</span>
+                </div>
+            </a>
+
+            <a href="#" class="text-decoration-none text-dark text-center">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
+                    style="width: 240px; height: 240px;
+                    background-image: url('https://images.pexels.com/photos/338504/pexels-photo-338504.jpeg');
+                    background-size: cover;
+                    background-position: center;
+                    border-radius: 20px;">
+                    </div>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Resort</span>
+                </div>
+            </a>
+
+            <a href="#" class="text-decoration-none text-dark text-center">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
+                    style="width: 240px; height: 240px;
+                    background-image: url('https://images.pexels.com/photos/1134175/pexels-photo-1134175.jpeg');
+                    background-size: cover;
+                    background-position: center;
+                    border-radius: 20px;">
+                    </div>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Biệt thự</span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Tìm theo địa điểm -->
+    <div class="container mb-5">
+        <h6 class="mb-3 fw-bold d-flex justify-content-between align-items-center">
+            <span style="font-size: 20px;">Điểm đến nổi bật tại Việt Nam</span>
+            <div>
+            <button class="btn btn-outline-secondary rounded-circle me-2" onclick="scrollDestinations(-3, 'destination-list')">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <button class="btn btn-light rounded-circle" onclick="scrollDestinations(3, 'destination-list')">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+            </div>
+        </h6>
+        <!-- Scrollable horizontal list -->
+        <div id="destination-list" class="d-flex overflow-hidden gap-3" style="scroll-behavior: smooth;">
+            
+            <!-- TP. Hồ Chí Minh -->
+            <a href="#" class="text-decoration-none text-dark text-center">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
+                    style="width: 240px; height: 240px;
+                    background-image: url('https://images.pexels.com/photos/33249100/pexels-photo-33249100.jpeg');
+                    background-size: cover;
+                    background-position: center;
+                    border-radius: 20px;">
+                    </div>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">TP.Hồ Chí Minh</span>
+                </div>
+            </a>
+
+            <!-- Hà Nội -->
+            <a href="#" class="text-decoration-none text-dark text-center">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
+                    style="width: 240px; height: 240px;
+                    background-image: url('https://images.pexels.com/photos/19504816/pexels-photo-19504816.jpeg');
+                    background-size: cover;
+                    background-position: center;
+                    border-radius: 20px;">
+                    </div>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Hà Nội</span>
+                </div>
+            </a>
+
+            <!-- Vũng Tàu -->
+            <a href="#" class="text-decoration-none text-dark text-center">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
+                    style="width: 240px; height: 240px;
+                    background-image: url('https://images.pexels.com/photos/30440736/pexels-photo-30440736.jpeg');
+                    background-size: cover;
+                    background-position: center;
+                    border-radius: 20px;">
+                    </div>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Vũng Tàu</span>
+                </div>
+            </a>
+
+            <!-- Đà Lạt -->
+            <a href="#" class="text-decoration-none text-dark text-center">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
+                    style="width: 240px; height: 240px;
+                    background-image: url('https://img.tripi.vn/cdn-cgi/image/width=700,height=700/https://hoanghamobile.com/tin-tuc/wp-content/uploads/2024/07/anh-da-lat-36.jpg');
+                    background-size: cover;
+                    background-position: left;
+                    border-radius: 20px;">
+                    </div>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Đà Lạt</span>
+                </div>
+            </a>
+
+            <!-- Nha Trang -->
+            <a href="#" class="text-decoration-none text-dark text-center">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
+                    style="width: 240px; height: 240px;
+                    background-image: url('https://bomanhatrang.com/wp-content/uploads/2023/08/thap-tram-huong-3.jpg');
+                    background-size: cover;
+                    background-position: center;
+                    border-radius: 20px;">
+                    </div>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Nha Trang</span>
+                </div>
+            </a>
+
+            <a href="#" class="text-decoration-none text-dark text-center">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
+                    style="width: 240px; height: 240px;
+                    background-image: url('http://catbabay.com.vn/SiteFolders/catbabay/ImageLibrary/637300807766508246.jpg');
+                    background-size: cover;
+                    background-position: center;
+                    border-radius: 20px;">
+                    </div>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Hải Phòng</span>
+                </div>
+            </a>
+
+            <!-- Đà Nẵng -->
+            <a href="#" class="text-decoration-none text-dark text-center">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
+                    style="width: 240px; height: 240px;
+                    background-image: url('https://th.bing.com/th/id/R.b010979548d511295d756897d23547aa?rik=F1EtOu7W892CWQ&pid=ImgRaw&r=0');
+                    background-size: cover;
+                    background-position: center;
+                    border-radius: 20px;">
+                    </div>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Đà Nẵng</span>
+                </div>
+            </a>
+
+            <!-- Huế -->
+            <a href="#" class="text-decoration-none text-dark text-center">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
+                    style="width: 240px; height: 240px;
+                    background-image: url('https://vietnamlocals.com/wp-content/uploads/2023/09/13-1024x576.webp');
+                    background-size: cover;
+                    background-position: center;
+                    border-radius: 20px;">
+                    </div>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Huế</span>
+                </div>
+            </a>
+
+            <!-- Hội An -->
+            <a href="#" class="text-decoration-none text-dark text-center">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
+                    style="width: 240px; height: 240px;
+                    background-image: url('https://images.pexels.com/photos/33186289/pexels-photo-33186289.jpeg');
+                    background-size: cover;
+                    background-position: center;
+                    border-radius: 20px;">
+                    </div>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Hội An</span>
+                </div>
+            </a>
+
+            <!-- Ninh Bình -->
+            <a href="#" class="text-decoration-none text-dark text-center">
+                <div class="d-flex flex-column align-items-center;">
+                    <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
+                    style="width: 240px; height: 240px;
+                    background-image: url('https://images.pexels.com/photos/6871160/pexels-photo-6871160.jpeg');
+                    background-size: cover;
+                    background-position: center;
+                    border-radius: 20px;">
+                    </div>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Ninh Bình</span>
+                </div>
+            </a>
+
+            <!-- Lào Cai -->
+            <a href="#" class="text-decoration-none text-dark text-center">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
+                    style="width: 240px; height: 240px;
+                    background-image: url('https://tse4.mm.bing.net/th/id/OIP.pEno5npQCGAPBqpYbZcyzwHaEK?r=0&rs=1&pid=ImgDetMain&o=7&rm=3');
+                    background-size: cover;
+                    background-position: center;
+                    border-radius: 20px;">
+                    </div>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Lào Cai</span>
+                </div>
+            </a>
+
+            <!-- Phú Quốc -->
+            <a href="#" class="text-decoration-none text-dark text-center">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
+                    style="width: 240px; height: 240px;
+                    background-image: url('https://phuquoctrip.com/files/images/vui-choi-phu-quoc/phu-quoc-united-center/venice-phuong-dong-tai-phu-quoc-united-center.jpg');
+                    background-size: cover;
+                    background-position: left;
+                    border-radius: 20px;">
+                    </div>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Phú Quốc</span>
+                </div>
+            </a>
+
+        </div>
+    </div>
+
+    <!-- Phiên đấu giá sắp kết thúc -->
+  <div class="container mb-5">
+    <h6 class="mb-3 fw-bold d-flex justify-content-between align-items-center">
+        <span style="font-size: 20px;">Phiên đấu giá sắp kết thúc</span>
+        <div>
+        <button class="btn btn-outline-secondary rounded-circle me-2" onclick="scrollDestinations(-3, 'ending-auction-list')">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+        <button class="btn btn-light rounded-circle" onclick="scrollDestinations(3, 'ending-auction-list')">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+        </div>
+    </h6>
+
+    <div id="ending-auction-list" class="scroll-x gap-3" style="scroll-behavior: smooth; overflow-x: hidden;">
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+          <!-- Bottom overlay with bids & timer -->
+          <div class="position-absolute bottom-0 start-0 w-100 d-flex justify-content-between px-3 py-2"
+              style="background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); color: white; font-size: 13px;">
+            <span>26 lượt đấu giá</span>
+            <span style="font-weight: 600;">15:30:59</span>
+          </div>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Villa tại Hội An</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Hội An, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px; white-space: nowrap;">Giá khởi điểm: <strong>20.000.000 VND</strong></span>
+          </div>
+          <div style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i> 
+            <span style="color: black; font-size: 14px;">Giá hiện tại: <strong>3.400.000 VND</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+          <!-- Bottom overlay with bids & timer -->
+          <div class="position-absolute bottom-0 start-0 w-100 d-flex justify-content-between px-3 py-2"
+              style="background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); color: white; font-size: 13px;">
+            <span>26 lượt đấu giá</span>
+            <span style="font-weight: 600;">15:30:59</span>
+          </div>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Villa tại Hội An</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Hội An, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px;">Giá khởi điểm: <strong>20.000.000 VND</strong></span>
+          </div>
+          <div style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i> 
+            <span style="color: black; font-size: 14px;">Giá hiện tại: <strong>3.400.000 VND</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+          <!-- Bottom overlay with bids & timer -->
+          <div class="position-absolute bottom-0 start-0 w-100 d-flex justify-content-between px-3 py-2"
+              style="background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); color: white; font-size: 13px;">
+            <span>26 lượt đấu giá</span>
+            <span style="font-weight: 600;">15:30:59</span>
+          </div>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Villa tại Hội An</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Hội An, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px;">Giá khởi điểm: <strong>20.000.000 VND</strong></span>
+          </div>
+          <div style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i> 
+            <span style="color: black; font-size: 14px;">Giá hiện tại: <strong>3.400.000 VND</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+          <!-- Bottom overlay with bids & timer -->
+          <div class="position-absolute bottom-0 start-0 w-100 d-flex justify-content-between px-3 py-2"
+              style="background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); color: white; font-size: 13px;">
+            <span>26 lượt đấu giá</span>
+            <span style="font-weight: 600;">15:30:59</span>
+          </div>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Villa tại Hội An</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Hội An, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px;">Giá khởi điểm: <strong>20.000.000 VND</strong></span>
+          </div>
+          <div style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i> 
+            <span style="color: black; font-size: 14px;">Giá hiện tại: <strong>3.400.000 VND</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+          <!-- Bottom overlay with bids & timer -->
+          <div class="position-absolute bottom-0 start-0 w-100 d-flex justify-content-between px-3 py-2"
+              style="background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); color: white; font-size: 13px;">
+            <span>26 lượt đấu giá</span>
+            <span style="font-weight: 600;">15:30:59</span>
+          </div>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Villa tại Hội An</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Hội An, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px;">Giá khởi điểm: <strong>20.000.000 VND</strong></span>
+          </div>
+          <div style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i> 
+            <span style="color: black; font-size: 14px;">Giá hiện tại: <strong>3.400.000 VND</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+          <!-- Bottom overlay with bids & timer -->
+          <div class="position-absolute bottom-0 start-0 w-100 d-flex justify-content-between px-3 py-2"
+              style="background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); color: white; font-size: 13px;">
+            <span>26 lượt đấu giá</span>
+            <span style="font-weight: 600;">15:30:59</span>
+          </div>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Villa tại Hội An</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Hội An, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px;">Giá khởi điểm: <strong>20.000.000 VND</strong></span>
+          </div>
+          <div style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i> 
+            <span style="color: black; font-size: 14px;">Giá hiện tại: <strong>3.400.000 VND</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </div>
+
+  <!-- Phiên đấu giá nổi bật -->
+  <div class="container mb-5">
+    <h6 class="mb-3 fw-bold d-flex justify-content-between align-items-center">
+        <span style="font-size: 20px;">Phiên đấu giá nổi bật</span>
+        <div>
+        <button class="btn btn-outline-secondary rounded-circle me-2" onclick="scrollDestinations(-3, 'highligh-auction-list')">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+        <button class="btn btn-light rounded-circle" onclick="scrollDestinations(3, 'highlight-auction-list')">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+        </div>
+    </h6>
+
+    <div id="ending-auction-list" class="scroll-x gap-3" style="scroll-behavior: smooth; overflow-x: hidden;">
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+          <!-- Bottom overlay with bids & timer -->
+          <div class="position-absolute bottom-0 start-0 w-100 d-flex justify-content-between px-3 py-2"
+              style="background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); color: white; font-size: 13px;">
+            <span>26 lượt đấu giá</span>
+            <span style="font-weight: 600;">15:30:59</span>
+          </div>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Villa tại Hội An</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Hội An, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px; white-space: nowrap;">Giá khởi điểm: <strong>20.000.000 VND</strong></span>
+          </div>
+          <div style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i> 
+            <span style="color: black; font-size: 14px;">Giá hiện tại: <strong>3.400.000 VND</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+          <!-- Bottom overlay with bids & timer -->
+          <div class="position-absolute bottom-0 start-0 w-100 d-flex justify-content-between px-3 py-2"
+              style="background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); color: white; font-size: 13px;">
+            <span>26 lượt đấu giá</span>
+            <span style="font-weight: 600;">15:30:59</span>
+          </div>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Villa tại Hội An</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Hội An, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px;">Giá khởi điểm: <strong>20.000.000 VND</strong></span>
+          </div>
+          <div style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i> 
+            <span style="color: black; font-size: 14px;">Giá hiện tại: <strong>3.400.000 VND</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+          <!-- Bottom overlay with bids & timer -->
+          <div class="position-absolute bottom-0 start-0 w-100 d-flex justify-content-between px-3 py-2"
+              style="background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); color: white; font-size: 13px;">
+            <span>26 lượt đấu giá</span>
+            <span style="font-weight: 600;">15:30:59</span>
+          </div>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Villa tại Hội An</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Hội An, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px;">Giá khởi điểm: <strong>20.000.000 VND</strong></span>
+          </div>
+          <div style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i> 
+            <span style="color: black; font-size: 14px;">Giá hiện tại: <strong>3.400.000 VND</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+          <!-- Bottom overlay with bids & timer -->
+          <div class="position-absolute bottom-0 start-0 w-100 d-flex justify-content-between px-3 py-2"
+              style="background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); color: white; font-size: 13px;">
+            <span>26 lượt đấu giá</span>
+            <span style="font-weight: 600;">15:30:59</span>
+          </div>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Villa tại Hội An</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Hội An, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px;">Giá khởi điểm: <strong>20.000.000 VND</strong></span>
+          </div>
+          <div style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i> 
+            <span style="color: black; font-size: 14px;">Giá hiện tại: <strong>3.400.000 VND</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+          <!-- Bottom overlay with bids & timer -->
+          <div class="position-absolute bottom-0 start-0 w-100 d-flex justify-content-between px-3 py-2"
+              style="background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); color: white; font-size: 13px;">
+            <span>26 lượt đấu giá</span>
+            <span style="font-weight: 600;">15:30:59</span>
+          </div>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Villa tại Hội An</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Hội An, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px;">Giá khởi điểm: <strong>20.000.000 VND</strong></span>
+          </div>
+          <div style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i> 
+            <span style="color: black; font-size: 14px;">Giá hiện tại: <strong>3.400.000 VND</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+          <!-- Bottom overlay with bids & timer -->
+          <div class="position-absolute bottom-0 start-0 w-100 d-flex justify-content-between px-3 py-2"
+              style="background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); color: white; font-size: 13px;">
+            <span>26 lượt đấu giá</span>
+            <span style="font-weight: 600;">15:30:59</span>
+          </div>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Villa tại Hội An</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Hội An, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px;">Giá khởi điểm: <strong>20.000.000 VND</strong></span>
+          </div>
+          <div style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i> 
+            <span style="color: black; font-size: 14px;">Giá hiện tại: <strong>3.400.000 VND</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!--Phiên đấu giá mới mở-->
+  <div class="container mb-5">
+    <h6 class="mb-3 fw-bold d-flex justify-content-between align-items-center">
+        <span style="font-size: 20px;">Phiên đấu giá mới mở</span>
+        <div>
+        <button class="btn btn-outline-secondary rounded-circle me-2" onclick="scrollDestinations(-3, 'new-auction-list')">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+        <button class="btn btn-light rounded-circle" onclick="scrollDestinations(3, 'new-auction-list')">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+        </div>
+    </h6>
+
+    <div id="new-auction-list" class="scroll-x gap-3" style="scroll-behavior: smooth; overflow-x: hidden;">
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+          <!-- Bottom overlay with bids & timer -->
+          <div class="position-absolute bottom-0 start-0 w-100 d-flex justify-content-between px-3 py-2"
+              style="background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); color: white; font-size: 13px;">
+            <span>26 lượt đấu giá</span>
+            <span style="font-weight: 600;">15:30:59</span>
+          </div>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Villa tại Hội An</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Hội An, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px; white-space: nowrap;">Giá khởi điểm: <strong>20.000.000 VND</strong></span>
+          </div>
+          <div style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i> 
+            <span style="color: black; font-size: 14px;">Giá hiện tại: <strong>3.400.000 VND</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+          <!-- Bottom overlay with bids & timer -->
+          <div class="position-absolute bottom-0 start-0 w-100 d-flex justify-content-between px-3 py-2"
+              style="background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); color: white; font-size: 13px;">
+            <span>26 lượt đấu giá</span>
+            <span style="font-weight: 600;">15:30:59</span>
+          </div>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Villa tại Hội An</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Hội An, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px;">Giá khởi điểm: <strong>20.000.000 VND</strong></span>
+          </div>
+          <div style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i> 
+            <span style="color: black; font-size: 14px;">Giá hiện tại: <strong>3.400.000 VND</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+          <!-- Bottom overlay with bids & timer -->
+          <div class="position-absolute bottom-0 start-0 w-100 d-flex justify-content-between px-3 py-2"
+              style="background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); color: white; font-size: 13px;">
+            <span>26 lượt đấu giá</span>
+            <span style="font-weight: 600;">15:30:59</span>
+          </div>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Villa tại Hội An</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Hội An, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px;">Giá khởi điểm: <strong>20.000.000 VND</strong></span>
+          </div>
+          <div style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i> 
+            <span style="color: black; font-size: 14px;">Giá hiện tại: <strong>3.400.000 VND</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+          <!-- Bottom overlay with bids & timer -->
+          <div class="position-absolute bottom-0 start-0 w-100 d-flex justify-content-between px-3 py-2"
+              style="background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); color: white; font-size: 13px;">
+            <span>26 lượt đấu giá</span>
+            <span style="font-weight: 600;">15:30:59</span>
+          </div>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Villa tại Hội An</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Hội An, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px;">Giá khởi điểm: <strong>20.000.000 VND</strong></span>
+          </div>
+          <div style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i> 
+            <span style="color: black; font-size: 14px;">Giá hiện tại: <strong>3.400.000 VND</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+          <!-- Bottom overlay with bids & timer -->
+          <div class="position-absolute bottom-0 start-0 w-100 d-flex justify-content-between px-3 py-2"
+              style="background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); color: white; font-size: 13px;">
+            <span>26 lượt đấu giá</span>
+            <span style="font-weight: 600;">15:30:59</span>
+          </div>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Villa tại Hội An</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Hội An, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px;">Giá khởi điểm: <strong>20.000.000 VND</strong></span>
+          </div>
+          <div style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i> 
+            <span style="color: black; font-size: 14px;">Giá hiện tại: <strong>3.400.000 VND</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+          <!-- Bottom overlay with bids & timer -->
+          <div class="position-absolute bottom-0 start-0 w-100 d-flex justify-content-between px-3 py-2"
+              style="background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); color: white; font-size: 13px;">
+            <span>26 lượt đấu giá</span>
+            <span style="font-weight: 600;">15:30:59</span>
+          </div>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Villa tại Hội An</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Hội An, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px;">Giá khởi điểm: <strong>20.000.000 VND</strong></span>
+          </div>
+          <div style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i> 
+            <span style="color: black; font-size: 14px;">Giá hiện tại: <strong>3.400.000 VND</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+      
+
+  <!-- Nơi lưu trú theo khu vực -->
+  <div class="container mb-5">
+    <h6 class="mb-3 fw-bold d-flex justify-content-between align-items-center">
+        <span style="font-size: 20px;">Nơi lưu trú tại Nha Trang</span>
+        <div>
+        <button class="btn btn-outline-secondary rounded-circle me-2" onclick="scrollDestinations(-3, 'nha-trang-list')">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+        <button class="btn btn-light rounded-circle" onclick="scrollDestinations(3, 'nha-trang-list')">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+        </div>
+    </h6>
+
+    <div id="nha-trang-list" class="scroll-x gap-3" style="scroll-behavior: smooth; overflow-x: hidden;">
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Villa tại Nha Trang</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Nha Trang, Khánh Hòa, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px; white-space: nowrap;"><strong>20.000.000 VND</strong> cho 1 đêm</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Villa tại Nha Trang</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Nha Trang, Khánh Hòa, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px; white-space: nowrap;"><strong>20.000.000 VND</strong> cho 1 đêm</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Villa tại Nha Trang</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Nha Trang, Khánh Hòa, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px; white-space: nowrap;"><strong>20.000.000 VND</strong> cho 1 đêm</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Villa tại Nha Trang</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Nha Trang, Khánh Hòa, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px; white-space: nowrap;"><strong>20.000.000 VND</strong> cho 1 đêm</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Villa tại Nha Trang</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Nha Trang, Khánh Hòa, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px; white-space: nowrap;"><strong>20.000.000 VND</strong> cho 1 đêm</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Villa tại Nha Trang</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Nha Trang, Khánh Hòa, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px; white-space: nowrap;"><strong>20.000.000 VND</strong> cho 1 đêm</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Villa tại Nha Trang</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Nha Trang, Khánh Hòa, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px; white-space: nowrap;"><strong>20.000.000 VND</strong> cho 1 đêm</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Villa tại Nha Trang</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Nha Trang, Khánh Hòa, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px; white-space: nowrap;"><strong>20.000.000 VND</strong> cho 1 đêm</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="container mb-5">
+    <h6 class="mb-3 fw-bold d-flex justify-content-between align-items-center">
+        <span style="font-size: 20px;">Nơi lưu trú tại Vũng Tàu</span>
+        <div>
+        <button class="btn btn-outline-secondary rounded-circle me-2" onclick="scrollDestinations(-3, 'vung-tau-list')">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+        <button class="btn btn-light rounded-circle" onclick="scrollDestinations(3, 'vung-tau-list')">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+        </div>
+    </h6>
+
+    <div id="vung-tau-list" class="scroll-x gap-3" style="scroll-behavior: smooth; overflow-x: hidden;">
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Căn hộ tại Vũng Tàu</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Vũng Tàu, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px; white-space: nowrap;"><strong>20.000.000 VND</strong> cho 1 đêm</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Căn hộ tại Vũng Tàu</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Vũng Tàu, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px; white-space: nowrap;"><strong>20.000.000 VND</strong> cho 1 đêm</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Căn hộ tại Vũng Tàu</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Vũng Tàu, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px; white-space: nowrap;"><strong>20.000.000 VND</strong> cho 1 đêm</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Căn hộ tại Vũng Tàu</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Vũng Tàu, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px; white-space: nowrap;"><strong>20.000.000 VND</strong> cho 1 đêm</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Căn hộ tại Vũng Tàu</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Vũng Tàu, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px; white-space: nowrap;"><strong>20.000.000 VND</strong> cho 1 đêm</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Căn hộ tại Vũng Tàu</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Vũng Tàu, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px; white-space: nowrap;"><strong>20.000.000 VND</strong> cho 1 đêm</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Căn hộ tại Vũng Tàu</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Vũng Tàu, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px; white-space: nowrap;"><strong>20.000.000 VND</strong> cho 1 đêm</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Căn hộ tại Vũng Tàu</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Vũng Tàu, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px; white-space: nowrap;"><strong>20.000.000 VND</strong> cho 1 đêm</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container mb-5">
+    <h6 class="mb-3 fw-bold d-flex justify-content-between align-items-center">
+        <span style="font-size: 20px;">Nơi lưu trú tại Đà Lạt</span>
+        <div>
+        <button class="btn btn-outline-secondary rounded-circle me-2" onclick="scrollDestinations(-3, 'da-lat-list')">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+        <button class="btn btn-light rounded-circle" onclick="scrollDestinations(3, 'da-lat-list')">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+        </div>
+    </h6>
+
+    <div id="da-lat-list" class="scroll-x gap-3" style="scroll-behavior: smooth; overflow-x: hidden;">
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Homestay tại Đà Lạt</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Đà Lạt, Lâm Đồng, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px; white-space: nowrap;"><strong>20.000.000 VND</strong> cho 1 đêm</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Homestay tại Đà Lạt</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Đà Lạt, Lâm Đồng, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px; white-space: nowrap;"><strong>20.000.000 VND</strong> cho 1 đêm</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Homestay tại Đà Lạt</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Đà Lạt, Lâm Đồng, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px; white-space: nowrap;"><strong>20.000.000 VND</strong> cho 1 đêm</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Homestay tại Đà Lạt</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Đà Lạt, Lâm Đồng, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px; white-space: nowrap;"><strong>20.000.000 VND</strong> cho 1 đêm</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Homestay tại Đà Lạt</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Đà Lạt, Lâm Đồng, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px; white-space: nowrap;"><strong>20.000.000 VND</strong> cho 1 đêm</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Homestay tại Đà Lạt</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Đà Lạt, Lâm Đồng, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px; white-space: nowrap;"><strong>20.000.000 VND</strong> cho 1 đêm</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Homestay tại Đà Lạt</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Đà Lạt, Lâm Đồng, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px; white-space: nowrap;"><strong>20.000.000 VND</strong> cho 1 đêm</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-0" style="width: 260px; border: none; font-family: 'Montserrat', sans-serif;">
+        <!-- Image Placeholder with overlay -->
+        <div class="position-relative rounded-4 overflow-hidden" style="height: 240px; background: #ddd;">
+          <!-- Heart Icon (top right) -->
+          <button onclick="toggleHeart(this)" class="position-absolute top-0 end-0 m-2 border-0 bg-transparent" style="font-size: 30px; color: red;">
+            <i class="bi bi-heart" ></i>
+          </button>
+        </div>
+
+        <!-- Text Content -->
+        <div class="p-2">
+          <p class="mb-1" style="font-size: 16px; font-weight: 700;">Homestay tại Đà Lạt</p>
+          
+          <div class="mb-1" style="font-size: 16px; color: red;">
+            <i class="bi bi-geo-alt me-1" ></i>
+            <span style="color: black; font-size: 14px;">Đà Lạt, Lâm Đồng, Việt Nam</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px; color: rgb(255, 215, 0);">
+            <i class="bi bi-star me-1"></i>
+            <span style="color: black; font-size: 14px;">5.0 - 1.130 đánh giá</span>
+          </div>
+          <div class="mb-1" style="font-size: 16px;">
+            <i class="bi bi-currency-dollar me-1"></i>
+            <span style="color: black; font-size: 14px; white-space: nowrap;"><strong>20.000.000 VND</strong> cho 1 đêm</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-light p-4 mt-5 border-top">
+    <div class="container text-muted small d-flex flex-wrap justify-content-between">
+      <div>
+        <span style="display: inline-block; margin-top: 20px; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 14px; color: black;">Hỗ trợ khách hàng</span>
+        <br>
+        <span style="display: inline-block; margin-top: 20px; font-family: 'Montserrat', sans-serif; font-size: 14px; color: black;">Câu hỏi thường gặp</span>
+        <br>
+        <span style="display: inline-block; margin-top: 20px; font-family: 'Montserrat', sans-serif; font-size: 14px; color: black;">Hướng dẫn đấu giá</span>
+        <br>
+        <span style="display: inline-block; margin-top: 20px; font-family: 'Montserrat', sans-serif; font-size: 14px; color: black;">Trung tâm hỗ trợ</span>
+      </div>
+      <div>
+        <span style="display: inline-block; margin-top: 20px; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 14px; color: black;">Chính sách</span>
+        <br>
+        <span style="display: inline-block; margin-top: 20px; font-family: 'Montserrat', sans-serif; font-size: 14px; color: black;">Điều khoản sử dụng</span>
+        <br>
+        <span style="display: inline-block; margin-top: 20px; font-family: 'Montserrat', sans-serif; font-size: 14px; color: black;">Chính sách bảo mật</span>
+        <br>
+        <span style="display: inline-block; margin-top: 20px; font-family: 'Montserrat', sans-serif; font-size: 14px; color: black;">Chính sách thanh toán</span>
+      </div>
+      <div>
+        <span style="display: inline-block; margin-top: 20px; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 14px; color: black;">Về chúng tôi</span>
+        <br>
+        <span style="display: inline-block; margin-top: 20px; font-family: 'Montserrat', sans-serif; font-size: 14px; color: black;">Truyền thônh</span>
+        <br>
+        <span style="display: inline-block; margin-top: 20px; font-family: 'Montserrat', sans-serif; font-size: 14px; color: black;">Tuyển dụng</span>
+        <br>
+        <span style="display: inline-block; margin-top: 20px; font-family: 'Montserrat', sans-serif; font-size: 14px; color: black;">Liên hệ công ty</span>
+      </div>
+        <div>
+        <span style="display: inline-block; margin-top: 20px; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 14px; color: black;">Đối tác thanh toán</span>
+        <br>
+        <div class="d-flex gap-2">
+          <div class="bg-white rounded-3 p-2" style="margin-top: 10px;">
+            <img src="https://coinpanda.io/wp-content/uploads/2021/05/paypal.svg" alt="PayPal" width="33" height="33">
+          </div>
+          <br>
+          <div class="bg-white rounded-3 p-2" style="margin-top: 10px;">
+            <img src="https://cdn.moveek.com/bundles/ornweb/partners/zalopay-icon.png" alt="ZaloPay" width="33" height="33">
+          </div>
+        </div>
+      </div>
+    </div>
+    <br>
+    <div class="text-center mt-3 small">© 2025 Azainbinh, Inc.</div>
+  </footer>
+
+</body>
+</html>
+
+<script>
+  function scrollDestinations(direction, list) {
+    const container = document.getElementById(list);
+    const scrollAmount = 160; // chiều rộng một ô + khoảng cách
+    container.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+  }
+
+  function toggleHeart(button) {
+    const icon = button.querySelector("i");
+    icon.classList.toggle("bi-heart");
+    icon.classList.toggle("bi-heart-fill");
+  }
+  
+</script>
