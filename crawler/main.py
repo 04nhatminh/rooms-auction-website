@@ -33,34 +33,34 @@ def main():
     #     return
     
     # 2. Lấy dữ liệu listing info
-    print("2. Starting fetch listing info...")
-    try:
-        from execute.run_fetch_listing_info import main as listing_info_main
-        listing_info_main()
-        print("Fetched listing info successfully!\n")
-    except Exception as e:
-        print(f"Error when running listing info fetch: {e}")
-        return
+    # print("2. Starting fetch listing info...")
+    # try:
+    #     from execute.run_fetch_listing_info import main as listing_info_main
+    #     listing_info_main()
+    #     print("Fetched listing info successfully!\n")
+    # except Exception as e:
+    #     print(f"Error when running listing info fetch: {e}")
+    #     return
     
-    # # 3. Lấy dữ liệu reviews
-    print("3. Starting fetch reviews...")
-    try:
-        from execute.run_fetch_reviews import main as reviews_main
-        reviews_main()
-        print("Fetched reviews successfully!\n")
-    except Exception as e:
-        print(f"Error when running reviews fetch: {e}")
-        return
+    # # # 3. Lấy dữ liệu reviews
+    # print("3. Starting fetch reviews...")
+    # try:
+    #     from execute.run_fetch_reviews import main as reviews_main
+    #     reviews_main()
+    #     print("Fetched reviews successfully!\n")
+    # except Exception as e:
+    #     print(f"Error when running reviews fetch: {e}")
+    #     return
     
-    # # 4. Lấy dữ liệu calendar
-    print("4. Starting fetch calendar...")
-    try:
-        from execute.run_fetch_calendar import main as calendar_main
-        calendar_main()
-        print("Fetched calendar successfully!\n")
-    except Exception as e:
-        print(f"Error when running calendar fetch: {e}")
-        return
+    # # # 4. Lấy dữ liệu calendar
+    # print("4. Starting fetch calendar...")
+    # try:
+    #     from execute.run_fetch_calendar import main as calendar_main
+    #     calendar_main()
+    #     print("Fetched calendar successfully!\n")
+    # except Exception as e:
+    #     print(f"Error when running calendar fetch: {e}")
+    #     return
     
     # 5. Upsert dữ liệu listing info vào MySQL
     print("5. Starting insert or update listing info into MySQL...")
