@@ -1,5 +1,6 @@
 import React from 'react';
 import Header from '../components/Header';
+import RoomTitle from '../components/RoomTitle';
 import ImageGallery from '../components/ImageGallery';
 import BookingInfo from '../components/BookingInfo';
 import Amenities from '../components/Amenities';
@@ -15,6 +16,7 @@ const RoomDetailPage = () => {
     <div className="room-detail-page">
       <Header />
       <main className="room-detail-content">
+        <RoomTitle />
         <ImageGallery />
         <div className="main-content">
           <div className="left-column">

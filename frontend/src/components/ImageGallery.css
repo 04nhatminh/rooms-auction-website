@@ -1,77 +1,25 @@
 .image-gallery {
-  padding: 32px 0px;
+  padding: 0px 0px;
   position: relative;
 }
 
-.gallery-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.image-gallery h2 {
-  font-size: 26px;
-  margin: 0;
-  flex: 1;
-  min-width: 300px;
-}
-
-.user-actions {
-  display: flex;
-  gap: 20px;
-  align-items: center;
-}
-
-.action-btn {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #000;
-  font-family: Montserrat, sans-serif;
-  font-size: 15px;
-  font-style: normal;
-  font-weight: 600;
-  line-height: normal;
-  text-decoration-line: underline;
-  padding: 4px 0;
-  transition: opacity 0.2s ease;
-}
-
-.action-btn:hover {
-  opacity: 0.8;
-  border-radius: 12px;
-}
-
-.action-icon {
-  width: 18px;
-  height: 18px;
-  object-fit: contain;
-}
-
 .gallery-layout {
-  display: flex;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
   height: 400px;
 }
 
 .main-image {
-  flex: 2;
   background-color: #e0e0e0;
   border-radius: 12px 0 0 12px;
 }
 
 .side-images {
-  flex: 1;
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
-  gap: 8px;
+  gap: 10px;
 }
 
 .side-image {
@@ -85,7 +33,6 @@
     border-radius: 0 0 12px 0;
 }
 
-
 .show-all-photos {
   position: absolute;
   bottom: 20px;
@@ -95,41 +42,4 @@
   background-color: white;
   border-radius: 8px;
   cursor: pointer;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .gallery-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
-  }
-  
-  .image-gallery h2 {
-    min-width: auto;
-    width: 100%;
-  }
-  
-  .user-actions {
-    width: 100%;
-    justify-content: space-between;
-    gap: 15px;
-  }
-}
-
-@media (max-width: 480px) {
-  .user-actions {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-  
-  .action-btn {
-    font-size: 14px;
-  }
-  
-  .action-icon {
-    width: 18px;
-    height: 18px;
-  }
 }
