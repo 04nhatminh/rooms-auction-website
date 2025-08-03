@@ -1,0 +1,16 @@
+.location-section h3 {
+  font-size: 22px;
+  margin-bottom: 24px;
+}
+
+.location-map {
+  height: 480px;
+  background-color: #e0e0e0;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.location-section h4 {
+    font-size: 18px;
+    margin: 0;
+}

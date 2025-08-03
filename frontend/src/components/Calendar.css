@@ -1,0 +1,77 @@
+.calendar-section h3 {
+  font-size: 22px;
+  margin-bottom: 24px;
+}
+
+.calendar-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 60px;
+}
+
+.calendar-month {
+  width: 50%;
+}
+
+.month-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.month-header h4 {
+    margin: 0;
+    width: 100%;
+    font-size: 16px;
+}
+
+.nav-button {
+  background: none;
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  text-align: center;
+}
+
+.day-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: #717171;
+  padding-bottom: 10px;
+}
+
+.calendar-day {
+  padding: 10px 0;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.calendar-day:not(.empty):hover {
+  border: 1px solid black;
+}
+
+.calendar-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.clear-dates {
+  background: none;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}

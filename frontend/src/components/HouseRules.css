@@ -1,0 +1,34 @@
+.house-rules-section h3 {
+  font-size: 22px;
+  margin-bottom: 24px;
+}
+
+.rules-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.rules-column {
+  flex: 1;
+}
+
+.rules-column h4 {
+  font-size: 16px;
+  margin-bottom: 16px;
+}
+
+.rules-column p {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.rules-column button {
+  background: none;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 0;
+}
