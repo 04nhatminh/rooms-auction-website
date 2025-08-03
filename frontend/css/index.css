@@ -1,0 +1,189 @@
+.placeholder-box {
+      background: #e0e0e0;
+      border-radius: 10px;
+      height: 150px;
+    }
+    .small-box {
+      height: 100px;
+    }
+    .card-title {
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+    .scroll-x {
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+    .scroll-x .card {
+      display: inline-block;
+      margin-right: 10px;
+    }
+    .roundered {
+      border-radius: 24px;
+    }
+
+    .floating-header {
+        background-color: #D9D9D9;
+        width: 100%;
+        max-width: 1400px;
+        height: 600px;           
+        margin: 30px auto;
+    }
+
+    .logo-text {
+        font-family: 'Be Vietnam Pro'sans-serif; 
+        font-weight: 500; 
+        color: #ACF5FF; 
+        font-size: 23px; 
+        line-height: 1;   
+    }
+
+    .log-in-text {
+        font-family: 'Montserrat', sans-serif; 
+        font-size: 14px; 
+        font-weight: 800; 
+        color: white; 
+        margin: 12px;
+    }
+
+    #destination-list {
+      white-space: nowrap;
+      overflow-x: hidden;
+    }
+
+    .auth-buttons {
+        align-self: flex-start;
+        display: flex;
+        align-items: center;
+    }
+
+    /* User info display */
+    .user-info {
+        display: none;
+        position: absolute;
+        top: 20px;
+        right: 45px;
+        border-radius: 25px;
+        color: white;
+    }
+
+    .user-info .welcome {
+        margin-right: 15px;
+        font-weight: bold;
+    }
+
+    .logout-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 5px 12px;
+        border-radius: 15px;
+        cursor: pointer;
+        font-size: 12px;
+    }
+
+    .logout-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .dropdown-toggle::after {
+      display: none !important;
+    }
+
+    .dropdown-menu {
+      width: 260px; /* hoặc 200px, tùy ý */
+      min-width: unset;
+    }
+    
+    .dropdown-item:hover {
+      background-color: #f0f0f0;     /* nền sáng khi hover */
+      color: #007bff;                /* đổi màu chữ khi hover */
+    }
+
+    .dropdown-item {
+      display: block;
+      background-color: white;
+      border: none;
+      border-radius: 8px;
+      margin-bottom: 3px;
+      font-family: 'Montserrat', sans-serif; 
+      font-size: 14px;
+      font-weight: 500;
+      color: black;
+      width: 100%;
+      text-align: left;
+      transition: background-color 0.3s ease;
+    }
+
+    #welcomeText {
+      background-color: rgba(255, 255, 255, 0.6); /* mờ nhẹ */
+      border: none;
+      color: #333;
+      font-weight: 600;
+      border-radius: 20px;
+      padding: 8px 18px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      backdrop-filter: blur(5px); /* làm mờ nhẹ phía sau */
+      transition: background-color 0.3s ease;
+      font-family: 'Montserrat', sans-serif; 
+      font-weight: 600; color: black; 
+      font-size: 16px; 
+      margin: 12px; 
+      height: 50px;
+      width: fit-content;
+      border-radius: 11px;
+    }
+
+    .search-btn {
+        background-color: #278C9F !important;
+        width: 40px; 
+        height: 40px;
+    }
+
+    .search-btn:hover {
+        background-color: black !important;
+    }
+
+    .search-btn i {
+        color: white;
+    }
+
+    .location-text {
+        margin-top: 10px; 
+        font-family: 'Montserrat', sans-serif; 
+        font-weight: 600; 
+        font-size: 14px;
+    }
+
+    #search-box.stuck {
+        border-radius: 0;
+        transition: all 0.3s ease;
+    }
+
+    #search-box.stuck form {
+        flex-wrap: nowrap;
+        border-radius: 0;
+    }
+
+    .chevron-left {
+        width: 32px; 
+        height: 32px; 
+        border-color: #c7c5c5 !important;
+    }
+
+    .chevron-left:hover i {
+        color: white;
+    }
+
+    .chevron-left i {
+        color: #c7c5c5;
+    }
+
+    .chevron-right {
+        width: 32px; 
+        height: 32px;
+    }
+
+    .chevron-right i {
+        color: black;
+    }
