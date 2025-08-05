@@ -5,7 +5,7 @@ const mysql = require('mysql2/promise');
 const dbConfig = {
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
-    port: process.env.PORT ? parseInt(process.env.PORT) : 3308,
+    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3306,
     password: process.env.DB_PASSWORD || '', 
     database: process.env.DB_NAME || 'a2airbnb',
     waitForConnections: true,

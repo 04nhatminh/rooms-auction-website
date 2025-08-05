@@ -16,10 +16,12 @@ class EmailService {
     // Gửi email xác thực
     async sendVerificationEmail(to, fullName, verificationToken) {
         try {
-            const verificationUrl = `http://localhost:3000/user/verify?token=${verificationToken}`;
+            // Use environment variable or fallback to localhost:3000
+            const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+            const verificationUrl = `${baseUrl}/user/verify?token=${verificationToken}`;
             
             const mailOptions = {
-                from: `"${process.env.FROM_NAME}" <${process.env.FROM_EMAIL}>`,
+                from: `"${process.env.FROM_NAME || 'A2BnB Platform'}" <${process.env.FROM_EMAIL}>`,
                 to: to,
                 subject: '🔐 Xác thực tài khoản A2BnB',
                 html: `

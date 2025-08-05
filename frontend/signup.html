@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tạo tài khoản</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="min-h-screen flex items-center justify-center bg-gray-100">
   <div class="w-full max-w-6xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden flex flex-col lg:flex-row">
@@ -60,15 +62,19 @@
         <!-- Mật khẩu -->
         <div class="mb-4 relative">
           <label class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu</label>
-          <input type="password" class="w-full border border-gray-300 rounded-lg px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-[#008489]" />
-          <span class="absolute right-3 top-9 text-gray-500 cursor-pointer">👁️</span>
+          <input type="password" id="password" class="w-full border border-gray-300 rounded-lg px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-[#008489]" />
+          <span class="absolute right-3 top-9 text-gray-500 cursor-pointer" onclick="togglePassword('password', this)">
+            <i class="fas fa-eye" id="password-eye"></i>
+          </span>
         </div>
 
         <!-- Xác nhận mật khẩu -->
         <div class="mb-4 relative">
           <label class="block text-sm font-medium text-gray-700 mb-1">Xác nhận mật khẩu</label>
-          <input type="password" class="w-full border border-gray-300 rounded-lg px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-[#008489]" />
-          <span class="absolute right-3 top-9 text-gray-500 cursor-pointer">👁️</span>
+          <input type="password" id="confirmPassword" class="w-full border border-gray-300 rounded-lg px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-[#008489]" />
+          <span class="absolute right-3 top-9 text-gray-500 cursor-pointer" onclick="togglePassword('confirmPassword', this)">
+            <i class="fas fa-eye" id="confirmPassword-eye"></i>
+          </span>
         </div>
 
         <!-- Checkbox Điều khoản -->
@@ -78,8 +84,15 @@
         </div>
 
         <!-- Submit button -->
-        <button type="submit" class="w-full bg-gray-300 text-black font-semibold py-2 rounded-lg hover:bg-gray-400">
-          Tạo tài khoản
+        <button type="submit" id="submitBtn" class="w-full bg-[#008489] text-white font-semibold py-2 rounded-lg hover:bg-[#006b70] transition-all duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed">
+          <span id="submitText">Tạo tài khoản</span>
+          <span id="loadingSpinner" class="hidden">
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Đang xử lý...
+          </span>
         </button>
 
         <!-- Đăng nhập -->
@@ -96,6 +109,41 @@
   </div>
 
   <script>
+// ✅ Hàm toggle hiển thị/ẩn mật khẩu
+function togglePassword(inputId, eyeElement) {
+    const passwordInput = document.getElementById(inputId);
+    const eyeIcon = eyeElement.querySelector('i');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        eyeIcon.classList.remove('fa-eye');
+        eyeIcon.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        eyeIcon.classList.remove('fa-eye-slash');
+        eyeIcon.classList.add('fa-eye');
+    }
+}
+
+// ✅ Hàm toggle loading state cho submit button
+function setLoading(isLoading) {
+    const submitBtn = document.getElementById('submitBtn');
+    const submitText = document.getElementById('submitText');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    
+    if (isLoading) {
+        submitBtn.disabled = true;
+        submitText.classList.add('hidden');
+        loadingSpinner.classList.remove('hidden');
+        submitBtn.classList.add('cursor-wait');
+    } else {
+        submitBtn.disabled = false;
+        submitText.classList.remove('hidden');
+        loadingSpinner.classList.add('hidden');
+        submitBtn.classList.remove('cursor-wait');
+    }
+}
+
 document.querySelector('form').addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -103,8 +151,8 @@ document.querySelector('form').addEventListener('submit', async (e) => {
     const lastName = e.target.querySelector('input[placeholder="Doe"]').value;
     const email = e.target.querySelector('input[type="email"]').value;
     const phoneNumber = e.target.querySelector('input[placeholder="838038900"]').value;
-    const password = e.target.querySelectorAll('input[type="password"]')[0].value;
-    const confirmPassword = e.target.querySelectorAll('input[type="password"]')[1].value;
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
     const agree = e.target.querySelector('#agree').checked;
     
     // Validation
@@ -124,6 +172,9 @@ document.querySelector('form').addEventListener('submit', async (e) => {
     }
     
     const fullName = `${firstName} ${lastName}`;
+    
+    // ✅ Bật loading state
+    setLoading(true);
     
     try {
         const response = await fetch('http://localhost:3000/user/register', {
@@ -154,13 +205,17 @@ document.querySelector('form').addEventListener('submit', async (e) => {
             alert('❌ Lỗi: ' + data.message);
         }
     } catch (error) {
+        console.error('Registration error:', error);
         alert('❌ Lỗi kết nối: ' + error.message);
+    } finally {
+        // ✅ Tắt loading state
+        setLoading(false);
     }
 });
 
 // Thêm function để gửi lại email xác thực
 function resendVerificationEmail(email) {
-    fetch('http://localhost:3000/user/resend-verification', {
+    fetch('http://localhost:3000/api/user/resend-verification', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

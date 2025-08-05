@@ -92,7 +92,7 @@ class UserController {
             
             if (verified) {
                 // Redirect to success page
-                return res.redirect('http://localhost:5500/frontend/verification-success.html');
+                return res.redirect('/verification-success.html');
             } else {
                 return res.status(400).json({ 
                     message: 'Xác thực thất bại.' 
