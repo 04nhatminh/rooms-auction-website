@@ -10,6 +10,10 @@
 
 .room-title h2 {
   font-size: 28px;
+  font-family: Montserrat;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
   margin: 0;
   flex: 1;
   width: fit-content;

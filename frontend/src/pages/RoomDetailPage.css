@@ -10,7 +10,8 @@
 }
 
 .room-detail-content .main-content {
-  display: flex;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
   justify-content: space-between;
 }
 
@@ -21,6 +22,6 @@
 .room-detail-content hr {
   border: 0;
   border-top: 1px solid #DDDDDD;
-  margin: 2.5rem 0;
+  margin: 32px 0;
   padding: 0px 64px;
 }

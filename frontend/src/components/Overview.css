@@ -1,0 +1,48 @@
+.overview {
+  padding: 32px 0px 0px 0px;
+}
+
+.overview h2 {
+  font-size: 24px;
+  font-family: Montserrat;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  margin-block-end: 0px;
+  margin-block-start: 0px;
+}
+
+.overview p {
+  margin-block-end: 8px;
+  margin-block-start: 8px;
+}
+
+.overview .room-details {
+  color: #000;
+  font-family: Montserrat, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.overview .rating {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.overview .star-icon {
+  width: 12px;
+  height: 12px;
+  object-fit: contain;
+}
+
+.overview .rating-text {
+  color: #000;
+  font-family: Montserrat, sans-serif;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  text-decoration-line: underline;
+}
+

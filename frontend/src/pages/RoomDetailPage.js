@@ -2,7 +2,8 @@ import React from 'react';
 import Header from '../components/Header';
 import RoomTitle from '../components/RoomTitle';
 import ImageGallery from '../components/ImageGallery';
-import BookingInfo from '../components/BookingInfo';
+import Overview from '../components/Overview';
+import Description from '../components/Description';
 import Amenities from '../components/Amenities';
 import Calendar from '../components/Calendar';
 import Reviews from '../components/Reviews';
@@ -20,7 +21,9 @@ const RoomDetailPage = () => {
         <ImageGallery />
         <div className="main-content">
           <div className="left-column">
-            <BookingInfo />
+            <Overview />
+            <hr />
+            <Description />
             <hr />
             <Amenities />
             <hr />

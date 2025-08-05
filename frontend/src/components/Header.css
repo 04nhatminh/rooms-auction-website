@@ -51,8 +51,11 @@
 .search-content span {
   padding: 0px 32px;
   cursor: pointer;
-  font-size: 14px;
-  font-weight: bold;
+  font-family: Montserrat, sans-serif;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -85,8 +88,8 @@
 }
 
 .search .search-icon img {
-  width: 16px;
-  height: 16px;
+  width: 17px;
+  height: 17px;
   object-fit: contain;
 }
 
@@ -134,8 +137,11 @@
 
 .user-btn {
   font-size: 14px;
-  font-weight: 300 !important;
+  font-weight: 600 !important;
   color: white !important;
+  font-family: Montserrat;
+  font-style: normal;
+  line-height: 14px;
   text-transform: uppercase !important;
   background-color: #000 !important;
 }
