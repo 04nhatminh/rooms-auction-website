@@ -8,6 +8,7 @@
   grid-template-columns: 1fr 1fr;
   gap: 10px;
   height: 320px;
+  position: relative;
 }
 
 .main-image {
@@ -34,12 +35,28 @@
 }
 
 .show-all-photos {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  padding: 10px 20px;
-  border: 1px solid black;
-  background-color: white;
   border-radius: 8px;
-  cursor: pointer;
+  border: 0.5px solid #000;
+  background: #FFF;
+  display: flex;
+  padding: 12px 20px;
+  align-items: center;
+  gap: 16px;
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  z-index: 10;
+
+  color: #000;
+  font-family: Montserrat;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+}
+
+.image-gallery img {
+  width: 16px;
+  height: 16px;
+  object-fit: cover;
 }

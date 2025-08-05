@@ -1,66 +1,8 @@
-.reviews-section h3 {
-  color: #000;
-  font-family: Montserrat;
-  font-size: 20px;
-  font-style: normal;
-  font-weight: 600;
-  line-height: normal;
-  margin-bottom: 16px;
-}
-
-.reviews-section h2 {
-  color: #000;
-  font-family: Montserrat;
-  font-size: 16px;
-  font-style: normal;
-  font-weight: 600;
-  line-height: normal;
-  margin-top: 0px;
-  margin-bottom: 24px;
-}
-
-.reviews-section img {
-  width: 14px;
-  height: 14px;
-  object-fit: contain;
-}
-
-.detailed-ratings {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px 40px;
-  margin-bottom: 40px;
-}
-
-.rating-bar-container {
-  display: flex;
-  align-items: center;
-  font-size: 16px;
-}
-
-.rating-bar-container span:first-child {
-    flex-basis: 100px;
-}
-
-.bar-wrapper {
-  flex-grow: 1;
-  height: 4px;
-  background-color: #e0e0e0;
-  border-radius: 2px;
-  margin: 0 10px;
-}
-
-.bar {
-  height: 100%;
-  background-color: #222;
-  border-radius: 2px;
-}
-
 .review-list {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 60px;
-    margin-bottom: 40px;
+    margin-bottom: 28px;
 }
 
 .review-card .review-author {
@@ -70,26 +12,69 @@
 }
 
 .author-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
     background-color: #e0e0e0;
-    margin-right: 12px;
+    margin-right: 24px;
+    width: 56px;
+    height: 56px;
+    aspect-ratio: 1/1;
+    border-radius: 50px;
 }
 
 .author-info h4 {
     margin: 0;
     font-size: 16px;
+    color: #000;
+    font-family: Montserrat;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    padding-bottom: 8px;
 }
 
 .author-info p {
     margin: 0;
     font-size: 14px;
-    color: #717171;
+    color: #000;
+    font-family: Montserrat;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+}
+
+.review-rating {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.rating-stars {
+    display: flex;
+    gap: 2px;
+}
+
+.rating-stars img {
+    width: 10px;
+    height: 10px;
+}
+
+.review-rating span {
+    font-size: 14px;
+    color: #000;
+    font-family: Montserrat;
+    font-style: normal;
+    line-height: normal;
+    font-weight: 600;
 }
 
 .review-card .review-text {
     line-height: 1.5;
+    color: #000;
+    font-family: Montserrat;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
 }
 
 .review-card .show-more-review {
@@ -97,17 +82,40 @@
     border: none;
     text-decoration: underline;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 600;
     padding: 0;
+    color: #000;
+    font-family: Montserrat;
+    font-style: normal;
+    line-height: normal;
+    text-decoration-style: solid;
+    text-decoration-skip-ink: auto;
+    text-decoration-thickness: auto;
+    text-underline-offset: auto;
+    text-underline-position: from-font;
 }
 
 .show-all-reviews {
-  padding: 13px 23px;
-  font-size: 16px;
-  font-weight: 600;
-  border: 1px solid #222;
-  background-color: #fff;
-  border-radius: 8px;
-  cursor: pointer;
+    display: flex;
+    padding: 16px 24px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    border-radius: 8px;
+    background: #F2F2F2;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    color: #000;
+    font-family: Montserrat;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+}
+
+.show-all-reviews:hover {
+  background-color: #E8E8E8;
 }

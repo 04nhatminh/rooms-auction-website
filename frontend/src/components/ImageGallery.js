@@ -1,8 +1,6 @@
 import React from 'react';
 import './ImageGallery.css';
-import shareIcon from '../assets/share.png';
-import heartIcon from '../assets/heart.png';
-import saveIcon from '../assets/save.png';
+import dotsMenuIcon from '../assets/dots_menu.png';
 
 const ImageGallery = () => {
   return (
@@ -16,7 +14,10 @@ const ImageGallery = () => {
           <div className="side-image"></div>
         </div>
       </div>
-      <button className="show-all-photos">Hiển thị tất cả ảnh</button>
+      <button className="show-all-photos">
+        <img src={dotsMenuIcon} alt="Hiển thị tất cả ảnh" />
+        Hiển thị tất cả ảnh
+      </button>
     </div>
   );
 };

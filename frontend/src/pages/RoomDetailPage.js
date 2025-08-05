@@ -6,6 +6,7 @@ import Overview from '../components/Overview';
 import Description from '../components/Description';
 import Amenities from '../components/Amenities';
 import Calendar from '../components/Calendar';
+import Rating from '../components/Rating';
 import Reviews from '../components/Reviews';
 import Location from '../components/Location';
 import HouseRules from '../components/HouseRules';
@@ -30,6 +31,8 @@ const RoomDetailPage = () => {
             <Calendar />
           </div>
         </div>
+        <hr />
+        <Rating />
         <hr />
         <Reviews />
         <hr />
