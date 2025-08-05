@@ -1,5 +1,10 @@
 .amenities-section h3 {
-  font-size: 22px;
+  color: #000;
+  font-family: Montserrat;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
   margin-bottom: 24px;
 }
 
@@ -8,6 +13,7 @@
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
   font-size: 16px;
+  margin-bottom: 24px;
 }
 
 .amenity-item {
@@ -15,18 +21,43 @@
   align-items: center;
 }
 
-.amenity-item span {
-  font-size: 24px;
+.amenity-icon {
+  width: 20px;
+  height: 20px;
+  aspect-ratio: 1/1;
   margin-right: 16px;
 }
 
-.show-all-amenities {
-  margin-top: 24px;
-  padding: 13px 23px;
+.amenity-text {
+  color: #000;
+  font-family: Montserrat;
   font-size: 16px;
-  font-weight: 600;
-  border: 1px solid #222;
-  background-color: #fff;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+}
+
+.amenities-section button {
+  display: flex;
+  padding: 16px 24px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
   border-radius: 8px;
+  background: #F2F2F2;
+  border: none;
   cursor: pointer;
+  transition: background-color 0.2s ease;
+  
+  color: #000;
+  font-family: Montserrat;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  text-decoration: none;
+}
+
+.amenities-section button:hover {
+  background-color: #E8E8E8;
 }
