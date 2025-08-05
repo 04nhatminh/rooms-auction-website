@@ -1,5 +1,6 @@
 import React from 'react';
 import './Reviews.css';
+import starIcon from '../assets/star_filled.png';
 
 const RatingBar = ({ label, score }) => (
   <div className="rating-bar-container">
@@ -29,7 +30,8 @@ const ReviewCard = () => (
 const Reviews = () => {
   return (
     <div className="reviews-section">
-      <h3>⭐ 4,9 - 39 đánh giá</h3>
+      <h3>Đánh giá của khách hàng</h3>
+      <h2><img src={starIcon} alt="Star Icon" /> 4,9 - 39 đánh giá</h2>
       <div className="detailed-ratings">
         <RatingBar label="Sạch sẽ" score={4.8} />
         <RatingBar label="Vị trí" score={4.9} />

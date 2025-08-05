@@ -3,7 +3,7 @@
 }
 
 .overview h2 {
-  font-size: 24px;
+  font-size: 20px;
   font-family: Montserrat;
   font-style: normal;
   font-weight: 600;
@@ -20,7 +20,7 @@
 .overview .room-details {
   color: #000;
   font-family: Montserrat, sans-serif;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 500;
 }
 
@@ -39,7 +39,7 @@
 .overview .rating-text {
   color: #000;
   font-family: Montserrat, sans-serif;
-  font-size: 16px;
+  font-size: 15px;
   font-style: normal;
   font-weight: 600;
   line-height: normal;

@@ -44,7 +44,7 @@ const Amenities = () => {
           <span className="amenity-text">TV</span>
         </div>
         <div className="amenity-item">
-          <img src={pingPongIcon} alt="Sân chơi ngoài trời" className="amenity-icon" />
+          <img src={horseIcon} alt="Sân chơi ngoài trời" className="amenity-icon" />
           <span className="amenity-text">Sân chơi ngoài trời</span>
         </div>
         <div className="amenity-item">
@@ -56,7 +56,7 @@ const Amenities = () => {
           <span className="amenity-text">Bể bơi</span>
         </div>
       </div>
-      <button className="show-all-amenities">Hiển thị tất cả 40 tiện nghi</button>
+      <button>Hiển thị tất cả 40 tiện nghi</button>
     </div>
   );
 };

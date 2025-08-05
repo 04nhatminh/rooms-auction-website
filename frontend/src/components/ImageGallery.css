@@ -7,7 +7,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-  height: 400px;
+  height: 320px;
 }
 
 .main-image {
