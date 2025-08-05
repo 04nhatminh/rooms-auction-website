@@ -1,6 +1,6 @@
 .footer {
   background-color: #f7f7f7;
-  padding: 24px 64px;
+  padding: 32px 64px 12px 64px;
   margin: 0 0px;
   border-top: 1px solid #ddd;
   font-family: 'Montserrat', sans-serif;
@@ -9,17 +9,25 @@
 .footer-top {
   display: flex;
   justify-content: space-between;
-  padding-bottom: 48px;
+  gap: 24px;
+  padding-bottom: 32px;
   border-bottom: 1px solid #ddd;
+  width: 100%;
 }
 
 .footer-column {
   flex: 1;
+  min-width: 280px;
 }
 
 .footer-column h4 {
+  margin-bottom: 16px;
+  color: #000;
+  font-family: Montserrat;
   font-size: 14px;
-  margin-bottom: 12px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
 }
 
 .footer-column ul {
@@ -29,7 +37,13 @@
 }
 
 .footer-column li {
-  margin-bottom: 8px;
+  margin-bottom: 16px;
+  color: #000;
+  font-family: Montserrat;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
 }
 
 .footer-column a {
@@ -39,12 +53,13 @@
 }
 
 .payment-logos img {
-    height: 24px;
+    height: 48px;
+    width: 48px;
     margin-right: 12px;
 }
 
 .footer-bottom {
-  padding-top: 24px;
+  margin-top: 28px;
   font-size: 14px;
   font-weight: bold;
   justify-content: center;

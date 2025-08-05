@@ -1,26 +1,44 @@
 .house-rules-section h3 {
-  font-size: 22px;
   margin-bottom: 24px;
+  color: #000;
+  font-family: Montserrat;
+  font-size: 22px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
 }
 
 .rules-container {
   display: flex;
   justify-content: space-between;
-  gap: 20px;
+  gap: 32px;
+  margin-bottom: 40px;
 }
 
 .rules-column {
   flex: 1;
+  align-items: flex-start;
 }
 
 .rules-column h4 {
-  font-size: 16px;
+  margin-top: 0px;
   margin-bottom: 16px;
+  color: #000;
+  font-family: Montserrat;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
 }
 
 .rules-column p {
-  font-size: 14px;
   line-height: 1.4;
+  color: #000;
+  font-family: Montserrat;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 24px;
 }
 
 .rules-column button {
@@ -31,4 +49,15 @@
   font-size: 14px;
   font-weight: 600;
   padding: 10px 0;
+  color: #000;
+  font-family: Montserrat;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  text-decoration-line: underline;
+  text-decoration-style: solid;
+  text-decoration-skip-ink: auto;
+  text-decoration-thickness: auto;
+  text-underline-offset: auto;
+  text-underline-position: from-font;
 }
