@@ -2,68 +2,86 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-  <title>a2bnb - Home</title>
-  <link rel="stylesheet" href="./css/index.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Azainbinh - Home</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
+  <style>
+    .placeholder-box {
+      background: #e0e0e0;
+      border-radius: 10px;
+      height: 150px;
+    }
+    .small-box {
+      height: 100px;
+    }
+    .card-title {
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+    .scroll-x {
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+    .scroll-x .card {
+      display: inline-block;
+      margin-right: 10px;
+    }
+    .roundered {
+      border-radius: 24px;
+    }
+
+    .floating-header {
+        background-color: #D9D9D9;
+        width: 100%;
+        max-width: 1400px;
+        height: 440px;           
+        margin: 30px auto;
+    }
+
+    .logo-text {
+        width: 108px;
+        height: 43px;
+        font-family: 'Montserrat', sans-serif; 
+        font-size: 35px;                  
+        font-weight: 1000;
+        margin: 5px;
+        color: white                
+    }
+
+    #destination-list {
+      white-space: nowrap;
+      overflow-x: hidden;
+    }
+    
+
+  </style>
   
 </head>
 <body class="bg-white">
 
   <!-- Header -->
    <div class="position-relative">
-        <div id ="header" class="roundered floating-header bg-gray p-3 shadow-sm d-flex justify-content-between"
-              style="background-image: url('./images/photo\ banner.png');
+        <div class="roundered floating-header bg-gray p-3 shadow-sm d-flex justify-content-between"
+              style="background-image: url('https://images.pexels.com/photos/412681/pexels-photo-412681.jpeg');
               background-size: cover;
               background-position: center;
-              border-radius: 20px;
-              transition: background-image 0.3s ease;">
+              border-radius: 20px;">
             <!-- LOGO + NAME -->
-            <div class="d-flex align-items-start mt-3 mt-md-3 ms-3">
+            <div class="d-flex align-items-start" style="margin: 12px;">
                     <a href="index.html" class="d-flex align-items-center text-decoration-none">
-                        <img src="./images/a2airbnb 2.png" alt="Logo" width="40" height="35" class="me-2"/>
-                        <h1 class="mb-0 logo-text">airbnb</h1>
+                        <img src="https://cdn-icons-png.flaticon.com/512/2111/2111320.png" alt="Logo" width="40" height="40" class="me-2"/>
+                        <h1 class="mb-0" style="font-family: 'Montserrat', sans-serif; font-weight: 800; color: #008489; font-size: 22px; line-height: 1;">A2BnB</h1>
                     </a>
             </div>
             <!-- LOGIN + SIGNUP -->
-            <div class="auth-buttons" id="authButtons">
-                <a href="login.html" class="me-3 text-decoration-none log-in-text">Đăng nhập</a>
-                <button class="btn btn btn-light btn-lg" 
+            <div>
+                <a href="login.html" class="me-3 text-decoration-none" style="font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 800; color: white; margin: 12px;">Login</a>
+                <button class="btn btn btn-light btn-lg sign-up-text" 
                 style="font-family: 'Montserrat', sans-serif; font-weight: 600; color: black; font-size: 14px; margin: 12px;"
-                onclick="window.location.href='signup.html'">Đăng ký</button>
-            </div>
-
-            <!-- User info (hidden by default) -->
-            <!-- <div class="user-info" id="userInfo">
-                <span class="welcome" id="welcomeText">Chào mừng, User!</span>
-                <button class="logout-btn" onclick="logout()">Đăng xuất</button>
-            </div> -->
-            <div class="dropdown user-info" id="userInfo" style="display: none;">
-              <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="welcomeText">
-                Chào mừng, User!
-              </button>
-              <ul class="dropdown-menu dropdown-menu-end custom-dropdown">
-                <li><button class="dropdown-item" type="button"><i class="fa-regular fa-heart me-2"></i>Danh sách yêu thích</button></li>
-                <li><button class="dropdown-item" type="button"><i class="fa-solid fa-gavel me-2"></i>Lịch sử đấu giá</button></li>
-                <li><button class="dropdown-item" type="button"><i class="fa-solid fa-clock-rotate-left me-2"></i>Lịch sử mua hàng/thanh toán</button></li>
-                <li><button class="dropdown-item" type="button"><i class="fa-solid fa-user me-2"></i> Hổ sơ</button></li>
-                
-                <li><hr class="dropdown-divider"></li>
-
-                <li><button class="dropdown-item" type="button"><i class="fa-solid fa-bell me-2"></i>Thông báo</button></li>
-                <li><button class="dropdown-item" type="button"><i class="fa-solid fa-gear me-2"></i>Cài đặt tài khoản</button></li>
-                <li><button class="dropdown-item" type="button"><i class="fa-solid fa-language me-2"></i>Ngôn ngữ & Tiền tệ</button></li>
-                <li><button class="dropdown-item" type="button"><i class="fa-solid fa-circle-info me-2"></i>Trung tâm trợ giúp</button></li>
-
-                <li><hr class="dropdown-divider"></li> 
-
-                <li><button class="dropdown-item" type="button" onclick="logout()">Đăng xuất</button></li>
-              </ul>
+                onclick="window.location.href='signup.html'">Sign up</button>
             </div>
         </div>
    </div>
@@ -71,8 +89,8 @@
 
   <!-- Search Box -->
 
-    <div id="search-box" class="align-items-center" style="margin: 5px auto; margin-top: -75px; z-index: 10; position: relative; width:100%; max-width: 1312px; position: sticky; top: 0;">
-      <form class="p-4 bg-white shadow d-flex rounded-pill flex-wrap gap-3 align-items-center justify-content-between">
+    <div class="align-items-center" style="margin: 5px auto; margin-top: -75px; z-index: 10; position: relative; width:100%; max-width: 1312px;">
+        <form class="p-4 bg-white rounded-pill shadow d-flex flex-wrap gap-3 align-items-center justify-content-between">
             
             <!-- Location -->
             <div style="width: 300px; margin-left: 25px; font-family: 'Montserrat', sans-serif; font-size: 14px;">
@@ -106,7 +124,7 @@
 
             <!-- Submit Button -->
             <div style="margin-left: 25px; font-family: 'Montserrat', sans-serif; font-size: 14px;">
-            <button type="submit" class="btn btn-outline-secondary search-btn rounded-circle d-flex justify-content-center align-items-center">
+            <button type="submit" class="btn btn-outline-secondary rounded-circle d-flex justify-content-center align-items-center" style="width: 40px; height: 40px;">
                 <i class="bi bi-search"></i>
             </button>
             </div>
@@ -131,7 +149,7 @@
                     background-position: center;
                     border-radius: 20px;">
                     </div>
-                    <span class="location-text">Khách sạn</span>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Khách sạn</span>
                 </div>
             </a>
 
@@ -139,12 +157,12 @@
                 <div class="d-flex flex-column align-items-center">
                     <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
                     style="width: 240px; height: 240px;
-                    background-image: url('./images/apartment\ img.png');
+                    background-image: url('https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg');
                     background-size: cover;
                     background-position: center;
                     border-radius: 20px;">
                     </div>
-                    <span class="location-text">Căn hộ</span>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Căn hộ</span>
                 </div>
             </a>
 
@@ -152,12 +170,12 @@
                 <div class="d-flex flex-column align-items-center">
                     <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
                     style="width: 240px; height: 240px;
-                    background-image: url('./images/homestay\ 1.png');
+                    background-image: url('https://images.pexels.com/photos/13326362/pexels-photo-13326362.jpeg');
                     background-size: cover;
                     background-position: bottom;
                     border-radius: 20px;">
                     </div>
-                    <span class="location-text">Homestay</span>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Homestay</span>
                 </div>
             </a>
 
@@ -165,12 +183,12 @@
                 <div class="d-flex flex-column align-items-center">
                     <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
                     style="width: 240px; height: 240px;
-                    background-image: url('./images/resort\ 1.png');
+                    background-image: url('https://images.pexels.com/photos/338504/pexels-photo-338504.jpeg');
                     background-size: cover;
                     background-position: center;
                     border-radius: 20px;">
                     </div>
-                    <span class="location-text">Resort</span>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Resort</span>
                 </div>
             </a>
 
@@ -178,12 +196,12 @@
                 <div class="d-flex flex-column align-items-center">
                     <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
                     style="width: 240px; height: 240px;
-                    background-image: url('./images/minimalist-architecture-space\ 1.png');
+                    background-image: url('https://images.pexels.com/photos/1134175/pexels-photo-1134175.jpeg');
                     background-size: cover;
                     background-position: center;
                     border-radius: 20px;">
                     </div>
-                    <span class="location-text">Biệt thự</span>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Biệt thự</span>
                 </div>
             </a>
         </div>
@@ -193,11 +211,11 @@
     <div class="container mb-5">
         <h6 class="mb-3 fw-bold d-flex justify-content-between align-items-center">
             <span style="font-size: 20px;">Điểm đến nổi bật tại Việt Nam</span>
-            <div class="d-flex align-items-center gap-2">
-            <button class="d-flex align-items-center justify-content-center btn btn-outline-secondary rounded-circle me-2 chevron-left" onclick="scrollDestinations(-3, 'destination-list')">
+            <div>
+            <button class="btn btn-outline-secondary rounded-circle me-2" onclick="scrollDestinations(-3, 'destination-list')">
                 <i class="bi bi-chevron-left"></i>
             </button>
-            <button class="d-flex align-items-center justify-content-center btn btn-light rounded-circle chevron-right" onclick="scrollDestinations(3, 'destination-list')">
+            <button class="btn btn-light rounded-circle" onclick="scrollDestinations(3, 'destination-list')">
                 <i class="bi bi-chevron-right"></i>
             </button>
             </div>
@@ -210,12 +228,12 @@
                 <div class="d-flex flex-column align-items-center">
                     <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
                     style="width: 240px; height: 240px;
-                    background-image: url('./images/tphcm\ 1.png');
+                    background-image: url('https://images.pexels.com/photos/33249100/pexels-photo-33249100.jpeg');
                     background-size: cover;
                     background-position: center;
                     border-radius: 20px;">
                     </div>
-                    <span class="location-text">TP.Hồ Chí Minh</span>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">TP.Hồ Chí Minh</span>
                 </div>
             </a>
 
@@ -224,12 +242,12 @@
                 <div class="d-flex flex-column align-items-center">
                     <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
                     style="width: 240px; height: 240px;
-                    background-image: url('./images/hanoi.png');
+                    background-image: url('https://images.pexels.com/photos/19504816/pexels-photo-19504816.jpeg');
                     background-size: cover;
                     background-position: center;
                     border-radius: 20px;">
                     </div>
-                    <span class="location-text">Hà Nội</span>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Hà Nội</span>
                 </div>
             </a>
 
@@ -238,12 +256,12 @@
                 <div class="d-flex flex-column align-items-center">
                     <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
                     style="width: 240px; height: 240px;
-                    background-image: url('./images/vungtau\ 1.png');
+                    background-image: url('https://images.pexels.com/photos/30440736/pexels-photo-30440736.jpeg');
                     background-size: cover;
                     background-position: center;
                     border-radius: 20px;">
                     </div>
-                    <span class="location-text">Vũng Tàu</span>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Vũng Tàu</span>
                 </div>
             </a>
 
@@ -252,12 +270,12 @@
                 <div class="d-flex flex-column align-items-center">
                     <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
                     style="width: 240px; height: 240px;
-                    background-image: url('./images/dalat2\ 1.png');
+                    background-image: url('https://img.tripi.vn/cdn-cgi/image/width=700,height=700/https://hoanghamobile.com/tin-tuc/wp-content/uploads/2024/07/anh-da-lat-36.jpg');
                     background-size: cover;
                     background-position: left;
                     border-radius: 20px;">
                     </div>
-                    <span class="location-text">Đà Lạt</span>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Đà Lạt</span>
                 </div>
             </a>
 
@@ -266,12 +284,12 @@
                 <div class="d-flex flex-column align-items-center">
                     <div class="bg-secondary-subtle rounded-4 d-flex flex-column justify-content-center align-items-center"
                     style="width: 240px; height: 240px;
-                    background-image: url('./images/nhatrang\ 1.png');
+                    background-image: url('https://bomanhatrang.com/wp-content/uploads/2023/08/thap-tram-huong-3.jpg');
                     background-size: cover;
                     background-position: center;
                     border-radius: 20px;">
                     </div>
-                    <span class="location-text">Nha Trang</span>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Nha Trang</span>
                 </div>
             </a>
 
@@ -284,7 +302,7 @@
                     background-position: center;
                     border-radius: 20px;">
                     </div>
-                    <span class="location-text">Hải Phòng</span>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Hải Phòng</span>
                 </div>
             </a>
 
@@ -298,7 +316,7 @@
                     background-position: center;
                     border-radius: 20px;">
                     </div>
-                    <span class="location-text">Đà Nẵng</span>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Đà Nẵng</span>
                 </div>
             </a>
 
@@ -312,7 +330,7 @@
                     background-position: center;
                     border-radius: 20px;">
                     </div>
-                    <span class="location-text">Huế</span>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Huế</span>
                 </div>
             </a>
 
@@ -326,7 +344,7 @@
                     background-position: center;
                     border-radius: 20px;">
                     </div>
-                    <span class="location-text">Hội An</span>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Hội An</span>
                 </div>
             </a>
 
@@ -340,7 +358,7 @@
                     background-position: center;
                     border-radius: 20px;">
                     </div>
-                    <span class="location-text">Ninh Bình</span>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Ninh Bình</span>
                 </div>
             </a>
 
@@ -354,7 +372,7 @@
                     background-position: center;
                     border-radius: 20px;">
                     </div>
-                    <span class="location-text">Lào Cai</span>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Lào Cai</span>
                 </div>
             </a>
 
@@ -368,7 +386,7 @@
                     background-position: left;
                     border-radius: 20px;">
                     </div>
-                    <span class="location-text">Phú Quốc</span>
+                    <span style="margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;">Phú Quốc</span>
                 </div>
             </a>
 
@@ -379,11 +397,11 @@
   <div class="container mb-5">
     <h6 class="mb-3 fw-bold d-flex justify-content-between align-items-center">
         <span style="font-size: 20px;">Phiên đấu giá sắp kết thúc</span>
-        <div class="d-flex align-items-center gap-2">
-        <button class="d-flex align-items-center justify-content-center btn btn-outline-secondary rounded-circle me-2 chevron-left" onclick="scrollDestinations(-3, 'ending-auction-list')">
+        <div>
+        <button class="btn btn-outline-secondary rounded-circle me-2" onclick="scrollDestinations(-3, 'ending-auction-list')">
             <i class="bi bi-chevron-left"></i>
         </button>
-        <button class="d-flex align-items-center justify-content-center btn btn-light rounded-circle chevron-right" onclick="scrollDestinations(3, 'ending-auction-list')">
+        <button class="btn btn-light rounded-circle" onclick="scrollDestinations(3, 'ending-auction-list')">
             <i class="bi bi-chevron-right"></i>
         </button>
         </div>
@@ -625,11 +643,11 @@
   <div class="container mb-5">
     <h6 class="mb-3 fw-bold d-flex justify-content-between align-items-center">
         <span style="font-size: 20px;">Phiên đấu giá nổi bật</span>
-        <div class="d-flex align-items-center gap-2">
-        <button class="d-flex align-items-center justify-content-center btn btn-outline-secondary rounded-circle me-2 chevron-left" onclick="scrollDestinations(-3, 'highligh-auction-list')">
+        <div>
+        <button class="btn btn-outline-secondary rounded-circle me-2" onclick="scrollDestinations(-3, 'highligh-auction-list')">
             <i class="bi bi-chevron-left"></i>
         </button>
-        <button class="d-flex align-items-center justify-content-center btn btn-light rounded-circle chevron-right" onclick="scrollDestinations(3, 'highlight-auction-list')">
+        <button class="btn btn-light rounded-circle" onclick="scrollDestinations(3, 'highlight-auction-list')">
             <i class="bi bi-chevron-right"></i>
         </button>
         </div>
@@ -870,11 +888,11 @@
   <div class="container mb-5">
     <h6 class="mb-3 fw-bold d-flex justify-content-between align-items-center">
         <span style="font-size: 20px;">Phiên đấu giá mới mở</span>
-        <div class="d-flex align-items-center gap-2">
-        <button class="d-flex align-items-center justify-content-center btn btn-outline-secondary rounded-circle me-2 chevron-left" onclick="scrollDestinations(-3, 'new-auction-list')">
+        <div>
+        <button class="btn btn-outline-secondary rounded-circle me-2" onclick="scrollDestinations(-3, 'new-auction-list')">
             <i class="bi bi-chevron-left"></i>
         </button>
-        <button class="d-flex align-items-center justify-content-center btn btn-light rounded-circle chevron-right" onclick="scrollDestinations(3, 'new-auction-list')">
+        <button class="btn btn-light rounded-circle" onclick="scrollDestinations(3, 'new-auction-list')">
             <i class="bi bi-chevron-right"></i>
         </button>
         </div>
@@ -1116,11 +1134,11 @@
   <div class="container mb-5">
     <h6 class="mb-3 fw-bold d-flex justify-content-between align-items-center">
         <span style="font-size: 20px;">Nơi lưu trú tại Nha Trang</span>
-        <div class="d-flex align-items-center gap-2">
-        <button class="d-flex align-items-center justify-content-center btn btn-outline-secondary rounded-circle me-2 chevron-left" onclick="scrollDestinations(-3, 'nha-trang-list')">
+        <div>
+        <button class="btn btn-outline-secondary rounded-circle me-2" onclick="scrollDestinations(-3, 'nha-trang-list')">
             <i class="bi bi-chevron-left"></i>
         </button>
-        <button class="d-flex align-items-center justify-content-center btn btn-light rounded-circle chevron-right" onclick="scrollDestinations(3, 'nha-trang-list')">
+        <button class="btn btn-light rounded-circle" onclick="scrollDestinations(3, 'nha-trang-list')">
             <i class="bi bi-chevron-right"></i>
         </button>
         </div>
@@ -1357,11 +1375,11 @@
   <div class="container mb-5">
     <h6 class="mb-3 fw-bold d-flex justify-content-between align-items-center">
         <span style="font-size: 20px;">Nơi lưu trú tại Vũng Tàu</span>
-        <div class="d-flex align-items-center gap-2">
-        <button class="d-flex align-items-center justify-content-center btn btn-light rounded-circle chevron-left" onclick="scrollDestinations(-3, 'vung-tau-list')">
+        <div>
+        <button class="btn btn-outline-secondary rounded-circle me-2" onclick="scrollDestinations(-3, 'vung-tau-list')">
             <i class="bi bi-chevron-left"></i>
         </button>
-        <button class="d-flex align-items-center justify-content-center btn btn-light rounded-circle chevron-right" onclick="scrollDestinations(3, 'vung-tau-list')">
+        <button class="btn btn-light rounded-circle" onclick="scrollDestinations(3, 'vung-tau-list')">
             <i class="bi bi-chevron-right"></i>
         </button>
         </div>
@@ -1597,11 +1615,11 @@
   <div class="container mb-5">
     <h6 class="mb-3 fw-bold d-flex justify-content-between align-items-center">
         <span style="font-size: 20px;">Nơi lưu trú tại Đà Lạt</span>
-        <div class="d-flex align-items-center gap-2">
-        <button class="d-flex align-items-center justify-content-center btn btn-outline-secondary rounded-circle me-2 chevron-left" onclick="scrollDestinations(-3, 'da-lat-list')">
+        <div>
+        <button class="btn btn-outline-secondary rounded-circle me-2" onclick="scrollDestinations(-3, 'da-lat-list')">
             <i class="bi bi-chevron-left"></i>
         </button>
-        <button class="d-flex align-items-center justify-content-center btn btn-light rounded-circle chevron-right" onclick="scrollDestinations(3, 'da-lat-list')">
+        <button class="btn btn-light rounded-circle" onclick="scrollDestinations(3, 'da-lat-list')">
             <i class="bi bi-chevron-right"></i>
         </button>
         </div>
@@ -1885,280 +1903,17 @@
 </body>
 </html>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    function scrollDestinations(direction, list) {
-        const container = document.getElementById(list);
-        const scrollAmount = 160; // chiều rộng một ô + khoảng cách
-        container.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
-    }
+  function scrollDestinations(direction, list) {
+    const container = document.getElementById(list);
+    const scrollAmount = 160; // chiều rộng một ô + khoảng cách
+    container.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+  }
 
-    function toggleHeart(button) {
-        const icon = button.querySelector("i");
-        icon.classList.toggle("bi-heart");
-        icon.classList.toggle("bi-heart-fill");
-    }
-
-    // Remove all modal-related functions and keep only product functions
-    // Check if user is logged in on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        const userData = localStorage.getItem('userData');
-        if (userData) {
-            updateAuthUI(JSON.parse(userData));
-        }
-        getAllProducts();
-    });
-
-    function updateAuthUI(userData) {
-        const authButtons = document.getElementById('authButtons');
-        const userInfo = document.getElementById('userInfo');
-        const welcomeText = document.getElementById('welcomeText');
-
-        if (userData) {
-            authButtons.style.display = 'none';
-            userInfo.style.display = 'flex';
-            welcomeText.textContent = `Chào ${userData.name}!`;
-        } else {
-            authButtons.style.display = 'flex';
-            userInfo.style.display = 'none';
-        }
-    }
-
-    function logout() {
-        const userData = JSON.parse(localStorage.getItem('userData'));
-
-        cleanupAfterLogout();
-
-        // Nếu user đăng nhập bằng Google thì revoke
-        if (!userData?.HashPassword) {
-            if (typeof google !== 'undefined' && google.accounts?.id?.revoke) {
-                google.accounts.id.revoke(userData.email, () => {
-                    console.log('✅ Đã logout khỏi Google');
-                });
-            } else {
-                console.warn('⚠️ Google API chưa sẵn sàng, thực hiện logout thông thường');
-            }
-        }
-    }
-
-    function cleanupAfterLogout() {
-        localStorage.removeItem('userData');
-        updateAuthUI(null);
-        window.location.href = 'index.html'; // hoặc reload lại nếu cần
-    }
-
-      const searchBox = document.getElementById("search-box");
-
-      const stickyThreshold = searchBox.offsetTop;
-
-      window.addEventListener('scroll', () => {
-        if (window.scrollY > stickyThreshold) {
-          searchBox.classList.add('stuck');
-        } else {
-          searchBox.classList.remove('stuck');
-        }
-      });
-
-    // Hàm hiển thị thông báo
-    function showMessage(container, message, type = 'info') {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = type === 'error' ? 'error' : 'success';
-        messageDiv.textContent = message;
-        container.innerHTML = '';
-        container.appendChild(messageDiv);
-        
-        setTimeout(() => {
-            messageDiv.remove();
-        }, 5000);
-    }
-
-    // Hàm format giá tiền
-    function formatPrice(price) {
-        return new Intl.NumberFormat('vi-VN', {
-            style: 'currency',
-            currency: 'VND'
-        }).format(price);
-    }
-
-    // Hàm format ngày
-    function formatDate(dateString) {
-        return new Date(dateString).toLocaleDateString('vi-VN');
-    }
-
-    // Lấy tất cả sản phẩm
-    async function getAllProducts() {
-        const container = document.getElementById('products-container');
-        container.innerHTML = '<div class="loading">Đang tải...</div>';
-
-        try {
-            const response = await fetch(API_BASE_URL);
-            const data = await response.json();
-
-            if (data.success) {
-                displayProducts(data.data, container);
-            } else {
-                container.innerHTML = `<div class="error">${data.message}</div>`;
-            }
-        } catch (error) {
-            container.innerHTML = `<div class="error">Lỗi kết nối: ${error.message}</div>`;
-        }
-    }
-
-    // Hiển thị danh sách sản phẩm
-    function displayProducts(products, container) {
-        if (products.length === 0) {
-            container.innerHTML = '<p>Không có sản phẩm nào.</p>';
-            return;
-        }
-
-        const productsHTML = products.map(product => `
-            <div class="product-card">
-                <h4>${product.name}</h4>
-                <div class="category">${product.category}</div>
-                <p>${product.description}</p>
-                <div class="price">${formatPrice(product.price)}</div>
-                <p><small>Ngày tạo: ${formatDate(product.createdAt)}</small></p>
-                <button class="btn btn-info" onclick="getProductById(${product.id})">Chi tiết</button>
-                <button class="btn btn-danger" onclick="deleteProduct(${product.id})">Xóa</button>
-            </div>
-        `).join('');
-
-        container.innerHTML = `
-            <div class="products-grid">
-                ${productsHTML}
-            </div>
-        `;
-    }
-
-    // Lấy sản phẩm theo ID
-    async function getProductById(id) {
-        try {
-            const response = await fetch(`${API_BASE_URL}/${id}`);
-            const data = await response.json();
-
-            if (data.success) {
-                alert(`Chi tiết sản phẩm:\n\nTên: ${data.data.name}\nMô tả: ${data.data.description}\nGiá: ${formatPrice(data.data.price)}\nDanh mục: ${data.data.category}\nNgày tạo: ${formatDate(data.data.createdAt)}`);
-            } else {
-                alert(`Lỗi: ${data.message}`);
-            }
-        } catch (error) {
-            alert(`Lỗi kết nối: ${error.message}`);
-        }
-    }
-
-    // Tìm kiếm sản phẩm
-    async function searchProducts() {
-        const name = document.getElementById('searchName').value.trim();
-        const category = document.getElementById('searchCategory').value;
-        const resultsContainer = document.getElementById('search-results');
-
-        if (!name && !category) {
-            showMessage(resultsContainer, 'Vui lòng nhập tên hoặc chọn danh mục để tìm kiếm!', 'error');
-            return;
-        }
-
-        resultsContainer.innerHTML = '<div class="loading">Đang tìm kiếm...</div>';
-
-        try {
-            let url = `${API_BASE_URL}/search?`;
-            if (name) url += `name=${encodeURIComponent(name)}`;
-            if (category) url += `category=${encodeURIComponent(category)}`;
-
-            const response = await fetch(url);
-            const data = await response.json();
-
-            if (data.success) {
-                displayProducts(data.data, resultsContainer);
-            } else {
-                resultsContainer.innerHTML = `<div class="error">${data.message}</div>`;
-            }
-        } catch (error) {
-            resultsContainer.innerHTML = `<div class="error">Lỗi kết nối: ${error.message}</div>`;
-        }
-    }
-
-    // Tạo sản phẩm mới
-    async function createProduct() {
-        const name = document.getElementById('newProductName').value.trim();
-        const description = document.getElementById('newProductDescription').value.trim();
-        const price = document.getElementById('newProductPrice').value;
-        const category = document.getElementById('newProductCategory').value;
-        const responseContainer = document.getElementById('create-response');
-
-        if (!name || !description || !price || !category) {
-            showMessage(responseContainer, 'Vui lòng điền đầy đủ thông tin!', 'error');
-            return;
-        }
-
-        try {
-            const response = await fetch(API_BASE_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    name,
-                    description,
-                    price: parseFloat(price),
-                    category
-                })
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                showMessage(responseContainer, 'Tạo sản phẩm thành công!', 'success');
-                // Reset form
-                document.getElementById('newProductName').value = '';
-                document.getElementById('newProductDescription').value = '';
-                document.getElementById('newProductPrice').value = '';
-                document.getElementById('newProductCategory').value = '';
-                // Reload products
-                getAllProducts();
-            } else {
-                showMessage(responseContainer, `Lỗi: ${data.message}`, 'error');
-            }
-        } catch (error) {
-            showMessage(responseContainer, `Lỗi kết nối: ${error.message}`, 'error');
-        }
-    }
-
-    // Xóa sản phẩm
-    async function deleteProduct(id) {
-        if (!confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
-            return;
-        }
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/${id}`, {
-                method: 'DELETE'
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                alert('Xóa sản phẩm thành công!');
-                getAllProducts(); // Reload products
-            } else {
-                alert(`Lỗi: ${data.message}`);
-            }
-        } catch (error) {
-            alert(`Lỗi kết nối: ${error.message}`);
-        }
-    }
-
-    // Test kết nối API
-    async function testAPI() {
-        const responseContainer = document.getElementById('api-response');
-        responseContainer.textContent = 'Đang test kết nối...';
-
-        try {
-            const response = await fetch('http://localhost:3000/');
-            const data = await response.json();
-            responseContainer.textContent = JSON.stringify(data, null, 2);
-        } catch (error) {
-            responseContainer.textContent = `Lỗi kết nối: ${error.message}\n\nHãy đảm bảo backend đang chạy trên http://localhost:3000`;
-        }
-    }
+  function toggleHeart(button) {
+    const icon = button.querySelector("i");
+    icon.classList.toggle("bi-heart");
+    icon.classList.toggle("bi-heart-fill");
+  }
   
 </script>
