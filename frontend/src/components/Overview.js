@@ -9,7 +9,9 @@ const Overview = () => {
       <p className="room-details">2 phòng khách - 1 phòng ngủ - 1 giường - 1 phòng tắm</p>
       <p className="rating">
         <img src={starIcon} alt="Star" className="star-icon" />
-        <span className="rating-text">4,82 - 17 đánh giá</span>
+        <span className="rating-score">4,82</span>
+        <span>-</span>
+        <span className="rating-count">10 đánh giá</span>
       </p>
     </div>
   );

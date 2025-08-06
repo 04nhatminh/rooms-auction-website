@@ -12,10 +12,15 @@
 .room-detail-content .main-content {
   display: grid;
   grid-template-columns: 2fr 1fr;
+  gap: 48px;
   justify-content: space-between;
 }
 
 .room-detail-content .left-column {
+  width: 100%;
+}
+
+.room-detail-content .right-column {
   width: 100%;
 }
 

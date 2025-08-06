@@ -55,6 +55,11 @@
   line-height: normal;
 }
 
+.show-all-photos:hover {
+  background: #fafafa;
+  cursor: pointer;
+}
+
 .image-gallery img {
   width: 16px;
   height: 16px;

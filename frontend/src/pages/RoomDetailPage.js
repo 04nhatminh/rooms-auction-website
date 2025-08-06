@@ -11,6 +11,7 @@ import Reviews from '../components/Reviews';
 import Location from '../components/Location';
 import HouseRules from '../components/HouseRules';
 import Footer from '../components/Footer';
+import BookingCard from '../components/BookingCard';
 import './RoomDetailPage.css';
 
 const RoomDetailPage = () => {
@@ -29,6 +30,9 @@ const RoomDetailPage = () => {
             <Amenities />
             <hr />
             <Calendar />
+          </div>
+          <div className="right-column">
+            <BookingCard />
           </div>
         </div>
         <hr />
