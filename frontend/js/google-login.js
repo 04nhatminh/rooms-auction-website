@@ -38,6 +38,8 @@ async function handleCredentialResponse(response) {
             id: data.user.id
         }));
 
+        localStorage.setItem('token', data.token);
+
         // Nếu chưa có số điện thoại → chuyển sang trang bổ sung
         // if (!data.user.phone) {
         //     // window.location.href = 'complete-profile.html';

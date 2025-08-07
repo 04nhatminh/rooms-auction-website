@@ -2,6 +2,7 @@ const userModel = require('../models/userModel');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const emailService = require('../services/emailService');
+const jwt = require('jsonwebtoken');
 
 class UserController {
     // Đăng ký người dùng mới với email verification
@@ -148,34 +149,65 @@ class UserController {
             // Tìm user theo email
             const user = await userModel.findOne({ email });
             if (!user) {
-                return res.status(400).json({ message: 'Email hoặc mật khẩu không đúng.' });
+            return res.status(400).json({ message: 'Email hoặc mật khẩu không đúng.' });
             }
 
-            // Kiểm tra user đã xác thực email chưa
+            // Kiểm tra xác thực email
             if (!user.isVerified) {
-                return res.status(400).json({ 
-                    message: 'Tài khoản chưa được xác thực. Vui lòng kiểm tra email và xác thực tài khoản.',
-                    needsVerification: true,
-                    email: email
-                });
+            return res.status(400).json({ 
+                message: 'Tài khoản chưa được xác thực. Vui lòng kiểm tra email và xác thực tài khoản.',
+                needsVerification: true,
+                email: email
+            });
             }
 
-            // So sánh password
+            // Kiểm tra password
             const isMatch = await bcrypt.compare(password, user.hashPassword);
             if (!isMatch) {
-                return res.status(400).json({ message: 'Email hoặc mật khẩu không đúng.' });
+            return res.status(400).json({ message: 'Email hoặc mật khẩu không đúng.' });
             }
 
-            // Loại bỏ sensitive data trước khi trả về
+            // Tạo JWT token
+            const token = jwt.sign(
+                {
+                    id: user.id,
+                    email: user.email,
+                    role: user.role || 'guest'  // Nếu bạn lưu role trong DB
+                },
+                process.env.JWT_SECRET || 'your-secret-key',
+                { expiresIn: '1d' }
+            );
+
+            // Trả về dữ liệu
             const { hashPassword, verificationToken, verificationTokenExpires, ...safeUser } = user;
 
-            return res.status(200).json({ 
-                message: 'Đăng nhập thành công.', 
-                user: safeUser 
+            return res.status(200).json({
+            message: 'Đăng nhập thành công.',
+            user: safeUser,
+            token
             });
         } catch (error) {
             console.error('Error in login:', error);
             return res.status(500).json({ message: 'Lỗi server.', error: error.message });
+        }
+    }
+
+    // Lấy danh sách tất cả user (admin)
+    async getAllUsers(req, res) {
+        try {
+            // Đọc page & limit từ query string
+            const page = Number(req.query.page) || 1;
+            const limit = Number(req.query.limit) || 20;
+            const offset = (page - 1) * limit;
+
+            // Gọi model
+            const users = await userModel.getAll(limit, offset);
+
+            // Trả kết quả
+            res.json(users);
+        } catch (err) {
+            console.error("Error in getAllUsers:", err);
+            res.status(500).json({ message: "Lỗi khi lấy danh sách người dùng" });
         }
     }
 }

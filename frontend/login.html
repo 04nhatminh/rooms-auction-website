@@ -119,10 +119,18 @@ document.querySelector('form').addEventListener('submit', async (e) => {
             localStorage.setItem('userData', JSON.stringify({
                 name: data.user.fullName,
                 email: data.user.email,
-                id: data.user.id
+                id: data.user.id,
+                role: data.user.role
             }));
+
+            localStorage.setItem('token', data.token);
+
             // Redirect to index page
-            window.location.href = 'index.html';
+            if (data.user.role === 'admin') {
+              window.location.href = 'admin/users-management.html';
+            } else {
+              window.location.href = 'index.html';
+            }
         } else {
             if (data.needsVerification) {
                 const resend = confirm(`❌ ${data.message}\n\nBạn có muốn gửi lại email xác thực không?`);

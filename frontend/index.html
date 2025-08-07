@@ -1930,7 +1930,7 @@
         cleanupAfterLogout();
 
         // Nếu user đăng nhập bằng Google thì revoke
-        if (!userData?.HashPassword) {
+        if (!userData?.hashPassword) {
             if (typeof google !== 'undefined' && google.accounts?.id?.revoke) {
                 google.accounts.id.revoke(userData.email, () => {
                     console.log('✅ Đã logout khỏi Google');
@@ -1943,6 +1943,7 @@
 
     function cleanupAfterLogout() {
         localStorage.removeItem('userData');
+        localStorage.removeItem('token');
         updateAuthUI(null);
         window.location.href = 'index.html'; // hoặc reload lại nếu cần
     }
