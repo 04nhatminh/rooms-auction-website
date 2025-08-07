@@ -31,8 +31,72 @@ async function testConnection() {
     }
 }
 
+async function createAdministrativeRegionsTable() {
+    await pool.execute(`
+        CREATE TABLE IF NOT EXISTS AdministrativeRegions (
+            RegionID INT PRIMARY KEY,
+            Name VARCHAR(255) NOT NULL,
+            NameEn VARCHAR(255) NOT NULL,
+            CodeName VARCHAR(255),
+            CodeNameEn VARCHAR(255)
+        )
+    `);
+}
+
+async function createAdministrativeUnitsTable() {
+    await pool.execute(`
+        CREATE TABLE IF NOT EXISTS AdministrativeUnits (
+            UnitID INT PRIMARY KEY,
+            FullName VARCHAR(255),
+            FullNameEn VARCHAR(255),
+            ShortName VARCHAR(255),
+            ShortNameEn VARCHAR(255),
+            CodeName VARCHAR(255),
+            CodeNameEn VARCHAR(255)
+        )
+    `);
+}
+
+async function createProvincesTable() {
+    await pool.execute(`
+        CREATE TABLE IF NOT EXISTS Provinces (
+            ProvinceCode VARCHAR(20) PRIMARY KEY,
+            Name VARCHAR(255) NOT NULL,
+            NameEn VARCHAR(255),
+            FullName VARCHAR(255),
+            FullNameEn VARCHAR(255),
+            CodeName VARCHAR(255),
+            AdministrativeUnitID INT,
+            AdministrativeRegionID INT,
+            FOREIGN KEY (AdministrativeUnitID) REFERENCES AdministrativeUnits(UnitID),
+            FOREIGN KEY (AdministrativeRegionID) REFERENCES AdministrativeRegions(RegionID)
+        )
+    `);
+    await pool.execute(`CREATE INDEX idx_Provinces_Region ON Provinces(AdministrativeRegionID)`);
+    await pool.execute(`CREATE INDEX idx_Provinces_Unit ON Provinces(AdministrativeUnitID)`);
+}
+
+async function createDistrictsTable() {
+    await pool.execute(`
+        CREATE TABLE IF NOT EXISTS Districts (
+            DistrictCode VARCHAR(20) PRIMARY KEY,
+            Name VARCHAR(255) NOT NULL,
+            NameEn VARCHAR(255),
+            FullName VARCHAR(255),
+            FullNameEn VARCHAR(255),
+            CodeName VARCHAR(255),
+            ProvinceCode VARCHAR(20),
+            AdministrativeUnitID INT,
+            FOREIGN KEY (ProvinceCode) REFERENCES Provinces(ProvinceCode),
+            FOREIGN KEY (AdministrativeUnitID) REFERENCES AdministrativeUnits(UnitID)
+        )
+    `);
+    await pool.execute(`CREATE INDEX idx_Districts_Province ON Districts(ProvinceCode)`);
+    await pool.execute(`CREATE INDEX idx_Districts_Unit ON Districts(AdministrativeUnitID)`);
+}
+
 async function createUsersTable() {
-    const query = `
+    await pool.execute(`
         CREATE TABLE IF NOT EXISTS Users (
             UserID INT AUTO_INCREMENT PRIMARY KEY,
             FullName VARCHAR(255) NOT NULL,
@@ -47,79 +111,69 @@ async function createUsersTable() {
             Rating DECIMAL(2,1) DEFAULT 0.0,
             CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-        )`;
-    await pool.execute(query);
+        )
+    `);
 }
 
 async function createOAuthAccountsTable() {
-    const query = `
+    await pool.execute(`
         CREATE TABLE IF NOT EXISTS OAuthAccounts (
-            OAuthID INT AUTO_INCREMENT PRIMARY KEY,
+            OAuthID INT PRIMARY KEY,
             Provider VARCHAR(15),
             ProviderUID VARCHAR(128),
             UserID INT,
-            FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE
-        )`;
-    await pool.execute(query);
+            FOREIGN KEY (UserID) REFERENCES Users(UserID)
+        )
+    `);
 }
 
 async function createPaymentMethodsTable() {
-    const query = `
+    await pool.execute(`
         CREATE TABLE IF NOT EXISTS PaymentMethods (
-            MethodID INT AUTO_INCREMENT PRIMARY KEY,
+            MethodID INT PRIMARY KEY,
             AccountIdentifier VARCHAR(4),
             Token TEXT,
             Provider VARCHAR(15),
-            IsDefault BOOLEAN,
+            IsDefault BIT(1),
             UserID INT,
             CreatedAt TIMESTAMP,
             UpdatedAt TIMESTAMP,
             FOREIGN KEY (UserID) REFERENCES Users(UserID)
-        )`;
-    await pool.execute(query);
-}
-
-async function createCategoriesTable() {
-    const query = `
-        CREATE TABLE IF NOT EXISTS Categories (
-            CategoryID INT PRIMARY KEY,
-            ParentID INT,
-            CategoryName VARCHAR(50),
-            CategoryImageURL VARCHAR(255)
-        )`;
-    await pool.execute(query);
+        )
+    `);
+    await pool.execute(`CREATE INDEX idx_PaymentMethods_UserID ON PaymentMethods(UserID)`);
 }
 
 async function createPropertiesTable() {
-    const query = `
+    await pool.execute(`
         CREATE TABLE IF NOT EXISTS Properties (
-            PropertyID INT PRIMARY KEY,
-            PropertyName VARCHAR(50),
+            PropertyID INT AUTO_INCREMENT PRIMARY KEY,
+            PropertyName VARCHAR(255),
             PropertyImageURL VARCHAR(255)
-        )`;
-    await pool.execute(query);
+        )
+    `);
 }
 
 async function createRoomTypesTable() {
-    const query = `
+    await pool.execute(`
         CREATE TABLE IF NOT EXISTS RoomTypes (
-            RoomTypeID INT PRIMARY KEY,
-            RoomTypeName VARCHAR(50),
+            RoomTypeID INT AUTO_INCREMENT PRIMARY KEY,
+            RoomTypeName VARCHAR(255),
             RoomTypeImageURL VARCHAR(255)
-        )`;
-    await pool.execute(query);
+        )
+    `);
 }
 
 async function createProductsTable() {
-    const query = `
+    await pool.execute(`
         CREATE TABLE IF NOT EXISTS Products (
-            ProductID INT PRIMARY KEY,
-            CategoryID INT,
+            ProductID INT AUTO_INCREMENT PRIMARY KEY,
             Source VARCHAR(20),
             ExternalID VARCHAR(30),
-            Name VARCHAR(100),
-            Description TEXT,
-            Address VARCHAR(100),
+            Name VARCHAR(255),
+            Address VARCHAR(255),
+            ProvinceCode VARCHAR(20),
+            DistrictCode VARCHAR(20),
             Latitude FLOAT,
             Longitude FLOAT,
             PropertyType INT,
@@ -129,72 +183,65 @@ async function createProductsTable() {
             NumBeds SMALLINT,
             NumBathrooms SMALLINT,
             Price DECIMAL(10, 2),
+            Currency VARCHAR(20),
             CleanlinessPoint FLOAT,
-            AccuracyPoint FLOAT,
-            CheckinPoint FLOAT,
-            CommunicationPoint FLOAT,
             LocationPoint FLOAT,
+            ServicePoint FLOAT,
             ValuePoint FLOAT,
+            CommunicationPoint FLOAT,
+            ConveniencePoint FLOAT,
+            CreatedAt TIMESTAMP,
             LastSyncedAt TIMESTAMP,
-            FOREIGN KEY (CategoryID) REFERENCES Categories(CategoryID),
+            FOREIGN KEY (ProvinceCode) REFERENCES Provinces(ProvinceCode),
+            FOREIGN KEY (DistrictCode) REFERENCES Districts(DistrictCode),
             FOREIGN KEY (PropertyType) REFERENCES Properties(PropertyID),
             FOREIGN KEY (RoomType) REFERENCES RoomTypes(RoomTypeID)
-        )`;
-    await pool.execute(query);
+        )
+    `);
+    await pool.execute(`CREATE INDEX idx_Products_ProvinceCode ON Products(ProvinceCode)`);
+    await pool.execute(`CREATE INDEX idx_Products_DistrictCode ON Products(DistrictCode)`);
+    await pool.execute(`CREATE INDEX idx_Products_Price ON Products(Price)`);
 }
 
-async function createProductPhotosTable() {
-    const query = `
-        CREATE TABLE IF NOT EXISTS ProductPhotos (
-            PhotoID INT AUTO_INCREMENT PRIMARY KEY,
-            ProductID INT,
-            PhotoURL VARCHAR(255),
-            IsBaseImage BOOLEAN,
-            Position SMALLINT,
-            FOREIGN KEY (ProductID) REFERENCES Products(ProductID)
-        )`;
-    await pool.execute(query);
+async function createAmenityGroupsTable() {
+    await pool.execute(`
+        CREATE TABLE IF NOT EXISTS AmenityGroups (
+            AmenityGroupID INT AUTO_INCREMENT PRIMARY KEY,
+            AmenityGroupName VARCHAR(255)
+        )
+    `);
 }
 
 async function createAmenitiesTable() {
-    const query = `
+    await pool.execute(`
         CREATE TABLE IF NOT EXISTS Amenities (
-            AmenitiesID INT PRIMARY KEY,
-            AmenitiesName VARCHAR(50),
-            AmenitiesImageURL VARCHAR(255)
-        )`;
-    await pool.execute(query);
+            AmenityID INT AUTO_INCREMENT PRIMARY KEY,
+            AmenityName VARCHAR(255),
+            AmenityGroupID INT,
+            AmenityImageURL VARCHAR(255),
+            FOREIGN KEY (AmenityGroupID) REFERENCES AmenityGroups(AmenityGroupID)
+        )
+    `);
 }
 
 async function createProductAmenitiesTable() {
-    const query = `
+    await pool.execute(`
         CREATE TABLE IF NOT EXISTS ProductAmenities (
-            ProductAmenitiesID INT PRIMARY KEY,
-            ProductID INT,
-            AmenitiesID INT,
-            FOREIGN KEY (ProductID) REFERENCES Products(ProductID),
-            FOREIGN KEY (AmenitiesID) REFERENCES Amenities(AmenitiesID)
-        )`;
-    await pool.execute(query);
-}
-
-async function createMarkingTable() {
-    const query = `
-        CREATE TABLE IF NOT EXISTS Marking (
-            MarkingID INT AUTO_INCREMENT PRIMARY KEY,
-            UserID INT,
-            ProductID INT,
-            IsFavourite BOOLEAN,
-            FOREIGN KEY (UserID) REFERENCES Users(UserID),
-            FOREIGN KEY (ProductID) REFERENCES Products(ProductID)
-        )`;
-    await pool.execute(query);
+            ProductID INT NOT NULL,
+            AmenityID INT NOT NULL,
+            PRIMARY KEY (ProductID, AmenityID),
+            FOREIGN KEY (ProductID) REFERENCES Products(ProductID) ON DELETE CASCADE,
+            FOREIGN KEY (AmenityID) REFERENCES Amenities(AmenityID) ON DELETE CASCADE
+        )
+    `);
+    await pool.execute(`CREATE INDEX idx_product_amenities_product ON ProductAmenities(ProductID)`);
+    await pool.execute(`CREATE INDEX idx_product_amenities_amenity ON ProductAmenities(AmenityID)`);
 }
 
 async function createAuctionTable() {
-    const query = `
+    await pool.execute(`
         CREATE TABLE IF NOT EXISTS Auction (
-            AuctionID INT UNSIGNED PRIMARY KEY,
+            AuctionID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             ProductID INT,
             StartTime TIMESTAMP,
             EndTime TIMESTAMP,
@@ -204,14 +251,17 @@ async function createAuctionTable() {
             CurrentPrice DECIMAL(10, 2),
             Status VARCHAR(20),
             FOREIGN KEY (ProductID) REFERENCES Products(ProductID)
-        )`;
-    await pool.execute(query);
+        )
+    `);
+    await pool.execute(`CREATE INDEX idx_Auction_ProductID ON Auction(ProductID)`);
+    await pool.execute(`CREATE INDEX idx_Auction_StartTime ON Auction(StartTime)`);
+    await pool.execute(`CREATE INDEX idx_Auction_Status_EndTime ON Auction(Status, EndTime)`);
 }
 
 async function createBidsTable() {
-    const query = `
+    await pool.execute(`
         CREATE TABLE IF NOT EXISTS Bids (
-            BidID INT UNSIGNED PRIMARY KEY,
+            BidID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             AuctionID INT UNSIGNED,
             UserID INT,
             Amount DECIMAL(9, 2),
@@ -220,14 +270,16 @@ async function createBidsTable() {
             FOREIGN KEY (AuctionID) REFERENCES Auction(AuctionID),
             FOREIGN KEY (UserID) REFERENCES Users(UserID),
             FOREIGN KEY (PaymentMethodID) REFERENCES PaymentMethods(MethodID)
-        )`;
-    await pool.execute(query);
+        )
+    `);
+    await pool.execute(`CREATE INDEX idx_Bids_AuctionID ON Bids(AuctionID)`);
+    await pool.execute(`CREATE INDEX idx_Bids_UserID ON Bids(UserID)`);
 }
 
 async function createBookingTable() {
-    const query = `
+    await pool.execute(`
         CREATE TABLE IF NOT EXISTS Booking (
-            BookingID INT UNSIGNED PRIMARY KEY,
+            BookingID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             BidID INT UNSIGNED,
             UserID INT,
             ProductID INT,
@@ -243,47 +295,53 @@ async function createBookingTable() {
             FOREIGN KEY (UserID) REFERENCES Users(UserID),
             FOREIGN KEY (ProductID) REFERENCES Products(ProductID),
             FOREIGN KEY (PaymentMethodID) REFERENCES PaymentMethods(MethodID)
-        )`;
-    await pool.execute(query);
+        )
+    `);
+    await pool.execute(`CREATE INDEX idx_Booking_UserID ON Booking(UserID)`);
+    await pool.execute(`CREATE INDEX idx_Booking_ProductID ON Booking(ProductID)`);
 }
 
 async function createRatingTable() {
-    const query = `
+    await pool.execute(`
         CREATE TABLE IF NOT EXISTS Rating (
-            RatingID INT UNSIGNED PRIMARY KEY,
+            RatingID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            ExternalID VARCHAR(30),
             BookingID INT UNSIGNED,
             ProductID INT,
             CleanlinessPoint FLOAT,
-            AccuracyPoint FLOAT,
-            CheckinPoint FLOAT,
-            CommunicationPoint FLOAT,
             LocationPoint FLOAT,
+            ServicePoint FLOAT,
             ValuePoint FLOAT,
+            CommunicationPoint FLOAT,
+            ConveniencePoint FLOAT,
             FOREIGN KEY (BookingID) REFERENCES Booking(BookingID),
             FOREIGN KEY (ProductID) REFERENCES Products(ProductID)
-        )`;
-    await pool.execute(query);
+        )
+    `);
+    await pool.execute(`CREATE INDEX idx_Rating_ProductID ON Rating(ProductID)`);
 }
 
-async function initDatabase() {
+async function initSchema() {
     await testConnection();
+    await createAdministrativeRegionsTable();
+    await createAdministrativeUnitsTable();
+    await createProvincesTable();
+    await createDistrictsTable();
     await createUsersTable();
     await createOAuthAccountsTable();
     await createPaymentMethodsTable();
-    await createCategoriesTable();
     await createPropertiesTable();
     await createRoomTypesTable();
     await createProductsTable();
-    await createProductPhotosTable();
+    await createAmenityGroupsTable();
     await createAmenitiesTable();
     await createProductAmenitiesTable();
-    await createMarkingTable();
     await createAuctionTable();
     await createBidsTable();
     await createBookingTable();
     await createRatingTable();
 }
 
-initDatabase();
+initSchema();
 
 module.exports = pool;
