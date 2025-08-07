@@ -1,0 +1,8 @@
+.content-room-section {
+  padding: 2rem 5rem;
+}
+.room-card-container {
+  display: flex;
+  gap: 1.5rem;
+  overflow-x: auto; /* Cho phép cuộn ngang nếu cần */
+}

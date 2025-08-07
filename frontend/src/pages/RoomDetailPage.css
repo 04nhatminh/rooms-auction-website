@@ -9,19 +9,21 @@
   margin: 0 64px;
 }
 
-.room-detail-content .main-content {
+.room-detail-content .room-main-content {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 48px;
+  grid-template-columns: 60% 35%;
+  gap: 5%;
   justify-content: space-between;
 }
 
 .room-detail-content .left-column {
-  width: 100%;
+  width: 100% !important;
+  max-width: 100% !important;
 }
 
 .room-detail-content .right-column {
-  width: 100%;
+  width: 100% !important;
+  max-width: 100% !important;
 }
 
 .room-detail-content hr {

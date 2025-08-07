@@ -1,0 +1,72 @@
+.search-container {
+  margin-top: -13vh;
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 15vh;
+  padding: 32px;
+  justify-content: flex-end;
+  align-items: flex-start;
+  gap: 200px;
+  z-index: 2;
+}
+
+.search-bar {
+  display: flex;
+  background: white;
+  border-radius: 50px;
+  padding: 4px 0px 4px 32px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  margin: 0 auto;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.search-input {
+  padding: 0.8rem 1.5rem;
+  flex-grow: 1;
+  align-items: center;
+  width: 25%;
+  margin-top: 4px;
+}
+
+.search-input label {
+  display: block;
+  color: #080808;
+  font-family: Montserrat;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+}
+
+.search-input input {
+  border: none;
+  outline: none;
+  width: 100%;
+  color: #8C8C8C;
+  font-family: Montserrat;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  margin-left: -1px;
+}
+
+.search-button {
+  background-color: #278C9F; /* Màu xanh đặc trưng */
+  color: white;
+  border: none;
+  border-radius: 50%;
+  height: 50px;
+  aspect-ratio: 1;
+  align-self: center;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.search-icon {
+  width: 20px;
+  height: 20px;
+}
+

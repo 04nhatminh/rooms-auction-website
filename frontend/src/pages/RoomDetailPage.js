@@ -21,7 +21,7 @@ const RoomDetailPage = () => {
       <main className="room-detail-content">
         <RoomTitle />
         <ImageGallery />
-        <div className="main-content">
+        <div className="room-main-content">
           <div className="left-column">
             <Overview />
             <hr />
