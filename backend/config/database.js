@@ -118,11 +118,13 @@ async function createUsersTable() {
 async function createOAuthAccountsTable() {
     await pool.execute(`
         CREATE TABLE IF NOT EXISTS OAuthAccounts (
-            OAuthID INT PRIMARY KEY,
-            Provider VARCHAR(15),
-            ProviderUID VARCHAR(128),
-            UserID INT,
-            FOREIGN KEY (UserID) REFERENCES Users(UserID)
+            ID INT AUTO_INCREMENT PRIMARY KEY,
+            Provider VARCHAR(50) NOT NULL,
+            ProviderUID VARCHAR(255) NOT NULL,
+            UserID INT NOT NULL,
+            CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE,
+            UNIQUE KEY unique_oauth (Provider, ProviderUID)
         )
     `);
 }
