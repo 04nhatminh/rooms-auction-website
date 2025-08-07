@@ -1,0 +1,216 @@
+.booking-card {
+  background: #fff;
+  border: 1px solid #DDDDDD;
+  border-radius: 12px;
+  padding: 24px;
+  position: sticky;
+  top: 32px;
+  margin-top: 32px;
+  height: fit-content;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.booking-card-content h3 {
+  margin: 0 0 24px 0;
+  color: #000;
+  font-family: Montserrat;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+}
+
+.date-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.date-input-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.date-input-group label {
+  margin-bottom: 8px;
+  color: #000;
+  font-family: Montserrat;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 550;
+  line-height: normal;
+}
+
+.date-input {
+  padding: 12px;
+  border: 1px solid #B0B0B0;
+  border-radius: 8px;
+  font-family: Montserrat;
+  font-size: 14px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.date-input:focus {
+  outline: none;
+  border-color: #222;
+}
+
+.guest-selector {
+  margin-bottom: 24px;
+}
+
+.guest-selector label {
+  display: block;
+  margin-bottom: 8px;
+  color: #000;
+  font-family: Montserrat;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 550;
+  line-height: normal;
+}
+
+.guest-input {
+  padding: 12px;
+  border: 1px solid #B0B0B0;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: Montserrat;
+  font-size: 14px;
+}
+
+.guest-input:hover {
+  border-color: #222;
+}
+
+.dropdown-arrow {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.guest-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #DDDDDD;
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  padding: 16px;
+  z-index: 100;
+  margin-top: 4px;
+}
+
+.guest-selector {
+  position: relative;
+}
+
+.guest-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+}
+
+.guest-option:not(:last-child) {
+  border-bottom: 1px solid #EBEBEB;
+}
+
+.guest-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.guest-type {
+  color: #000;
+  font-family: Montserrat;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  margin-bottom: 4px;
+}
+
+.guest-description {
+  color: #717171;
+  font-family: Montserrat;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+
+.guest-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.guest-controls button {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #B0B0B0;
+  border-radius: 50%;
+  background: #fff;
+  color: #717171;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: Montserrat;
+  font-weight: 600;
+}
+
+.guest-controls button:hover:not(:disabled) {
+  border-color: #222;
+  color: #222;
+}
+
+.guest-controls button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.guest-controls span {
+  color: #000;
+  font-family: Montserrat;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  min-width: 20px;
+  text-align: center;
+}
+
+.auction-button {
+  width: 100%;
+  background: #278C9F;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 24px;
+  font-family: Montserrat;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.auction-button:hover {
+  background: #2fa7bf;
+}
+
+.auction-button:active {
+  background: #278C9F;
+}

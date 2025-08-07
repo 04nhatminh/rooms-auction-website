@@ -1,0 +1,67 @@
+.footer {
+  background-color: #f7f7f7;
+  padding: 32px 64px 12px 64px;
+  margin: 0 0px;
+  border-top: 1px solid #ddd;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.footer-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid #ddd;
+  width: 100%;
+}
+
+.footer-column {
+  flex: 1;
+  min-width: 280px;
+}
+
+.footer-column h4 {
+  margin-bottom: 16px;
+  color: #000;
+  font-family: Montserrat;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+}
+
+.footer-column ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-column li {
+  margin-bottom: 16px;
+  color: #000;
+  font-family: Montserrat;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+
+.footer-column a {
+  text-decoration: none;
+  color: #222;
+  font-size: 14px;
+}
+
+.payment-logos img {
+    height: 48px;
+    width: 48px;
+    margin-right: 12px;
+}
+
+.footer-bottom {
+  margin-top: 28px;
+  font-size: 14px;
+  font-weight: bold;
+  justify-content: center;
+  text-align: center;
+}

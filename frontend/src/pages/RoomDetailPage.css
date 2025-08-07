@@ -1,0 +1,32 @@
+.room-detail-page {
+  display: flex;
+  flex-direction: column;
+}
+
+.room-detail-content {
+  flex: 1;
+  max-width: 100vw - 128px;
+  margin: 0 64px;
+}
+
+.room-detail-content .main-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 48px;
+  justify-content: space-between;
+}
+
+.room-detail-content .left-column {
+  width: 100%;
+}
+
+.room-detail-content .right-column {
+  width: 100%;
+}
+
+.room-detail-content hr {
+  border: 0;
+  border-top: 1px solid #DDDDDD;
+  margin: 32px 0;
+  padding: 0px 64px;
+}

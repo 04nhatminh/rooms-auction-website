@@ -1,0 +1,27 @@
+.location-section h3 {
+  margin-bottom: 24px;
+  color: #000;
+  font-family: Montserrat;
+  font-size: 22px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+}
+
+.location-section span {
+    margin-bottom: 24px;
+    color: #000;
+    font-family: Montserrat;
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 550;
+    line-height: normal;
+}
+
+.location-map {
+  height: 480px;
+  background-color: #e0e0e0;
+  border-radius: 12px;
+  margin-top: 16px;
+}
+

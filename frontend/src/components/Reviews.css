@@ -1,0 +1,121 @@
+.review-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 60px;
+    margin-bottom: 28px;
+}
+
+.review-card .review-author {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.author-avatar {
+    background-color: #e0e0e0;
+    margin-right: 24px;
+    width: 56px;
+    height: 56px;
+    aspect-ratio: 1/1;
+    border-radius: 50px;
+}
+
+.author-info h4 {
+    margin: 0;
+    font-size: 16px;
+    color: #000;
+    font-family: Montserrat;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    padding-bottom: 8px;
+}
+
+.author-info p {
+    margin: 0;
+    font-size: 14px;
+    color: #000;
+    font-family: Montserrat;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+}
+
+.review-rating {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.rating-stars {
+    display: flex;
+    gap: 2px;
+}
+
+.rating-stars img {
+    width: 10px;
+    height: 10px;
+}
+
+.review-rating span {
+    font-size: 14px;
+    color: #000;
+    font-family: Montserrat;
+    font-style: normal;
+    line-height: normal;
+    font-weight: 600;
+}
+
+.review-card .review-text {
+    line-height: 1.5;
+    color: #000;
+    font-family: Montserrat;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+
+.review-card .show-more-review {
+    background: none;
+    border: none;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 0;
+    color: #000;
+    font-family: Montserrat;
+    font-style: normal;
+    line-height: normal;
+    text-decoration-style: solid;
+    text-decoration-skip-ink: auto;
+    text-decoration-thickness: auto;
+    text-underline-offset: auto;
+    text-underline-position: from-font;
+}
+
+.show-all-reviews {
+    display: flex;
+    padding: 16px 24px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    border-radius: 8px;
+    background: #F2F2F2;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    color: #000;
+    font-family: Montserrat;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+}
+
+.show-all-reviews:hover {
+  background-color: #E8E8E8;
+}
