@@ -136,6 +136,102 @@ class ImageController {
             });
         }
     }
+
+    /**
+     * API lấy total_reviews cho một listing_id
+     * GET /api/images/reviews/:listingId
+     */
+    static async getTotalReviews(req, res) {
+        try {
+            const { listingId } = req.params;
+
+            if (!listingId) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'ListingId is required'
+                });
+            }
+
+            const totalReviews = await ImageModel.getTotalReviewsByListingId(listingId);
+
+            if (totalReviews === null) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'No reviews found for this listing_id',
+                    data: { listingId }
+                });
+            }
+
+            return res.status(200).json({
+                success: true,
+                message: 'Total reviews retrieved successfully',
+                data: {
+                    listingId,
+                    totalReviews
+                }
+            });
+
+        } catch (error) {
+            console.error('Error in getTotalReviews:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Internal server error',
+                error: error.message
+            });
+        }
+    }
+
+    /**
+     * API lấy total_reviews cho nhiều listing_id cùng lúc
+     * POST /api/images/reviews/batch
+     * Body: { listingIds: ["id1", "id2", "id3"] }
+     */
+    static async getBatchTotalReviews(req, res) {
+        try {
+            const { listingIds } = req.body;
+
+            if (!listingIds || !Array.isArray(listingIds) || listingIds.length === 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'ListingIds array is required and must not be empty'
+                });
+            }
+
+            if (listingIds.length > 100) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Too many listingIds. Maximum 100 allowed per request.'
+                });
+            }
+
+            console.log(`Processing batch reviews request for ${listingIds.length} listing_ids`);
+            const reviewsMap = await ImageModel.getBatchTotalReviews(listingIds);
+
+            return res.status(200).json({
+                success: true,
+                message: 'Batch reviews retrieved successfully',
+                data: {
+                    totalRequested: listingIds.length,
+                    totalFound: Object.keys(reviewsMap).length,
+                    reviewsMap
+                }
+            });
+
+        } catch (error) {
+            console.error('Error in getBatchTotalReviews:', error);
+            
+            return res.status(200).json({
+                success: false,
+                message: 'MongoDB connection failed, returning empty results',
+                data: {
+                    totalRequested: req.body.listingIds ? req.body.listingIds.length : 0,
+                    totalFound: 0,
+                    reviewsMap: {},
+                    error: error.message
+                }
+            });
+        }
+    }
 }
 
 module.exports = ImageController;

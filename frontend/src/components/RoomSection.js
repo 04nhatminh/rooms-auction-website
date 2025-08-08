@@ -82,22 +82,40 @@ const RoomSection = ({ title, provinceCode = '01', limit = 15 }) => {
             body: JSON.stringify({ externalIds })
           });
 
+          // 4. Fetch reviews từ MongoDB batch
+          const reviewsResponse = await fetch('http://localhost:3000/api/images/reviews/batch', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ listingIds: externalIds }) // listing_id tương ứng với ExternalID
+          });
+
+          let imageMap = {};
+          let reviewsMap = {};
+
           if (imageResponse.ok) {
             const imageData = await imageResponse.json();
-            const imageMap = imageData.success ? imageData.data.imageMap : {};
-
-            // 4. Gắn imageUrl vào products
-            const productsWithImages = products.map(product => ({
-              ...product,
-              mongoImageUrl: product.ExternalID ? imageMap[product.ExternalID] : null
-            }));
-
-            setProducts(productsWithImages);
+            imageMap = imageData.success ? imageData.data.imageMap : {};
           } else {
-            // Nếu fetch images thất bại, vẫn hiển thị products không có MongoDB images
-            console.warn('Failed to fetch images from MongoDB, using default images');
-            setProducts(products);
+            console.warn('Failed to fetch images from MongoDB');
           }
+
+          if (reviewsResponse.ok) {
+            const reviewsData = await reviewsResponse.json();
+            reviewsMap = reviewsData.success ? reviewsData.data.reviewsMap : {};
+          } else {
+            console.warn('Failed to fetch reviews from MongoDB');
+          }
+
+          // 5. Gắn imageUrl và totalReviews vào products
+          const productsWithImagesAndReviews = products.map(product => ({
+            ...product,
+            mongoImageUrl: product.ExternalID ? imageMap[product.ExternalID] : null,
+            totalReviews: product.ExternalID ? reviewsMap[product.ExternalID] : null
+          }));
+
+          setProducts(productsWithImagesAndReviews);
         } else {
           setProducts(products);
         }

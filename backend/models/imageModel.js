@@ -168,6 +168,89 @@ class ImageModel {
             return {}; // Return empty object thay vì throw
         }
     }
+
+    /**
+     * Lấy total_reviews cho một listing_id
+     * @param {string} listingId - listing_id (tương ứng với ExternalID)
+     * @returns {number|null} - total_reviews hoặc null
+     */
+    async getTotalReviewsByListingId(listingId) {
+        try {
+            console.log(`Fetching total reviews for listing_id: ${listingId}`);
+            const db = await this.connect();
+            
+            if (!db) {
+                throw new Error('Database connection failed');
+            }
+            
+            const reviewsCollection = db.collection('reviews');
+
+            const result = await reviewsCollection.findOne(
+                { listing_id: listingId },
+                { 
+                    projection: { 
+                        total_reviews: 1
+                    }
+                }
+            );
+
+            console.log(`MongoDB reviews query result for ${listingId}:`, result ? `Found ${result.total_reviews} reviews` : 'Not found');
+
+            if (result && typeof result.total_reviews === 'number') {
+                return result.total_reviews;
+            }
+
+            return null;
+
+        } catch (error) {
+            console.error(`Error fetching reviews for listing_id ${listingId}:`, error);
+            return null;
+        }
+    }
+
+    /**
+     * Lấy total_reviews cho nhiều listing_id cùng lúc
+     * @param {Array} listingIds - Mảng các listing_id
+     * @returns {Object} - Object với key là listing_id và value là total_reviews
+     */
+    async getBatchTotalReviews(listingIds) {
+        try {
+            console.log(`Fetching batch reviews for ${listingIds.length} listing_ids`);
+            const db = await this.connect();
+            
+            if (!db) {
+                throw new Error('Database connection failed');
+            }
+
+            const reviewsCollection = db.collection('reviews');
+
+            const results = await reviewsCollection.find(
+                { listing_id: { $in: listingIds } },
+                { 
+                    projection: { 
+                        listing_id: 1,
+                        total_reviews: 1 
+                    }
+                }
+            ).toArray();
+
+            console.log(`MongoDB batch reviews query found ${results.length} results out of ${listingIds.length} requested`);
+
+            const reviewsMap = {};
+            results.forEach(result => {
+                if (result.listing_id && typeof result.total_reviews === 'number') {
+                    reviewsMap[result.listing_id] = result.total_reviews;
+                }
+            });
+
+            console.log(`Successfully mapped ${Object.keys(reviewsMap).length} review counts`);
+            return reviewsMap;
+
+        } catch (error) {
+            console.error('Error fetching batch reviews from MongoDB:', error);
+            return {};
+        }
+    }
 }
 
 module.exports = new ImageModel();

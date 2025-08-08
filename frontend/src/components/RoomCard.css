@@ -48,7 +48,7 @@
   font-family: Montserrat;
   font-size: 13px;
   font-style: normal;
-  font-weight: 400;
+  font-weight: 500;
   line-height: normal;
   margin: 0 0 8px 0;
   overflow: hidden;
@@ -67,18 +67,21 @@
 }
 
 .room-rating {
-  color: #000;
-  font-family: Montserrat;
-  font-size: 13px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: normal;
   margin: 0 0 8px 0;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 1;
   line-clamp: 1;
   -webkit-box-orient: vertical;
+}
+
+.rating-text {
+  color: #000;
+  font-family: Montserrat;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
 }
 
 .room-rating img {
@@ -121,13 +124,6 @@
   color: #000;
   font-family: Montserrat;
   font-style: normal;
-  font-weight: 400;
-  line-height: normal;
-}
-
-.rating-number {
-  color: #666;
-  font-family: Montserrat;
-  font-size: 12px;
   font-weight: 500;
+  line-height: normal;
 }

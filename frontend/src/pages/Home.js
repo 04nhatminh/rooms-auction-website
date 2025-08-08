@@ -66,7 +66,7 @@ const Home = () => {
       <CardSection title="Điểm đến nổi bật tại Việt Nam" items={destinations} />
       <RoomSection title="Nơi lưu trú được ưa chuộng tại Hà Nội" provinceCode="01" limit={15} />
       <RoomSection title="Chỗ ở còn phòng tại Phú Quốc" provinceCode="91" limit={15} />
-
+      <RoomSection title="Khám phá nơi lưu trú tại Hà Giang" provinceCode="02" limit={15} />
       <Footer />
     </>
   );
