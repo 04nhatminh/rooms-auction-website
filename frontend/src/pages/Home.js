@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import './Home.css';
 import SearchBar from '../components/SearchBar';
 import CardSection from '../components/CardSection';
+import RoomSection from '../components/RoomSection';
 import Footer from '../components/Footer';
 import logo from '../assets/logo.png';
 import HomeBackground from '../assets/home_background.jpg';
@@ -63,7 +64,8 @@ const Home = () => {
       <SearchBar />
       <CardSection title="Tìm theo loại chỗ nghỉ" items={accommodationTypes} />
       <CardSection title="Điểm đến nổi bật tại Việt Nam" items={destinations} />
-      {/* Thêm các section đấu giá và nơi lưu trú ở đây */}
+      <RoomSection title="Nơi lưu trú được ưa chuộng tại Hà Nội" provinceCode="01" limit={15} />
+      <RoomSection title="Chỗ ở còn phòng tại Phú Quốc" provinceCode="91" limit={15} />
 
       <Footer />
     </>

@@ -5,10 +5,14 @@ const demoRoutes = require('./demoRoutes');
 const userRoutes = require('./userRoutes');
 const authRoutes = require('./authRoutes');
 const adminRoutes = require('./adminRoutes');
+const productRoutes = require('./productRoutes');
+const imageRoutes = require('./imageRoutes');
 
 
 // Demo routes - điều hướng đến /demo
 router.use('/api/demo', demoRoutes);
+router.use('/api/products', productRoutes);
+router.use('/api/images', imageRoutes);
 router.use('/', authRoutes);
 router.use('/user', userRoutes);
 router.use('/admin', adminRoutes);

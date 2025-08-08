@@ -72,8 +72,23 @@ async function createProvincesTable() {
             FOREIGN KEY (AdministrativeRegionID) REFERENCES AdministrativeRegions(RegionID)
         )
     `);
-    await pool.execute(`CREATE INDEX idx_Provinces_Region ON Provinces(AdministrativeRegionID)`);
-    await pool.execute(`CREATE INDEX idx_Provinces_Unit ON Provinces(AdministrativeUnitID)`);
+    
+    // Tạo index với error handling
+    try {
+        await pool.execute(`CREATE INDEX idx_Provinces_Region ON Provinces(AdministrativeRegionID)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') {
+            throw error; // Re-throw nếu không phải lỗi duplicate key
+        }
+    }
+    
+    try {
+        await pool.execute(`CREATE INDEX idx_Provinces_Unit ON Provinces(AdministrativeUnitID)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') {
+            throw error;
+        }
+    }
 }
 
 async function createDistrictsTable() {
@@ -91,8 +106,18 @@ async function createDistrictsTable() {
             FOREIGN KEY (AdministrativeUnitID) REFERENCES AdministrativeUnits(UnitID)
         )
     `);
-    await pool.execute(`CREATE INDEX idx_Districts_Province ON Districts(ProvinceCode)`);
-    await pool.execute(`CREATE INDEX idx_Districts_Unit ON Districts(AdministrativeUnitID)`);
+    
+    try {
+        await pool.execute(`CREATE INDEX idx_Districts_Province ON Districts(ProvinceCode)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
+    
+    try {
+        await pool.execute(`CREATE INDEX idx_Districts_Unit ON Districts(AdministrativeUnitID)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
 }
 
 async function createUsersTable() {
@@ -143,7 +168,12 @@ async function createPaymentMethodsTable() {
             FOREIGN KEY (UserID) REFERENCES Users(UserID)
         )
     `);
-    await pool.execute(`CREATE INDEX idx_PaymentMethods_UserID ON PaymentMethods(UserID)`);
+    
+    try {
+        await pool.execute(`CREATE INDEX idx_PaymentMethods_UserID ON PaymentMethods(UserID)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
 }
 
 async function createPropertiesTable() {
@@ -200,9 +230,24 @@ async function createProductsTable() {
             FOREIGN KEY (RoomType) REFERENCES RoomTypes(RoomTypeID)
         )
     `);
-    await pool.execute(`CREATE INDEX idx_Products_ProvinceCode ON Products(ProvinceCode)`);
-    await pool.execute(`CREATE INDEX idx_Products_DistrictCode ON Products(DistrictCode)`);
-    await pool.execute(`CREATE INDEX idx_Products_Price ON Products(Price)`);
+    
+    try {
+        await pool.execute(`CREATE INDEX idx_Products_ProvinceCode ON Products(ProvinceCode)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
+    
+    try {
+        await pool.execute(`CREATE INDEX idx_Products_DistrictCode ON Products(DistrictCode)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
+    
+    try {
+        await pool.execute(`CREATE INDEX idx_Products_Price ON Products(Price)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
 }
 
 async function createAmenityGroupsTable() {
@@ -236,8 +281,18 @@ async function createProductAmenitiesTable() {
             FOREIGN KEY (AmenityID) REFERENCES Amenities(AmenityID) ON DELETE CASCADE
         )
     `);
-    await pool.execute(`CREATE INDEX idx_product_amenities_product ON ProductAmenities(ProductID)`);
-    await pool.execute(`CREATE INDEX idx_product_amenities_amenity ON ProductAmenities(AmenityID)`);
+    
+    try {
+        await pool.execute(`CREATE INDEX idx_product_amenities_product ON ProductAmenities(ProductID)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
+    
+    try {
+        await pool.execute(`CREATE INDEX idx_product_amenities_amenity ON ProductAmenities(AmenityID)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
 }
 
 async function createAuctionTable() {
@@ -255,9 +310,24 @@ async function createAuctionTable() {
             FOREIGN KEY (ProductID) REFERENCES Products(ProductID)
         )
     `);
-    await pool.execute(`CREATE INDEX idx_Auction_ProductID ON Auction(ProductID)`);
-    await pool.execute(`CREATE INDEX idx_Auction_StartTime ON Auction(StartTime)`);
-    await pool.execute(`CREATE INDEX idx_Auction_Status_EndTime ON Auction(Status, EndTime)`);
+    
+    try {
+        await pool.execute(`CREATE INDEX idx_Auction_ProductID ON Auction(ProductID)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
+    
+    try {
+        await pool.execute(`CREATE INDEX idx_Auction_StartTime ON Auction(StartTime)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
+    
+    try {
+        await pool.execute(`CREATE INDEX idx_Auction_Status_EndTime ON Auction(Status, EndTime)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
 }
 
 async function createBidsTable() {
@@ -274,8 +344,18 @@ async function createBidsTable() {
             FOREIGN KEY (PaymentMethodID) REFERENCES PaymentMethods(MethodID)
         )
     `);
-    await pool.execute(`CREATE INDEX idx_Bids_AuctionID ON Bids(AuctionID)`);
-    await pool.execute(`CREATE INDEX idx_Bids_UserID ON Bids(UserID)`);
+    
+    try {
+        await pool.execute(`CREATE INDEX idx_Bids_AuctionID ON Bids(AuctionID)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
+    
+    try {
+        await pool.execute(`CREATE INDEX idx_Bids_UserID ON Bids(UserID)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
 }
 
 async function createBookingTable() {
@@ -299,8 +379,18 @@ async function createBookingTable() {
             FOREIGN KEY (PaymentMethodID) REFERENCES PaymentMethods(MethodID)
         )
     `);
-    await pool.execute(`CREATE INDEX idx_Booking_UserID ON Booking(UserID)`);
-    await pool.execute(`CREATE INDEX idx_Booking_ProductID ON Booking(ProductID)`);
+    
+    try {
+        await pool.execute(`CREATE INDEX idx_Booking_UserID ON Booking(UserID)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
+    
+    try {
+        await pool.execute(`CREATE INDEX idx_Booking_ProductID ON Booking(ProductID)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
 }
 
 async function createRatingTable() {
@@ -320,28 +410,78 @@ async function createRatingTable() {
             FOREIGN KEY (ProductID) REFERENCES Products(ProductID)
         )
     `);
-    await pool.execute(`CREATE INDEX idx_Rating_ProductID ON Rating(ProductID)`);
+    
+    try {
+        await pool.execute(`CREATE INDEX idx_Rating_ProductID ON Rating(ProductID)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
 }
 
 async function initSchema() {
-    await testConnection();
-    await createAdministrativeRegionsTable();
-    await createAdministrativeUnitsTable();
-    await createProvincesTable();
-    await createDistrictsTable();
-    await createUsersTable();
-    await createOAuthAccountsTable();
-    await createPaymentMethodsTable();
-    await createPropertiesTable();
-    await createRoomTypesTable();
-    await createProductsTable();
-    await createAmenityGroupsTable();
-    await createAmenitiesTable();
-    await createProductAmenitiesTable();
-    await createAuctionTable();
-    await createBidsTable();
-    await createBookingTable();
-    await createRatingTable();
+    console.log('🚀 Initializing database schema...');
+    
+    try {
+        await testConnection();
+        
+        console.log('📋 Creating tables...');
+        await createAdministrativeRegionsTable();
+        console.log('✅ AdministrativeRegions table ready');
+        
+        await createAdministrativeUnitsTable();
+        console.log('✅ AdministrativeUnits table ready');
+        
+        await createProvincesTable();
+        console.log('✅ Provinces table ready');
+        
+        await createDistrictsTable();
+        console.log('✅ Districts table ready');
+        
+        await createUsersTable();
+        console.log('✅ Users table ready');
+        
+        await createOAuthAccountsTable();
+        console.log('✅ OAuthAccounts table ready');
+        
+        await createPaymentMethodsTable();
+        console.log('✅ PaymentMethods table ready');
+        
+        await createPropertiesTable();
+        console.log('✅ Properties table ready');
+        
+        await createRoomTypesTable();
+        console.log('✅ RoomTypes table ready');
+        
+        await createProductsTable();
+        console.log('✅ Products table ready');
+        
+        await createAmenityGroupsTable();
+        console.log('✅ AmenityGroups table ready');
+        
+        await createAmenitiesTable();
+        console.log('✅ Amenities table ready');
+        
+        await createProductAmenitiesTable();
+        console.log('✅ ProductAmenities table ready');
+        
+        await createAuctionTable();
+        console.log('✅ Auction table ready');
+        
+        await createBidsTable();
+        console.log('✅ Bids table ready');
+        
+        await createBookingTable();
+        console.log('✅ Booking table ready');
+        
+        await createRatingTable();
+        console.log('✅ Rating table ready');
+        
+        console.log('🎉 Database schema initialization completed successfully!');
+        
+    } catch (error) {
+        console.error('❌ Error during database schema initialization:', error);
+        throw error;
+    }
 }
 
 initSchema();
