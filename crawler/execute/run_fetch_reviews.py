@@ -48,12 +48,58 @@ def get_valid_hashes(listing_ids):
     print("[ERROR] Could not get hash from any listing_id!")
     return None
 
-def save_to_json(data, filename):
-    # Lưu dữ liệu vào file JSON
+def save_to_json(new_data, filename):
+    """Lưu dữ liệu vào file JSON, append IDs mới và ghi đè IDs đã có"""
     try:
+        existing_data = []
+        
+        # Đọc dữ liệu hiện tại nếu file tồn tại
+        if os.path.exists(filename):
+            try:
+                with open(filename, 'r', encoding='utf-8') as f:
+                    existing_data = json.load(f)
+                    if not isinstance(existing_data, list):
+                        existing_data = []
+                print(f"[INFO] Found {len(existing_data)} existing records in {filename}")
+            except (json.JSONDecodeError, FileNotFoundError):
+                print(f"[WARNING] Could not read existing {filename}, starting fresh")
+                existing_data = []
+        
+        # Tạo dict để lookup existing data theo listing_id
+        existing_dict = {}
+        for item in existing_data:
+            if item and isinstance(item, dict) and 'listing_id' in item:
+                existing_dict[item['listing_id']] = item
+        
+        # Xử lý new data: thêm mới hoặc ghi đè
+        updated_count = 0
+        added_count = 0
+        
+        for item in new_data:
+            if item and isinstance(item, dict) and 'listing_id' in item:
+                listing_id = item['listing_id']
+                
+                if listing_id in existing_dict:
+                    # Ghi đè data cũ
+                    existing_dict[listing_id] = item
+                    updated_count += 1
+                    print(f"[UPDATE] Overwritten reviews for listing {listing_id}")
+                else:
+                    # Thêm mới
+                    existing_dict[listing_id] = item
+                    added_count += 1
+                    print(f"[NEW] Added new reviews for listing {listing_id}")
+        
+        # Convert dict back to list để maintain order
+        combined_data = list(existing_dict.values())
+        
+        # Ghi lại file với dữ liệu đã merge
         with open(filename, 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
-        print(f"[SUCCESS] Saved data to {filename}")
+            json.dump(combined_data, f, ensure_ascii=False, indent=2)
+        
+        print(f"[SUCCESS] Added {added_count} new records, updated {updated_count} existing records")
+        print(f"[INFO] Total records in file: {len(combined_data)}")
+        
     except Exception as e:
         print(f"[ERROR] Error saving file {filename}: {e}")
 

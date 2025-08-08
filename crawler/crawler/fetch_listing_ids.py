@@ -32,15 +32,12 @@ def append_listing_ids_to_txt(listing_ids, filename="output/listing_ids.txt"):
 
     new_ids = [lid for lid in filtered_ids if lid not in existing_ids]
 
-    with open(filename, mode="r", encoding="utf-8") as f:
-        old_content = f.read()
-
-    with open(filename, mode="w", encoding="utf-8") as f:
+    # Nối vào cuối file
+    with open(filename, mode="a", encoding="utf-8") as f:
         for lid in new_ids:
             f.write(f"{lid}\n")
-        f.write(old_content)
 
-    print(f"Prepended {len(new_ids)} new listing_id(s) to {filename}")
+    print(f"Appended {len(new_ids)} new listing_id(s) to {filename}")
 
 # --- Mô phỏng nhập vào thanh tìm kiếm ---
 def simulate_user_search(page, location_name):
@@ -92,8 +89,8 @@ def loop_through_each_page(name):
         # Tìm kiếm lần đầu tiên
         simulate_user_search(page, name)
 
-        # Lặp tối đa 5 trang
-        for page_index in range(5):
+        # Lặp tối đa 3 trang
+        for page_index in range(3):
             print(f"[INFO] --- Page {page_index+1} ---")
 
             # Đợi response được bắt (API StaysSearch)
