@@ -1,12 +1,13 @@
 .search-container {
   margin-top: -13vh;
   position: relative;
-  display: flex;
-  width: 100%;
   height: 15vh;
   padding: 32px;
-  justify-content: flex-end;
-  align-items: flex-start;
+  margin-bottom: 56px;
+  margin-left: 24px;
+  margin-right: 24px;
+  justify-content:center;
+  align-items: center;
   gap: 200px;
   z-index: 2;
 }
@@ -16,7 +17,7 @@
   background: white;
   border-radius: 50px;
   padding: 4px 0px 4px 32px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
   margin: 0 auto;
   justify-content: space-between;
   align-items: center;
@@ -54,19 +55,24 @@
 }
 
 .search-button {
-  background-color: #278C9F; /* Màu xanh đặc trưng */
+  background-color: #278C9F;
   color: white;
   border: none;
   border-radius: 50%;
-  height: 50px;
+  height: 60px;
   aspect-ratio: 1;
   align-self: center;
   margin-right: 10px;
   cursor: pointer;
 }
 
+.search-button:hover {
+  background-color: #1F6B7A;
+}
+
 .search-icon {
   width: 20px;
   height: 20px;
+  align-items: center;
 }
 

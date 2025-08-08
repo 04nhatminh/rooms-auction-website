@@ -1,35 +1,41 @@
 import React from 'react';
-// import Header from '../components/Header';
+import { useNavigate } from 'react-router-dom';
+import './Home.css';
 import SearchBar from '../components/SearchBar';
 import CardSection from '../components/CardSection';
 import Footer from '../components/Footer';
-import HomeBackground from '../assets/home_background.jpg';
 import logo from '../assets/logo.png';
-import './Home.css';
+import HomeBackground from '../assets/home_background.jpg';
+import KhachSanImg from '../assets/khach_san.png';
+import CanHoImg from '../assets/can_ho.jpg';
+import HomestayImg from '../assets/homestay.jpg';
+import ResortImg from '../assets/resort.jpg';
+import BietThuImg from '../assets/biet_thu.jpg';
+import HoChiMinhImg from '../assets/ho_chi_minh.jpg';
+import HaNoiImg from '../assets/ha_noi.png';
+import VungTauImg from '../assets/vung_tau.jpg';
+import DaLatImg from '../assets/da_lat.jpg';
+import NhaTrangImg from '../assets/nha_trang.jpg';
 
-// Import ảnh từ thư mục assets
-// Ví dụ: import bannerImg from '../assets/banner.jpg';
-// Bạn cần tự thêm các ảnh vào thư mục assets
 
 const Home = () => {
-  // Dữ liệu mẫu - Trong ứng dụng thực tế, dữ liệu này sẽ được lấy từ API
+  const navigate = useNavigate();
+  
   const accommodationTypes = [
-    { image: '/path/to/khachsan.jpg', title: 'Khách sạn' },
-    { image: '/path/to/canho.jpg', title: 'Căn hộ' },
-    { image: '/path/to/homestay.jpg', title: 'Homestay' },
-    { image: '/path/to/resort.jpg', title: 'Resort' },
-    { image: '/path/to/bietthu.jpg', title: 'Biệt thự' },
+    { image: KhachSanImg, title: 'Khách sạn' },
+    { image: CanHoImg, title: 'Căn hộ' },
+    { image: HomestayImg, title: 'Homestay' },
+    { image: ResortImg, title: 'Resort' },
+    { image: BietThuImg, title: 'Biệt thự' },
   ];
 
   const destinations = [
-    { image: '/path/to/hcmc.jpg', title: 'TP. Hồ Chí Minh' },
-    { image: '/path/to/hanoi.jpg', title: 'Hà Nội' },
-    { image: '/path/to/vungtau.jpg', title: 'Vũng Tàu' },
-    { image: '/path/to/dalat.jpg', title: 'Đà Lạt' },
-    { image: '/path/to/nhatrang.jpg', title: 'Nha Trang' },
+    { image: HoChiMinhImg, title: 'TP. Hồ Chí Minh' },
+    { image: HaNoiImg, title: 'Hà Nội' },
+    { image: VungTauImg, title: 'Vũng Tàu' },
+    { image: DaLatImg, title: 'Đà Lạt' },
+    { image: NhaTrangImg, title: 'Nha Trang' },
   ];
-  
-  // Tương tự, tạo dữ liệu cho các section khác...
 
   return (
     <>
@@ -43,8 +49,8 @@ const Home = () => {
           </div>
 
           <div className="login-signup">
-            <button className='home-login-button'>Đăng nhập</button>
-            <button className='home-signup-button'>Đăng ký</button>
+            <button className='home-login-button' onClick={() => navigate('/login')}>Đăng nhập</button>
+            <button className='home-signup-button' onClick={() => navigate('/signup')}>Đăng ký</button>
           </div>
         </div>
 
