@@ -2,6 +2,7 @@
 node_modules/
 */node_modules/
 .env
+.venv/
 
 # Python cache files
 __pycache__/

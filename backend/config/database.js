@@ -15,6 +15,7 @@ const dbConfig = {
 console.log('🔍 Database config:', {
     host: dbConfig.host,
     user: dbConfig.user,
+    port: dbConfig.port,
     password: dbConfig.password ? '***hidden***' : 'empty',
     database: dbConfig.database
 });
