@@ -42,6 +42,40 @@ const UsersManagementPage = () => {
     }
   };
 
+  const deleteUser = async (id) => {
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      alert('Vui lòng đăng nhập lại.');
+      navigate('/login');
+      return;
+    }
+
+    if (!window.confirm("Bạn có chắc muốn xóa người dùng này?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:3000/admin/users/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error("Không thể xóa người dùng.");
+      }
+
+      // Xóa user trong state
+      setUsers(prevUsers => prevUsers.filter(user => user.id !== id));
+
+      alert("Xóa người dùng thành công!");
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('userData');
     localStorage.removeItem('token');
@@ -72,7 +106,7 @@ const UsersManagementPage = () => {
           <div className="sidebar-content">
             <div className="sidebar-header">
               <div className="logo-section">
-                <img src="../images/a2airbnb 2.png" alt="Logo" className="logo-image" />
+                <img src="../assets/logo.png" alt="Logo" className="logo-image" />
                 <h2 className="logo-title">A2BnB Admin</h2>
               </div>
               <nav className="navigation">
@@ -123,7 +157,7 @@ const UsersManagementPage = () => {
                     <td>
                       <div className="action-buttons">
                         <button className="edit-btn">Sửa</button>
-                        <button className="delete-btn">Xóa</button>
+                        <button className="delete-btn" onClick={() => deleteUser(user.id)}>Xóa</button>
                       </div>
                     </td>
                   </tr>

@@ -210,6 +210,26 @@ class UserController {
             res.status(500).json({ message: "Lỗi khi lấy danh sách người dùng" });
         }
     }
+
+    async deleteUser(req, res) {
+        try {
+            const userId = req.params.id;
+
+            // Kiểm tra xem user có tồn tại không
+            const user = await userModel.findById(userId);
+            if (!user) {
+                return res.status(404).json({ message: 'Người dùng không tồn tại.' });
+            }
+
+            // Xóa user
+            await userModel.delete(userId);
+
+            return res.status(200).json({ message: 'Người dùng đã được xóa thành công.' });
+        } catch (error) {
+            console.error('Error in deleteUser:', error);
+            return res.status(500).json({ message: 'Lỗi server.', error: error.message });
+        }
+    }
 }
 
 module.exports = new UserController();
