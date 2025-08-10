@@ -11,7 +11,7 @@ router.get('/top-rated', ProductController.getTopRatedProducts);
 // GET /api/products/search - Tìm kiếm products theo nhiều tiêu chí
 router.get('/search', ProductController.searchProducts);
 
-// GET /api/products/:id - Lấy chi tiết product theo ID
-router.get('/:id', ProductController.getProductDetails);
+// GET /api/products/:uid - Lấy chi tiết product theo UID
+router.get('/:uid', ProductController.getProductDetails);
 
 module.exports = router;

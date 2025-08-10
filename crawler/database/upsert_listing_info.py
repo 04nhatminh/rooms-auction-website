@@ -455,7 +455,6 @@ def upsert_reviews_to_mongodb(db, product_id, listing_id, reviews_data):
         # Tạo document mới
         document = {
             'ProductID': product_id,
-            'listing_id': listing_id,
             'Source': 'airbnb',
             'reviews': processed_reviews,
             'total_reviews': len(processed_reviews),

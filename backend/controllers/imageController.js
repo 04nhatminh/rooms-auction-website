@@ -2,27 +2,27 @@ const ImageModel = require('../models/imageModel');
 
 class ImageController {
     /**
-     * API lấy hình ảnh đầu tiên cho một ExternalID
-     * GET /api/images/:externalId
+     * API lấy hình ảnh đầu tiên cho một ProductID
+     * GET /api/images/:productId
      */
     static async getFirstImage(req, res) {
         try {
-            const { externalId } = req.params;
+            const { productId } = req.params;
 
-            if (!externalId) {
+            if (!productId) {
                 return res.status(400).json({
                     success: false,
-                    message: 'ExternalID is required'
+                    message: 'ProductID is required'
                 });
             }
 
-            const imageUrl = await ImageModel.getFirstImageByExternalId(externalId);
+            const imageUrl = await ImageModel.getFirstImageByProductId(productId);
 
             if (!imageUrl) {
                 return res.status(404).json({
                     success: false,
-                    message: 'No image found for this ExternalID',
-                    data: { externalId }
+                    message: 'No image found for this ProductID',
+                    data: { productId }
                 });
             }
 
@@ -30,7 +30,7 @@ class ImageController {
                 success: true,
                 message: 'Image retrieved successfully',
                 data: {
-                    externalId,
+                    productId,
                     imageUrl
                 }
             });
@@ -46,27 +46,27 @@ class ImageController {
     }
 
     /**
-     * API lấy tất cả hình ảnh cho một ExternalID
-     * GET /api/images/:externalId/all
+     * API lấy tất cả hình ảnh cho một ProductID
+     * GET /api/images/:productId/all
      */
     static async getAllImages(req, res) {
         try {
-            const { externalId } = req.params;
+            const { productId } = req.params;
 
-            if (!externalId) {
+            if (!productId) {
                 return res.status(400).json({
                     success: false,
-                    message: 'ExternalID is required'
+                    message: 'ProductID is required'
                 });
             }
 
-            const imageUrls = await ImageModel.getAllImagesByExternalId(externalId);
+            const imageUrls = await ImageModel.getAllImagesByProductId(productId);
 
             return res.status(200).json({
                 success: true,
                 message: 'Images retrieved successfully',
                 data: {
-                    externalId,
+                    productId,
                     totalImages: imageUrls.length,
                     imageUrls
                 }
@@ -83,38 +83,38 @@ class ImageController {
     }
 
     /**
-     * API lấy hình ảnh cho nhiều ExternalID cùng lúc
+     * API lấy hình ảnh cho nhiều ProductID cùng lúc
      * POST /api/images/batch
-     * Body: { externalIds: ["id1", "id2", "id3"] }
+     * Body: { productIds: ["id1", "id2", "id3"] }
      */
     static async getBatchImages(req, res) {
         try {
-            const { externalIds } = req.body;
+            const { productIds } = req.body;
 
-            if (!externalIds || !Array.isArray(externalIds) || externalIds.length === 0) {
+            if (!productIds || !Array.isArray(productIds) || productIds.length === 0) {
                 return res.status(400).json({
                     success: false,
-                    message: 'ExternalIds array is required and must not be empty'
+                    message: 'ProductIds array is required and must not be empty'
                 });
             }
 
             // Giới hạn số lượng để tránh overload
-            if (externalIds.length > 100) {
+            if (productIds.length > 100) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Too many ExternalIds. Maximum 100 allowed per request.'
+                    message: 'Too many ProductIds. Maximum 100 allowed per request.'
                 });
             }
 
-            console.log(`Processing batch image request for ${externalIds.length} ExternalIDs`);
-            const imageMap = await ImageModel.getBatchFirstImages(externalIds);
+            console.log(`Processing batch image request for ${productIds.length} ProductIDs`);
+            const imageMap = await ImageModel.getBatchFirstImages(productIds);
 
             // Vẫn return success ngay cả khi một số images không tìm thấy
             return res.status(200).json({
                 success: true,
                 message: 'Batch images retrieved successfully',
                 data: {
-                    totalRequested: externalIds.length,
+                    totalRequested: productIds.length,
                     totalFound: Object.keys(imageMap).length,
                     imageMap
                 }
@@ -128,7 +128,7 @@ class ImageController {
                 success: false,
                 message: 'MongoDB connection failed, returning empty results',
                 data: {
-                    totalRequested: req.body.externalIds ? req.body.externalIds.length : 0,
+                    totalRequested: req.body.productIds ? req.body.productIds.length : 0,
                     totalFound: 0,
                     imageMap: {},
                     error: error.message
@@ -138,27 +138,27 @@ class ImageController {
     }
 
     /**
-     * API lấy total_reviews cho một listing_id
-     * GET /api/images/reviews/:listingId
+     * API lấy total_reviews cho một productId
+     * GET /api/images/reviews/:productId
      */
     static async getTotalReviews(req, res) {
         try {
-            const { listingId } = req.params;
+            const { productId } = req.params;
 
-            if (!listingId) {
+            if (!productId) {
                 return res.status(400).json({
                     success: false,
-                    message: 'ListingId is required'
+                    message: 'ProductId is required'
                 });
             }
 
-            const totalReviews = await ImageModel.getTotalReviewsByListingId(listingId);
+            const totalReviews = await ImageModel.getTotalReviewsByProductId(productId);
 
             if (totalReviews === null) {
                 return res.status(404).json({
                     success: false,
-                    message: 'No reviews found for this listing_id',
-                    data: { listingId }
+                    message: 'No reviews found for this productId',
+                    data: { productId }
                 });
             }
 
@@ -166,7 +166,7 @@ class ImageController {
                 success: true,
                 message: 'Total reviews retrieved successfully',
                 data: {
-                    listingId,
+                    productId,
                     totalReviews
                 }
             });
@@ -182,36 +182,36 @@ class ImageController {
     }
 
     /**
-     * API lấy total_reviews cho nhiều listing_id cùng lúc
+     * API lấy total_reviews cho nhiều productId cùng lúc
      * POST /api/images/reviews/batch
-     * Body: { listingIds: ["id1", "id2", "id3"] }
+     * Body: { productIds: ["id1", "id2", "id3"] }
      */
     static async getBatchTotalReviews(req, res) {
         try {
-            const { listingIds } = req.body;
+            const { productIds } = req.body;
 
-            if (!listingIds || !Array.isArray(listingIds) || listingIds.length === 0) {
+            if (!productIds || !Array.isArray(productIds) || productIds.length === 0) {
                 return res.status(400).json({
                     success: false,
-                    message: 'ListingIds array is required and must not be empty'
+                    message: 'ProductIds array is required and must not be empty'
                 });
             }
 
-            if (listingIds.length > 100) {
+            if (productIds.length > 100) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Too many listingIds. Maximum 100 allowed per request.'
+                    message: 'Too many productIds. Maximum 100 allowed per request.'
                 });
             }
 
-            console.log(`Processing batch reviews request for ${listingIds.length} listing_ids`);
-            const reviewsMap = await ImageModel.getBatchTotalReviews(listingIds);
+            console.log(`Processing batch reviews request for ${productIds.length} productIds`);
+            const reviewsMap = await ImageModel.getBatchTotalReviews(productIds);
 
             return res.status(200).json({
                 success: true,
                 message: 'Batch reviews retrieved successfully',
                 data: {
-                    totalRequested: listingIds.length,
+                    totalRequested: productIds.length,
                     totalFound: Object.keys(reviewsMap).length,
                     reviewsMap
                 }
@@ -224,7 +224,7 @@ class ImageController {
                 success: false,
                 message: 'MongoDB connection failed, returning empty results',
                 data: {
-                    totalRequested: req.body.listingIds ? req.body.listingIds.length : 0,
+                    totalRequested: req.body.productIds ? req.body.productIds.length : 0,
                     totalFound: 0,
                     reviewsMap: {},
                     error: error.message

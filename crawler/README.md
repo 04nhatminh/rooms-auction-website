@@ -110,7 +110,7 @@ python database/upsert_to_mysql.py
 #### `images` Collection:
 ```json
 {
-  "ExternalID": "listing_id",
+  "ProductID": "listing_id",
   "Images": [
     {
       "id": "image_id",
@@ -126,7 +126,7 @@ python database/upsert_to_mysql.py
 #### `room_tour_images` Collection:
 ```json
 {
-  "ExternalID": "listing_id",
+  "ProductID": "listing_id",
   "RoomTourItems": [
     {
       "title": "Tên phòng",
@@ -140,7 +140,7 @@ python database/upsert_to_mysql.py
 #### `policies` Collection:
 ```json
 {
-  "ExternalID": "listing_id", 
+  "ProductID": "listing_id", 
   "Policies": {
     "house_rules": ["rule1", "rule2"],
     "safety_properties": ["safety1", "safety2"],
@@ -153,7 +153,7 @@ python database/upsert_to_mysql.py
 #### `highlights` Collection:
 ```json
 {
-  "ExternalID": "listing_id",
+  "ProductID": "listing_id",
   "Highlights": [
     {
       "title": "Tiêu đề",
@@ -168,7 +168,7 @@ python database/upsert_to_mysql.py
 #### `descriptions` Collection:
 ```json
 {
-  "ExternalID": "listing_id",
+  "ProductID": "listing_id",
   "Descriptions": [
     {
       "title": "Tiêu đề (có thể null)",

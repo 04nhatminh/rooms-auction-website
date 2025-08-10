@@ -4,7 +4,6 @@ import './App.css';
 
 // Import pages
 import Home from './pages/Home';
-import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
 import RoomDetailPage from './pages/RoomDetailPage';
@@ -16,11 +15,11 @@ function App() {
     <Router>
       <div className="App">
         <Routes>
-          <Route path="/home" element={<HomePage />} />
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/room" element={<RoomDetailPage />} />
+          <Route path="/room/:roomId" element={<RoomDetailPage />} />
           <Route path="/verification-success" element={<VerificationSuccessPage />} />
           <Route path="/admin/users-management" element={<UsersManagementPage />} />
         </Routes>

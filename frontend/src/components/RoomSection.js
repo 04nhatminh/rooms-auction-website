@@ -67,32 +67,22 @@ const RoomSection = ({ title, provinceCode = '01', limit = 15 }) => {
 
         const products = data.data.products;
         
-        // 2. Lấy danh sách ExternalID để fetch images
-        const externalIds = products
-          .map(product => product.ExternalID)
+        // 2. Lấy danh sách ProductID để fetch images và reviews
+        const productIds = products
+          .map(product => product.ProductID)
           .filter(id => id); // Loại bỏ null/undefined
 
-        if (externalIds.length > 0) {
-          // 3. Fetch images từ MongoDB batch
+        if (productIds.length > 0) {
+          // 3. Fetch images từ MongoDB batch bằng ProductID
           const imageResponse = await fetch('http://localhost:3000/api/images/batch', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ externalIds })
-          });
-
-          // 4. Fetch reviews từ MongoDB batch
-          const reviewsResponse = await fetch('http://localhost:3000/api/images/reviews/batch', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ listingIds: externalIds }) // listing_id tương ứng với ExternalID
+            body: JSON.stringify({ productIds })
           });
 
           let imageMap = {};
-          let reviewsMap = {};
 
           if (imageResponse.ok) {
             const imageData = await imageResponse.json();
@@ -101,18 +91,30 @@ const RoomSection = ({ title, provinceCode = '01', limit = 15 }) => {
             console.warn('Failed to fetch images from MongoDB');
           }
 
-          if (reviewsResponse.ok) {
-            const reviewsData = await reviewsResponse.json();
-            reviewsMap = reviewsData.success ? reviewsData.data.reviewsMap : {};
-          } else {
-            console.warn('Failed to fetch reviews from MongoDB');
+          // . Fetch reviews từ MongoDB batch bằng ProductID
+          let reviewsMap = {};
+          if (productIds.length > 0) {
+            const reviewsResponse = await fetch('http://localhost:3000/api/images/reviews/batch', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ productIds })
+            });
+
+            if (reviewsResponse.ok) {
+              const reviewsData = await reviewsResponse.json();
+              reviewsMap = reviewsData.success ? reviewsData.data.reviewsMap : {};
+            } else {
+              console.warn('Failed to fetch reviews from MongoDB');
+            }
           }
 
-          // 5. Gắn imageUrl và totalReviews vào products
+          // 6. Gắn imageUrl và totalReviews vào products
           const productsWithImagesAndReviews = products.map(product => ({
             ...product,
-            mongoImageUrl: product.ExternalID ? imageMap[product.ExternalID] : null,
-            totalReviews: product.ExternalID ? reviewsMap[product.ExternalID] : null
+            mongoImageUrl: product.ProductID ? imageMap[product.ProductID] : null,
+            totalReviews: product.ProductID ? reviewsMap[product.ProductID] : null
           }));
 
           setProducts(productsWithImagesAndReviews);

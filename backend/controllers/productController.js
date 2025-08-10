@@ -172,6 +172,7 @@ class ProductController {
             const query = `
                 SELECT 
                     p.ProductID,
+                    p.UID,
                     p.Name,
                     p.Address,
                     p.ProvinceCode,
