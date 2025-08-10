@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { ProductContext } from '../contexts/ProductContext';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import Header from '../components/Header';
@@ -22,14 +23,14 @@ const RoomDetailPage = () => {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    axios.get(`/api/products/${id}`)
+    axios.get(`/api/room/${id}`)
       .then((res) => {
         console.log("✅ API response:", res.data);
         setData(res.data.data);
       })
       .catch((err) => {
         console.error("Error loading product data", err);
-        setError('Không thể tải dữ liệu sản phẩm.');
+        setError(err?.response?.data?.message || err.message || 'Không thể tải dữ liệu sản phẩm.');
       });
   }, [id]);
   
@@ -37,35 +38,36 @@ const RoomDetailPage = () => {
   if (!data) return <p>Loading...</p>;
   return (
     <div className="room-detail-page">
-      <Header />
-      <main className="room-detail-content">
-        console.log("🧠 Fetched Name:", {data.details.Name});
-        <RoomTitle title={data.details.Name} />
-        <ImageGallery />
-        <div className="main-content">
-          <div className="left-column">
-            <Overview />
-            <hr />
-            <Description descriptions={data.description}/>
-            <hr />
-             <Amenities amenities={data.amenities} />
-            <hr />
-            <Calendar />
+      <ProductContext.Provider value={{ data, setData }}> 
+        <Header />
+        <main className="room-detail-content">
+            <RoomTitle />
+            <ImageGallery />
+          <div className="main-content">
+            <div className="left-column">
+              <Overview />
+              <hr />
+              <Description/>
+              <hr />
+              <Amenities />
+              <hr />
+              <Calendar />
+            </div>
+            <div className="right-column">
+              <BookingCard />
+            </div>
           </div>
-          <div className="right-column">
-            <BookingCard />
-          </div>
-        </div>
-        <hr />
-        <Rating />
-        <hr />
-        <Reviews />
-        <hr />
-        <Location />
-        <hr />
-        <HouseRules />
-      </main>
-      <Footer />
+          <hr />
+          <Rating />
+          <hr />
+          <Reviews />
+          <hr />
+          <Location />
+          <hr />
+          <HouseRules />
+        </main>
+        <Footer />
+      </ProductContext.Provider>
     </div>
   );
 };

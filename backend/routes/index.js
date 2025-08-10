@@ -6,7 +6,7 @@ const productRoutes = require('./productRoutes');
 
 // Demo routes - điều hướng đến /demo
 router.use('/api/demo', demoRoutes);
-router.use('/api/products', productRoutes);
+router.use('/api/room', productRoutes);
 
 router.get('/', (req, res) => {
     res.status(200).json({

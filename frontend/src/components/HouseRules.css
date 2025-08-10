@@ -20,6 +20,7 @@
   align-items: flex-start;
 }
 
+
 .rules-column h4 {
   margin-top: 0px;
   margin-bottom: 16px;
@@ -38,7 +39,10 @@
   font-size: 14px;
   font-style: normal;
   font-weight: 500;
-  line-height: 24px;
+  /* line-height: 24px; */
+  white-space: normal;  
+  word-break: break-word;
+  max-width: 100%; 
 }
 
 .rules-column button {

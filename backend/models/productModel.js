@@ -11,7 +11,7 @@ class ProductModel {
     async initMongo() {
         try {
             const client = await MongoClient.connect('mongodb+srv://11_a2airbnb:anhmanminhnhu@cluster0.cyihew1.mongodb.net/');
-            this.mongoDb = client.db('air2airbnb');
+            this.mongoDb = client.db('a2airbnb');
         } catch (err) {
             console.error("MongoDB connection failed:", err);
         }
@@ -45,6 +45,7 @@ class ProductModel {
                     pa.ProductID = ?
             `;
             const [amenities] = await db.execute(query, [productID]);
+            console.log(`Fetched amenities for ProductID ${productID}:`, amenities);
             return amenities;
         } catch (error) {
             console.error('Error fetching product amenities:', error);
@@ -53,7 +54,7 @@ class ProductModel {
     }
 
     async getProductDescription(productID) {
-        const [products] = await db.execute('SELECT ExternalID, Name FROM Products WHERE ProductID = ?', [productID]);
+        const [products] = await db.execute('SELECT ExternalID FROM Products WHERE ProductID = ?', [productID]);
 
         if (products.length === 0) {
             console.log(`No product found in MySQL for ProductID ${productID}`);
@@ -74,14 +75,157 @@ class ProductModel {
 
         console.log(`Found description in MongoDB for ExternalID ${externalID}`);
         console.log(`Description: ${matchingDoc.Descriptions}`);
-        return {
-            success: true,
-            externalID: externalID,
-            descriptions: matchingDoc.Descriptions
-        };
+
+        return matchingDoc.Descriptions;
 
     }
 
+    async getProductReviews(productID) {
+        const [products] = await db.execute('SELECT ExternalID FROM Products WHERE ProductID = ?', [productID]);
+
+        if (products.length === 0) {
+            console.log(`No product found in MySQL for ProductID ${productID}`);
+            return;
+        }
+
+        const externalID = products[0].ExternalID;
+
+        // Step 2: Fetch matching document from MongoDB
+        const collection = this.mongoDb.collection('reviews');
+        const matchingDoc = await collection.findOne({ listing_id: externalID });
+
+        if (!matchingDoc) {
+        return { success: false, message: 'No reviews found in MongoDB' };
+        }
+
+        // Step 3: Return the MongoDB document
+
+        console.log(`Found reviews in MongoDB for ExternalID ${externalID}`);
+
+        console.log(`Reviews:`, matchingDoc);
+        return matchingDoc;
+
+    }
+
+    async getProductImages(productID) {
+        const [products] = await db.execute('SELECT ExternalID FROM Products WHERE ProductID = ?', [productID]);
+
+        if (products.length === 0) {
+            console.log(`No product found in MySQL for ProductID ${productID}`);
+            return;
+        }
+
+        const externalID = products[0].ExternalID;
+
+        // Step 2: Fetch matching document from MongoDB
+        const collection = this.mongoDb.collection('images');
+        const matchingDoc = await collection.findOne({ ExternalID: externalID });
+
+        if (!matchingDoc) {
+        return { success: false, message: 'No images found in MongoDB' };
+        }
+
+        // Step 3: Return the MongoDB document
+
+        console.log(`Found images in MongoDB for ExternalID ${externalID}`);
+        console.log(`Images: ${matchingDoc.Images}`);
+
+        return matchingDoc.Images || []; // Trả về mảng hình ảnh, nếu không có thì trả về mảng rỗng
+
+    }
+
+    async getProductPolicies(productID) {
+        const [products] = await db.execute('SELECT ExternalID FROM Products WHERE ProductID = ?', [productID]);
+
+        if (products.length === 0) {
+            console.log(`No product found in MySQL for ProductID ${productID}`);
+            return;
+        }
+
+        const externalID = products[0].ExternalID;
+
+        // Step 2: Fetch matching document from MongoDB
+        const collection = this.mongoDb.collection('policies');
+        const matchingDoc = await collection.findOne({ ExternalID: externalID });
+
+        if (!matchingDoc) {
+        return { success: false, message: 'No policies found in MongoDB' };
+        }
+
+        // Step 3: Return the MongoDB document
+
+        console.log(`Found policies in MongoDB for ExternalID ${externalID}`);
+        console.log(`Policy: ${matchingDoc.Policies}`);
+
+        return matchingDoc.Policies || []; // Trả về mảng hình ảnh, nếu không có thì trả về mảng rỗng
+
+    }
+
+    async getProductProvinceName(productID) 
+    {
+        try {
+                const query = `
+                SELECT 
+                    pa.Name 
+                FROM 
+                    Provinces pa
+                JOIN 
+                    Products pr ON pr.ProvinceCode = pa.ProvinceCode
+                WHERE 
+                    pr.ProductID = ?
+            `;
+                const [provinceName] = await db.execute(query, [productID]);
+                console.log(`Fetched product province for ProductID ${productID}:`, provinceName);
+                return provinceName[0]; // Trả về sản phẩm đầu tiên
+        } catch (error) {
+            console.error('Error fetching product province:', error);
+            throw error; // Ném lỗi để xử lý ở nơi gọi
+        }
+    }
+
+    async getProductDistrictName(productID) 
+    {
+        try {
+                const query = `
+                SELECT 
+                    d.Name 
+                FROM 
+                    Districts d
+                JOIN 
+                    Products p ON p.DistrictCode = d.DistrictCode
+                WHERE 
+                    p.ProductID = ?
+            `;
+                const [districtName] = await db.execute(query, [productID]);
+                console.log(`Fetched product district for ProductID ${productID}:`, districtName);
+                return districtName[0]; // Trả về sản phẩm đầu tiên
+        } catch (error) {
+            console.error('Error fetching product district:', error);
+            throw error; // Ném lỗi để xử lý ở nơi gọi
+        }
+    }
+
+    async getProductPropertyTypeName(productID) 
+    {
+        try {
+                const query = `
+                SELECT 
+                    prop.PropertyName as Name
+                FROM 
+                    Properties prop
+                JOIN 
+                    Products p ON p.PropertyType = prop.PropertyID
+                WHERE 
+                    p.ProductID = ?
+            `;
+                const [property] = await db.execute(query, [productID]);
+                console.log(`Fetched product property name for ProductID ${productID}:`, property);
+                return property[0]; // Trả về sản phẩm đầu tiên
+        } catch (error) {
+            console.error('Error fetching product property name:', error);
+            throw error; // Ném lỗi để xử lý ở nơi gọi
+        }
+    }
 }
 
 module.exports = new ProductModel();

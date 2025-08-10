@@ -1,4 +1,5 @@
 const ProductModel = require('../models/productModel');
+const { get } = require('../routes');
 
 class ProductController {
     async getFullProductDataById(req, res) {
@@ -9,13 +10,27 @@ class ProductController {
             // Fetch all in parallel
             const [
                 productDetails,
+                productProvinceName,
+                productDistrictName,
+                productPropertyName,
                 productAmenities,
-                productDescription
+                productDescription,
+                productReviews,
+                productImages,
+                productPolicies
             ] = await Promise.all([
                 ProductModel.getProductDetails(productID),
+                ProductModel.getProductProvinceName(productID),
+                ProductModel.getProductDistrictName(productID),
+                ProductModel.getProductPropertyTypeName(productID),
                 ProductModel.getProductAmenities(productID),
-                ProductModel.getProductDescription(productID)
+                ProductModel.getProductDescription(productID),
+                ProductModel.getProductReviews(productID),
+                ProductModel.getProductImages(productID),
+                ProductModel.getProductPolicies(productID)
             ]);
+
+            const averageRating = calculateRating(productReviews);
 
             if (!productDetails) {
                 return res.status(404).json({
@@ -28,8 +43,15 @@ class ProductController {
                 success: true,
                 data: {
                     details: productDetails,
+                    provinceName: productProvinceName,
+                    districtName: productDistrictName,
+                    propertyName: productPropertyName,
                     amenities: productAmenities,
-                    description: productDescription?.descriptions || []
+                    description: productDescription,
+                    reviews: productReviews,
+                    images: productImages,
+                    policies: productPolicies, 
+                    averageRating: averageRating
                 }
             });
 
@@ -43,5 +65,23 @@ class ProductController {
         }
     }
 }
+
+function calculateRating(productReviews) {
+    if (
+    !productReviews ||
+    !Array.isArray(productReviews.reviews) ||
+    productReviews.reviews.length === 0
+    ) return 0;
+
+    const totalReviews = productReviews.total_reviews;
+        
+    const sumRatings = productReviews.reviews.reduce((sum, review) => sum + review.rating, 0);
+    const averageRating = (sumRatings / totalReviews).toFixed(2);
+
+    console.log(`Calculated average rating: ${averageRating} based on ${totalReviews} reviews`);
+
+    return averageRating;
+}
+
 
 module.exports = new ProductController();
