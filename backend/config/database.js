@@ -1,5 +1,7 @@
 require('dotenv').config({ path: '../.env' });
 const mysql = require('mysql2/promise');
+const { spawn } = require('child_process');
+const path = require('path');
 
 const dbConfig = {
     host: process.env.DB_HOST || 'localhost',
@@ -201,6 +203,7 @@ async function createProductsTable() {
     await pool.execute(`
         CREATE TABLE IF NOT EXISTS Products (
             ProductID INT AUTO_INCREMENT PRIMARY KEY,
+            UID BIGINT UNSIGNED,
             Source VARCHAR(20),
             ExternalID VARCHAR(30),
             Name VARCHAR(255),
@@ -419,13 +422,604 @@ async function createRatingTable() {
     }
 }
 
+// Procedure
+async function dropUpsertPropertyProcedureIfExists() {
+    await pool.query(`
+        DROP PROCEDURE IF EXISTS UpsertProperty;
+    `);
+}
+
+async function createUpsertPropertyProcedure() {
+    await pool.query(`
+        
+        CREATE PROCEDURE UpsertProperty(IN p_PropertyName VARCHAR(255))
+        BEGIN
+            DECLARE v_PropertyID INT;
+            DECLARE v_OldName VARCHAR(255);
+
+            SELECT PropertyID, PropertyName INTO v_PropertyID, v_OldName
+            FROM Properties
+            WHERE PropertyName = p_PropertyName
+            LIMIT 1;
+
+            IF v_PropertyID IS NULL THEN
+                INSERT INTO Properties(PropertyName, PropertyImageURL)
+                VALUES(p_PropertyName, NULL);
+            ELSE
+                IF v_OldName <> p_PropertyName THEN
+                    UPDATE Properties
+                    SET PropertyName = p_PropertyName
+                    WHERE PropertyID = v_PropertyID;
+                END IF;
+            END IF;
+        END;
+    `);
+}
+
+async function dropUpsertRoomTypeProcedureIfExists() {
+    await pool.query(`
+        DROP PROCEDURE IF EXISTS UpsertRoomType;
+    `);
+}
+
+async function createUpsertRoomTypeProcedure() {
+    await pool.query(`
+        
+        CREATE PROCEDURE UpsertRoomType(IN p_RoomTypeName VARCHAR(255))
+        BEGIN
+            DECLARE v_RoomTypeID INT;
+            DECLARE v_OldName VARCHAR(255);
+
+            SELECT RoomTypeID, RoomTypeName INTO v_RoomTypeID, v_OldName
+            FROM RoomTypes
+            WHERE RoomTypeName = p_RoomTypeName
+            LIMIT 1;
+
+            IF v_RoomTypeID IS NULL THEN
+                INSERT INTO RoomTypes(RoomTypeName, RoomTypeImageURL)
+                VALUES(p_RoomTypeName, NULL);
+            ELSE
+                IF v_OldName <> p_RoomTypeName THEN
+                    UPDATE RoomTypes
+                    SET RoomTypeName = p_RoomTypeName
+                    WHERE RoomTypeID = v_RoomTypeID;
+                END IF;
+            END IF;
+        END;
+    `);
+}
+
+async function dropUpsertProductProcedureIfExists() {
+    await pool.query(`
+        DROP PROCEDURE IF EXISTS UpsertProduct;
+    `);
+}
+
+async function createUpsertProductProcedure() {
+    await pool.query(`
+        
+        CREATE PROCEDURE UpsertProduct(
+            IN p_UID BIGINT UNSIGNED,
+            IN p_ExternalID VARCHAR(30),
+            IN p_Source VARCHAR(20),
+            IN p_Name VARCHAR(255),
+            IN p_Address VARCHAR(255),
+            IN p_ProvinceCode VARCHAR(20),
+            IN p_DistrictCode VARCHAR(20),
+            IN p_Latitude FLOAT,
+            IN p_Longitude FLOAT,
+            IN p_PropertyType INT,
+            IN p_RoomType INT,
+            IN p_MaxGuests SMALLINT,
+            IN p_NumBedrooms SMALLINT,
+            IN p_NumBeds SMALLINT,
+            IN p_NumBathrooms SMALLINT,
+            IN p_Price DECIMAL(10,2),
+            IN p_Currency VARCHAR(20),
+            IN p_Cleanliness FLOAT,
+            IN p_Location FLOAT,
+            IN p_Service FLOAT,
+            IN p_Value FLOAT,
+            IN p_Communication FLOAT,
+            IN p_Convenience FLOAT,
+            IN p_CreatedAt TIMESTAMP,
+            IN p_LastSyncedAt TIMESTAMP
+        )
+        BEGIN
+            DECLARE v_ProductID INT;
+
+            SELECT ProductID INTO v_ProductID
+            FROM Products
+            WHERE ExternalID = p_ExternalID
+            LIMIT 1;
+
+            IF v_ProductID IS NULL THEN
+                -- Insert nếu chưa có
+                INSERT INTO Products(UID, Source, ExternalID, Name, Address, ProvinceCode, DistrictCode, Latitude, Longitude,
+                                    PropertyType, RoomType, MaxGuests, NumBedrooms, NumBeds, NumBathrooms, Price, Currency,
+                                    CleanlinessPoint, LocationPoint, ServicePoint, ValuePoint, CommunicationPoint, ConveniencePoint,
+                                    CreatedAt, LastSyncedAt)
+                VALUES(p_UID, p_Source, p_ExternalID, p_Name, p_Address, p_ProvinceCode, p_DistrictCode, p_Latitude, p_Longitude,
+                    p_PropertyType, p_RoomType, p_MaxGuests, p_NumBedrooms, p_NumBeds, p_NumBathrooms, p_Price, p_Currency,
+                    p_Cleanliness, p_Location, p_Service, p_Value, p_Communication, p_Convenience,
+                    p_CreatedAt, p_LastSyncedAt);
+            ELSE
+                -- Chỉ update nếu có sự khác biệt
+                IF EXISTS (
+                    SELECT 1 FROM Products
+                    WHERE ProductID = v_ProductID
+                    AND (
+                        Source <> p_Source OR
+                        Name <> p_Name OR
+                        Address <> p_Address OR
+                        ProvinceCode <> p_ProvinceCode OR
+                        DistrictCode <> p_DistrictCode OR
+                        Latitude <> p_Latitude OR
+                        Longitude <> p_Longitude OR
+                        PropertyType <> p_PropertyType OR
+                        RoomType <> p_RoomType OR
+                        MaxGuests <> p_MaxGuests OR
+                        NumBedrooms <> p_NumBedrooms OR
+                        NumBeds <> p_NumBeds OR
+                        NumBathrooms <> p_NumBathrooms OR
+                        Price <> p_Price OR
+                        Currency <> p_Currency OR
+                        CleanlinessPoint <> p_Cleanliness OR
+                        LocationPoint <> p_Location OR
+                        ServicePoint <> p_Service OR
+                        ValuePoint <> p_Value OR
+                        CommunicationPoint <> p_Communication OR
+                        ConveniencePoint <> p_Convenience
+                    )
+                ) THEN
+                    UPDATE Products
+                    SET 
+                        Source = p_Source,
+                        Name = p_Name,
+                        Address = p_Address,
+                        ProvinceCode = p_ProvinceCode,
+                        DistrictCode = p_DistrictCode,
+                        Latitude = p_Latitude,
+                        Longitude = p_Longitude,
+                        PropertyType = p_PropertyType,
+                        RoomType = p_RoomType,
+                        MaxGuests = p_MaxGuests,
+                        NumBedrooms = p_NumBedrooms,
+                        NumBeds = p_NumBeds,
+                        NumBathrooms = p_NumBathrooms,
+                        Price = p_Price,
+                        Currency = p_Currency,
+                        CleanlinessPoint = p_Cleanliness,
+                        LocationPoint = p_Location,
+                        ServicePoint = p_Service,
+                        ValuePoint = p_Value,
+                        CommunicationPoint = p_Communication,
+                        ConveniencePoint = p_Convenience,
+                        CreatedAt = p_CreatedAt,
+                        LastSyncedAt = p_LastSyncedAt
+                    WHERE ProductID = v_ProductID;
+                ELSE
+                    -- Chỉ cập nhật thời gian đồng bộ nếu không thay đổi gì khác
+                    UPDATE Products
+                    SET LastSyncedAt = p_LastSyncedAt
+                    WHERE ProductID = v_ProductID;
+                END IF;
+            END IF;
+        END;
+    `);
+}
+
+async function dropUpsertAmenityGroupProcedureIfExists() {
+    await pool.query(`
+        DROP PROCEDURE IF EXISTS UpsertAmenityGroup;
+    `);
+}
+
+async function createUpsertAmenityGroupProcedure() {
+    await pool.query(`
+        
+        CREATE PROCEDURE UpsertAmenityGroup(IN p_GroupName VARCHAR(255))
+        BEGIN
+            DECLARE v_GroupID INT;
+            DECLARE v_OldName VARCHAR(255);
+
+            SELECT AmenityGroupID, AmenityGroupName INTO v_GroupID, v_OldName
+            FROM AmenityGroups
+            WHERE AmenityGroupName = p_GroupName
+            LIMIT 1;
+
+            IF v_GroupID IS NULL THEN
+                INSERT INTO AmenityGroups(AmenityGroupName)
+                VALUES(p_GroupName);
+            ELSE
+                IF v_OldName <> p_GroupName THEN
+                    UPDATE AmenityGroups
+                    SET AmenityGroupName = p_GroupName
+                    WHERE AmenityGroupID = v_GroupID;
+                END IF;
+            END IF;
+        END;
+    `);
+}
+
+async function dropUpsertAmenityProcedureIfExists() {
+    await pool.query(`
+        DROP PROCEDURE IF EXISTS UpsertAmenity;
+    `);
+}
+
+async function createUpsertAmenityProcedure() {
+    await pool.query(`
+        
+        CREATE PROCEDURE UpsertAmenity(IN p_AmenityName VARCHAR(255), IN p_GroupID INT)
+        BEGIN
+            DECLARE v_AmenityID INT;
+            DECLARE v_OldName VARCHAR(255);
+            DECLARE v_OldGroupID INT;
+
+            SELECT AmenityID, AmenityName, AmenityGroupID INTO v_AmenityID, v_OldName, v_OldGroupID
+            FROM Amenities
+            WHERE AmenityName = p_AmenityName
+            LIMIT 1;
+
+            IF v_AmenityID IS NULL THEN
+                INSERT INTO Amenities(AmenityName, AmenityGroupID, AmenityImageURL)
+                VALUES(p_AmenityName, p_GroupID, NULL);
+            ELSE
+                IF v_OldName <> p_AmenityName OR v_OldGroupID <> p_GroupID THEN
+                    UPDATE Amenities
+                    SET AmenityName = p_AmenityName,
+                        AmenityGroupID = p_GroupID
+                    WHERE AmenityID = v_AmenityID;
+                END IF;
+            END IF;
+        END;
+    `);
+}
+
+async function dropUpsertProductAmenityProcedureIfExists() {
+    await pool.query(`
+        DROP PROCEDURE IF EXISTS UpsertProductAmenity;
+    `);
+}
+
+async function createUpsertProductAmenityProcedure() {
+    await pool.query(`
+        
+        CREATE PROCEDURE UpsertProductAmenity(IN p_ProductID INT, IN p_AmenityID INT)
+        BEGIN
+            DECLARE v_Count INT;
+
+            SELECT COUNT(*) INTO v_Count
+            FROM ProductAmenities
+            WHERE ProductID = p_ProductID AND AmenityID = p_AmenityID;
+
+            IF v_Count = 0 THEN
+                INSERT INTO ProductAmenities(ProductID, AmenityID)
+                VALUES(p_ProductID, p_AmenityID);
+            END IF;
+            -- Không có gì để update nên không cần phần ELSE
+        END;
+    `);
+}
+
+async function dropUpsertRatingProcedureIfExists() {
+    await pool.query(`
+        DROP PROCEDURE IF EXISTS UpsertRating;
+    `);
+}
+
+async function createUpsertRatingProcedure() {
+    await pool.query(`
+        
+        CREATE PROCEDURE UpsertRating(
+            IN p_ExternalID VARCHAR(30),
+            IN p_BookingID INT,
+            IN p_ProductID INT,
+            IN p_Cleanliness FLOAT,
+            IN p_Location FLOAT,
+            IN p_Service FLOAT,
+            IN p_Value FLOAT,
+            IN p_Communication FLOAT,
+            IN p_Convenience FLOAT
+        )
+        BEGIN
+            DECLARE v_RatingID INT;
+            
+            SELECT RatingID INTO v_RatingID
+            FROM Rating
+            WHERE ExternalID = p_ExternalID
+            LIMIT 1;
+            
+            IF v_RatingID IS NULL THEN
+                INSERT INTO Rating(ExternalID, BookingID, ProductID, CleanlinessPoint, LocationPoint,
+                                ServicePoint, ValuePoint, CommunicationPoint, ConveniencePoint)
+                VALUES(p_ExternalID, p_BookingID, p_ProductID, p_Cleanliness, p_Location,
+                    p_Service, p_Value, p_Communication, p_Convenience);
+            ELSE
+                UPDATE Rating
+                SET BookingID = p_BookingID,
+                    ProductID = p_ProductID,
+                    CleanlinessPoint = p_Cleanliness,
+                    LocationPoint = p_Location,
+                    ServicePoint = p_Service,
+                    ValuePoint = p_Value,
+                    CommunicationPoint = p_Communication,
+                    ConveniencePoint = p_Convenience
+                WHERE RatingID = v_RatingID;
+            END IF;
+        END;
+    `);
+}
+
+async function dropGetTopProductsByProvinceProcedureIfExists() {
+    await pool.query(`
+        DROP PROCEDURE IF EXISTS GetTopProductsByProvince;
+    `);
+}
+
+async function createGetTopProductsByProvinceProcedure() {
+    await pool.query(`
+        
+        CREATE PROCEDURE GetTopProductsByProvince(
+            IN province_code_input VARCHAR(20),
+            IN limit_input INT
+        )
+        BEGIN
+            SELECT 
+                p.ProductID,
+                p.UID,
+                p.ExternalID,
+                p.Name,
+                p.Address,
+                prov.Name AS ProvinceName,
+                disct.Name AS DistrictName,
+                p.ProvinceCode,
+                p.DistrictCode,
+                prop.PropertyName,
+                p.Price,
+                p.Currency,
+                p.CleanlinessPoint,
+                p.LocationPoint,
+                p.ServicePoint,
+                p.ValuePoint,
+                p.CommunicationPoint,
+                p.ConveniencePoint,
+                ROUND((
+                    COALESCE(p.CleanlinessPoint, 0) + 
+                    COALESCE(p.LocationPoint, 0) + 
+                    COALESCE(p.ServicePoint, 0) + 
+                    COALESCE(p.ValuePoint, 0) + 
+                    COALESCE(p.CommunicationPoint, 0) + 
+                    COALESCE(p.ConveniencePoint, 0)
+                ) / 6, 2) AS AverageRating,
+                prop.PropertyName,
+                prop.PropertyImageURL,
+                rt.RoomTypeName,
+                rt.RoomTypeImageURL
+            FROM Products p
+            LEFT JOIN Properties prop ON p.PropertyType = prop.PropertyID
+            LEFT JOIN RoomTypes rt ON p.RoomType = rt.RoomTypeID
+            LEFT JOIN Provinces prov ON p.ProvinceCode = prov.ProvinceCode
+            LEFT JOIN Districts disct ON p.DistrictCode = disct.DistrictCode
+            WHERE p.ProvinceCode = province_code_input
+                AND p.CleanlinessPoint IS NOT NULL
+                AND p.LocationPoint IS NOT NULL  
+                AND p.ServicePoint IS NOT NULL
+                AND p.ValuePoint IS NOT NULL
+                AND p.CommunicationPoint IS NOT NULL
+                AND p.ConveniencePoint IS NOT NULL
+            ORDER BY AverageRating DESC
+            LIMIT limit_input;
+        END;
+    `);
+}
+
+async function installPythonDependencies() {    
+    return new Promise((resolve, reject) => {
+        const crawlerDir = path.join(__dirname, '../../crawler');
+        const requirementsPath = path.join(crawlerDir, 'requirements.txt');
+        
+        // Kiểm tra xem requirements.txt có tồn tại không
+        if (!require('fs').existsSync(requirementsPath)) {
+            console.log('⚠️ requirements.txt not found, skipping dependency installation');
+            resolve();
+            return;
+        }
+        
+        const pipProcess = spawn('pip', ['install', '-r', 'requirements.txt'], {
+            cwd: crawlerDir,
+            stdio: ['pipe', 'pipe', 'pipe']
+        });
+        
+        let stdoutData = '';
+        let stderrData = '';
+        
+        pipProcess.stdout.on('data', (data) => {
+            const output = data.toString();
+            stdoutData += output;
+        });
+        
+        pipProcess.stderr.on('data', (data) => {
+            const error = data.toString();
+            stderrData += error;
+        });
+        
+        pipProcess.on('close', (code) => {
+            if (code === 0) {
+                console.log('✅ Python dependencies installed successfully!');
+                resolve(stdoutData);
+            } else {
+                console.error(`❌ Pip install failed with exit code: ${code}`);
+                console.error(`❌ Error output: ${stderrData}`);
+                reject(new Error(`Pip install exited with code ${code}`));
+            }
+        });
+        
+        pipProcess.on('error', (error) => {
+            console.error('❌ Failed to start pip process:', error);
+            // Không reject để script vẫn tiếp tục chạy
+            console.log('⚠️ Continuing without dependency installation...');
+            resolve();
+        });
+    });
+}
+
+async function importBasicData() {    
+    return new Promise((resolve, reject) => {
+        const fs = require('fs');
+        const dataFilePath = path.join(__dirname, '../../crawler/output/data.sql');
+        
+        // Kiểm tra xem file data.sql có tồn tại không
+        if (!fs.existsSync(dataFilePath)) {
+            console.log('⚠️ data.sql not found, skipping basic data import');
+            resolve();
+            return;
+        }
+        
+        // Đọc nội dung file SQL với encoding UTF-8
+        fs.readFile(dataFilePath, 'utf8', async (err, sqlContent) => {
+            if (err) {
+                console.error('❌ Error reading data.sql:', err);
+                reject(err);
+                return;
+            }
+            
+            try {
+                // Loại bỏ BOM nếu có
+                if (sqlContent.charCodeAt(0) === 0xFEFF) {
+                    sqlContent = sqlContent.slice(1);
+                }
+                
+                // Tách các câu lệnh SQL bằng dấu ;
+                const sqlStatements = sqlContent
+                    .split(';')
+                    .map(stmt => stmt.trim())
+                    .filter(stmt => 
+                        stmt.length > 0 && 
+                        !stmt.startsWith('--') && 
+                        !stmt.startsWith('/*') &&
+                        !stmt.toUpperCase().startsWith('USE') // Loại bỏ lệnh USE
+                    );
+                
+                // Nhóm các statements theo bảng để đảm bảo thứ tự insert đúng
+                const administrativeRegionsStatements = [];
+                const administrativeUnitsStatements = [];
+                const provincesStatements = [];
+                const districtsStatements = [];
+                const otherStatements = [];
+                
+                // Phân loại statements
+                for (const statement of sqlStatements) {
+                    const upperStmt = statement.toUpperCase();
+                    if (upperStmt.includes('ADMINISTRATIVEREGIONS')) {
+                        administrativeRegionsStatements.push(statement);
+                    } else if (upperStmt.includes('ADMINISTRATIVEUNITS')) {
+                        administrativeUnitsStatements.push(statement);
+                    } else if (upperStmt.includes('PROVINCES')) {
+                        provincesStatements.push(statement);
+                    } else if (upperStmt.includes('DISTRICTS')) {
+                        districtsStatements.push(statement);
+                    } else {
+                        otherStatements.push(statement);
+                    }
+                }
+                
+                // Thực thi theo thứ tự đúng để tránh foreign key constraint
+                const orderedStatements = [
+                    ...administrativeRegionsStatements,
+                    ...administrativeUnitsStatements,
+                    ...provincesStatements,
+                    ...districtsStatements,
+                    ...otherStatements
+                ];
+                
+                // Thực thi từng câu lệnh SQL
+                for (let i = 0; i < orderedStatements.length; i++) {
+                    const statement = orderedStatements[i];
+                    if (statement) {
+                        try {
+                            await pool.execute(statement);
+                        } catch (execError) {
+                            // Ignore duplicate entry errors for INSERT statements
+                            if (execError.code === 'ER_DUP_ENTRY') {
+                                // Skip duplicate entries silently
+                                continue;
+                            } else {
+                                console.error(`❌ Error executing statement ${i + 1}: ${execError.message}`);
+                                console.error(`❌ Statement: ${statement.substring(0, 100)}...`);
+                                // Continue with next statement instead of failing completely
+                            }
+                        }
+                    }
+                }
+                
+                console.log('✅ Basic data import completed successfully!');
+                resolve();
+                
+            } catch (parseError) {
+                console.error('❌ Error parsing SQL file:', parseError);
+                reject(parseError);
+            }
+        });
+    });
+}
+
+async function runCrawlerDataImport() {
+    console.log('🐍 Starting crawler data import...');
+    
+    return new Promise((resolve, reject) => {
+        // Đường dẫn đến file Python
+        const crawlerPath = path.join(__dirname, '../../crawler/database/upsert_listing_info.py');
+        const crawlerDir = path.join(__dirname, '../../crawler');
+        
+        // Spawn Python process
+        const pythonProcess = spawn('python', [crawlerPath], {
+            cwd: crawlerDir,
+            stdio: ['pipe', 'pipe', 'pipe']
+        });
+        
+        let stdoutData = '';
+        let stderrData = '';
+        
+        pythonProcess.stdout.on('data', (data) => {
+            const output = data.toString();
+            stdoutData += output;
+            console.log(`🐍 Python: ${output.trim()}`);
+        });
+        
+        pythonProcess.stderr.on('data', (data) => {
+            const error = data.toString();
+            stderrData += error;
+            console.error(`🐍 Python Error: ${error.trim()}`);
+        });
+        
+        pythonProcess.on('close', (code) => {
+            if (code === 0) {
+                console.log('✅ Crawler data import completed successfully!');
+                resolve(stdoutData);
+            } else {
+                console.error(`❌ Crawler data import failed with exit code: ${code}`);
+                console.error(`❌ Error output: ${stderrData}`);
+                reject(new Error(`Python script exited with code ${code}`));
+            }
+        });
+        
+        pythonProcess.on('error', (error) => {
+            console.error('❌ Failed to start Python process:', error);
+            reject(error);
+        });
+    });
+}
+
 async function initSchema() {
     console.log('🚀 Initializing database schema...');
     
     try {
         await testConnection();
         
-        console.log('📋 Creating tables...');
+        console.log('\n📋 Creating tables...');
+
         await createAdministrativeRegionsTable();
         console.log('✅ AdministrativeRegions table ready');
         
@@ -476,11 +1070,57 @@ async function initSchema() {
         
         await createRatingTable();
         console.log('✅ Rating table ready');
+
+        console.log('\n📋 Creating procedures...');
+
+        await dropUpsertPropertyProcedureIfExists();
+        await createUpsertPropertyProcedure();
+        console.log('✅ UpsertProperty procedure ready');
+
+        await dropUpsertRoomTypeProcedureIfExists();
+        await createUpsertRoomTypeProcedure();
+        console.log('✅ UpsertRoomType procedure ready');
+
+        await dropUpsertProductProcedureIfExists();
+        await createUpsertProductProcedure();
+        console.log('✅ UpsertProduct procedure ready');
+
+        await dropUpsertAmenityGroupProcedureIfExists();
+        await createUpsertAmenityGroupProcedure();
+        console.log('✅ UpsertAmenityGroup procedure ready');
+
+        await dropUpsertAmenityProcedureIfExists();
+        await createUpsertAmenityProcedure();
+        console.log('✅ UpsertAmenity procedure ready');
+
+        await dropUpsertProductAmenityProcedureIfExists();
+        await createUpsertProductAmenityProcedure();
+        console.log('✅ UpsertProductAmenity procedure ready');
+
+        await dropUpsertRatingProcedureIfExists();
+        await createUpsertRatingProcedure();
+        console.log('✅ UpsertRating procedure ready');
+
+        await dropGetTopProductsByProvinceProcedureIfExists();
+        await createGetTopProductsByProvinceProcedure();
+        console.log('✅ GetTopProductsByProvince procedure ready');
         
-        console.log('🎉 Database schema initialization completed successfully!');
+        // Cài đặt Python dependencies
+        console.log('\n📦 Installing Python dependencies...');
+        await installPythonDependencies();
+        
+        // Import dữ liệu cơ bản từ data.sql
+        console.log('\n📊 Importing basic data...');
+        await importBasicData();
+        
+        // Chạy crawler data import sau khi schema và basic data được tạo xong
+        // console.log('\n📋 Starting crawler data import process...');
+        // await runCrawlerDataImport();
+
+        console.log('\n🎉 Database schema initialization completed successfully!');
         
     } catch (error) {
-        console.error('❌ Error during database schema initialization:', error);
+        console.error('\n❌ Error during database schema initialization:', error);
         throw error;
     }
 }

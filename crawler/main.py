@@ -57,47 +57,6 @@ def main():
     #     print(f"Error when running calendar fetch: {e}")
     #     return
     
-    # 5. Upsert dữ liệu listing info vào MySQL
-    print("5. Starting insert or update listing info into MySQL...")
-    try:
-        from database.upsert_lising_info_to_mysql import main as mysql_main
-        mysql_main()
-        print("Upsert listing info to mysql successful!\n")
-    except Exception as e:
-        print(f"Error when upserting listing info to mysql: {e}")
-        return
-    
-    # # 6. Upsert dữ liệu listing info vào MongoDB
-    # print("6. Starting insert or update listing info into MongoDB...")
-    # try:
-    #     from database.upsert_lising_info_to_mongodb import main as mongodb_main
-    #     mongodb_main()
-    #     print("Upsert listing info to mongodb successful!\n")
-    # except Exception as e:
-    #     print(f"Error when upserting listing info to mongodb: {e} ===")
-    #     sys.exit(1)
-        
-    # # 7. Upsert dữ liệu reviews vào MongoDB
-    # print("7. Starting insert or update reviews into MongoDB...")
-    # try:
-    #     from database.upsert_reviews_to_mongodb import main as reviews_main
-    #     reviews_main()
-    #     print("Upsert reviews to mongodb successful!\n")
-    # except Exception as e:
-    #     print(f"Error when upserting reviews to mongodb: {e} ===")
-    #     sys.exit(1)
-    
-    # 8. Upsert dữ liệu calendar vào MongoDB
-    # print("8. Starting insert or update calendar into MongoDB...")
-    # try:
-    #     from database.upsert_calendars_to_mongodb import main as calendars_main
-    #     calendars_main()
-    #     print("Upsert calendars to MongoDB completed successfully!")
-    # except Exception as e:
-    #     print(f"Error when upserting calendars to mongodb: {e}")
-    #     import traceback
-    #     traceback.print_exc()
-    
     print("========================== SUCCESSFUL ==========================")
     print("All data has been crawled and stored in the database successfully!")
 
