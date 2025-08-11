@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Home.css';
+import './HomePage.css';
 import SearchBar from '../components/SearchBar';
 import CardSection from '../components/CardSection';
 import RoomSection from '../components/RoomSection';
 import Footer from '../components/Footer';
+import { useLocation } from '../contexts/LocationContext';
 import logo from '../assets/logo.png';
 import HomeBackground from '../assets/home_background.jpg';
 import KhachSanImg from '../assets/khach_san.png';
@@ -19,27 +20,47 @@ import DaLatImg from '../assets/da_lat.jpg';
 import NhaTrangImg from '../assets/nha_trang.jpg';
 
 
-const Home = () => {
+const HomePage = () => {
   const navigate = useNavigate();
+  const { popularLocations, isLoading: isLoadingLocations, error: locationError, getPopularLocations } = useLocation();
   
-  const accommodationTypes = [
+  // Load popular locations khi component mount (chỉ khi chưa có data)
+  useEffect(() => {
+    if (popularLocations.length === 0 && !isLoadingLocations) {
+      console.log('HomePage: Loading popular locations...');
+      getPopularLocations(5);
+    } else if (popularLocations.length > 0) {
+      console.log('HomePage: Popular locations already available:', popularLocations.length);
+    }
+  }, []);
+  
+  const accommodationTypes = useMemo(() => [
     { image: KhachSanImg, title: 'Khách sạn' },
     { image: CanHoImg, title: 'Căn hộ' },
     { image: HomestayImg, title: 'Homestay' },
     { image: ResortImg, title: 'Resort' },
     { image: BietThuImg, title: 'Biệt thự' },
-  ];
+  ], []);
 
-  const destinations = [
+  const destinations = useMemo(() => [
     { image: HoChiMinhImg, title: 'TP. Hồ Chí Minh' },
     { image: HaNoiImg, title: 'Hà Nội' },
     { image: VungTauImg, title: 'Vũng Tàu' },
     { image: DaLatImg, title: 'Đà Lạt' },
     { image: NhaTrangImg, title: 'Nha Trang' },
-  ];
+  ], []);
+
+  // Memoize các props cho RoomSection để tránh tạo object mới mỗi lần render
+  const roomSectionConfigs = useMemo(() => [
+    { title: "Nơi lưu trú được ưa chuộng tại Hà Nội", provinceCode: "01", limit: 15 },
+    { title: "Chỗ ở còn phòng tại Vũng Tàu", provinceCode: "77", limit: 15 },
+    { title: "Khám phá nơi lưu trú tại Sa Pa", provinceCode: "10", limit: 15 }
+  ], []);
+
 
   return (
     <>
+      {isLoadingLocations}
       <div className="home-banner">
         <img src={HomeBackground} alt="Home Banner" className="banner-image" />
         
@@ -61,15 +82,20 @@ const Home = () => {
           <p className="banner-subtitle">Ưu đãi linh hoạt cho mọi hành trình</p>
         </div>
       </div>
-      <SearchBar />
+      <SearchBar popularLocations={popularLocations} />
       <CardSection title="Tìm theo loại chỗ nghỉ" items={accommodationTypes} />
       <CardSection title="Điểm đến nổi bật tại Việt Nam" items={destinations} />
-      <RoomSection title="Nơi lưu trú được ưa chuộng tại Hà Nội" provinceCode="01" limit={15} />
-      <RoomSection title="Chỗ ở còn phòng tại Phú Quốc" provinceCode="91" limit={15} />
-      <RoomSection title="Khám phá nơi lưu trú tại Hà Giang" provinceCode="02" limit={15} />
+      {roomSectionConfigs.map((config, index) => (
+        <RoomSection 
+          key={`${config.provinceCode}-${config.limit}`}
+          title={config.title}
+          provinceCode={config.provinceCode}
+          limit={config.limit}
+        />
+      ))}
       <Footer />
     </>
   );
 };
 
-export default Home;
+export default HomePage;

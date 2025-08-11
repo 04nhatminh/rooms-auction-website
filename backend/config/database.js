@@ -954,6 +954,75 @@ async function createGetTopProductsByProvinceProcedure() {
     `);
 }
 
+async function dropGetPopularProvincesProcedureIfExists() {
+    await pool.query(`
+        DROP PROCEDURE IF EXISTS GetPopularProvinces;
+    `);
+}
+
+async function createGetPopularProvincesProcedure() {
+    await pool.query(`
+        CREATE PROCEDURE GetPopularProvinces(IN p_limit INT)
+        BEGIN
+            SELECT 
+                prov.ProvinceCode AS code,
+                prov.Name,
+                prov.NameEn,
+                prov.CodeName,
+                COUNT(p.ProductID) AS ProductCount,
+                'province' AS type
+            FROM Provinces prov
+            LEFT JOIN Products p 
+                ON prov.ProvinceCode = p.ProvinceCode
+            GROUP BY 
+                prov.ProvinceCode, 
+                prov.Name, 
+                prov.NameEn, 
+                prov.FullName, 
+                prov.FullNameEn, 
+                prov.CodeName
+            HAVING ProductCount > 0
+            ORDER BY 
+                ProductCount DESC, 
+                prov.Name ASC
+            LIMIT p_limit;
+        END;
+    `);
+}
+
+async function dropGetPopularDistrictsProcedureIfExists() {
+    await pool.query(`
+        DROP PROCEDURE IF EXISTS GetPopularDistricts;
+    `);
+}
+
+async function createGetPopularDistrictsProcedure() {
+    await pool.query(`
+        CREATE PROCEDURE GetPopularDistricts(IN p_limit INT)
+        BEGIN
+            SELECT 
+                disct.DistrictCode AS code,
+                disct.Name,
+                disct.NameEn,
+                disct.CodeName,
+                COUNT(p.ProductID) AS ProductCount,
+                'district' AS type
+            FROM Districts disct
+            LEFT JOIN Products p 
+                ON disct.DistrictCode = p.DistrictCode
+            GROUP BY 
+                disct.DistrictCode, 
+                disct.Name, 
+                disct.NameEn, 
+                disct.CodeName
+            HAVING ProductCount > 0
+            ORDER BY 
+                ProductCount DESC, 
+                disct.Name ASC
+            LIMIT p_limit;
+        END;
+    `);
+}
 
 async function initSchema() {
     console.log('🚀 Initializing database schema...');
@@ -1062,6 +1131,14 @@ async function initSchema() {
         await dropGetTopProductsByProvinceProcedureIfExists();
         await createGetTopProductsByProvinceProcedure();
         console.log('✅ GetTopProductsByProvince procedure ready');
+
+        await dropGetPopularProvincesProcedureIfExists();
+        await createGetPopularProvincesProcedure();
+        console.log('✅ GetPopularProvinces procedure ready');
+
+        await dropGetPopularDistrictsProcedureIfExists();
+        await createGetPopularDistrictsProcedure();
+        console.log('✅ GetPopularDistricts procedure ready');
 
         console.log('\n🎉 Database schema initialization completed successfully!');
         
