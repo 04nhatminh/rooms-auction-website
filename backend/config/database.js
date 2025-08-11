@@ -254,6 +254,26 @@ async function createProductsTable() {
     }
 }
 
+async function createFavoritesTable() {
+    await pool.execute(`
+        CREATE TABLE IF NOT EXISTS Favorites (
+            FavoriteID INT AUTO_INCREMENT PRIMARY KEY,
+            UserID INT NOT NULL,
+            ProductID INT NOT NULL,
+            CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE,
+            FOREIGN KEY (ProductID) REFERENCES Products(ProductID) ON DELETE CASCADE,
+            UNIQUE KEY unique_user_product (UserID, ProductID)
+        );
+    `);
+
+    try {
+        await pool.execute(`CREATE INDEX idx_Favorites_UserID ON Favorites(UserID)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
+}
+
 async function createAmenityGroupsTable() {
     await pool.execute(`
         CREATE TABLE IF NOT EXISTS AmenityGroups (
@@ -431,7 +451,6 @@ async function dropUpsertPropertyProcedureIfExists() {
 
 async function createUpsertPropertyProcedure() {
     await pool.query(`
-        
         CREATE PROCEDURE UpsertProperty(IN p_PropertyName VARCHAR(255))
         BEGIN
             DECLARE v_PropertyID INT;
@@ -464,7 +483,6 @@ async function dropUpsertRoomTypeProcedureIfExists() {
 
 async function createUpsertRoomTypeProcedure() {
     await pool.query(`
-        
         CREATE PROCEDURE UpsertRoomType(IN p_RoomTypeName VARCHAR(255))
         BEGIN
             DECLARE v_RoomTypeID INT;
@@ -497,7 +515,6 @@ async function dropUpsertProductProcedureIfExists() {
 
 async function createUpsertProductProcedure() {
     await pool.query(`
-        
         CREATE PROCEDURE UpsertProduct(
             IN p_UID BIGINT UNSIGNED,
             IN p_ExternalID VARCHAR(30),
@@ -609,6 +626,133 @@ async function createUpsertProductProcedure() {
     `);
 }
 
+async function dropAddToFavoritesProcedureIfExists() {
+    await pool.query(`
+        DROP PROCEDURE IF EXISTS AddToFavorites;
+    `);
+}
+
+async function dropRemoveFromFavoritesProcedureIfExists() {
+    await pool.query(`
+        DROP PROCEDURE IF EXISTS RemoveFromFavorites;
+    `);
+}
+
+async function createAddToFavoritesProcedure() {
+    await pool.query(`
+        CREATE PROCEDURE AddToFavorites(
+            IN p_UserID INT,
+            IN p_ProductID INT
+        )
+        BEGIN
+            DECLARE v_Count INT DEFAULT 0;
+            DECLARE v_UserExists INT DEFAULT 0;
+            DECLARE v_ProductExists INT DEFAULT 0;
+            
+            SELECT COUNT(*) INTO v_UserExists 
+            FROM Users 
+            WHERE UserID = p_UserID;
+            
+            SELECT COUNT(*) INTO v_ProductExists 
+            FROM Products 
+            WHERE ProductID = p_ProductID;
+            
+            IF v_UserExists = 0 THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'User not found';
+            END IF;
+            
+            IF v_ProductExists = 0 THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Product not found';
+            END IF;
+            
+            SELECT COUNT(*) INTO v_Count
+            FROM Favorites
+            WHERE UserID = p_UserID AND ProductID = p_ProductID;
+            
+            IF v_Count = 0 THEN
+                INSERT INTO Favorites(UserID, ProductID, CreatedAt)
+                VALUES(p_UserID, p_ProductID, NOW());
+                
+                SELECT 'SUCCESS' AS Status, 'Product added to favorites' AS Message;
+            ELSE
+                SELECT 'INFO' AS Status, 'Product already in favorites' AS Message;
+            END IF;
+        END;
+    `);
+}
+
+async function createRemoveFromFavoritesProcedure() {
+    await pool.query(`
+        CREATE PROCEDURE RemoveFromFavorites(
+            IN p_UserID INT,
+            IN p_ProductID INT
+        )
+        BEGIN
+            DECLARE v_Count INT DEFAULT 0;
+            
+            SELECT COUNT(*) INTO v_Count
+            FROM Favorites
+            WHERE UserID = p_UserID AND ProductID = p_ProductID;
+            
+            IF v_Count > 0 THEN
+                DELETE FROM Favorites
+                WHERE UserID = p_UserID AND ProductID = p_ProductID;
+                
+                SELECT 'SUCCESS' AS Status, 'Product removed from favorites' AS Message;
+            ELSE
+                SELECT 'INFO' AS Status, 'Product not found in favorites' AS Message;
+            END IF;
+        END;
+    `);
+}
+
+async function dropGetUserFavoritesProcedureIfExists() {
+    await pool.query(`
+        DROP PROCEDURE IF EXISTS GetUserFavorites;
+    `);
+}
+
+async function createGetUserFavoritesProcedure() {
+    await pool.query(`
+        CREATE PROCEDURE GetUserFavorites(
+            IN p_UserID INT,
+            IN p_Limit INT,
+            IN p_Offset INT
+        )
+        BEGIN
+            SELECT 
+                f.FavoriteID,
+                f.UserID,
+                f.ProductID,
+                f.CreatedAt,
+                p.UID,
+                p.Name AS ProductName,
+                p.Address,
+                p.Price,
+                p.Currency,
+                prop.PropertyName,
+                rt.RoomTypeName,
+                prov.Name AS ProvinceName,
+                ROUND((
+                    COALESCE(p.CleanlinessPoint, 0) + 
+                    COALESCE(p.LocationPoint, 0) + 
+                    COALESCE(p.ServicePoint, 0) + 
+                    COALESCE(p.ValuePoint, 0) + 
+                    COALESCE(p.CommunicationPoint, 0) + 
+                    COALESCE(p.ConveniencePoint, 0)
+                ) / 6, 2) AS AverageRating
+            FROM Favorites f
+            JOIN Products p ON f.ProductID = p.ProductID
+            LEFT JOIN Properties prop ON p.PropertyType = prop.PropertyID
+            LEFT JOIN RoomTypes rt ON p.RoomType = rt.RoomTypeID
+            LEFT JOIN Provinces prov ON p.ProvinceCode = prov.ProvinceCode
+            WHERE f.UserID = p_UserID
+            ORDER BY f.CreatedAt DESC
+            LIMIT p_Limit OFFSET p_Offset;
+        END;
+    `);
+}
+
 async function dropUpsertAmenityGroupProcedureIfExists() {
     await pool.query(`
         DROP PROCEDURE IF EXISTS UpsertAmenityGroup;
@@ -617,7 +761,6 @@ async function dropUpsertAmenityGroupProcedureIfExists() {
 
 async function createUpsertAmenityGroupProcedure() {
     await pool.query(`
-        
         CREATE PROCEDURE UpsertAmenityGroup(IN p_GroupName VARCHAR(255))
         BEGIN
             DECLARE v_GroupID INT;
@@ -650,7 +793,6 @@ async function dropUpsertAmenityProcedureIfExists() {
 
 async function createUpsertAmenityProcedure() {
     await pool.query(`
-        
         CREATE PROCEDURE UpsertAmenity(IN p_AmenityName VARCHAR(255), IN p_GroupID INT)
         BEGIN
             DECLARE v_AmenityID INT;
@@ -685,7 +827,6 @@ async function dropUpsertProductAmenityProcedureIfExists() {
 
 async function createUpsertProductAmenityProcedure() {
     await pool.query(`
-        
         CREATE PROCEDURE UpsertProductAmenity(IN p_ProductID INT, IN p_AmenityID INT)
         BEGIN
             DECLARE v_Count INT;
@@ -711,7 +852,6 @@ async function dropUpsertRatingProcedureIfExists() {
 
 async function createUpsertRatingProcedure() {
     await pool.query(`
-        
         CREATE PROCEDURE UpsertRating(
             IN p_ExternalID VARCHAR(30),
             IN p_BookingID INT,
@@ -760,7 +900,6 @@ async function dropGetTopProductsByProvinceProcedureIfExists() {
 
 async function createGetTopProductsByProvinceProcedure() {
     await pool.query(`
-        
         CREATE PROCEDURE GetTopProductsByProvince(
             IN province_code_input VARCHAR(20),
             IN limit_input INT
@@ -815,202 +954,6 @@ async function createGetTopProductsByProvinceProcedure() {
     `);
 }
 
-async function installPythonDependencies() {    
-    return new Promise((resolve, reject) => {
-        const crawlerDir = path.join(__dirname, '../../crawler');
-        const requirementsPath = path.join(crawlerDir, 'requirements.txt');
-        
-        // Kiểm tra xem requirements.txt có tồn tại không
-        if (!require('fs').existsSync(requirementsPath)) {
-            console.log('⚠️ requirements.txt not found, skipping dependency installation');
-            resolve();
-            return;
-        }
-        
-        const pipProcess = spawn('pip', ['install', '-r', 'requirements.txt'], {
-            cwd: crawlerDir,
-            stdio: ['pipe', 'pipe', 'pipe']
-        });
-        
-        let stdoutData = '';
-        let stderrData = '';
-        
-        pipProcess.stdout.on('data', (data) => {
-            const output = data.toString();
-            stdoutData += output;
-        });
-        
-        pipProcess.stderr.on('data', (data) => {
-            const error = data.toString();
-            stderrData += error;
-        });
-        
-        pipProcess.on('close', (code) => {
-            if (code === 0) {
-                console.log('✅ Python dependencies installed successfully!');
-                resolve(stdoutData);
-            } else {
-                console.error(`❌ Pip install failed with exit code: ${code}`);
-                console.error(`❌ Error output: ${stderrData}`);
-                reject(new Error(`Pip install exited with code ${code}`));
-            }
-        });
-        
-        pipProcess.on('error', (error) => {
-            console.error('❌ Failed to start pip process:', error);
-            // Không reject để script vẫn tiếp tục chạy
-            console.log('⚠️ Continuing without dependency installation...');
-            resolve();
-        });
-    });
-}
-
-async function importBasicData() {    
-    return new Promise((resolve, reject) => {
-        const fs = require('fs');
-        const dataFilePath = path.join(__dirname, '../../crawler/output/data.sql');
-        
-        // Kiểm tra xem file data.sql có tồn tại không
-        if (!fs.existsSync(dataFilePath)) {
-            console.log('⚠️ data.sql not found, skipping basic data import');
-            resolve();
-            return;
-        }
-        
-        // Đọc nội dung file SQL với encoding UTF-8
-        fs.readFile(dataFilePath, 'utf8', async (err, sqlContent) => {
-            if (err) {
-                console.error('❌ Error reading data.sql:', err);
-                reject(err);
-                return;
-            }
-            
-            try {
-                // Loại bỏ BOM nếu có
-                if (sqlContent.charCodeAt(0) === 0xFEFF) {
-                    sqlContent = sqlContent.slice(1);
-                }
-                
-                // Tách các câu lệnh SQL bằng dấu ;
-                const sqlStatements = sqlContent
-                    .split(';')
-                    .map(stmt => stmt.trim())
-                    .filter(stmt => 
-                        stmt.length > 0 && 
-                        !stmt.startsWith('--') && 
-                        !stmt.startsWith('/*') &&
-                        !stmt.toUpperCase().startsWith('USE') // Loại bỏ lệnh USE
-                    );
-                
-                // Nhóm các statements theo bảng để đảm bảo thứ tự insert đúng
-                const administrativeRegionsStatements = [];
-                const administrativeUnitsStatements = [];
-                const provincesStatements = [];
-                const districtsStatements = [];
-                const otherStatements = [];
-                
-                // Phân loại statements
-                for (const statement of sqlStatements) {
-                    const upperStmt = statement.toUpperCase();
-                    if (upperStmt.includes('ADMINISTRATIVEREGIONS')) {
-                        administrativeRegionsStatements.push(statement);
-                    } else if (upperStmt.includes('ADMINISTRATIVEUNITS')) {
-                        administrativeUnitsStatements.push(statement);
-                    } else if (upperStmt.includes('PROVINCES')) {
-                        provincesStatements.push(statement);
-                    } else if (upperStmt.includes('DISTRICTS')) {
-                        districtsStatements.push(statement);
-                    } else {
-                        otherStatements.push(statement);
-                    }
-                }
-                
-                // Thực thi theo thứ tự đúng để tránh foreign key constraint
-                const orderedStatements = [
-                    ...administrativeRegionsStatements,
-                    ...administrativeUnitsStatements,
-                    ...provincesStatements,
-                    ...districtsStatements,
-                    ...otherStatements
-                ];
-                
-                // Thực thi từng câu lệnh SQL
-                for (let i = 0; i < orderedStatements.length; i++) {
-                    const statement = orderedStatements[i];
-                    if (statement) {
-                        try {
-                            await pool.execute(statement);
-                        } catch (execError) {
-                            // Ignore duplicate entry errors for INSERT statements
-                            if (execError.code === 'ER_DUP_ENTRY') {
-                                // Skip duplicate entries silently
-                                continue;
-                            } else {
-                                console.error(`❌ Error executing statement ${i + 1}: ${execError.message}`);
-                                console.error(`❌ Statement: ${statement.substring(0, 100)}...`);
-                                // Continue with next statement instead of failing completely
-                            }
-                        }
-                    }
-                }
-                
-                console.log('✅ Basic data import completed successfully!');
-                resolve();
-                
-            } catch (parseError) {
-                console.error('❌ Error parsing SQL file:', parseError);
-                reject(parseError);
-            }
-        });
-    });
-}
-
-async function runCrawlerDataImport() {
-    console.log('🐍 Starting crawler data import...');
-    
-    return new Promise((resolve, reject) => {
-        // Đường dẫn đến file Python
-        const crawlerPath = path.join(__dirname, '../../crawler/database/upsert_listing_info.py');
-        const crawlerDir = path.join(__dirname, '../../crawler');
-        
-        // Spawn Python process
-        const pythonProcess = spawn('python', [crawlerPath], {
-            cwd: crawlerDir,
-            stdio: ['pipe', 'pipe', 'pipe']
-        });
-        
-        let stdoutData = '';
-        let stderrData = '';
-        
-        pythonProcess.stdout.on('data', (data) => {
-            const output = data.toString();
-            stdoutData += output;
-            console.log(`🐍 Python: ${output.trim()}`);
-        });
-        
-        pythonProcess.stderr.on('data', (data) => {
-            const error = data.toString();
-            stderrData += error;
-            console.error(`🐍 Python Error: ${error.trim()}`);
-        });
-        
-        pythonProcess.on('close', (code) => {
-            if (code === 0) {
-                console.log('✅ Crawler data import completed successfully!');
-                resolve(stdoutData);
-            } else {
-                console.error(`❌ Crawler data import failed with exit code: ${code}`);
-                console.error(`❌ Error output: ${stderrData}`);
-                reject(new Error(`Python script exited with code ${code}`));
-            }
-        });
-        
-        pythonProcess.on('error', (error) => {
-            console.error('❌ Failed to start Python process:', error);
-            reject(error);
-        });
-    });
-}
 
 async function initSchema() {
     console.log('🚀 Initializing database schema...');
@@ -1049,7 +992,10 @@ async function initSchema() {
         
         await createProductsTable();
         console.log('✅ Products table ready');
-        
+
+        await createFavoritesTable();
+        console.log('✅ Favorites table ready');
+
         await createAmenityGroupsTable();
         console.log('✅ AmenityGroups table ready');
         
@@ -1085,6 +1031,18 @@ async function initSchema() {
         await createUpsertProductProcedure();
         console.log('✅ UpsertProduct procedure ready');
 
+        await dropAddToFavoritesProcedureIfExists();
+        await createAddToFavoritesProcedure();
+        console.log('✅ AddToFavorites procedure ready');
+
+        await dropRemoveFromFavoritesProcedureIfExists();
+        await createRemoveFromFavoritesProcedure();
+        console.log('✅ RemoveFromFavorites procedure ready');
+
+        await dropGetUserFavoritesProcedureIfExists();
+        await createGetUserFavoritesProcedure();
+        console.log('✅ GetUserFavorites procedure ready');
+
         await dropUpsertAmenityGroupProcedureIfExists();
         await createUpsertAmenityGroupProcedure();
         console.log('✅ UpsertAmenityGroup procedure ready');
@@ -1104,18 +1062,6 @@ async function initSchema() {
         await dropGetTopProductsByProvinceProcedureIfExists();
         await createGetTopProductsByProvinceProcedure();
         console.log('✅ GetTopProductsByProvince procedure ready');
-        
-        // Cài đặt Python dependencies
-        console.log('\n📦 Installing Python dependencies...');
-        await installPythonDependencies();
-        
-        // Import dữ liệu cơ bản từ data.sql
-        console.log('\n📊 Importing basic data...');
-        await importBasicData();
-        
-        // Chạy crawler data import sau khi schema và basic data được tạo xong
-        // console.log('\n📋 Starting crawler data import process...');
-        // await runCrawlerDataImport();
 
         console.log('\n🎉 Database schema initialization completed successfully!');
         

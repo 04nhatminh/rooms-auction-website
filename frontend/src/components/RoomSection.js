@@ -94,7 +94,7 @@ const RoomSection = ({ title, provinceCode = '01', limit = 15 }) => {
           // . Fetch reviews từ MongoDB batch bằng ProductID
           let reviewsMap = {};
           if (productIds.length > 0) {
-            const reviewsResponse = await fetch('http://localhost:3000/api/images/reviews/batch', {
+            const reviewsResponse = await fetch('http://localhost:3000/api/reviews/batch', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
