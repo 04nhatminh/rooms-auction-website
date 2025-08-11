@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+from datetime import datetime
 
 # Thêm thư mục cha vào Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -9,11 +10,15 @@ from crawler.graphql_hashes import extract_sha256_hashes
 from crawler.fetch_reviews import fetch_reviews, extract_reviews_data
 from crawler.headers import encode_listing_id
 from crawler.config import API_DOMAIN
+from crawler.utils import generate_date_sequence_number
 
-def read_listing_ids():
+def read_listing_ids(province):
     # Đọc danh sách listing IDs từ file
     listing_ids = []
-    file_path = "output/listing_ids.txt"
+    
+    # Lấy đường dẫn tới thư mục gốc của crawler (thư mục cha của execute)
+    crawler_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    file_path = os.path.join(crawler_root, "output", "listing_ids", f"listing_ids_{province}.txt")
     
     if not os.path.exists(file_path):
         print(f"[ERROR] File {file_path} is not found!")
@@ -103,7 +108,7 @@ def save_to_json(new_data, filename):
     except Exception as e:
         print(f"[ERROR] Error saving file {filename}: {e}")
 
-def process_reviews(listing_ids, hashes):
+def process_reviews(listing_ids, hashes, output_filename):
     # Xử lý fetch reviews cho tất cả listing_ids
     print(f"\n[INFO] Starting fetch reviews for {len(listing_ids)} listings...")
     
@@ -132,35 +137,64 @@ def process_reviews(listing_ids, hashes):
             })
             continue
     
-    save_to_json(all_reviews_data, "output/listing_reviews.json")
+    save_to_json(all_reviews_data, output_filename)
 
-def main():
+def main(province=None):
     print("=== FETCH REVIEWS ===")
     
-    # 1. Đọc listing_ids từ file
-    listing_ids = read_listing_ids()
-    if not listing_ids:
-        print("[ERROR] No listing IDs found to process!")
+    # Kiểm tra xem province có được truyền vào không
+    if province is None:
+        print("[ERROR] Province parameter is required!")
+        print("Usage: python run_fetch_reviews.py <province_name>")
+        print("Example: python run_fetch_reviews.py 'Ba Ria - Vung Tau'")
         return
     
-    # 2. Lấy hash từ listing_id đầu tiên có thể
-    print(f"\n[INFO] Fetching hash...")
-    hashes = get_valid_hashes(listing_ids)
-    if not hashes:
-        print("[ERROR] No valid hash found, stopping program!")
-        return
+    print(f"[INFO] Processing province: {province}")
     
-    # 3. Tạo thư mục output nếu chưa có
-    os.makedirs("output", exist_ok=True)
-    
-    # 4. Xử lý reviews
     try:
-        process_reviews(listing_ids, hashes)
+        # 1. Đọc listing_ids từ file
+        listing_ids = read_listing_ids(province)
+        if not listing_ids:
+            print("[ERROR] No listing IDs found to process!")
+            return
+        
+        # 2. Lấy hash từ listing_id đầu tiên có thể
+        print(f"\n[INFO] Fetching hash...")
+        hashes = get_valid_hashes(listing_ids)
+        if not hashes:
+            print("[ERROR] No valid hash found, stopping program!")
+            return
+        
+        # 3. Tạo thư mục output/crawled_data nếu chưa có
+        crawler_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        output_dir = os.path.join(crawler_root, "output", "crawled_data")
+        os.makedirs(output_dir, exist_ok=True)
+        
+        # 4. Tạo date_sequence_number cho tên file output
+        date_sequence_number = generate_date_sequence_number("review")
+        output_filename = os.path.join(output_dir, f"review_{date_sequence_number}.json")
+        print(f"[INFO] Output file will be: {output_filename}")
+        
+        # 5. Xử lý reviews
+        process_reviews(listing_ids, hashes, output_filename)
         print("\n=== COMPLETED FETCH REVIEWS ===")
-        print("File created: output/listing_reviews.json")
+        print(f"File created: {output_filename}")
+        
+        # 6. Upsert dữ liệu vào mongodb
+        from database.upsert_room_review import main as upsert_reviews
+        upsert_reviews(output_filename)
+        print("\n=== COMPLETED UPSERT REVIEWS ===")
         
     except Exception as e:
         print(f"[ERROR] Error occurred during processing: {e}")
 
 if __name__ == "__main__":
-    main()
+    # Lấy province từ command line arguments
+    if len(sys.argv) < 2:
+        print("[ERROR] Province parameter is required!")
+        print("Usage: python run_fetch_reviews.py <province_name>")
+        print("Example: python run_fetch_reviews.py 'Ba Ria - Vung Tau'")
+        sys.exit(1)
+    
+    province = sys.argv[1]
+    main(province)

@@ -31,7 +31,7 @@ INSERT INTO Provinces(ProvinceCode, Name, NameEn, FullName, FullNameEn, CodeName
 ('12','Lai Châu','Lai Chau','Tỉnh Lai Châu','Lai Chau Province','lai_chau',2,2),
 ('14','Sơn La','Son La','Tỉnh Sơn La','Son La Province','son_la',2,2),
 ('15','Yên Bái','Yen Bai','Tỉnh Yên Bái','Yen Bai Province','yen_bai',2,2),
-('17','Hoà Bình','Hoa Binh','Tỉnh Hoà Bình','Hoa Binh Province','hoa_binh',2,2),
+('17','Hòa Bình','Hoa Binh','Tỉnh Hòa Bình','Hoa Binh Province','hoa_binh',2,2),
 ('19','Thái Nguyên','Thai Nguyen','Tỉnh Thái Nguyên','Thai Nguyen Province','thai_nguyen',2,1),
 ('20','Lạng Sơn','Lang Son','Tỉnh Lạng Sơn','Lang Son Province','lang_son',2,1),
 ('22','Quảng Ninh','Quang Ninh','Tỉnh Quảng Ninh','Quang Ninh Province','quang_ninh',2,1),
@@ -137,7 +137,7 @@ INSERT INTO Districts(DistrictCode, Name, NameEn, FullName, FullNameEn, CodeName
 ('047','Trùng Khánh','Trung Khanh','Huyện Trùng Khánh','Trung Khanh District','trung_khanh','04',7),
 ('048','Hạ Lang','Ha Lang','Huyện Hạ Lang','Ha Lang District','ha_lang','04',7),
 ('049','Quảng Hòa','Quang Hoa','Huyện Quảng Hòa','Quang Hoa District','quang_hoa','04',7),
-('051','Hoà An','Hoa An','Huyện Hoà An','Hoa An District','hoa_an','04',7),
+('051','Hòa An','Hoa An','Huyện Hòa An','Hoa An District','hoa_an','04',7),
 ('052','Nguyên Bình','Nguyen Binh','Huyện Nguyên Bình','Nguyen Binh District','nguyen_binh','04',7);
 
 INSERT INTO Districts(DistrictCode, Name, NameEn, FullName, FullNameEn, CodeName, ProvinceCode, AdministrativeUnitID) VALUES
@@ -265,7 +265,7 @@ INSERT INTO Districts(DistrictCode, Name, NameEn, FullName, FullNameEn, CodeName
 ('227','Việt Trì','Viet Tri','Thành phố Việt Trì','Viet Tri City','viet_tri','25',4),
 ('228','Phú Thọ','Phu Tho','Thị xã Phú Thọ','Phu Tho Town','phu_tho','25',6),
 ('230','Đoan Hùng','Doan Hung','Huyện Đoan Hùng','Doan Hung District','doan_hung','25',7),
-('231','Hạ Hoà','Ha Hoa','Huyện Hạ Hoà','Ha Hoa District','ha_hoa','25',7),
+('231','Hạ Hòa','Ha Hoa','Huyện Hạ Hòa','Ha Hoa District','ha_hoa','25',7),
 ('232','Thanh Ba','Thanh Ba','Huyện Thanh Ba','Thanh Ba District','thanh_ba','25',7),
 ('233','Phù Ninh','Phu Ninh','Huyện Phù Ninh','Phu Ninh District','phu_ninh','25',7),
 ('234','Yên Lập','Yen Lap','Huyện Yên Lập','Yen Lap District','yen_lap','25',7),
@@ -390,7 +390,7 @@ INSERT INTO Districts(DistrictCode, Name, NameEn, FullName, FullNameEn, CodeName
 ('406','Quảng Xương','Quang Xuong','Huyện Quảng Xương','Quang Xuong District','quang_xuong','38',7),
 ('407','Nghi Sơn','Nghi Son','Thị xã Nghi Sơn','Nghi Son Town','nghi_son','38',6),
 ('412','Vinh','Vinh','Thành phố Vinh','Vinh City','vinh','40',4),
-('414','Thái Hoà','Thai Hoa','Thị xã Thái Hoà','Thai Hoa Town','thai_hoa','40',6),
+('414','Thái Hòa','Thai Hoa','Thị xã Thái Hòa','Thai Hoa Town','thai_hoa','40',6),
 ('415','Quế Phong','Que Phong','Huyện Quế Phong','Que Phong District','que_phong','40',7),
 ('416','Quỳ Châu','Quy Chau','Huyện Quỳ Châu','Quy Chau District','quy_chau','40',7),
 ('417','Kỳ Sơn','Ky Son','Huyện Kỳ Sơn','Ky Son District','ky_son','40',7),
@@ -501,7 +501,7 @@ INSERT INTO Districts(DistrictCode, Name, NameEn, FullName, FullNameEn, CodeName
 ('549','An Nhơn','An Nhon','Thị xã An Nhơn','An Nhon Town','an_nhon','52',6),
 ('550','Tuy Phước','Tuy Phuoc','Huyện Tuy Phước','Tuy Phuoc District','tuy_phuoc','52',7),
 ('551','Vân Canh','Van Canh','Huyện Vân Canh','Van Canh District','van_canh','52',7),
-('555','Tuy Hoà','Tuy Hoa','Thành phố Tuy Hoà','Tuy Hoa City','tuy_hoa','54',4),
+('555','Tuy Hòa','Tuy Hoa','Thành phố Tuy Hòa','Tuy Hoa City','tuy_hoa','54',4),
 ('557','Sông Cầu','Song Cau','Thị xã Sông Cầu','Song Cau Town','song_cau','54',6);
 
 INSERT INTO Districts(DistrictCode, Name, NameEn, FullName, FullNameEn, CodeName, ProvinceCode, AdministrativeUnitID) VALUES
@@ -509,8 +509,8 @@ INSERT INTO Districts(DistrictCode, Name, NameEn, FullName, FullNameEn, CodeName
 ('559','Tuy An','Tuy An','Huyện Tuy An','Tuy An District','tuy_an','54',7),
 ('560','Sơn Hòa','Son Hoa','Huyện Sơn Hòa','Son Hoa District','son_hoa','54',7),
 ('561','Sông Hinh','Song Hinh','Huyện Sông Hinh','Song Hinh District','song_hinh','54',7),
-('562','Tây Hoà','Tay Hoa','Huyện Tây Hoà','Tay Hoa District','tay_hoa','54',7),
-('563','Phú Hoà','Phu Hoa','Huyện Phú Hoà','Phu Hoa District','phu_hoa','54',7),
+('562','Tây Hòa','Tay Hoa','Huyện Tây Hòa','Tay Hoa District','tay_hoa','54',7),
+('563','Phú Hòa','Phu Hoa','Huyện Phú Hòa','Phu Hoa District','phu_hoa','54',7),
 ('564','Đông Hòa','Dong Hoa','Thị xã Đông Hòa','Dong Hoa Town','dong_hoa','54',6),
 ('568','Nha Trang','Nha Trang','Thành phố Nha Trang','Nha Trang City','nha_trang','56',4),
 ('569','Cam Ranh','Cam Ranh','Thành phố Cam Ranh','Cam Ranh City','cam_ranh','56',4),
@@ -801,7 +801,7 @@ INSERT INTO Districts(DistrictCode, Name, NameEn, FullName, FullNameEn, CodeName
 ('958','Vĩnh Lợi','Vinh Loi','Huyện Vĩnh Lợi','Vinh Loi District','vinh_loi','95',7),
 ('959','Giá Rai','Gia Rai','Thị xã Giá Rai','Gia Rai Town','gia_rai','95',6),
 ('960','Đông Hải','Dong Hai','Huyện Đông Hải','Dong Hai District','dong_hai','95',7),
-('961','Hoà Bình','Hoa Binh','Huyện Hoà Bình','Hoa Binh District','hoa_binh','95',7),
+('961','Hòa Bình','Hoa Binh','Huyện Hòa Bình','Hoa Binh District','hoa_binh','95',7),
 ('964','Cà Mau','Ca Mau','Thành phố Cà Mau','Ca Mau City','ca_mau','96',4),
 ('966','U Minh','U Minh','Huyện U Minh','U Minh District','u_minh','96',7),
 ('967','Thới Bình','Thoi Binh','Huyện Thới Bình','Thoi Binh District','thoi_binh','96',7),
