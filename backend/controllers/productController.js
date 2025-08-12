@@ -37,6 +37,43 @@ class ProductController {
         }
     }
 
+
+    // API lấy top products theo district
+    // GET /api/products/district/top-rated?districtCode=01&limit=15
+    static async getTopRatedProductsByDistrict(req, res) {
+        try {
+            const { districtCode, limit = 15, method = 'main' } = req.query;
+
+            let products;
+            products = await ProductModel.getTopRatedProductsByDistrict(
+                districtCode,
+                parseInt(limit)
+            );
+
+            console.log('Controller: Got products:', products.length);
+
+            return res.status(200).json({
+                success: true,
+                message: `Top ${limit} rated products in district ${districtCode}`,
+                data: {
+                    districtCode,
+                    totalProducts: products.length,
+                    method: method,
+                    products
+                }
+            });
+
+        } catch (error) {
+            console.error('Error in getTopRatedProducts:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Internal server error',
+                error: error.message,
+                stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+            });
+        }
+    }
+
     // API lấy chi tiết product theo ID
     // GET /api/products/:id
     static async getProductDetails(req, res) {
@@ -172,6 +209,7 @@ class ProductController {
             const query = `
                 SELECT 
                     p.ProductID,
+                    p.UID,
                     p.Name,
                     p.Address,
                     p.ProvinceCode,

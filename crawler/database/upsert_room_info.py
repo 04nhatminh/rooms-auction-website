@@ -1,16 +1,36 @@
 import json
 import pymysql
+import pymongo
+from pymongo import MongoClient
 from datetime import datetime
 import re
 import os
+import sys
+from dotenv import load_dotenv
+
+# Thêm đường dẫn để có thể import local modules
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from snowflake_ID_generator import generate_snowflake_uid
+
+# Load environment variables from ../.env
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '../.env'))
 
 # --- Config kết nối MySQL ---
 MYSQL_CONFIG = {
-    'host': 'localhost', 
-    'user': 'root', 
-    'password': '', # pass user mysql của mn
-    'database': 'a2airbnb', 
-    'charset': 'utf8mb4'
+    'host': os.getenv('DB_HOST', 'localhost'),
+    'user': os.getenv('DB_USER', 'root'),
+    'port': int(os.getenv('DB_PORT', 3306)),
+    'password': os.getenv('DB_PASSWORD', ''),
+    'database': os.getenv('DB_NAME', 'a2airbnb'),
+    'charset': 'utf8mb4',
+    'use_unicode': True,
+    'autocommit': False  # Changed to False to manage transactions manually
+}
+
+# --- Config kết nối MongoDB ---
+MONGODB_CONFIG = {
+    'uri': os.getenv('MONGODB_URI', 'mongodb://localhost:27017/'),
+    'database': os.getenv('MONGODB_DB', 'a2airbnb')
 }
 
 def get_db_connection():
@@ -20,6 +40,17 @@ def get_db_connection():
         return connection
     except Exception as e:
         print(f"[ERROR] Can't connect to MySQL: {e}")
+        return None
+
+def connect_to_mongodb():
+    # Kết nối đến MongoDB
+    try:
+        client = MongoClient(MONGODB_CONFIG['uri'])
+        db = client[MONGODB_CONFIG['database']]
+        print("[INFO] Connected to MongoDB successfully!")
+        return db
+    except Exception as e:
+        print(f"[ERROR] Error connecting to MongoDB: {e}")
         return None
 
 def extract_location_from_sharing_location(sharing_location, cursor):
@@ -81,66 +112,11 @@ def extract_location_from_sharing_location(sharing_location, cursor):
                     print(f"[INFO] Found province: {name} ({province_code})")
                     return province_code, None
 
-        print(f"[WARNING] Can't find matching location in sharing_location: {location_str[:100]}...")
+        print(f"[WARNING] Can't find {location_lower} matching location in sharing_location")
         return None, None
         
     except Exception as e:
-        print(f"[ERROR] Error extracting location from sharing_location: {e}")
-        return None, None
-
-def extract_location_info(description, cursor):
-    # Trích xuất thông tin địa điểm từ description và query database để lấy ProvinceCode/DistrictCode
-    if not description:
-        return None, None
-    
-    # Làm sạch description (loại bỏ HTML tags nếu có)
-    clean_desc = re.sub(r'<[^>]+>', '', description)
-    description_lower = clean_desc.lower()
-    
-    try:
-        # Tìm trong bảng Districts trước (chi tiết hơn)
-        cursor.execute("""
-            SELECT DistrictCode, ProvinceCode, Name, NameEn, FullName, FullNameEn 
-            FROM Districts 
-            ORDER BY LENGTH(Name) DESC
-        """)
-        districts = cursor.fetchall()
-        
-        for district in districts:
-            district_code, province_code, name, name_en, full_name, full_name_en = district
-            # Tạo danh sách các tên có thể có của district
-            possible_names = [name, name_en, full_name, full_name_en]
-            possible_names = [n.lower() for n in possible_names if n]
-            
-            for possible_name in possible_names:
-                if possible_name in description_lower:
-                    print(f"[INFO] Found district: {name} ({district_code}) in province {province_code}")
-                    return province_code, district_code
-        
-        # Nếu không tìm thấy district, tìm trong bảng Provinces
-        cursor.execute("""
-            SELECT ProvinceCode, Name, NameEn, FullName, FullNameEn 
-            FROM Provinces 
-            ORDER BY LENGTH(Name) DESC
-        """)
-        provinces = cursor.fetchall()
-        
-        for province in provinces:
-            province_code, name, name_en, full_name, full_name_en = province
-            # Tạo danh sách các tên có thể có của province
-            possible_names = [name, name_en, full_name, full_name_en]
-            possible_names = [n.lower() for n in possible_names if n]
-            
-            for possible_name in possible_names:
-                if possible_name in description_lower:
-                    print(f"[INFO] Found province: {name} ({province_code})")
-                    return province_code, None
-
-        print(f"[WARNING] Can't find matching location in description: {clean_desc[:100]}...")
-        return None, None
-        
-    except Exception as e:
-        print(f"[ERROR] Error extracting location: {e}")
+        print(f"[ERROR] Error extracting location from sharing_location: {str(e)}")
         return None, None
 
 def get_district_province_names(province_code, district_code, cursor):
@@ -172,7 +148,7 @@ def get_district_province_names(province_code, district_code, cursor):
             return "N/A"
             
     except Exception as e:
-        print(f"[ERROR] Error extracting location: {e}")
+        print(f"[ERROR] Error extracting location: {str(e)}")
         return "N/A"
 
 def get_property_type_id(cursor, property_type):
@@ -283,8 +259,177 @@ def rating_mapping(ratings_data):
         rating['ConveniencePoint']       # ConveniencePoint (CHECKIN)
     )
 
-def upsert_product_from_listing_data(listing_data, price_data=None):
-    # Insert/Update product từ dữ liệu listing
+# Mongodb
+def upsert_images_to_mongodb(db, product_id, listing_id, images_data):
+    # Upsert dữ liệu images vào collection images
+    try:
+        collection = db['images']
+        
+        document = {
+            'ProductID': product_id,
+            'Source': 'airbnb',
+            'Images': images_data,
+            'updated_at': datetime.now()
+        }
+        
+        result = collection.replace_one(
+            {'ProductID': product_id},
+            document,
+            upsert=True
+        )
+        
+        action = "inserted" if result.upserted_id else "updated"
+        print(f"[INFO] MongoDB Images of listing {listing_id}: {action}")
+
+    except Exception as e:
+        print(f"[ERROR] Error upserting images to MongoDB for listing {listing_id}: {e}")
+        raise
+
+def upsert_room_tour_images_to_mongodb(db, product_id, listing_id, room_tour_items):
+    # Upsert dữ liệu room_tour_items vào collection room_tour_images
+    try:
+        collection = db['room_tour_images']
+        
+        document = {
+            'ProductID': product_id,
+            'Source': 'airbnb',
+            'RoomTourItems': room_tour_items,
+            'updated_at': datetime.now()
+        }
+        
+        result = collection.replace_one(
+            {'ProductID': product_id},
+            document,
+            upsert=True
+        )
+        
+        action = "inserted" if result.upserted_id else "updated"
+        print(f"[INFO] MongoDB Room tour images of listing {listing_id}: {action}")
+
+    except Exception as e:
+        print(f"[ERROR] Error upserting room tour images to MongoDB for listing {listing_id}: {e}")
+        raise
+
+def upsert_policies_to_mongodb(db, product_id, listing_id, policies_data):
+    # Upsert dữ liệu policies vào collection policies
+    try:
+        collection = db['policies']
+        
+        document = {
+            'ProductID': product_id,
+            'Source': 'airbnb',
+            'Policies': policies_data,
+            'updated_at': datetime.now()
+        }
+        
+        result = collection.replace_one(
+            {'ProductID': product_id},
+            document,
+            upsert=True
+        )
+        
+        action = "inserted" if result.upserted_id else "updated"
+        print(f"[INFO] MongoDB Policies of listing {listing_id}: {action}")
+
+    except Exception as e:
+        print(f"[ERROR] Error upserting policies to MongoDB for listing {listing_id}: {e}")
+        raise
+
+def upsert_highlights_to_mongodb(db, product_id, listing_id, highlights_data):
+    # Upsert dữ liệu highlights vào collection highlights
+    try:
+        collection = db['highlights']
+        
+        document = {
+            'ProductID': product_id,
+            'Source': 'airbnb',
+            'Highlights': highlights_data,
+            'updated_at': datetime.now()
+        }
+        
+        result = collection.replace_one(
+            {'ProductID': product_id},
+            document,
+            upsert=True
+        )
+        
+        action = "inserted" if result.upserted_id else "updated"
+        print(f"[INFO] MongoDB Highlights of listing {listing_id}: {action}")
+
+    except Exception as e:
+        print(f"[ERROR] Error upserting highlights to MongoDB for listing {listing_id}: {e}")
+        raise
+
+def upsert_descriptions_to_mongodb(db, product_id, listing_id, descriptions_data):
+    # Upsert dữ liệu descriptions vào collection descriptions
+    try:
+        collection = db['descriptions']
+        
+        document = {
+            'ProductID': product_id,
+            'Source': 'airbnb',
+            'Descriptions': descriptions_data,
+            'updated_at': datetime.now()
+        }
+        
+        result = collection.replace_one(
+            {'ProductID': product_id},
+            document,
+            upsert=True
+        )
+        
+        action = "inserted" if result.upserted_id else "updated"
+        print(f"[INFO] MongoDB Descriptions of listing {listing_id}: {action}")
+
+    except Exception as e:
+        print(f"[ERROR] Error upserting descriptions to MongoDB for listing {listing_id}: {e}")
+        raise
+
+
+
+def create_mongodb_indexes(db):
+    # Tạo indexes cho các collections để tối ưu hiệu suất
+    try:
+        collections = ['images', 'room_tour_images', 'policies', 'highlights', 'descriptions']
+        
+        for collection_name in collections:
+            collection = db[collection_name]
+            
+            try:
+                # Xóa các document có ProductID null trước khi tạo unique index
+                delete_result = collection.delete_many({'ProductID': None})
+                if delete_result.deleted_count > 0:
+                    print(f"[INFO] Deleted {delete_result.deleted_count} documents with null ProductID from {collection_name}")
+                
+                # Xóa index cũ nếu tồn tại (UID_1)
+                try:
+                    collection.drop_index("UID_1")
+                    print(f"[INFO] Removed old UID index for collection {collection_name}")
+                except:
+                    pass  # Index không tồn tại
+                
+                # Xóa index ProductID cũ nếu tồn tại
+                try:
+                    collection.drop_index("ProductID_1")
+                    print(f"[INFO] Removed old ProductID index for collection {collection_name}")
+                except:
+                    pass  # Index không tồn tại
+                
+                # Tạo index mới cho ProductID
+                collection.create_index([("ProductID", 1)], unique=True)
+                print(f"[INFO] Created ProductID index for collection {collection_name}")
+
+            except Exception as index_error:
+                print(f"[ERROR] Error creating index for collection {collection_name}: {index_error}")
+                continue
+
+    except Exception as e:
+        print(f"[ERROR] Error creating indexes: {e}")
+
+
+
+def upsert_product_from_listing_data(listing_data, mongodb_db=None):
+    # Insert/Update product từ dữ liệu listing vào cả MySQL và MongoDB
     connection = get_db_connection()
     if not connection:
         return False
@@ -316,8 +461,17 @@ def upsert_product_from_listing_data(listing_data, price_data=None):
         if sharing_location:
             # Trích xuất thông tin địa điểm từ sharing_location
             province_code, district_code = extract_location_from_sharing_location(sharing_location, cursor)
+            
+            # Skip if no location information found
+            if province_code is None and district_code is None:
+                print(f"[SKIP] Listing {listing_id}: No location information found, skipping...")
+                return "skipped"
+            
             # Tạo Address từ District + ', ' + Province
             address = get_district_province_names(province_code, district_code, cursor)
+        else:
+            print(f"[SKIP] Listing {listing_id}: No sharing_location data, skipping...")
+            return "skipped"
         
         # Upsert property type trước để đảm bảo có trong bảng Properties
         cursor.callproc('UpsertProperty', [property_type])
@@ -345,8 +499,12 @@ def upsert_product_from_listing_data(listing_data, price_data=None):
         created_at = None if is_update else current_time  # NULL nếu update, timestamp nếu insert
         last_synced_at = current_time  # Luôn cập nhật LastSyncedAt
         
-        # Thực hiện upsert product với cấu trúc mới
+        # Tạo UID bằng snowflake generator
+        uid = generate_snowflake_uid()
+        
+        # Thực hiện upsert product với cấu trúc mới vào MySQL
         cursor.callproc('UpsertProduct', [
+            uid,
             listing_id,                    # p_ExternalID
             'airbnb',                      # p_Source (luôn là 'airbnb')
             name,                          # p_Name (name trong apartment_info)
@@ -373,32 +531,84 @@ def upsert_product_from_listing_data(listing_data, price_data=None):
             last_synced_at                 # p_LastSyncedAt (luôn timestamp hiện tại)
         ])
         
-        # Upsert amenities
-        amenities = data.get('amenities', [])
-        amenity_ids = upsert_amenities(cursor, amenities)
-        
-        # Lấy ProductID để liên kết amenities (query lại sau khi upsert)
+        # Query lại để lấy ProductID sau khi upsert
         cursor.execute("SELECT ProductID FROM Products WHERE ExternalID = %s", [listing_id])
         product_result = cursor.fetchone()
         
-        if product_result and amenity_ids:
-            product_id = product_result[0]
+        if not product_result:
+            raise Exception(f"Could not retrieve ProductID for listing {listing_id} after upsert")
+        
+        product_id = product_result[0]
+        print(f"[INFO] Retrieved ProductID: {product_id} for listing {listing_id}")
+        
+        # Upsert amenities vào MySQL
+        amenities = data.get('amenities', [])
+        amenity_ids = upsert_amenities(cursor, amenities)
+        
+        if amenity_ids:
+            # Lấy danh sách amenity_ids hiện tại
+            cursor.execute(
+                "SELECT AmenityID FROM ProductAmenities WHERE ProductID = %s", 
+                [product_id]
+            )
+            existing_amenity_ids = set(row[0] for row in cursor.fetchall())
             
-            # Xóa các liên kết amenities cũ
-            cursor.execute("DELETE FROM ProductAmenities WHERE ProductID = %s", [product_id])
+            # Tìm amenities cần thêm mới và cần xóa
+            new_amenity_ids = set(amenity_ids)
+            amenities_to_add = new_amenity_ids - existing_amenity_ids
+            amenities_to_remove = existing_amenity_ids - new_amenity_ids
             
-            # Thêm liên kết amenities mới
-            for amenity_id in amenity_ids:
+            # Xóa các amenities không còn cần thiết
+            if amenities_to_remove:
+                placeholders = ','.join(['%s'] * len(amenities_to_remove))
+                cursor.execute(
+                    f"DELETE FROM ProductAmenities WHERE ProductID = %s AND AmenityID IN ({placeholders})",
+                    [product_id] + list(amenities_to_remove)
+                )
+            
+            # Thêm các amenities mới
+            for amenity_id in amenities_to_add:
                 cursor.execute(
                     "INSERT INTO ProductAmenities (ProductID, AmenityID) VALUES (%s, %s)",
                     [product_id, amenity_id]
                 )
         
+        # Commit MySQL changes
+        connection.commit()
+        
+        # Upsert vào MongoDB nếu connection có sẵn
+        if mongodb_db is not None:
+            try:
+                # Upsert images
+                if 'images' in data:
+                    upsert_images_to_mongodb(mongodb_db, product_id, listing_id, data['images'])
+                
+                # Upsert room tour images
+                if 'room_tour_items' in data:
+                    upsert_room_tour_images_to_mongodb(mongodb_db, product_id, listing_id, data['room_tour_items'])
+                
+                # Upsert policies
+                if 'policies' in data:
+                    upsert_policies_to_mongodb(mongodb_db, product_id, listing_id, data['policies'])
+                
+                # Upsert highlights
+                if 'highlights' in data:
+                    upsert_highlights_to_mongodb(mongodb_db, product_id, listing_id, data['highlights'])
+                
+                # Upsert descriptions
+                if 'descriptions' in data:
+                    upsert_descriptions_to_mongodb(mongodb_db, product_id, listing_id, data['descriptions'])
+                
+                print(f"[SUCCESS] MongoDB data for listing {listing_id} processed successfully")
+                
+            except Exception as mongo_error:
+                print(f"[ERROR] Error upserting to MongoDB for listing {listing_id}: {mongo_error}")
+                # MongoDB error không làm fail toàn bộ process
+        
         # In thông báo insert/update
         action = "updated" if is_update else "inserted"
-        print(f"[SUCCESS] Successfully {action} listing {listing_id} into database\n")
+        print(f"[SUCCESS] Successfully {action} listing {listing_id} into MySQL and MongoDB with ProductID: {product_id}\n")
 
-        connection.commit()
         return True
         
     except Exception as e:
@@ -410,39 +620,59 @@ def upsert_product_from_listing_data(listing_data, price_data=None):
         cursor.close()
         connection.close()
 
-def main():
-    # Đọc dữ liệu listing info
-    listing_info_file = "output/listing_info.json"
-    
+
+
+def main(listing_info_file):    
     if not os.path.exists(listing_info_file):
         print(f"[ERROR] File {listing_info_file} not found!")
         return
     
     try:
+        # Kết nối MongoDB
+        mongodb_db = connect_to_mongodb()
+        if mongodb_db is not None:
+            # Tạo indexes cho MongoDB
+            create_mongodb_indexes(mongodb_db)
+        else:
+            print("[WARNING] MongoDB connection failed, will only update MySQL")
+        
         # Đọc listing info (đã bao gồm price data)
         with open(listing_info_file, 'r', encoding='utf-8') as f:
             listing_data_list = json.load(f)
 
-        print(f"[INFO] Processing {len(listing_data_list)} listings...")
+        print(f"\n[INFO] Processing {len(listing_data_list)} listings...")
 
         success_count = 0
         error_count = 0
+        skipped_count = 0
         
         for i, listing_data in enumerate(listing_data_list):
             listing_id = listing_data.get('listing_id', '')
             print(f"[INFO] Processing listing {i+1}/{len(listing_data_list)}: {listing_id}")
 
-            # Upsert vào database (price data đã có trong listing_data)
-            if upsert_product_from_listing_data(listing_data):
+            # Upsert vào cả MySQL và MongoDB
+            result = upsert_product_from_listing_data(listing_data, mongodb_db)
+            if result == "skipped":
+                skipped_count += 1
+            elif result:
                 success_count += 1
             else:
                 error_count += 1
 
-        print(f"Completed! Processed {success_count} listings, {error_count} errors")
+        print(f"\nCompleted! Processed {success_count} listings, {error_count} errors, {skipped_count} skipped (no location)")
 
     except Exception as e:
         print(f"[ERROR] Error processing JSON file: {e}")
 
 if __name__ == "__main__":
     os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    main()
+    
+    # Lấy filename từ command line arguments
+    listing_info_file = None
+    if len(sys.argv) > 1:
+        listing_info_file = sys.argv[1]
+        print(f"[INFO] Using file: {listing_info_file}")
+    else:
+        print("[INFO] Example: python upsert_room_info.py output/crawled_data/listing_info_20250812001.json")
+
+    main(listing_info_file)

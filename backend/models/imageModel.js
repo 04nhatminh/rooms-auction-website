@@ -57,14 +57,12 @@ class ImageModel {
         }
     }
 
-    /**
-     * Lấy hình ảnh đầu tiên của một listing dựa trên ExternalID
-     * @param {string} externalId - ExternalID của product
-     * @returns {string|null} - baseUrl của hình ảnh đầu tiên hoặc null
-     */
-    async getFirstImageByExternalId(externalId) {
+    // Lấy hình ảnh đầu tiên của một listing dựa trên ProductID
+    // @param {string} productId - ProductID của product
+    // @returns {string|null} - baseUrl của hình ảnh đầu tiên hoặc null
+    async getFirstImageByProductId(productId) {
         try {
-            console.log(`Fetching image for ExternalID: ${externalId}`);
+            console.log(`Fetching image for ProductID: ${productId}`);
             const db = await this.connect();
             
             if (!db) {
@@ -73,9 +71,9 @@ class ImageModel {
             
             const imagesCollection = db.collection('images');
 
-            // Tìm document có ExternalID tương ứng
+            // Tìm document có ProductID tương ứng
             const result = await imagesCollection.findOne(
-                { ExternalID: externalId },
+                { ProductID: productId },
                 { 
                     projection: { 
                         'Images.baseUrl': 1
@@ -83,7 +81,7 @@ class ImageModel {
                 }
             );
 
-            console.log(`MongoDB query result for ${externalId}:`, result ? 'Found' : 'Not found');
+            console.log(`MongoDB query result for ${productId}:`, result ? 'Found' : 'Not found');
 
             if (result && result.Images && result.Images.length > 0) {
                 console.log(`Returning image URL: ${result.Images[0].baseUrl}`);
@@ -93,23 +91,21 @@ class ImageModel {
             return null;
 
         } catch (error) {
-            console.error(`Error fetching image for ExternalID ${externalId}:`, error);
+            console.error(`Error fetching image for ProductID ${productId}:`, error);
             return null; // Return null thay vì throw để không break toàn bộ process
         }
     }
 
-    /**
-     * Lấy tất cả hình ảnh của một listing dựa trên ExternalID
-     * @param {string} externalId - ExternalID của product
-     * @returns {Array} - Mảng các baseUrl hoặc mảng rỗng
-     */
-    async getAllImagesByExternalId(externalId) {
+    // Lấy tất cả hình ảnh của một listing dựa trên ProductID
+    // @param {string} productId - ProductID của product
+    // @returns {Array} - Mảng các baseUrl hoặc mảng rỗng
+    async getAllImagesByProductId(productId) {
         try {
             const db = await this.connect();
             const imagesCollection = db.collection('images');
 
             const result = await imagesCollection.findOne(
-                { ExternalID: externalId },
+                { ProductID: productId },
                 { projection: { 'Images.baseUrl': 1 } }
             );
 
@@ -125,14 +121,12 @@ class ImageModel {
         }
     }
 
-    /**
-     * Lấy hình ảnh cho nhiều ExternalID cùng lúc
-     * @param {Array} externalIds - Mảng các ExternalID
-     * @returns {Object} - Object với key là ExternalID và value là baseUrl đầu tiên
-     */
-    async getBatchFirstImages(externalIds) {
+    // Lấy hình ảnh cho nhiều ProductID cùng lúc
+    // @param {Array} productIds - Mảng các ProductID
+    // @returns {Object} - Object với key là ProductID và value là baseUrl đầu tiên
+    async getBatchFirstImages(productIds) {
         try {
-            console.log(`Fetching batch images for ${externalIds.length} ExternalIDs`);
+            console.log(`Fetching batch images for ${productIds.length} ProductIDs`);
             const db = await this.connect();
             
             if (!db) {
@@ -142,21 +136,21 @@ class ImageModel {
             const imagesCollection = db.collection('images');
 
             const results = await imagesCollection.find(
-                { ExternalID: { $in: externalIds } },
+                { ProductID: { $in: productIds } },
                 { 
                     projection: { 
-                        ExternalID: 1,
+                        ProductID: 1,
                         'Images.baseUrl': 1 
                     }
                 }
             ).toArray();
 
-            console.log(`MongoDB batch query found ${results.length} results out of ${externalIds.length} requested`);
+            console.log(`MongoDB batch query found ${results.length} results out of ${productIds.length} requested`);
 
             const imageMap = {};
             results.forEach(result => {
                 if (result.Images && result.Images.length > 0) {
-                    imageMap[result.ExternalID] = result.Images[0].baseUrl;
+                    imageMap[result.ProductID] = result.Images[0].baseUrl;
                 }
             });
 
@@ -166,89 +160,6 @@ class ImageModel {
         } catch (error) {
             console.error('Error fetching batch images from MongoDB:', error);
             return {}; // Return empty object thay vì throw
-        }
-    }
-
-    /**
-     * Lấy total_reviews cho một listing_id
-     * @param {string} listingId - listing_id (tương ứng với ExternalID)
-     * @returns {number|null} - total_reviews hoặc null
-     */
-    async getTotalReviewsByListingId(listingId) {
-        try {
-            console.log(`Fetching total reviews for listing_id: ${listingId}`);
-            const db = await this.connect();
-            
-            if (!db) {
-                throw new Error('Database connection failed');
-            }
-            
-            const reviewsCollection = db.collection('reviews');
-
-            const result = await reviewsCollection.findOne(
-                { listing_id: listingId },
-                { 
-                    projection: { 
-                        total_reviews: 1
-                    }
-                }
-            );
-
-            console.log(`MongoDB reviews query result for ${listingId}:`, result ? `Found ${result.total_reviews} reviews` : 'Not found');
-
-            if (result && typeof result.total_reviews === 'number') {
-                return result.total_reviews;
-            }
-
-            return null;
-
-        } catch (error) {
-            console.error(`Error fetching reviews for listing_id ${listingId}:`, error);
-            return null;
-        }
-    }
-
-    /**
-     * Lấy total_reviews cho nhiều listing_id cùng lúc
-     * @param {Array} listingIds - Mảng các listing_id
-     * @returns {Object} - Object với key là listing_id và value là total_reviews
-     */
-    async getBatchTotalReviews(listingIds) {
-        try {
-            console.log(`Fetching batch reviews for ${listingIds.length} listing_ids`);
-            const db = await this.connect();
-            
-            if (!db) {
-                throw new Error('Database connection failed');
-            }
-
-            const reviewsCollection = db.collection('reviews');
-
-            const results = await reviewsCollection.find(
-                { listing_id: { $in: listingIds } },
-                { 
-                    projection: { 
-                        listing_id: 1,
-                        total_reviews: 1 
-                    }
-                }
-            ).toArray();
-
-            console.log(`MongoDB batch reviews query found ${results.length} results out of ${listingIds.length} requested`);
-
-            const reviewsMap = {};
-            results.forEach(result => {
-                if (result.listing_id && typeof result.total_reviews === 'number') {
-                    reviewsMap[result.listing_id] = result.total_reviews;
-                }
-            });
-
-            console.log(`Successfully mapped ${Object.keys(reviewsMap).length} review counts`);
-            return reviewsMap;
-
-        } catch (error) {
-            console.error('Error fetching batch reviews from MongoDB:', error);
-            return {};
         }
     }
 }

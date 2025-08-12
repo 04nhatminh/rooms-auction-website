@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+from datetime import datetime
 
 # Thêm thư mục cha vào Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -9,11 +10,15 @@ from crawler.graphql_hashes import extract_sha256_hashes
 from crawler.fetch_listing_info import fetch_listing_info, extract_listing_data, fetch_price
 from crawler.headers import encode_listing_id
 from crawler.config import API_DOMAIN
+from crawler.utils import generate_date_sequence_number
 
-def read_listing_ids():
+def read_listing_ids(province):
     # Đọc danh sách listing IDs từ file
     listing_ids = []
-    file_path = "output/listing_ids.txt"
+    
+    # Lấy đường dẫn tới thư mục gốc của crawler (thư mục cha của execute)
+    crawler_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    file_path = os.path.join(crawler_root, "output", "listing_ids", f"listing_ids_{province}.txt")
     
     if not os.path.exists(file_path):
         print(f"[ERROR] File {file_path} is not found!")
@@ -102,7 +107,7 @@ def save_to_json(new_data, filename):
     except Exception as e:
         print(f"[ERROR] Error saving file {filename}: {e}")
 
-def process_listing_info(listing_ids, hashes):
+def process_listing_info(listing_ids, hashes, output_filename):
     # Xử lý fetch listing info và price cho tất cả listing_ids
     print(f"\n[INFO] Starting fetch listing info and price for {len(listing_ids)} listings...")
     
@@ -144,35 +149,65 @@ def process_listing_info(listing_ids, hashes):
             new_listing_info.append(listing_data)
     
     # Append vào file hiện tại thay vì ghi đè
-    save_to_json(new_listing_info, "output/listing_info.json")
+    save_to_json(new_listing_info, output_filename)
 
-def main():
+def main(province=None):
     print("=== FETCH LISTING INFO ===")
     
-    # 1. Đọc listing_ids từ file
-    listing_ids = read_listing_ids()
-    if not listing_ids:
-        print("[ERROR] No listing IDs found to process!")
+    # Kiểm tra xem province có được truyền vào không
+    if province is None:
+        print("[ERROR] Province parameter is required!")
+        print("Usage: python run_fetch_listing_info.py <province_name>")
+        print("Example: python run_fetch_listing_info.py 'Ba Ria - Vung Tau'")
         return
     
-    # 2. Lấy hash từ listing_id đầu tiên có thể
-    print(f"\n[INFO] Fetching hash...")
-    hashes = get_valid_hashes(listing_ids)
-    if not hashes:
-        print("[ERROR] No valid hash found, stopping program!")
-        return
+    print(f"[INFO] Processing province: {province}")
     
-    # 3. Tạo thư mục output nếu chưa có
-    os.makedirs("output", exist_ok=True)
-    
-    # 4. Xử lý listing info
     try:
-        process_listing_info(listing_ids, hashes)
-        print("\n=== COMPLETED FETCH LISTING INFO ===")
-        print("File created: output/listing_info.json")
+        # 1. Đọc listing_ids từ file
+        listing_ids = read_listing_ids(province)
+        if not listing_ids:
+            print("[ERROR] No listing IDs found to process!")
+            return
         
+        # 2. Lấy hash từ listing_id đầu tiên có thể
+        print(f"\n[INFO] Fetching hash...")
+        hashes = get_valid_hashes(listing_ids)
+        if not hashes:
+            print("[ERROR] No valid hash found, stopping program!")
+            return
+
+        # 3. Tạo thư mục output/crawled_data nếu chưa có
+        crawler_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        output_dir = os.path.join(crawler_root, "output", "crawled_data")
+        os.makedirs(output_dir, exist_ok=True)
+        
+        # 4. Tạo date_sequence_number cho tên file output
+        date_sequence_number = generate_date_sequence_number("listing_info")
+        output_filename = os.path.join(output_dir, f"listing_info_{date_sequence_number}.json")
+        print(f"[INFO] Output file will be: {output_filename}")
+        
+        # 5. Xử lý listing info
+        process_listing_info(listing_ids, hashes, output_filename)
+        print(f"[OUTPUT] File created: {output_filename}")
+        
+        # 6. Upsert dữ liệu vào mysql/mongodb
+        print("\n=== UPSERTING LISTING INFO ===")
+        from database.upsert_room_info import main as upsert_listing_info
+        upsert_listing_info(output_filename)
+        
+        print("\n=== COMPLETED UPSERT LISTING INFO ===")
+
     except Exception as e:
         print(f"[ERROR] Error occurred during processing: {e}")
 
 if __name__ == "__main__":
-    main()
+    # Lấy province từ command line arguments
+    if len(sys.argv) < 2:
+        print("[ERROR] Province parameter is required!")
+        print("Usage: python run_fetch_listing_info.py <province_name>")
+        print("Example: python run_fetch_listing_info.py 'Ba Ria - Vung Tau'")
+        sys.exit(1)
+    
+    province = sys.argv[1]
+    main(province)

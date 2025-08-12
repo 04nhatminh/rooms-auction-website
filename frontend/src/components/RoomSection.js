@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import RoomCard from './RoomCard';
 import './RoomSection.css';
 import chevronLeftGrayIcon from '../assets/chevron_left_gray.png';
@@ -6,13 +6,17 @@ import chevronRightGrayIcon from '../assets/chevron_right_gray.png';
 import chevronLeftBlackIcon from '../assets/chevron_left_black.png';
 import chevronRightBlackIcon from '../assets/chevron_right_black.png';
 
-const RoomSection = ({ title, provinceCode = '01', limit = 15 }) => {
+const RoomSection = memo(({ title, provinceCode = '01', limit = 15 }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentStartIndex, setCurrentStartIndex] = useState(0);
   const [itemsPerView] = useState(5); // Hiển thị 5 items cùng lúc
   const [scrollStep] = useState(2); // Scroll 2 items mỗi lần
+  
+  // Thêm refs để quản lý cache và request
+  const cacheRef = useRef(new Map());
+  const currentRequestRef = useRef(null);
   
   // Tính toán pagination
   const maxStartIndex = Math.max(0, products.length - itemsPerView);
@@ -47,13 +51,37 @@ const RoomSection = ({ title, provinceCode = '01', limit = 15 }) => {
 
   useEffect(() => {
     const fetchProductsWithImages = async () => {
+      const cacheKey = `${provinceCode}-${limit}`;
+      
+      // Kiểm tra cache trước
+      if (cacheRef.current.has(cacheKey)) {
+        const cachedData = cacheRef.current.get(cacheKey);
+        setProducts(cachedData);
+        setLoading(false);
+        setCurrentStartIndex(0);
+        return;
+      }
+
+      // Hủy request trước đó nếu có
+      if (currentRequestRef.current) {
+        currentRequestRef.current.abort();
+      }
+
+      // Tạo AbortController mới
+      const abortController = new AbortController();
+      currentRequestRef.current = abortController;
+
       try {
         setLoading(true);
+        setError(null);
         
         // 1. Fetch products từ MySQL
         const response = await fetch(
-          `http://localhost:3000/api/products/top-rated?provinceCode=${provinceCode}&limit=${limit}`
+          `http://localhost:3000/api/products/top-rated?provinceCode=${provinceCode}&limit=${limit}`,
+          { signal: abortController.signal }
         );
+        
+        if (abortController.signal.aborted) return;
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -67,32 +95,25 @@ const RoomSection = ({ title, provinceCode = '01', limit = 15 }) => {
 
         const products = data.data.products;
         
-        // 2. Lấy danh sách ExternalID để fetch images
-        const externalIds = products
-          .map(product => product.ExternalID)
+        // 2. Lấy danh sách ProductID để fetch images và reviews
+        const productIds = products
+          .map(product => product.ProductID)
           .filter(id => id); // Loại bỏ null/undefined
 
-        if (externalIds.length > 0) {
-          // 3. Fetch images từ MongoDB batch
+        if (productIds.length > 0) {
+          // 3. Fetch images từ MongoDB batch bằng ProductID
           const imageResponse = await fetch('http://localhost:3000/api/images/batch', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ externalIds })
+            body: JSON.stringify({ productIds }),
+            signal: abortController.signal
           });
 
-          // 4. Fetch reviews từ MongoDB batch
-          const reviewsResponse = await fetch('http://localhost:3000/api/images/reviews/batch', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ listingIds: externalIds }) // listing_id tương ứng với ExternalID
-          });
+          if (abortController.signal.aborted) return;
 
           let imageMap = {};
-          let reviewsMap = {};
 
           if (imageResponse.ok) {
             const imageData = await imageResponse.json();
@@ -101,36 +122,68 @@ const RoomSection = ({ title, provinceCode = '01', limit = 15 }) => {
             console.warn('Failed to fetch images from MongoDB');
           }
 
-          if (reviewsResponse.ok) {
-            const reviewsData = await reviewsResponse.json();
-            reviewsMap = reviewsData.success ? reviewsData.data.reviewsMap : {};
-          } else {
-            console.warn('Failed to fetch reviews from MongoDB');
+          // 4. Fetch reviews từ MongoDB batch bằng ProductID
+          let reviewsMap = {};
+          if (productIds.length > 0) {
+            const reviewsResponse = await fetch('http://localhost:3000/api/reviews/batch', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ productIds }),
+              signal: abortController.signal
+            });
+
+            if (abortController.signal.aborted) return;
+
+            if (reviewsResponse.ok) {
+              const reviewsData = await reviewsResponse.json();
+              reviewsMap = reviewsData.success ? reviewsData.data.reviewsMap : {};
+            } else {
+              console.warn('Failed to fetch reviews from MongoDB');
+            }
           }
 
           // 5. Gắn imageUrl và totalReviews vào products
           const productsWithImagesAndReviews = products.map(product => ({
             ...product,
-            mongoImageUrl: product.ExternalID ? imageMap[product.ExternalID] : null,
-            totalReviews: product.ExternalID ? reviewsMap[product.ExternalID] : null
+            mongoImageUrl: product.ProductID ? imageMap[product.ProductID] : null,
+            totalReviews: product.ProductID ? reviewsMap[product.ProductID] : null
           }));
 
+          // Lưu vào cache
+          cacheRef.current.set(cacheKey, productsWithImagesAndReviews);
           setProducts(productsWithImagesAndReviews);
         } else {
+          // Lưu vào cache
+          cacheRef.current.set(cacheKey, products);
           setProducts(products);
         }
         
         setCurrentStartIndex(0); // Reset về đầu khi load dữ liệu mới
 
       } catch (err) {
+        if (err.name === 'AbortError') {
+          console.log('Request was aborted');
+          return;
+        }
         console.error('Error fetching products:', err);
         setError(err.message);
       } finally {
-        setLoading(false);
+        if (!abortController.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchProductsWithImages();
+
+    // Cleanup function
+    return () => {
+      if (currentRequestRef.current) {
+        currentRequestRef.current.abort();
+      }
+    };
   }, [provinceCode, limit]);
 
   if (loading) {
@@ -211,6 +264,13 @@ const RoomSection = ({ title, provinceCode = '01', limit = 15 }) => {
       </div>
     </section>
   );
-};
+}, (prevProps, nextProps) => {
+  // Custom comparison function để tránh re-render không cần thiết
+  return (
+    prevProps.title === nextProps.title &&
+    prevProps.provinceCode === nextProps.provinceCode &&
+    prevProps.limit === nextProps.limit
+  );
+});
 
 export default RoomSection;

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import './RoomCard.css';
 import LocationIcon from '../assets/location.png';
 import StarOutlineIcon from '../assets/star_outline.png';
@@ -6,6 +7,7 @@ import PriceTagIcon from '../assets/price.png';
 import PlaceHolderImg from '../assets/placeholder.jpg';
 
 const RoomCard = ({ product }) => {
+  const navigate = useNavigate();
   const defaultImage = PlaceHolderImg;
 
   // Format giá tiền
@@ -49,8 +51,11 @@ const RoomCard = ({ product }) => {
 
   // Xử lý sự kiện click vào card
   const handleCardClick = () => {
-    if (product && product.ProductID) {
-      window.location.href = `/room/${product.ProductID}`;
+    if (product) {
+      const roomId = product.UID;
+      if (roomId) {
+        navigate(`/room/${roomId}`);
+      }
     }
   };
 
