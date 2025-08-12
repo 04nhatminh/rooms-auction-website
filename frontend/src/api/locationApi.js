@@ -34,7 +34,7 @@ class LocationAPI {
    */
   static async getPopularLocations(limit = 20) {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/locations/popular?limit=${limit}`);
+      const response = await fetch(`http://localhost:3000/api/locations/popular?limit=${limit}`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -53,7 +53,7 @@ class LocationAPI {
    */
   static async getProvincesWithProducts(limit = 50) {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/locations/provinces/with-products?limit=${limit}`);
+      const response = await fetch(`http://localhost:3000/api/locations/provinces/with-products?limit=${limit}`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -89,8 +89,8 @@ class LocationAPI {
         limit: limit
       });
 
-      const response = await fetch(`${API_BASE_URL}/api/locations/search?${params}`);
-      
+      const response = await fetch(`http://localhost:3000/api/locations/search?${params}`);
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }

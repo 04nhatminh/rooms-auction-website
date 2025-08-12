@@ -10,6 +10,7 @@
 .logo {
   display: flex;
   align-items: center;
+  cursor: pointer;
 }
 
 .logo-image {
@@ -85,6 +86,7 @@
   justify-content: center;
   flex-shrink: 0;
   order: 999;
+  cursor: pointer;
 }
 
 .search .search-icon img {
@@ -113,6 +115,7 @@
   background-color: white !important;
   transition: all 0.2s ease !important;
   flex-shrink: 0;
+  cursor: pointer;
 }
 
 .circle-btn:hover {

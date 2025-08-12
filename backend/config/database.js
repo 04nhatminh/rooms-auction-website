@@ -2,6 +2,7 @@ require('dotenv').config({ path: '../.env' });
 const mysql = require('mysql2/promise');
 const { spawn } = require('child_process');
 const path = require('path');
+const { create } = require('domain');
 
 const dbConfig = {
     host: process.env.DB_HOST || 'localhost',
@@ -954,6 +955,68 @@ async function createGetTopProductsByProvinceProcedure() {
     `);
 }
 
+async function dropGetTopProductsByDistrictProcedureIfExists() {
+    await pool.query(`
+        DROP PROCEDURE IF EXISTS GetTopProductsByDistrict;
+    `);
+}
+
+async function createGetTopProductsByDistrictProcedure() {
+    await pool.query(`
+        CREATE PROCEDURE GetTopProductsByDistrict(
+            IN district_code_input VARCHAR(20),
+            IN limit_input INT
+        )
+        BEGIN
+            SELECT 
+                p.ProductID,
+                p.UID,
+                p.ExternalID,
+                p.Name,
+                p.Address,
+                prov.Name AS ProvinceName,
+                disct.Name AS DistrictName,
+                p.ProvinceCode,
+                p.DistrictCode,
+                prop.PropertyName,
+                p.Price,
+                p.Currency,
+                p.CleanlinessPoint,
+                p.LocationPoint,
+                p.ServicePoint,
+                p.ValuePoint,
+                p.CommunicationPoint,
+                p.ConveniencePoint,
+                ROUND((
+                    COALESCE(p.CleanlinessPoint, 0) + 
+                    COALESCE(p.LocationPoint, 0) + 
+                    COALESCE(p.ServicePoint, 0) + 
+                    COALESCE(p.ValuePoint, 0) + 
+                    COALESCE(p.CommunicationPoint, 0) + 
+                    COALESCE(p.ConveniencePoint, 0)
+                ) / 6, 2) AS AverageRating,
+                prop.PropertyName,
+                prop.PropertyImageURL,
+                rt.RoomTypeName,
+                rt.RoomTypeImageURL
+            FROM Products p
+            LEFT JOIN Properties prop ON p.PropertyType = prop.PropertyID
+            LEFT JOIN RoomTypes rt ON p.RoomType = rt.RoomTypeID
+            LEFT JOIN Provinces prov ON p.ProvinceCode = prov.ProvinceCode
+            LEFT JOIN Districts disct ON p.DistrictCode = disct.DistrictCode
+            WHERE p.DistrictCode = district_code_input
+                AND p.CleanlinessPoint IS NOT NULL
+                AND p.LocationPoint IS NOT NULL  
+                AND p.ServicePoint IS NOT NULL
+                AND p.ValuePoint IS NOT NULL
+                AND p.CommunicationPoint IS NOT NULL
+                AND p.ConveniencePoint IS NOT NULL
+            ORDER BY AverageRating DESC
+            LIMIT limit_input;
+        END;
+    `);
+}
+
 async function dropGetPopularProvincesProcedureIfExists() {
     await pool.query(`
         DROP PROCEDURE IF EXISTS GetPopularProvinces;
@@ -1019,6 +1082,91 @@ async function createGetPopularDistrictsProcedure() {
             ORDER BY 
                 ProductCount DESC, 
                 disct.Name ASC
+            LIMIT p_limit;
+        END;
+    `);
+}
+
+async function dropSearchProvincesProcedureIfExists() {
+    await pool.query(`
+        DROP PROCEDURE IF EXISTS SearchProvinces;
+    `);
+}
+
+async function createSearchProvincesProcedure() {
+    await pool.query(`
+        CREATE PROCEDURE SearchProvinces(
+            IN p_name VARCHAR(255),
+            IN p_limit INT
+        )
+        BEGIN
+            SELECT 
+                ProvinceCode AS code,
+                Name,
+                NameEn,
+                FullName,
+                FullNameEn,
+                CodeName,
+                'province' AS type
+            FROM Provinces
+            WHERE 
+                Name = p_name OR 
+                NameEn = p_name OR 
+                FullName = p_name OR 
+                FullNameEn = p_name OR 
+                CodeName = p_name
+            ORDER BY 
+                CASE 
+                    WHEN Name = p_name THEN 1
+                    WHEN FullName = p_name THEN 2
+                    ELSE 3
+                END,
+                Name ASC
+            LIMIT p_limit;
+        END;
+    `);
+}
+
+async function dropSearchDistrictsProcedureIfExists() {
+    await pool.query(`
+        DROP PROCEDURE IF EXISTS SearchDistricts;
+    `);
+}
+
+async function createSearchDistrictsProcedure() {
+    await pool.query(`
+        CREATE PROCEDURE SearchDistricts(
+            IN p_name VARCHAR(255),
+            IN p_limit INT
+        )
+        BEGIN
+            SELECT 
+                d.DistrictCode AS code,
+                d.Name,
+                d.NameEn,
+                d.FullName,
+                d.FullNameEn,
+                d.CodeName,
+                d.ProvinceCode,
+                p.Name AS ProvinceName,
+                p.NameEn AS ProvinceNameEn,
+                'district' AS type
+            FROM Districts d
+            LEFT JOIN Provinces p 
+                ON d.ProvinceCode = p.ProvinceCode
+            WHERE 
+                d.Name = p_name OR 
+                d.NameEn = p_name OR 
+                d.FullName = p_name OR 
+                d.FullNameEn = p_name OR 
+                d.CodeName = p_name
+            ORDER BY 
+                CASE 
+                    WHEN d.Name = p_name THEN 1 
+                    WHEN d.FullName = p_name THEN 2 
+                    ELSE 3 
+                END,
+                d.Name ASC
             LIMIT p_limit;
         END;
     `);
@@ -1132,6 +1280,10 @@ async function initSchema() {
         await createGetTopProductsByProvinceProcedure();
         console.log('✅ GetTopProductsByProvince procedure ready');
 
+        await dropGetTopProductsByDistrictProcedureIfExists();
+        await createGetTopProductsByDistrictProcedure();
+        console.log('✅ GetTopProductsByDistrict procedure ready');
+
         await dropGetPopularProvincesProcedureIfExists();
         await createGetPopularProvincesProcedure();
         console.log('✅ GetPopularProvinces procedure ready');
@@ -1139,6 +1291,14 @@ async function initSchema() {
         await dropGetPopularDistrictsProcedureIfExists();
         await createGetPopularDistrictsProcedure();
         console.log('✅ GetPopularDistricts procedure ready');
+
+        await dropSearchProvincesProcedureIfExists();
+        await createSearchProvincesProcedure();
+        console.log('✅ SearchProvinces procedure ready');
+
+        await dropSearchDistrictsProcedureIfExists();
+        await createSearchDistrictsProcedure();
+        console.log('✅ SearchDistricts procedure ready');
 
         console.log('\n🎉 Database schema initialization completed successfully!');
         

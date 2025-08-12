@@ -32,6 +32,37 @@ class ProductModel {
         }
     }
 
+    // Lấy top products theo điểm trung bình cao nhất trong một district
+    static async getTopRatedProductsByDistrict(districtCode, limit = 15) {
+        try {
+            // Validate inputs
+            if (!districtCode || typeof districtCode !== 'string') {
+                throw new Error('Invalid districtCode');
+            }
+            
+            const numLimit = parseInt(limit);
+            if (isNaN(numLimit) || numLimit <= 0 || numLimit > 100) {
+                throw new Error('Invalid limit');
+            }
+            
+            // Gọi stored procedure
+            const [rows] = await pool.execute(
+                'CALL GetTopProductsByDistrict(?, ?)', 
+                [districtCode, numLimit]
+            );
+            
+            // MySQL stored procedure trả về array of arrays, lấy result set đầu tiên
+            const products = Array.isArray(rows[0]) ? rows[0] : rows;
+            
+            console.log('Stored procedure result count:', products.length);
+            return products;
+            
+        } catch (error) {
+            console.error('Error in getTopRatedProductsByDistrict:', error);
+            throw error;
+        }
+    }
+
     /**
      * Lấy thông tin chi tiết một product theo ID
      * @param {number} productId - ID của product

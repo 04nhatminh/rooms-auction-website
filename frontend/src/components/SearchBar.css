@@ -36,6 +36,11 @@
   position: relative;
 }
 
+/* Special styling for guest input wrapper */
+.guest-input-wrapper {
+  position: relative;
+}
+
 .search-input label {
   display: block;
   color: #080808;

@@ -226,70 +226,14 @@ class LocationModel {
             const searchPattern = `%${searchTerm.trim()}%`;
             
             // Tìm provinces
-            const provinceQuery = `
-                SELECT 
-                    ProvinceCode as code,
-                    Name,
-                    NameEn,
-                    FullName,
-                    FullNameEn,
-                    CodeName,
-                    'province' as type
-                FROM Provinces
-                WHERE 
-                    Name LIKE ? OR 
-                    NameEn LIKE ? OR 
-                    FullName LIKE ? OR 
-                    FullNameEn LIKE ? OR 
-                    CodeName LIKE ?
-                ORDER BY 
-                    CASE 
-                        WHEN Name LIKE ? THEN 1 
-                        WHEN FullName LIKE ? THEN 2 
-                        ELSE 3 
-                    END,
-                    Name ASC
-                LIMIT ?
-            `;
-            
-            const [provinces] = await pool.execute(provinceQuery, [
+            const [provinces] = await pool.execute('CALL SearchProvinces(?, ?, ?, ?, ?, ?, ?, ?)', [
                 searchPattern, searchPattern, searchPattern, searchPattern, searchPattern,
                 `${searchTerm.trim()}%`, `${searchTerm.trim()}%`,
                 Math.floor(limit / 2)
             ]);
 
             // Tìm districts
-            const districtQuery = `
-                SELECT 
-                    d.DistrictCode as code,
-                    d.Name,
-                    d.NameEn,
-                    d.FullName,
-                    d.FullNameEn,
-                    d.CodeName,
-                    d.ProvinceCode,
-                    p.Name AS ProvinceName,
-                    p.NameEn AS ProvinceNameEn,
-                    'district' as type
-                FROM Districts d
-                LEFT JOIN Provinces p ON d.ProvinceCode = p.ProvinceCode
-                WHERE 
-                    d.Name LIKE ? OR 
-                    d.NameEn LIKE ? OR 
-                    d.FullName LIKE ? OR 
-                    d.FullNameEn LIKE ? OR 
-                    d.CodeName LIKE ?
-                ORDER BY 
-                    CASE 
-                        WHEN d.Name LIKE ? THEN 1 
-                        WHEN d.FullName LIKE ? THEN 2 
-                        ELSE 3 
-                    END,
-                    d.Name ASC
-                LIMIT ?
-            `;
-            
-            const [districts] = await pool.execute(districtQuery, [
+            const [districts] = await pool.execute('CALL SearchDistricts(?, ?, ?, ?, ?, ?, ?, ?)', [
                 searchPattern, searchPattern, searchPattern, searchPattern, searchPattern,
                 `${searchTerm.trim()}%`, `${searchTerm.trim()}%`,
                 Math.floor(limit / 2)

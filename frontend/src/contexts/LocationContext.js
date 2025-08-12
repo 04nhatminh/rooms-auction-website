@@ -17,8 +17,6 @@ export const LocationProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const [hasInitialized, setHasInitialized] = useState(false);
 
-  // Không preload tự động nữa, chỉ load khi được yêu cầu
-
   // Function để search locations với fallback đến popular locations
   const searchLocations = async (searchTerm, limit = 10) => {
     try {

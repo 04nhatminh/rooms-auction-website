@@ -4,7 +4,7 @@
   left: -32px;
   z-index: 1000;
   margin-top: 8px;
-  width: fit-content + 16px;
+  width: fit-content;
   min-width: 320px;
   max-width: 500px;
   

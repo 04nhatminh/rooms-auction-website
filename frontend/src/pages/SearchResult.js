@@ -1,54 +1,60 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import LocationAPI from '../api/locationApi';
 import './SearchResult.css';
 import Header from '../components/Header';
-import CardSection from '../components/CardSection';
 import SearchRes_RoomSection from '../components/SearchRes_RoomSection';
 import Footer from '../components/Footer';
-import logo from '../assets/logo.png';
-
 
 const SearchResult = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useState({});
+  const [locationInfo, setLocationInfo] = useState(null);
+  const [topRatedProducts, setTopRatedProducts] = useState([]);
 
   useEffect(() => {
     // Lấy parameters từ URL
     const urlParams = new URLSearchParams(location.search);
     const params = {
-      provinceCode: urlParams.get('provinceCode'),
+      location: urlParams.get('location'),
+      locationId: urlParams.get('locationId'),
+      type: urlParams.get('type'),
       checkinDate: urlParams.get('checkinDate'),
       checkoutDate: urlParams.get('checkoutDate'),
       numAdults: urlParams.get('numAdults'),
       numChildren: urlParams.get('numChildren'),
       numInfants: urlParams.get('numInfants')
     };
-    
     setSearchParams(params);
-    console.log('Received search parameters:', params);
+    console.log('LocationId:', params.locationId);
+
+    // Gọi API lấy top-rated products nếu có locationId
+    let api = "";
+    if (params.locationId && typeof params.locationId === "string") {
+      if (params.type == "province")
+        api = `http://localhost:3000/api/products/top-rated?provinceCode=${params.locationId}&limit=20`;
+      else if (params.type == "district")
+        api = `http://localhost:3000/api/products/district/top-rated?districtCode=${params.locationId}&limit=20`;
+      fetch(api)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && Array.isArray(data.data?.products)) {
+            setTopRatedProducts(data.data.products);
+          } else {
+            setTopRatedProducts([]);
+          }
+        })
+        .catch(() => setTopRatedProducts([]));
+    } else {
+      setTopRatedProducts([]);
+    }
   }, [location.search]);
 
   return (
     <>
       <Header />
-      
-      {/* Hiển thị thông tin parameters để test */}
-      <div style={{ padding: '20px', backgroundColor: '#f5f5f5', margin: '20px', borderRadius: '8px' }}>
-        <h3>Thông tin tìm kiếm nhận được:</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', marginTop: '10px' }}>
-          <p><strong>Province Code:</strong> {searchParams.provinceCode || 'Không có'}</p>
-          <p><strong>Check-in Date:</strong> {searchParams.checkinDate || 'Không có'}</p>
-          <p><strong>Check-out Date:</strong> {searchParams.checkoutDate || 'Không có'}</p>
-          <p><strong>Số người lớn:</strong> {searchParams.numAdults || 'Không có'}</p>
-          <p><strong>Số trẻ em:</strong> {searchParams.numChildren || 'Không có'}</p>
-          <p><strong>Số trẻ sơ sinh:</strong> {searchParams.numInfants || 'Không có'}</p>
-        </div>
-      </div>
-
-      <SearchRes_RoomSection/>
-      <SearchRes_RoomSection/>
-      <SearchRes_RoomSection/>
+      <SearchRes_RoomSection topRatedProducts={topRatedProducts} />
       <Footer />
     </>
   );

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LocationAPI from '../api/locationApi';
 import LocationSuggestionDropdown from './LocationSuggestionDropdown';
+import GuestCounterDropdown from './GuestCounterDropdown';
 import './SearchBar.css';
 import searchIcon from '../assets/search.png';
 
@@ -16,6 +17,18 @@ const SearchBar = ({ popularLocations = [] }) => {
     guests: ''
   });
 
+  // State cho id của location đã chọn
+  const [selectedLocationId, setSelectedLocationId] = useState(null);
+  const [selectedType, setSelectedType] = useState(null);
+
+  // State cho guest counter
+  const [guestCounts, setGuestCounts] = useState({
+    adults: 1,
+    children: 0,
+    infants: 0
+  });
+  const [showGuestDropdown, setShowGuestDropdown] = useState(false);
+
   // State cho location suggestion
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -26,9 +39,16 @@ const SearchBar = ({ popularLocations = [] }) => {
   const locationInputRef = useRef(null);
   const suggestionsRef = useRef(null);
   const searchTimeoutRef = useRef(null);
+  const guestInputRef = useRef(null);
+  const guestDropdownRef = useRef(null);
 
   // Hàm xử lý thay đổi input
   const handleInputChange = (field, value) => {
+    // Không cho phép thay đổi guests input trực tiếp
+    if (field === 'guests') {
+      return;
+    }
+    
     setSearchData(prev => ({
       ...prev,
       [field]: value
@@ -106,9 +126,55 @@ const SearchBar = ({ popularLocations = [] }) => {
       ...prev,
       location: suggestion.displayText
     }));
+    setSelectedLocationId(suggestion.id);
+    setSelectedType(suggestion.type);
     setShowSuggestions(false);
     setSuggestions([]);
     setSelectedSuggestionIndex(-1);
+  };
+
+  // Hàm xử lý thay đổi guest count
+  const handleGuestCountChange = (type, count) => {
+    setGuestCounts(prev => ({
+      ...prev,
+      [type]: count
+    }));
+    
+    // Cập nhật display text cho guest input
+    updateGuestDisplayText({ ...guestCounts, [type]: count });
+  };
+
+  // Hàm cập nhật text hiển thị cho guest input
+  const updateGuestDisplayText = (counts) => {
+    const totalGuests = counts.adults + counts.children;
+    let displayText = '';
+    
+    if (totalGuests === 0) {
+      displayText = '';
+    } else if (totalGuests === 1) {
+      displayText = '1 khách';
+    } else {
+      displayText = `${totalGuests} khách`;
+    }
+    
+    // Thêm thông tin em bé nếu có
+    if (counts.infants > 0) {
+      if (displayText) {
+        displayText += `, ${counts.infants} em bé`;
+      } else {
+        displayText = `${counts.infants} em bé`;
+      }
+    }
+    
+    setSearchData(prev => ({
+      ...prev,
+      guests: displayText
+    }));
+  };
+
+  // Hàm xử lý focus vào guest input
+  const handleGuestFocus = () => {
+    setShowGuestDropdown(true);
   };
 
   // Xử lý keyboard navigation
@@ -145,13 +211,20 @@ const SearchBar = ({ popularLocations = [] }) => {
     }
   };
 
-  // Xử lý click outside để đóng suggestions
+  // Xử lý click outside để đóng suggestions và guest dropdown
   useEffect(() => {
     const handleClickOutside = (event) => {
+      // Xử lý location suggestions
       if (suggestionsRef.current && !suggestionsRef.current.contains(event.target) &&
           locationInputRef.current && !locationInputRef.current.contains(event.target)) {
         setShowSuggestions(false);
         setSelectedSuggestionIndex(-1);
+      }
+      
+      // Xử lý guest dropdown
+      if (guestDropdownRef.current && !guestDropdownRef.current.contains(event.target) &&
+          guestInputRef.current && !guestInputRef.current.contains(event.target)) {
+        setShowGuestDropdown(false);
       }
     };
 
@@ -160,6 +233,11 @@ const SearchBar = ({ popularLocations = [] }) => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  // Khởi tạo guest display text ban đầu
+  useEffect(() => {
+    updateGuestDisplayText(guestCounts);
+  }, []); // Only run once on mount
 
   // Hiển thị popular locations khi focus vào input trống
   const handleLocationFocus = () => {
@@ -180,23 +258,25 @@ const SearchBar = ({ popularLocations = [] }) => {
       return;
     }
 
-    // Đóng suggestions
+    // Đóng suggestions và dropdowns
     setShowSuggestions(false);
+    setShowGuestDropdown(false);
+
+    // Tạo guest string từ guest counts
+    const totalGuests = guestCounts.adults + guestCounts.children;
 
     // Lấy thông tin từ các input, nếu trống thì là 'None'
     const searchParams = new URLSearchParams({
-      location: searchData.location.trim() || 'None',
+      location: searchData.location.trim()
+                  .replace(/\s+/g, '-') || 'None'
+                  .toLowerCase(),
+      locationId: selectedLocationId,
+      type: selectedType,
       checkinDate: searchData.checkinDate || 'None',
       checkoutDate: searchData.checkoutDate || 'None',
-      guests: searchData.guests.trim() || 'None'
-    });
-
-    // Log để kiểm tra dữ liệu
-    console.log('Search Data:', {
-      location: searchData.location.trim() || 'None',
-      checkinDate: searchData.checkinDate || 'None',
-      checkoutDate: searchData.checkoutDate || 'None',
-      guests: searchData.guests.trim() || 'None'
+      numAdults: guestCounts.adults || 0,
+      numChildren: guestCounts.children || 0,
+      numInfants: guestCounts.infants || 0
     });
 
     // Navigate đến trang SearchResult với parameters
@@ -253,13 +333,25 @@ const SearchBar = ({ popularLocations = [] }) => {
             onBlur={(e) => e.target.type = 'text'}
           />
         </div>
-        <div className="search-input">
+        <div className="search-input guest-input-wrapper">
           <label>Khách</label>
           <input 
+            ref={guestInputRef}
             type="text" 
             placeholder="Thêm khách" 
             value={searchData.guests}
             onChange={(e) => handleInputChange('guests', e.target.value)}
+            onFocus={handleGuestFocus}
+            readOnly
+            style={{ cursor: 'pointer' }}
+          />
+          
+          {/* Guest Counter Dropdown */}
+          <GuestCounterDropdown
+            ref={guestDropdownRef}
+            showDropdown={showGuestDropdown}
+            guestCounts={guestCounts}
+            onGuestCountChange={handleGuestCountChange}
           />
         </div>
         
