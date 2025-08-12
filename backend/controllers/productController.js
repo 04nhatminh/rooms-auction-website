@@ -2,14 +2,15 @@ const ProductModel = require('../models/productModel');
 const { get } = require('../routes');
 
 class ProductController {
-    async getFullProductDataById(req, res) {
-        const productID = req.params.id;
-        console.log('GET /api/products/' + productID);
+    async getFullProductDataByExternalId(req, res) {
+        const productExternalID = req.params.UID;
+        console.log('GET /api/room/' + productExternalID);
 
         try {
             // Fetch all in parallel
+            const productDetails = await ProductModel.getProductDetails(productExternalID);
+            const productID = productDetails.ProductID;
             const [
-                productDetails,
                 productProvinceName,
                 productDistrictName,
                 productPropertyName,
@@ -19,7 +20,7 @@ class ProductController {
                 productImages,
                 productPolicies
             ] = await Promise.all([
-                ProductModel.getProductDetails(productID),
+                
                 ProductModel.getProductProvinceName(productID),
                 ProductModel.getProductDistrictName(productID),
                 ProductModel.getProductPropertyTypeName(productID),
@@ -35,7 +36,7 @@ class ProductController {
             if (!productDetails) {
                 return res.status(404).json({
                     success: false,
-                    message: `No product found with ID ${productID}`
+                    message: `No product found with ID ${productDetails}`
                 });
             }
 

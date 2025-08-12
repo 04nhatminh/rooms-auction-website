@@ -18,12 +18,12 @@ import BookingCard from '../components/BookingCard';
 import './RoomDetailPage.css';
 
 const RoomDetailPage = () => {
-  const { id } = useParams(); // get product ID from URL
+  const { UID } = useParams(); // get UID from URL
   const [data, setData] = useState(null);
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    axios.get(`/api/room/${id}`)
+    axios.get(`/api/room/${UID}`)
       .then((res) => {
         console.log("✅ API response:", res.data);
         setData(res.data.data);
@@ -32,7 +32,7 @@ const RoomDetailPage = () => {
         console.error("Error loading product data", err);
         setError(err?.response?.data?.message || err.message || 'Không thể tải dữ liệu sản phẩm.');
       });
-  }, [id]);
+  }, [UID]);
   
   if (error) return <p>{error}</p>;
   if (!data) return <p>Loading...</p>;

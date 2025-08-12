@@ -17,12 +17,12 @@ class ProductModel {
         }
     }
 
-    async getProductDetails(productID) 
+    async getProductDetails(productExternalID) 
     {
         try {
-            const query = 'SELECT * FROM products WHERE ProductID = ?';
-            const [products] = await db.execute(query, [productID]);
-            console.log(`Fetched product details for ProductID ${productID}:`, products);
+            const query = 'SELECT * FROM products WHERE ExternalID = ?';
+            const [products] = await db.execute(query, [productExternalID]);
+            console.log(`Fetched product details for ProductID ${productExternalID}:`, products);
             return products[0]; // Trả về sản phẩm đầu tiên
         } catch (error) {
             console.error('Error fetching product details:', error);
@@ -54,18 +54,10 @@ class ProductModel {
     }
 
     async getProductDescription(productID) {
-        const [products] = await db.execute('SELECT ExternalID FROM Products WHERE ProductID = ?', [productID]);
-
-        if (products.length === 0) {
-            console.log(`No product found in MySQL for ProductID ${productID}`);
-            return;
-        }
-
-        const externalID = products[0].ExternalID;
 
         // Step 2: Fetch matching document from MongoDB
         const collection = this.mongoDb.collection('descriptions');
-        const matchingDoc = await collection.findOne({ ExternalID: externalID });
+        const matchingDoc = await collection.findOne({ ProductID: productID });
 
         if (!matchingDoc) {
         return { success: false, message: 'No description found in MongoDB' };
@@ -73,7 +65,7 @@ class ProductModel {
 
         // Step 3: Return the MongoDB document
 
-        console.log(`Found description in MongoDB for ExternalID ${externalID}`);
+        console.log(`Found description in MongoDB for ExternalID ${productID}`);
         console.log(`Description: ${matchingDoc.Descriptions}`);
 
         return matchingDoc.Descriptions;
@@ -81,18 +73,10 @@ class ProductModel {
     }
 
     async getProductReviews(productID) {
-        const [products] = await db.execute('SELECT ExternalID FROM Products WHERE ProductID = ?', [productID]);
-
-        if (products.length === 0) {
-            console.log(`No product found in MySQL for ProductID ${productID}`);
-            return;
-        }
-
-        const externalID = products[0].ExternalID;
 
         // Step 2: Fetch matching document from MongoDB
         const collection = this.mongoDb.collection('reviews');
-        const matchingDoc = await collection.findOne({ listing_id: externalID });
+        const matchingDoc = await collection.findOne({ ProductID: productID });
 
         if (!matchingDoc) {
         return { success: false, message: 'No reviews found in MongoDB' };
@@ -100,7 +84,7 @@ class ProductModel {
 
         // Step 3: Return the MongoDB document
 
-        console.log(`Found reviews in MongoDB for ExternalID ${externalID}`);
+        console.log(`Found reviews in MongoDB for ExternalID ${productID}`);
 
         console.log(`Reviews:`, matchingDoc);
         return matchingDoc;
@@ -108,18 +92,10 @@ class ProductModel {
     }
 
     async getProductImages(productID) {
-        const [products] = await db.execute('SELECT ExternalID FROM Products WHERE ProductID = ?', [productID]);
-
-        if (products.length === 0) {
-            console.log(`No product found in MySQL for ProductID ${productID}`);
-            return;
-        }
-
-        const externalID = products[0].ExternalID;
 
         // Step 2: Fetch matching document from MongoDB
         const collection = this.mongoDb.collection('images');
-        const matchingDoc = await collection.findOne({ ExternalID: externalID });
+        const matchingDoc = await collection.findOne({ ProductID: productID });
 
         if (!matchingDoc) {
         return { success: false, message: 'No images found in MongoDB' };
@@ -127,7 +103,7 @@ class ProductModel {
 
         // Step 3: Return the MongoDB document
 
-        console.log(`Found images in MongoDB for ExternalID ${externalID}`);
+        console.log(`Found images in MongoDB for ExternalID ${productID}`);
         console.log(`Images: ${matchingDoc.Images}`);
 
         return matchingDoc.Images || []; // Trả về mảng hình ảnh, nếu không có thì trả về mảng rỗng
@@ -135,18 +111,10 @@ class ProductModel {
     }
 
     async getProductPolicies(productID) {
-        const [products] = await db.execute('SELECT ExternalID FROM Products WHERE ProductID = ?', [productID]);
-
-        if (products.length === 0) {
-            console.log(`No product found in MySQL for ProductID ${productID}`);
-            return;
-        }
-
-        const externalID = products[0].ExternalID;
 
         // Step 2: Fetch matching document from MongoDB
         const collection = this.mongoDb.collection('policies');
-        const matchingDoc = await collection.findOne({ ExternalID: externalID });
+        const matchingDoc = await collection.findOne({ ProductID: productID });
 
         if (!matchingDoc) {
         return { success: false, message: 'No policies found in MongoDB' };
@@ -154,7 +122,7 @@ class ProductModel {
 
         // Step 3: Return the MongoDB document
 
-        console.log(`Found policies in MongoDB for ExternalID ${externalID}`);
+        console.log(`Found policies in MongoDB for ExternalID ${productID}`);
         console.log(`Policy: ${matchingDoc.Policies}`);
 
         return matchingDoc.Policies || []; // Trả về mảng hình ảnh, nếu không có thì trả về mảng rỗng
