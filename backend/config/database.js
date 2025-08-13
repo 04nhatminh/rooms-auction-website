@@ -126,19 +126,37 @@ async function createUsersTable() {
         CREATE TABLE IF NOT EXISTS Users (
             UserID INT AUTO_INCREMENT PRIMARY KEY,
             FullName VARCHAR(255) NOT NULL,
-            Email VARCHAR(255) UNIQUE NOT NULL,
+            Email VARCHAR(255) NOT NULL UNIQUE,
             HashPassword VARCHAR(255),
             PhoneNumber VARCHAR(20),
-            AvatarURL TEXT,
-            IsVerified BOOLEAN DEFAULT FALSE,
+            DateOfBirth DATE NULL,
+            Gender ENUM('male','female','other') NULL,
+            Address VARCHAR(512) NULL,
+            AvatarURL VARCHAR(512),
+            Role ENUM('guest', 'admin') DEFAULT 'guest',
+            Rating DECIMAL(3,2) DEFAULT 0.0,
+            IsVerified TINYINT(1) DEFAULT FALSE,
             VerificationToken VARCHAR(255),
             VerificationTokenExpires DATETIME,
-            Role ENUM('guest', 'admin') DEFAULT 'guest',
-            Rating DECIMAL(2,1) DEFAULT 0.0,
+            status ENUM('active','disabled','suspended','deleted') DEFAULT 'active',
+            SuspendedUntil DATETIME NULL,
+            UnpaidStrikeCount INT NOT NULL DEFAULT 0,
             CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         )
     `);
+
+    try {
+        await pool.execute(`CREATE INDEX idx_Users_Email ON Users(Email)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
+
+    try {
+        await pool.execute(`CREATE INDEX idx_Users_Status ON Users(Status)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
 }
 
 async function createOAuthAccountsTable() {
@@ -162,10 +180,10 @@ async function createPaymentMethodsTable() {
             AccountIdentifier VARCHAR(4),
             Token TEXT,
             Provider VARCHAR(15),
-            IsDefault BIT(1),
+            IsDefault TINYINT(1) DEFAULT 0,
             UserID INT,
-            CreatedAt TIMESTAMP,
-            UpdatedAt TIMESTAMP,
+            CreatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UpdatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             FOREIGN KEY (UserID) REFERENCES Users(UserID)
         )
     `);
@@ -175,6 +193,38 @@ async function createPaymentMethodsTable() {
     } catch (error) {
         if (error.code !== 'ER_DUP_KEYNAME') throw error;
     }
+}
+
+async function createUserViolationsTable() {
+    await pool.execute(`
+        CREATE TABLE IF NOT EXISTS UserViolations (
+            ViolationID BIGINT AUTO_INCREMENT PRIMARY KEY,
+            UserID INT NOT NULL,
+            BookingID INT UNSIGNED NULL,
+            Kind ENUM('non_payment') NOT NULL,
+            Note VARCHAR(255) NULL,
+            CreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY uniq_user_booking_kind (UserID, BookingID, Kind),
+            INDEX idx_user_kind (UserID, Kind),
+            FOREIGN KEY (UserID) REFERENCES Users(UserID)
+        );
+    `);
+}
+
+async function createEmailOutboxTable() {
+    await pool.execute(`
+        CREATE TABLE IF NOT EXISTS EmailOutbox (
+            EmailID BIGINT AUTO_INCREMENT PRIMARY KEY,
+            ToEmail VARCHAR(255) NOT NULL,
+            Subject VARCHAR(255) NOT NULL,
+            Body TEXT NOT NULL,
+            SendAfter DATETIME DEFAULT CURRENT_TIMESTAMP,
+            Meta JSON NULL,
+            ProcessedAt DATETIME NULL,
+            CreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_unprocessed (ProcessedAt)
+        );
+    `);
 }
 
 async function createPropertiesTable() {
@@ -207,8 +257,8 @@ async function createProductsTable() {
             Address VARCHAR(255),
             ProvinceCode VARCHAR(20),
             DistrictCode VARCHAR(20),
-            Latitude FLOAT,
-            Longitude FLOAT,
+            Latitude DECIMAL(9,6),
+            Longitude DECIMAL(9,6),
             PropertyType INT,
             RoomType INT,
             MaxGuests SMALLINT,
@@ -217,13 +267,13 @@ async function createProductsTable() {
             NumBathrooms SMALLINT,
             Price DECIMAL(10, 2),
             Currency VARCHAR(20),
-            CleanlinessPoint FLOAT,
-            LocationPoint FLOAT,
-            ServicePoint FLOAT,
-            ValuePoint FLOAT,
-            CommunicationPoint FLOAT,
-            ConveniencePoint FLOAT,
-            CreatedAt TIMESTAMP,
+            CleanlinessPoint DECIMAL(3,2),
+            LocationPoint DECIMAL(3,2),
+            ServicePoint DECIMAL(3,2),
+            ValuePoint DECIMAL(3,2),
+            CommunicationPoint DECIMAL(3,2),
+            ConveniencePoint DECIMAL(3,2),
+            CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             LastSyncedAt TIMESTAMP,
             FOREIGN KEY (ProvinceCode) REFERENCES Provinces(ProvinceCode),
             FOREIGN KEY (DistrictCode) REFERENCES Districts(DistrictCode),
@@ -284,13 +334,13 @@ async function createProductAmenitiesTable() {
     `);
     
     try {
-        await pool.execute(`CREATE INDEX idx_product_amenities_product ON ProductAmenities(ProductID)`);
+        await pool.execute(`CREATE INDEX idx_ProductAmenities_Product ON ProductAmenities(ProductID)`);
     } catch (error) {
         if (error.code !== 'ER_DUP_KEYNAME') throw error;
     }
     
     try {
-        await pool.execute(`CREATE INDEX idx_product_amenities_amenity ON ProductAmenities(AmenityID)`);
+        await pool.execute(`CREATE INDEX idx_ProductAmenities_Amenity ON ProductAmenities(AmenityID)`);
     } catch (error) {
         if (error.code !== 'ER_DUP_KEYNAME') throw error;
     }
@@ -307,7 +357,7 @@ async function createAuctionTable() {
             StartPrice DECIMAL(10, 2),
             BidIncrement DECIMAL(10, 2),
             CurrentPrice DECIMAL(10, 2),
-            Status VARCHAR(20),
+            Status ENUM('active','ended','cancelled') DEFAULT 'active',
             FOREIGN KEY (ProductID) REFERENCES Products(ProductID)
         )
     `);
@@ -357,6 +407,12 @@ async function createBidsTable() {
     } catch (error) {
         if (error.code !== 'ER_DUP_KEYNAME') throw error;
     }
+
+     try {
+        await pool.execute(`CREATE INDEX idx_Bids_AuctionBidTime ON Bids(AuctionID, BidTime)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
 }
 
 async function createBookingTable() {
@@ -368,12 +424,12 @@ async function createBookingTable() {
             ProductID INT,
             StartDate DATE,
             EndDate DATE,
-            BookingStatus VARCHAR(20),
+            BookingStatus ENUM('pending','confirmed','cancelled','completed','expired') DEFAULT 'pending',
             WinningPrice DECIMAL(10, 2),
             PaymentMethodID INT,
             PaidAt TIMESTAMP,
-            CreatedAt TIMESTAMP,
-            UpdatedAt TIMESTAMP,
+            CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             FOREIGN KEY (BidID) REFERENCES Bids(BidID),
             FOREIGN KEY (UserID) REFERENCES Users(UserID),
             FOREIGN KEY (ProductID) REFERENCES Products(ProductID),
@@ -392,12 +448,71 @@ async function createBookingTable() {
     } catch (error) {
         if (error.code !== 'ER_DUP_KEYNAME') throw error;
     }
+
+    try {
+        await pool.execute(`CREATE INDEX idx_Booking_UserStatus ON Booking(UserID, BookingStatus)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
+
+    try {
+        await pool.execute(`CREATE INDEX idx_Booking_ProductDates ON Booking(ProductID, StartDate, EndDate)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
+}
+
+async function createPaymentsTable() {
+    await pool.execute(`
+        CREATE TABLE IF NOT EXISTS Payments (
+            PaymentID BIGINT AUTO_INCREMENT PRIMARY KEY,
+            BookingID INT UNSIGNED NOT NULL,
+            UserID INT NOT NULL,
+            Amount DECIMAL(10,2) NOT NULL,
+            Currency VARCHAR(10) NOT NULL DEFAULT 'VND',
+            Provider VARCHAR(50) NOT NULL,
+            ProviderTxnID VARCHAR(128) NULL,
+            Status ENUM('initiated','authorized','captured','failed','refunded','voided') NOT NULL DEFAULT 'initiated',
+            FailureReason VARCHAR(255) NULL,
+            CreatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UpdatedAt TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (BookingID) REFERENCES Booking(BookingID),
+            FOREIGN KEY (UserID) REFERENCES Users(UserID),
+            INDEX idx_payments_booking (BookingID),
+            INDEX idx_payments_user (UserID),
+            UNIQUE KEY uq_provider_txn (Provider, ProviderTxnID)
+        );
+    `);
+    try {
+        await pool.execute(`CREATE INDEX idx_Payments_BookingID ON Payments(BookingID)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
+
+    try {
+        await pool.execute(`CREATE INDEX idx_Payments_UserID ON Payments(UserID)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
+
+    try {
+        await pool.execute(`CREATE INDEX idx_Payments_Status ON Payments(Status)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
+
+    try {
+        await pool.execute(`CREATE INDEX idx_Payments_CreatedAt ON Payments(CreatedAt)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
 }
 
 async function createRatingTable() {
     await pool.execute(`
         CREATE TABLE IF NOT EXISTS Rating (
             RatingID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            UserID INT NOT NULL,
             ExternalID VARCHAR(30),
             BookingID INT UNSIGNED,
             ProductID INT,
@@ -407,6 +522,11 @@ async function createRatingTable() {
             ValuePoint FLOAT,
             CommunicationPoint FLOAT,
             ConveniencePoint FLOAT,
+            Comment TEXT,
+            CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            UNIQUE KEY uq_rating_booking_user (BookingID, UserID),
+            FOREIGN KEY (UserID) REFERENCES Users(UserID),
             FOREIGN KEY (BookingID) REFERENCES Booking(BookingID),
             FOREIGN KEY (ProductID) REFERENCES Products(ProductID)
         )
@@ -446,6 +566,12 @@ async function initSchema() {
         
         await createPaymentMethodsTable();
         console.log('✅ PaymentMethods table ready');
+
+        await createUserViolationsTable();
+        console.log('✅ UserViolations table ready');
+
+        await createEmailOutboxTable();
+        console.log('✅ EmailOutbox table ready');
         
         await createPropertiesTable();
         console.log('✅ Properties table ready');
@@ -473,6 +599,9 @@ async function initSchema() {
         
         await createBookingTable();
         console.log('✅ Booking table ready');
+
+        await createPaymentsTable();
+        console.log('✅ Payments table ready');
         
         await createRatingTable();
         console.log('✅ Rating table ready');

@@ -10,6 +10,7 @@ import SignUpPage from './pages/SignUpPage';
 import RoomDetailPage from './pages/RoomDetailPage';
 import VerificationSuccessPage from './pages/VerificationSuccessPage';
 import UsersManagementPage from './pages/UsersManagementPage';
+import AuctionPage from './pages/AuctionPage';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           <Route path="/room" element={<RoomDetailPage />} />
           <Route path="/verification-success" element={<VerificationSuccessPage />} />
           <Route path="/admin/users-management" element={<UsersManagementPage />} />
+          <Route path="/auction" element={<AuctionPage />} />
         </Routes>
       </div>
     </Router>
