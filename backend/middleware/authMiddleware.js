@@ -12,7 +12,7 @@ const verifyToken = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
     req.user = decoded; // Gắn thông tin user từ token vào request
-    next();
+    return next();
   } catch (err) {
     return res.status(403).json({ message: 'Token không hợp lệ hoặc hết hạn.' });
   }
@@ -22,7 +22,7 @@ const isAdmin = (req, res, next) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ message: 'Chỉ admin được phép truy cập.' });
   }
-  next();
+  return next();
 };
 
 module.exports = { verifyToken, isAdmin };

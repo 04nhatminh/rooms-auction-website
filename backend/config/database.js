@@ -478,8 +478,6 @@ async function createPaymentsTable() {
             UpdatedAt TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             FOREIGN KEY (BookingID) REFERENCES Booking(BookingID),
             FOREIGN KEY (UserID) REFERENCES Users(UserID),
-            INDEX idx_payments_booking (BookingID),
-            INDEX idx_payments_user (UserID),
             UNIQUE KEY uq_provider_txn (Provider, ProviderTxnID)
         );
     `);

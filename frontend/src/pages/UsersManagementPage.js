@@ -1,6 +1,11 @@
+// src/pages/UsersManagementPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './UsersManagementPage.css';
+import { getUsers, deleteUser as apiDeleteUser } from '../api/userAPI';
+import PageHeader from '../components/PageHeader/PageHeader';
+
+// 👉 dùng CSS Modules
+import styles from './UsersManagementPage.module.css';
 
 const UsersManagementPage = () => {
   const navigate = useNavigate();
@@ -8,13 +13,10 @@ const UsersManagementPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    loadUsers();
-  }, []);
+  useEffect(() => { loadUsers(); }, []);
 
   const loadUsers = async () => {
     const token = localStorage.getItem('token');
-
     if (!token) {
       alert('Vui lòng đăng nhập lại.');
       navigate('/login');
@@ -22,112 +24,60 @@ const UsersManagementPage = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:3000/admin/users?page=1&limit=10", {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error("Không thể lấy danh sách người dùng.");
-      }
-
-      const usersData = await response.json();
-      setUsers(usersData);
-      setLoading(false);
-    } catch (error) {
-      setError(error.message);
+      const data = await getUsers(token, 1, 10);
+      const list = Array.isArray(data) ? data : (data.items || []);
+      setUsers(list);
+    } catch (err) {
+      setError(err.message);
+    } finally {
       setLoading(false);
     }
   };
 
-  const deleteUser = async (id) => {
+  const handleDeleteUser = async (id) => {
     const token = localStorage.getItem('token');
-
-    if (!token) {
-      alert('Vui lòng đăng nhập lại.');
-      navigate('/login');
-      return;
-    }
-
-    if (!window.confirm("Bạn có chắc muốn xóa người dùng này?")) {
-      return;
-    }
+    if (!token) { alert('Vui lòng đăng nhập lại.'); navigate('/login'); return; }
+    if (!window.confirm('Bạn có chắc muốn xóa người dùng này?')) return;
 
     try {
-      const response = await fetch(`http://localhost:3000/admin/users/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error("Không thể xóa người dùng.");
-      }
-
-      // Xóa user trong state
-      setUsers(prevUsers => prevUsers.filter(user => user.id !== id));
-
-      alert("Xóa người dùng thành công!");
-    } catch (error) {
-      alert(error.message);
+      await apiDeleteUser(token, id);
+      setUsers(prev => prev.filter(u => (u.id ?? u._id) !== id));
+      alert('Xóa người dùng thành công!');
+    } catch (err) {
+      alert(err.message);
     }
-  };
-
-  const logout = () => {
-    localStorage.removeItem('userData');
-    localStorage.removeItem('token');
-    navigate('/login');
   };
 
   if (loading) {
     return (
-      <div className="users-management-page">
-        <div className="loading">Đang tải...</div>
+      <div className={styles.page}>
+        <div className={styles.loading}>Đang tải...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="users-management-page">
-        <div className="error">Lỗi: {error}</div>
+      <div className={styles.page}>
+        <div className={styles.error}>Lỗi: {error}</div>
       </div>
     );
   }
 
   return (
-    <div className="users-management-page">
-      <div className="admin-layout">
-        {/* Sidebar */}
-        <aside className="sidebar">
-          <div className="sidebar-content">
-            <div className="sidebar-header">
-              <div className="logo-section">
-                <img src="../assets/logo.png" alt="Logo" className="logo-image" />
-                <h2 className="logo-title">A2BnB Admin</h2>
-              </div>
-              <nav className="navigation">
-                <a href="/admin/dashboard" className="nav-item">🏠 Dashboard</a>
-                <a href="/admin/users-management" className="nav-item active">👥 Quản lý khách hàng</a>
-                <a href="/admin/products-management" className="nav-item">🏘️ Quản lý phòng</a>
-                <a href="/admin/bookings-management" className="nav-item">📆 Quản lý đặt phòng</a>
-              </nav>
-            </div>
-            <button onClick={logout} className="logout-btn">← Đăng xuất</button>
-          </div>
-        </aside>
+    <div className={styles.page}>
+      <PageHeader
+        title="Quản lý khách hàng"
+        crumbs={[{ label: 'Dashboard', to: '/admin/dashboard' }, { label: 'Quản lý khách hàng' }]}
+      />
 
-        {/* Main Content */}
-        <main className="main-content">
-          <h1 className="page-title">Quản lý khách hàng</h1>
-
-          <div className="table-container">
-            <table className="users-table">
+      {/* Nếu bạn đã dùng AdminLayout bọc /admin thì không cần div layout này nữa */}
+      <div className={styles.layout}>
+        <main className={styles.main}>
+          <div className={styles.tableContainer}>
+            <table className={styles.table}>
               <thead>
-                <tr>
+                <tr className={styles.tableHeader}>
                   <th>ID</th>
                   <th>Tên</th>
                   <th>Email</th>
@@ -138,30 +88,39 @@ const UsersManagementPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {users.map((user, index) => (
-                  <tr key={user.id} className="table-row">
-                    <td>{user.id}</td>
-                    <td>{user.fullName}</td>
-                    <td>{user.email}</td>
-                    <td>{user.phoneNumber || "-"}</td>
-                    <td>
-                      <span className={`status ${user.isVerified ? 'verified' : 'unverified'}`}>
-                        {user.isVerified ? '✓ Đã xác minh' : '✗ Chưa xác minh'}
-                      </span>
-                    </td>
-                    <td>
-                      <span className="role-badge">
-                        {user.role}
-                      </span>
-                    </td>
-                    <td>
-                      <div className="action-buttons">
-                        <button className="edit-btn">Sửa</button>
-                        <button className="delete-btn" onClick={() => deleteUser(user.id)}>Xóa</button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                {users.map((user) => {
+                  const id = user.id ?? user._id;
+                  return (
+                    <tr key={id} className={styles.row}>
+                      <td>{id}</td>
+                      <td>{user.fullName || user.name}</td>
+                      <td>{user.email}</td>
+                      <td>{user.phoneNumber || '-'}</td>
+                      <td>
+                        <span className={`${styles.status} ${user.isVerified ? styles.verified : styles.unverified}`}>
+                          {user.isVerified ? '✓ Đã xác minh' : '✗ Chưa xác minh'}
+                        </span>
+                      </td>
+                      <td><span className={styles.roleBadge}>{user.role}</span></td>
+                      <td>
+                        <div className={styles.actions}>
+                          <button
+                            className={styles.btnEdit}
+                            onClick={() => navigate(`/admin/users-management/${id}`)}
+                          >
+                            Sửa
+                          </button>
+                          <button
+                            className={styles.btnDelete}
+                            onClick={() => handleDeleteUser(id)}
+                          >
+                            Xóa
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

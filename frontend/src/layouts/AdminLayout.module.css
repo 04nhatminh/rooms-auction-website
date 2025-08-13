@@ -1,0 +1,4 @@
+:root{ --bg:#f6f8fb; }
+.layout{ display:flex; height:100vh; background:var(--bg); }
+.main{ flex:1; padding:28px; }
+@media (max-width:1024px){ .main{ padding:20px; } }

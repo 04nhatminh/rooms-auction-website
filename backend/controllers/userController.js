@@ -192,6 +192,19 @@ class UserController {
         }
     }
 
+    // Lấy thông tin user theo ID
+    async getUserById(req, res) {
+        try {
+            const { id } = req.params;
+            const user = await userModel.findById(id);
+            if (!user) return res.status(404).json({ message: 'User không tồn tại' });
+            return res.json(user);
+        } catch (err) {
+            console.error('getUserById error:', err);
+            return res.status(500).json({ message: 'Lỗi server' });
+        }
+    }
+
     // Lấy danh sách tất cả user (admin)
     async getAllUsers(req, res) {
         try {
@@ -221,6 +234,10 @@ class UserController {
                 return res.status(404).json({ message: 'Người dùng không tồn tại.' });
             }
 
+            if (user.role === 'admin') {
+                return res.status(400).json({ message: 'Không thể xóa tài khoản admin' });
+            }
+
             // Xóa user
             await userModel.delete(userId);
 
@@ -228,6 +245,48 @@ class UserController {
         } catch (error) {
             console.error('Error in deleteUser:', error);
             return res.status(500).json({ message: 'Lỗi server.', error: error.message });
+        }
+    }
+
+    async updateUserStatus(req, res) {
+        try {
+            const { id } = req.params;
+            const { status, suspendedUntil } = req.body;
+
+            const user = await userModel.findById(id);
+            if (!user) return res.status(404).json({ message: 'User không tồn tại' });
+
+            // Không cho update status của admin
+            if (user.role === 'admin') {
+                return res.status(400).json({ message: 'Không thể thay đổi trạng thái admin' });
+            }
+
+            // Validate status
+            if (!['active','disabled','suspended'].includes(status)) {
+                return res.status(400).json({ message: 'Trạng thái không hợp lệ' });
+            }
+
+            // Xử lý suspendedUntil theo status
+            let until = null;
+            if (status === 'suspended') {
+                if (!suspendedUntil) {
+                return res.status(400).json({ message: 'Cần nhập thời điểm kết thúc tạm treo' });
+                }
+                until = new Date(suspendedUntil);
+                if (Number.isNaN(+until)) {
+                return res.status(400).json({ message: 'Thời gian không hợp lệ' });
+                }
+            }
+
+            // Cập nhật
+            const affected = await userModel.updateStatus(id, status, until);
+            if (!affected) return res.status(500).json({ message: 'Cập nhật thất bại' });
+
+            const updated = await userModel.findById(id);
+            return res.json(updated);
+        } catch (e) {
+            console.error('updateUserStatus error:', e);
+            return res.status(500).json({ message: 'Lỗi server' });
         }
     }
 }

@@ -1,58 +1,6 @@
 const db = require('../config/database');
 
 class UserModel {
-    // Tìm user theo điều kiện
-    async findOne(criteria) {
-        try {
-            let query = 'SELECT * FROM Users WHERE ';
-            const values = [];
-            const conditions = [];
-
-            if (criteria.email) {
-                conditions.push('Email = ?');
-                values.push(criteria.email);
-            }
-            if (criteria.id) {
-                conditions.push('UserID = ?');
-                values.push(criteria.id);
-            }
-            if (criteria.verificationToken) {
-                conditions.push('VerificationToken = ?');
-                values.push(criteria.verificationToken);
-            }
-
-            if (conditions.length === 0) {
-                throw new Error('Không có điều kiện tìm kiếm');
-            }
-
-            query += conditions.join(' AND ');
-            
-            const [rows] = await db.execute(query, values);
-            if (rows.length > 0) {
-                const user = rows[0];
-                return {
-                    id: user.UserID,
-                    fullName: user.FullName,
-                    email: user.Email,
-                    hashPassword: user.HashPassword,
-                    phoneNumber: user.PhoneNumber,
-                    avatarURL: user.AvatarURL,
-                    isVerified: user.IsVerified,
-                    verificationToken: user.VerificationToken,
-                    verificationTokenExpires: user.VerificationTokenExpires,
-                    role: user.Role,
-                    rating: user.Rating,
-                    createdAt: user.CreatedAt,
-                    updatedAt: user.UpdatedAt
-                };
-            }
-            return null;
-        } catch (error) {
-            console.error('Error in findOne:', error);
-            throw error;
-        }
-    }
-
     // Tạo user mới với verification token
     async create(userData) {
         try {
@@ -107,10 +55,33 @@ class UserModel {
         }
     }
 
-    // Lấy user theo ID
-    async findById(id) {
+    // Tìm user theo điều kiện
+    async findOne(criteria) {
         try {
-            const [rows] = await db.execute('SELECT * FROM Users WHERE UserID = ?', [id]);
+            let query = 'SELECT * FROM Users WHERE ';
+            const values = [];
+            const conditions = [];
+
+            if (criteria.email) {
+                conditions.push('Email = ?');
+                values.push(criteria.email);
+            }
+            if (criteria.id) {
+                conditions.push('UserID = ?');
+                values.push(criteria.id);
+            }
+            if (criteria.verificationToken) {
+                conditions.push('VerificationToken = ?');
+                values.push(criteria.verificationToken);
+            }
+
+            if (conditions.length === 0) {
+                throw new Error('Không có điều kiện tìm kiếm');
+            }
+
+            query += conditions.join(' AND ');
+            
+            const [rows] = await db.execute(query, values);
             if (rows.length > 0) {
                 const user = rows[0];
                 return {
@@ -123,7 +94,40 @@ class UserModel {
                     isVerified: user.IsVerified,
                     verificationToken: user.VerificationToken,
                     verificationTokenExpires: user.VerificationTokenExpires,
+                    role: user.Role,
                     rating: user.Rating,
+                    createdAt: user.CreatedAt,
+                    updatedAt: user.UpdatedAt
+                };
+            }
+            return null;
+        } catch (error) {
+            console.error('Error in findOne:', error);
+            throw error;
+        }
+    }
+
+    // Lấy user theo ID
+    async findById(id) {
+        try {
+            const [rows] = await db.execute('SELECT * FROM Users WHERE UserID = ?', [id]);
+            if (rows.length > 0) {
+                const user = rows[0];
+                return {
+                    id: user.UserID,
+                    fullName: user.FullName,
+                    email: user.Email,
+                    phoneNumber: user.PhoneNumber,
+                    dateOfBirth: user.DateOfBirth,
+                    gender: user.Gender,
+                    address: user.Address,
+                    avatarURL: user.AvatarURL,
+                    isVerified: user.IsVerified,
+                    role: user.Role,
+                    rating: user.Rating,
+                    status: user.status,
+                    suspendedUntil: user.SuspendedUntil,
+                    unpaidStrikeCount: user.UnpaidStrikeCount,
                     createdAt: user.CreatedAt,
                     updatedAt: user.UpdatedAt
                 };
@@ -182,6 +186,22 @@ class UserModel {
         }
     }
 
+    // Cập nhật trạng thái user
+    async updateStatus(id, status, suspendedUntil) {
+        try {
+            const [r] = await db.execute(
+            `UPDATE Users
+            SET status = ?, SuspendedUntil = ?
+            WHERE UserID = ?`,
+            [status, status === 'suspended' ? suspendedUntil : null, id]
+            );
+            return r.affectedRows;
+        } catch (e) {
+            console.error('Error in updateStatus:', e);
+            throw e;
+        }
+    }
+
     // Xóa user
     async delete(id) {
         try {
@@ -212,16 +232,22 @@ class UserModel {
             const [rows] = await db.execute(sql); // KHÔNG truyền [limit, offset] nữa
 
             const users = rows.map(user => ({
-            id: user.UserID,
-            fullName: user.FullName,
-            email: user.Email,
-            phoneNumber: user.PhoneNumber,
-            avatarURL: user.AvatarURL,
-            isVerified: user.IsVerified,
-            role: user.Role,
-            rating: user.Rating,
-            createdAt: user.CreatedAt,
-            updatedAt: user.UpdatedAt
+                id: user.UserID,
+                fullName: user.FullName,
+                email: user.Email,
+                phoneNumber: user.PhoneNumber,
+                dateOfBirth: user.DateOfBirth,
+                gender: user.Gender,
+                address: user.Address,
+                avatarURL: user.AvatarURL,
+                isVerified: user.IsVerified,
+                role: user.Role,
+                rating: user.Rating,
+                status: user.status,
+                suspendedUntil: user.SuspendedUntil,
+                unpaidStrikeCount: user.UnpaidStrikeCount,
+                createdAt: user.CreatedAt,
+                updatedAt: user.UpdatedAt
             }));
 
             return users;
