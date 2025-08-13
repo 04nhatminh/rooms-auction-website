@@ -18,10 +18,10 @@ import HaNoiImg from '../assets/ha_noi.png';
 import VungTauImg from '../assets/vung_tau.jpg';
 import DaLatImg from '../assets/da_lat.jpg';
 import NhaTrangImg from '../assets/nha_trang.jpg';
+import UserMenu from '../components/UserMenu';
 
 
 const HomePage = () => {
-  const navigate = useNavigate();
   const { popularLocations, isLoading: isLoadingLocations, error: locationError, getPopularLocations } = useLocation();
   
   // Load popular locations khi component mount (chỉ khi chưa có data)
@@ -57,6 +57,22 @@ const HomePage = () => {
     { title: "Khám phá nơi lưu trú tại Sa Pa", provinceCode: "10", limit: 15 }
   ], []);
 
+  const [user, setUser] = React.useState(null);
+  const navigate = useNavigate();
+
+  React.useEffect(() => {
+    try {
+      const stored = localStorage.getItem('userData');
+      if (stored) setUser(JSON.parse(stored));
+    } catch (_) {}
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('userData');
+    localStorage.removeItem('token');
+    setUser(null);
+    navigate('/login');
+  };
 
   return (
     <>
@@ -70,10 +86,15 @@ const HomePage = () => {
             <span className="home-logo-text">bidstay</span>
           </div>
 
-          <div className="login-signup">
-            <button className='home-login-button' onClick={() => navigate('/login')}>Đăng nhập</button>
-            <button className='home-signup-button' onClick={() => navigate('/signup')}>Đăng ký</button>
-          </div>
+          {/* Thay thế cụm nút Login/Signup bằng menu người dùng */}
+          {user ? (
+            <UserMenu user={user} onLogout={handleLogout} />
+          ) : (
+            <div className="login-signup">
+              <button className='home-login-button' onClick={() => navigate('/login')}>Đăng nhập</button>
+              <button className='home-signup-button' onClick={() => navigate('/signup')}>Đăng ký</button>
+            </div>
+          )}
         </div>
 
         <div className="banner-content">

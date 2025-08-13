@@ -92,8 +92,9 @@ class UserController {
             const verified = await userModel.verifyUser(token);
             
             if (verified) {
-                // Redirect to success page
-                return res.redirect('/verification-success.html');
+                // Redirect về frontend SPA route
+                const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+                return res.redirect(`${frontendUrl}/verification-success`);
             } else {
                 return res.status(400).json({ 
                     message: 'Xác thực thất bại.' 

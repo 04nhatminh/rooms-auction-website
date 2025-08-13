@@ -64,17 +64,16 @@ const Login = () => {
       
       if (response.ok) {
         alert('✅ Đăng nhập thành công!');
-        // Save user data to localStorage
+        // Chuẩn hóa userData
         localStorage.setItem('userData', JSON.stringify({
-          name: data.user.fullName,
+          fullName: data.user.fullName,
+          name: data.user.fullName,   // giữ tương thích ngược nếu header dùng 'name'
           email: data.user.email,
           id: data.user.id,
           role: data.user.role
         }));
-
         localStorage.setItem('token', data.token);
-
-        // Redirect to appropriate page
+        // Redirect
         if (data.user.role === 'admin') {
           navigate('/admin/users-management');
         } else {
@@ -124,15 +123,15 @@ const Login = () => {
       const data = await res.json();
 
       if (res.ok) {
-        // Save to localStorage
+        // Chuẩn hóa userData
         localStorage.setItem('userData', JSON.stringify({
-          name: data.user.fullName,
+          fullName: data.user.fullName,
+          name: data.user.fullName,   // giữ tương thích ngược
           email: data.user.email,
-          id: data.user.id
+          id: data.user.id,
+          role: data.user.role
         }));
-
         localStorage.setItem('token', data.token);
-
         navigate('/');
       } else {
         alert('❌ Đăng nhập Google thất bại: ' + data.message);
