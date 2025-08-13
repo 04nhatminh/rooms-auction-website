@@ -1,33 +1,44 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import './Header.css';
 import logo from '../assets/logo.png';
-import menuIcon from '../assets/menu.png';
-import searchIcon from '../assets/search.png';
+import SearchBarMini from './SearchBarMini';
+import SearchBar from './SearchBar';
+import UserMenu from './UserMenu';
 
 const Header = () => {
+  const [showFullSearch, setShowFullSearch] = useState(false);
+
   return (
-    <header className="header">
-      <div className="logo">
-        <img src={logo} alt="Logo" className="logo-image" />
-        <span className="logo-text">bidstay</span>
-      </div>
-      <nav className="search">
-        <div className="search-content">
-          <span>Địa điểm bất kỳ</span>
-          <span>18 thg 7 - 23 thg 7</span>
-          <span>Thêm khách</span>
+    <header className={`header ${showFullSearch ? 'expanded' : ''}`}>
+      <div className="header-top">
+        <div className="logo">
+          <Link to="/" >
+            <img src={logo} alt="Logo" className="logo-image" />
+            <span className="logo-text">bidstay</span>
+          </Link>
         </div>
-        <span className="search-icon">
-          <img src={searchIcon} alt="Search" />
-        </span>
-      </nav>
-      <div className="header-button-actions">
-        <button className="circle-btn user-btn">U</button>
-        <button className="circle-btn menu-btn">
-          <img src={menuIcon} alt="Menu" className="menu-icon" />
-        </button>
+
+        {!showFullSearch && (
+          <div className="header-mini-slot">
+            <SearchBarMini onActivate={() => setShowFullSearch(true)} />
+          </div>
+        )}
+
+        <div className="header-button-actions">
+          <button className="circle-btn user-btn">U</button>
+          
+          <UserMenu onLogout={() => {/* your logout logic */}} />
+        </div>
       </div>
+
+      {showFullSearch && (
+        <div className="header-full-floating">
+          <SearchBar onClose={() => setShowFullSearch(false)} />
+        </div>
+      )}
     </header>
+
   );
 };
 

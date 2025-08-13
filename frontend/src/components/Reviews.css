@@ -68,6 +68,11 @@
     height: 10px;
 }
 
+.rating-stars .star-empty {
+  opacity: 0.25;         
+  filter: grayscale(100%);
+}
+
 .review-rating span {
     font-size: 14px;
     color: #000;

@@ -1,47 +1,3 @@
-// import React from 'react';
-// import './Reviews.css';
-// import starIcon from '../assets/star_filled.png';
-
-// const ReviewCard = () => (
-//     <div className="review-card">
-//         <div className="review-author">
-//             <div className="author-avatar"></div>
-//             <div className="author-info">
-//                 <h4>Musk</h4>
-//                 <p>Tháng 4 năm 2025</p>
-//             </div>
-//         </div>
-//         <div className="review-rating">
-//           <div className="rating-stars">
-//             <img src={starIcon} alt="Star" />
-//             <img src={starIcon} alt="Star" />
-//             <img src={starIcon} alt="Star" />
-//             <img src={starIcon} alt="Star" />
-//             <img src={starIcon} alt="Star" />
-//           </div>
-//           <span>-</span>
-//           <span>Tuyệt hảo</span>
-//         </div>
-//         <p className="review-text">Một nơi thật đẹp! Cảm ơn toàn đội đã biến thời gian lưu trú này thành một khoảnh khắc tuyệt vời. Rất nhiều điều nhỏ nhặt khiến tôi hài lòng về nơi này! Đầu ...</p>
-//         <button className="show-more-review">Hiển thị thêm</button>
-//     </div>
-// );
-
-// const Reviews = () => {
-//   return (
-//     <div className="reviews-section">
-//       <div className="review-list">
-//         <ReviewCard />
-//         <ReviewCard />
-//       </div>
-//        <button className="show-all-reviews">Hiển thị tất cả 39 đánh giá</button>
-//     </div>
-//   );
-// };
-
-// export default Reviews;
-
-
 import React, { useMemo, useState } from 'react';
 import './Reviews.css';
 import starIcon from '../assets/star_filled.png';
@@ -49,15 +5,15 @@ import { useProduct } from '../contexts/ProductContext';
 import DOMPurify from 'dompurify';
 
 const Stars = ({ rating = 0 }) => {
-  const filledCount = Math.round(Number(rating) || 0); // 0..5
+  const filledCount = Math.floor(Number(rating) || 0); // 0..5
   const items = Array.from({ length: 5 }, (_, i) => i < filledCount);
   return (
-    <div className="rating-stars">
+    <div className="rating-stars" aria-label={`${filledCount}/5`}>
       {items.map((filled, idx) => (
         <img
           key={idx}
           src={starIcon}
-          alt={filled ? 'Star filled' : 'Star'}
+          alt={filled ? 'Star filled' : 'Star empty'}
           className={filled ? 'star-filled' : 'star-empty'}
         />
       ))}

@@ -18,6 +18,27 @@
   width: 50%;
 }
 
+.calendar-day.past-date {
+  color: #ccc;
+  pointer-events: none; 
+  background-color: #f9f9f9;
+}
+
+.calendar-day.selected {
+  background: #278C9F;
+  color: #fff;
+}
+
+/* days in the middle of the selected range */
+.calendar-day.in-range {
+  background: #E6F4F6;
+  color: #000;
+}
+
+.calendar-day:not(.empty):not(.past-date):not(.selected):hover {
+  background-color: #f0f0f0;
+}
+
 .month-header {
   display: flex;
   justify-content: space-between;

@@ -1,8 +1,11 @@
 {
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^7.0.0",
+    "bootstrap": "^5.3.7",
     "dompurify": "^3.2.6",
     "i": "^0.3.7",
     "mapbox-gl": "^3.14.0",
-    "npm": "^11.5.2"
+    "npm": "^11.5.2",
+    "react-toastify": "^11.0.5"
   }
 }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ProductContext } from '../contexts/ProductContext';
+import { DateRangeProvider } from '../contexts/DateRangeContext';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import Header from '../components/Header';
@@ -39,34 +40,36 @@ const RoomDetailPage = () => {
   return (
     <div className="room-detail-page">
       <ProductContext.Provider value={{ data, setData }}> 
-        <Header />
-        <main className="room-detail-content">
-            <RoomTitle />
-            <ImageGallery />
-          <div className="main-content">
-            <div className="left-column">
-              <Overview />
+        <DateRangeProvider>
+          <Header />
+            <main className="room-detail-content">
+                <RoomTitle />
+                <ImageGallery />
+              <div className="main-content">
+                <div className="left-column">
+                  <Overview />
+                  <hr />
+                  <Description/>
+                  <hr />
+                  <Amenities />
+                  <hr />
+                  <Calendar />
+                </div>
+                <div className="right-column">
+                  <BookingCard />
+                </div>
+              </div>
               <hr />
-              <Description/>
+              <Rating />
               <hr />
-              <Amenities />
+              <Reviews />
               <hr />
-              <Calendar />
-            </div>
-            <div className="right-column">
-              <BookingCard />
-            </div>
-          </div>
-          <hr />
-          <Rating />
-          <hr />
-          <Reviews />
-          <hr />
-          <Location />
-          <hr />
-          <HouseRules />
-        </main>
-        <Footer />
+              <Location />
+              <hr />
+              <HouseRules />
+            </main>
+          <Footer />
+        </DateRangeProvider>
       </ProductContext.Provider>
     </div>
   );

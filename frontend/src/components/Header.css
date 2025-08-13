@@ -1,20 +1,101 @@
+/* Smooth header height */
 .header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 64px;
+  --header-top-h: 72px;
+  position: relative;
   border-bottom: 1px solid #DDDDDD;
-  flex-wrap: wrap;
+  padding: 8px 64px;
+  height: calc(var(--header-top-h) + 6px); 
+  transition: height 0.6s ease;
+  overflow: visible;
 }
+
+/* When expanded, give the header extra height to host the full bar */
+.header.expanded {
+  height: 200px; 
+  position: relative;
+  overflow: visible;  
+}
+
+/* Top row stays fixed (logo | mini | actions) */
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: calc(var(--header-top-h) + 2px);
+}
+
+.header.expanded .header-top {
+  height:200px;
+}
+
+/* MINI → morph out */
+.header-mini-slot {
+  --header-top-h: 72px;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, opacity;
+}
+.header-mini-slot .search { /* the pill */
+  transition: inherit;
+}
+.header.expanded .header-mini-slot {
+  opacity: 0;
+  transform: scale(0.96);     /* subtle shrink */
+  pointer-events: none;       /* avoid clicks while morphing */
+}
+
+/* FULL → morph in (floats, centered vertically) */
+.header-full-floating {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(0.98); /* start a tad high & small */
+  opacity: 0;
+  z-index: 300;
+  transition:
+    opacity 0.35s ease,
+    transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, opacity;
+}
+
+
+.header.expanded .header-full-floating {
+  opacity: 1;
+  transform: translate(-45%, 50%) scale(1); /* perfect center */
+  width: clamp(880px, 68vw, 1200px);
+}
+
+/* (Optional) Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .header,
+  .header-mini-slot,
+  .header-full-floating {
+    transition: none !important;
+  }
+}
+
 
 .logo {
   display: flex;
   align-items: center;
 }
 
+
+.logo a {
+  display: inline-flex;  /* or display:flex */
+  align-items: center;
+  text-decoration: none; /* no underline */
+  color: inherit;        /* no purple visited color */
+  line-height: 1;        
+}
+
+
 .logo-image {
   width: clamp(48px, 6vw, 64px);
   height: clamp(48px, 6vw, 64px);
+  display: block;
 }
 
 .logo-text {
