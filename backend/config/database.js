@@ -129,15 +129,18 @@ async function createUsersTable() {
         CREATE TABLE IF NOT EXISTS Users (
             UserID INT AUTO_INCREMENT PRIMARY KEY,
             FullName VARCHAR(255) NOT NULL,
-            Email VARCHAR(255) UNIQUE NOT NULL,
+            Email VARCHAR(255) NOT NULL UNIQUE,
             HashPassword VARCHAR(255),
             PhoneNumber VARCHAR(20),
-            AvatarURL TEXT,
+            AvatarURL VARCHAR(512),
             IsVerified BOOLEAN DEFAULT FALSE,
+            Role VARCHAR(20) DEFAULT 'guest',
+            Rating DECIMAL(3,2) DEFAULT 0.0,
             VerificationToken VARCHAR(255),
             VerificationTokenExpires DATETIME,
-            Role ENUM('guest', 'admin') DEFAULT 'guest',
-            Rating DECIMAL(2,1) DEFAULT 0.0,
+            DateOfBirth DATE NULL,
+            Gender ENUM('male','female','other') NULL,
+            Address VARCHAR(512) NULL,
             CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         )
@@ -1173,8 +1176,6 @@ async function createSearchDistrictsProcedure() {
 }
 
 async function initSchema() {
-    console.log('🚀 Initializing database schema...');
-    
     try {
         await testConnection();
         

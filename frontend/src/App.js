@@ -13,6 +13,7 @@ import SignUpPage from './pages/SignUpPage';
 import RoomDetailPage from './pages/RoomDetailPage';
 import VerificationSuccessPage from './pages/VerificationSuccessPage';
 import UsersManagementPage from './pages/UsersManagementPage';
+import UserProfilePage from './pages/UserProfilePage';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
             <Route path="/verification-success" element={<VerificationSuccessPage />} />
             <Route path="/search" element={<SearchResult />} />
             <Route path="/admin/users-management" element={<UsersManagementPage />} />
+            <Route path="/profile" element={<UserProfilePage />} />
           </Routes>
         </div>
       </Router>

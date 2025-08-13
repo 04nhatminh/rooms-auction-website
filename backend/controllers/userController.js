@@ -211,6 +211,93 @@ class UserController {
             res.status(500).json({ message: "Lỗi khi lấy danh sách người dùng" });
         }
     }
+
+    // Lấy hồ sơ người dùng hiện tại
+    async getProfile(req, res) {
+        try {
+            const userId = req.user.id;
+            const user = await userModel.findById(userId);
+            if (!user) return res.status(404).json({ message: 'Không tìm thấy người dùng.' });
+            const { hashPassword, verificationToken, verificationTokenExpires, ...safeUser } = user;
+            return res.json({ success: true, user: safeUser });
+        } catch (error) {
+            console.error('Error in getProfile:', error);
+            return res.status(500).json({ message: 'Lỗi server.', error: error.message });
+        }
+    }
+
+    // Cập nhật hồ sơ (không cho đổi email ở đây)
+    async updateProfile(req, res) {
+        try {
+            const userId = req.user.id;
+            const { fullName, phoneNumber, avatarURL, dateOfBirth, gender, address } = req.body;
+
+            const payload = {};
+            if (fullName !== undefined) payload.fullName = fullName;
+            if (phoneNumber !== undefined) payload.phoneNumber = phoneNumber;
+            if (avatarURL !== undefined) payload.avatarURL = avatarURL;
+            if (dateOfBirth !== undefined) payload.DateOfBirth = dateOfBirth; // handled in model with column map? add support below
+            if (gender !== undefined) payload.Gender = gender;
+            if (address !== undefined) payload.Address = address;
+
+            // Normalize to model expected keys
+            const normalized = {
+                ...('fullName' in payload ? { fullName: payload.fullName } : {}),
+                ...('phoneNumber' in payload ? { phoneNumber: payload.phoneNumber } : {}),
+                ...('avatarURL' in payload ? { avatarURL: payload.avatarURL } : {}),
+            };
+
+            // Custom columns not in model map yet -> run raw updates
+            const updated = await userModel.update(userId, normalized);
+
+            // Directly update optional fields if provided
+            const db = require('../config/database');
+            const extraFields = [];
+            const values = [];
+            if (dateOfBirth !== undefined) { extraFields.push('DateOfBirth = ?'); values.push(dateOfBirth || null); }
+            if (gender !== undefined) { extraFields.push('Gender = ?'); values.push(gender || null); }
+            if (address !== undefined) { extraFields.push('Address = ?'); values.push(address || null); }
+            if (extraFields.length) {
+                values.push(userId);
+                await db.execute(`UPDATE Users SET ${extraFields.join(', ')}, UpdatedAt = CURRENT_TIMESTAMP WHERE UserID = ?`, values);
+            }
+
+            const user = await userModel.findById(userId);
+            const { hashPassword, verificationToken, verificationTokenExpires, ...safeUser } = user;
+            return res.json({ success: true, user: safeUser });
+        } catch (error) {
+            console.error('Error in updateProfile:', error);
+            return res.status(500).json({ message: 'Lỗi server.', error: error.message });
+        }
+    }
+
+    // Đổi mật khẩu
+    async changePassword(req, res) {
+        try {
+            const userId = req.user.id;
+            const { currentPassword, newPassword } = req.body;
+            if (!newPassword) return res.status(400).json({ message: 'Mật khẩu mới không được trống.' });
+
+            const user = await userModel.findById(userId);
+            if (!user) return res.status(404).json({ message: 'Không tìm thấy người dùng.' });
+
+            // Nếu user có mật khẩu cũ thì cần kiểm tra (đăng ký Google có thể null)
+            if (user.hashPassword) {
+                if (!currentPassword) return res.status(400).json({ message: 'Vui lòng nhập mật khẩu hiện tại.' });
+                const ok = await bcrypt.compare(currentPassword, user.hashPassword);
+                if (!ok) return res.status(400).json({ message: 'Mật khẩu hiện tại không đúng.' });
+            }
+
+            const hashPassword = await bcrypt.hash(newPassword, 10);
+            const updated = await userModel.update(userId, { hashPassword });
+            if (!updated) return res.status(500).json({ message: 'Không thể cập nhật mật khẩu.' });
+
+            return res.json({ success: true, message: 'Đổi mật khẩu thành công.' });
+        } catch (error) {
+            console.error('Error in changePassword:', error);
+            return res.status(500).json({ message: 'Lỗi server.', error: error.message });
+        }
+    }
 }
 
 module.exports = new UserController();

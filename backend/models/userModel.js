@@ -38,6 +38,9 @@ class UserModel {
                     phoneNumber: user.PhoneNumber,
                     avatarURL: user.AvatarURL,
                     isVerified: user.IsVerified,
+                    dateOfBirth: user.DateOfBirth,
+                    gender: user.Gender,
+                    address: user.Address,
                     verificationToken: user.VerificationToken,
                     verificationTokenExpires: user.VerificationTokenExpires,
                     role: user.Role,
@@ -121,6 +124,9 @@ class UserModel {
                     phoneNumber: user.PhoneNumber,
                     avatarURL: user.AvatarURL,
                     isVerified: user.IsVerified,
+                    dateOfBirth: user.DateOfBirth,
+                    gender: user.Gender,
+                    address: user.Address,
                     verificationToken: user.VerificationToken,
                     verificationTokenExpires: user.VerificationTokenExpires,
                     rating: user.Rating,
@@ -151,7 +157,10 @@ class UserModel {
                 isVerified: 'IsVerified',
                 verificationToken: 'VerificationToken',
                 verificationTokenExpires: 'VerificationTokenExpires',
-                rating: 'Rating'
+                rating: 'Rating',
+                dateOfBirth: 'DateOfBirth',
+                gender: 'Gender',
+                address: 'Address'
             };
 
             // Xây dựng câu query động
@@ -220,6 +229,9 @@ class UserModel {
             isVerified: user.IsVerified,
             role: user.Role,
             rating: user.Rating,
+            dateOfBirth: user.DateOfBirth,
+            gender: user.Gender,
+            address: user.Address,
             createdAt: user.CreatedAt,
             updatedAt: user.UpdatedAt
             }));
