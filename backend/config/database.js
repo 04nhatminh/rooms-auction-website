@@ -12,7 +12,9 @@ const dbConfig = {
     database: process.env.DB_NAME || 'a2airbnb',
     waitForConnections: true,
     connectionLimit: 10,
-    queueLimit: 0
+    queueLimit: 0,
+    supportBigNumbers: true,
+    bigNumberStrings: true
 };
 
 console.log('🔍 Database config:', {
