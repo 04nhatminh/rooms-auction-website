@@ -1,8 +1,8 @@
 import React from 'react';
-import './RoomDetails.css';
+import './AuctionRoomDetails.css';
 import DownIcon from '../../assets/down.png';
 
-const RoomDetails = ({ info }) => {
+const AuctionRoomDetails = ({ info }) => {
     return (
         <div className="auction-room-details">
             <div className="auction-room-details-header">
@@ -32,4 +32,4 @@ const RoomDetails = ({ info }) => {
     );
 };
 
-export default RoomDetails;
+export default AuctionRoomDetails;

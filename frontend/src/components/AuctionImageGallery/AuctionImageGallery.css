@@ -1,37 +1,35 @@
-.image-gallery-container {
+.auction-image-gallery {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 4px;
 }
 
-.main-image img {
+.auction-main-image img {
     width: 100%;
-    height: auto;
-    border-radius: 12px;
-    background-color: #eee;
+    height: 54.4vh;
+    border-radius: 8px;
 }
 
-.thumbnail-grid {
+.auction-thumbnail-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 8px;
 }
 
-.thumbnail-grid img {
+.auction-thumbnail-grid img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     border-radius: 8px;
-    background-color: #eee;
 }
 
-.thumbnail-grid .more-photos {
+.auction-thumbnail-grid .auction-more-photos {
     display: flex;
     align-items: center;
     justify-content: center;
     background-color: #ccc;
     border-radius: 8px;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: bold;
     color: #fff;
     cursor: pointer;

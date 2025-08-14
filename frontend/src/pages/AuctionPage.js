@@ -3,10 +3,11 @@ import './AuctionPage.css';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import AuctionTitle from '../components/AuctionTitle/AuctionTitle';
-import ImageGallery from '../components/ImageGallery/ImageGallery';
+import AuctionImageGallery from '../components/AuctionImageGallery/AuctionImageGallery';
+import CountdownTimer from '../components/CountdownTimer/CountdownTimer';
 import AuctionInfo from '../components/AuctionInfo/AuctionInfo';
 import BiddingForm from '../components/BiddingForm/BiddingForm';
-import RoomDetails from '../components/RoomDetails/RoomDetails';
+import AuctionRoomDetails from '../components/AuctionRoomDetails/AuctionRoomDetails';
 import AuctionHistory from '../components/AuctionHistory/AuctionHistory';
 import PolicySections from '../components/PolicySections/PolicySections';
 
@@ -14,11 +15,11 @@ import PolicySections from '../components/PolicySections/PolicySections';
 const auctionData = {
     title: 'Leo House - The Song Building (Angia)',
     images: {
-        main: 'https://via.placeholder.com/800x600',
+        main: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQeJQeJyzgAzTEVqXiGe90RGBFhfp_4RcJJMQ&s',
         thumbnails: [
-            'https://via.placeholder.com/150',
-            'https://via.placeholder.com/150',
-            'https://via.placeholder.com/150',
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQeJQeJyzgAzTEVqXiGe90RGBFhfp_4RcJJMQ&s',
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQeJQeJyzgAzTEVqXiGe90RGBFhfp_4RcJJMQ&s',
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQeJQeJyzgAzTEVqXiGe90RGBFhfp_4RcJJMQ&s',
         ],
         moreCount: 10,
     },
@@ -56,15 +57,16 @@ const AuctionPage = () => {
                 <AuctionTitle />
                 <div className="auction-layout-grid">
                     <div className="left-column">
-                        <ImageGallery images={auctionData.images} />
+                        <AuctionImageGallery images={auctionData.images} />
                     </div>
-                    <div className="right-column">
+                    <div className="right-column auction-info-card">
+                        <CountdownTimer details={auctionData.auctionDetails} />
                         <AuctionInfo details={auctionData.auctionDetails} />
                         <BiddingForm currentPrice={auctionData.auctionDetails.currentPrice} bidIncrement={auctionData.auctionDetails.bidIncrement} />
                     </div>
                 </div>
                 <div className="bottom-sections">
-                    <RoomDetails info={auctionData.roomInfo} />
+                    <AuctionRoomDetails info={auctionData.roomInfo} />
                     <AuctionHistory title="Lịch sử đấu giá toàn phòng" bids={auctionData.fullHistory} />
                     <AuctionHistory title="Lịch sử đấu giá cá nhân" bids={auctionData.personalHistory} />
                     <PolicySections />

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './BiddingForm.css';
+import DownIcon from '../../assets/down.png';
 
 const BiddingForm = ({ currentPrice, bidIncrement }) => {
     const [bidValue, setBidValue] = useState('');
@@ -17,8 +18,11 @@ const BiddingForm = ({ currentPrice, bidIncrement }) => {
     };
 
     return (
-        <div className="bidding-form-card">
-            <h4>Đặt giá ngay</h4>
+        <div className="bidding-form">
+            <div className='bidding-form-title'>
+                <img src={DownIcon} alt="Down Icon" className="down-icon" />
+                <h4>Đặt giá ngay</h4>
+            </div>
             <div className="current-price-display">
                 <p>Giá hiện tại:</p>
                 <span>{currentPrice.toLocaleString('vi-VN')} đ</span>
@@ -30,16 +34,19 @@ const BiddingForm = ({ currentPrice, bidIncrement }) => {
                     </button>
                 ))}
             </div>
-            <input
-                type="text"
-                value={bidValue.toLocaleString('vi-VN')}
-                onChange={(e) => setBidValue(e.target.value.replace(/[^0-9]/g, ''))}
-                placeholder="Nhập giá của bạn"
-                className="bid-input"
-            />
-            <button className="submit-bid-button" onClick={handleBidSubmit}>
-                Đặt giá
-            </button>
+
+            <div className="bid-input-container">
+                <input
+                    type="text"
+                    value={bidValue.toLocaleString('vi-VN')}
+                    onChange={(e) => setBidValue(e.target.value.replace(/[^0-9]/g, ''))}
+                    placeholder="Nhập giá của bạn"
+                    className="bid-input"
+                />
+                <button className="submit-bid-button" onClick={handleBidSubmit}>
+                    Đặt giá
+                </button>
+            </div>
         </div>
     );
 };
