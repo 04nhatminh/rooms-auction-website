@@ -1,0 +1,43 @@
+.auction-info-card {
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 24px;
+}
+
+.countdown-timer {
+    text-align: center;
+    background-color: #f7f7f7;
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+}
+
+.countdown-timer p {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    color: #555;
+}
+
+.countdown-timer span {
+    font-size: 36px;
+    font-weight: bold;
+    color: #333;
+}
+
+.details-section h4 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-size: 16px;
+}
+
+.details-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.details-section ul li {
+    margin-bottom: 8px;
+}

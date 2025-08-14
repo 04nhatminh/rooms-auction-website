@@ -1,0 +1,32 @@
+.auction-page-container {
+    max-width: 100vw;
+    font-family: Montserrat;
+    color: #333;
+}
+
+.auction-main-content {
+    margin: 32px 64px;
+}
+
+.auction-layout-grid {
+    display: flex;
+    gap: 64px;
+}
+
+.left-column {
+    flex: 5;
+}
+
+.right-column {
+    flex: 5;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* Responsive cho màn hình nhỏ */
+@media (max-width: 992px) {
+    .auction-layout-grid {
+        flex-direction: column;
+    }
+}

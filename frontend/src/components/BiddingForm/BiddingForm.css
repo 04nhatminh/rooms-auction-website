@@ -1,0 +1,72 @@
+.bidding-form-card {
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 24px;
+}
+
+.bidding-form-card h4 {
+    margin-top: 0;
+    font-size: 16px;
+}
+
+.current-price-display {
+    margin: 16px 0;
+}
+
+.current-price-display p {
+    margin: 0;
+    font-size: 14px;
+    color: #555;
+}
+
+.current-price-display span {
+    font-size: 32px;
+    font-weight: bold;
+    color: #d9534f; /* Màu đỏ cho giá */
+}
+
+.suggested-bids {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.suggested-bids button {
+    padding: 10px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.suggested-bids button:hover {
+    background-color: #f0f0f0;
+}
+
+.bid-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 16px;
+}
+
+.submit-bid-button {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    background-color: #d9534f;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.submit-bid-button:hover {
+    background-color: #c9302c;
+}
