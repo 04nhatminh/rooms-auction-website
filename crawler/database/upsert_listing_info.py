@@ -7,6 +7,7 @@ import re
 import os
 import sys
 from dotenv import load_dotenv
+import unicodedata
 
 # Thêm đường dẫn để có thể import local modules
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -53,6 +54,19 @@ def connect_to_mongodb():
         print(f"[ERROR] Error connecting to MongoDB: {e}")
         return None
 
+def _normalize_text(value: str) -> str:
+    """Lowercase, remove accents, non-alphanumerics collapsed to single spaces."""
+    if value is None:
+        return ""
+    s = str(value).lower().strip()
+    # Remove accents
+    s = unicodedata.normalize('NFD', s)
+    s = ''.join(ch for ch in s if unicodedata.category(ch) != 'Mn')
+    # Replace non-alphanumeric with space and collapse
+    s = re.sub(r"[^a-z0-9]+", " ", s)
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
+
 def extract_location_from_sharing_location(sharing_location, cursor):
     # Trích xuất thông tin địa điểm từ sharing_location và query database để lấy ProvinceCode/DistrictCode
     if not sharing_location:
@@ -71,48 +85,50 @@ def extract_location_from_sharing_location(sharing_location, cursor):
     if not location_str:
         return None, None
     
-    location_lower = location_str.lower()
+    # Normalize input for robust matching
+    norm_loc = _normalize_text(location_str)
     
     try:
         # Tìm trong bảng Districts trước (chi tiết hơn)
         cursor.execute("""
-            SELECT DistrictCode, ProvinceCode, Name, NameEn, FullName, FullNameEn 
+            SELECT DistrictCode, ProvinceCode, Name, NameEn, FullName, FullNameEn, CodeName 
             FROM Districts 
             ORDER BY LENGTH(Name) DESC
         """)
-        districts = cursor.fetchall()
+        districts = cursor.fetchall() 
         
         for district in districts:
-            district_code, province_code, name, name_en, full_name, full_name_en = district
+            district_code, province_code, name, name_en, full_name, full_name_en, code_name = district
             # Tạo danh sách các tên có thể có của district
-            possible_names = [name, name_en, full_name, full_name_en]
-            possible_names = [n.lower() for n in possible_names if n]
+            possible_names = [name, name_en, full_name, full_name_en, code_name]
+            possible_names = [_normalize_text(n) for n in possible_names if n]
             
             for possible_name in possible_names:
-                if possible_name in location_lower:
+                # Match both ways to handle cases like "tay ho" vs "quan tay ho"
+                if possible_name and (possible_name in norm_loc or norm_loc in possible_name):
                     print(f"[INFO] Found district: {name} ({district_code}) in province {province_code}")
                     return province_code, district_code
         
         # Nếu không tìm thấy district, tìm trong bảng Provinces
         cursor.execute("""
-            SELECT ProvinceCode, Name, NameEn, FullName, FullNameEn 
+            SELECT ProvinceCode, Name, NameEn, FullName, FullNameEn, CodeName 
             FROM Provinces 
             ORDER BY LENGTH(Name) DESC
         """)
         provinces = cursor.fetchall()
         
         for province in provinces:
-            province_code, name, name_en, full_name, full_name_en = province
+            province_code, name, name_en, full_name, full_name_en, code_name = province
             # Tạo danh sách các tên có thể có của province
-            possible_names = [name, name_en, full_name, full_name_en]
-            possible_names = [n.lower() for n in possible_names if n]
+            possible_names = [name, name_en, full_name, full_name_en, code_name]
+            possible_names = [_normalize_text(n) for n in possible_names if n]
             
             for possible_name in possible_names:
-                if possible_name in location_lower:
+                if possible_name and (possible_name in norm_loc or norm_loc in possible_name):
                     print(f"[INFO] Found province: {name} ({province_code})")
                     return province_code, None
 
-        print("[WARNING] Can't find matching location in sharing_location")
+        print(f"[WARNING] Can't find matching location in sharing_location: '{location_str}' -> '{norm_loc}'")
         return None, None
         
     except Exception as e:
@@ -536,200 +552,171 @@ def create_mongodb_indexes(db):
 
 
 def upsert_product_from_listing_data(listing_data, mongodb_db=None, reviews_dict=None):
-    # Insert/Update product từ dữ liệu listing vào cả MySQL và MongoDB
+    """Insert/Update product from listing data into MySQL and MongoDB."""
     connection = get_db_connection()
     if not connection:
         return False
-    
+
     try:
         cursor = connection.cursor()
-        
-        # Lấy dữ liệu từ listing
+
+        # Parse listing payload
         listing_id = listing_data.get('listing_id', '')
         data = listing_data.get('data', {})
         apartment_info = data.get('apartment_info', {})
         ratings = data.get('ratings', [])
-        
-        # Thông tin cơ bản
+
+        # Basic info
         name = apartment_info.get('name', f'Listing {listing_id}')
         person_capacity = apartment_info.get('personCapacity', 1)
         property_type = apartment_info.get('propertyType', 'Unknown')
-        
-        # Vị trí
+
+        # Geo
         latitude = apartment_info.get('lat', 0.0)
         longitude = apartment_info.get('lng', 0.0)
-        
-        # Lấy location từ sharing_location
+
+        # Location mapping
         sharing_location = apartment_info.get('sharing_location', {})
         province_code = None
         district_code = None
         address = "N/A"
-        
+
         if sharing_location:
-            # Trích xuất thông tin địa điểm từ sharing_location
             province_code, district_code = extract_location_from_sharing_location(sharing_location, cursor)
-            
-            # Skip if no location information found
             if province_code is None and district_code is None:
-                print(f"[SKIP] Listing {listing_id}: No location information found, skipping...")
-                return "skipped"
-            
-            # Tạo Address từ District + ', ' + Province
-            address = get_district_province_names(province_code, district_code, cursor)
+                try:
+                    address = sharing_location if isinstance(sharing_location, str) else (
+                        sharing_location.get('address') if isinstance(sharing_location, dict) else str(sharing_location)
+                    )
+                except Exception:
+                    address = "N/A"
+                print(f"[WARNING] Proceeding without mapped location for listing {listing_id}; address='{address}'")
+            else:
+                address = get_district_province_names(province_code, district_code, cursor)
         else:
             print(f"[SKIP] Listing {listing_id}: No sharing_location data, skipping...")
             return "skipped"
-        
-        # Upsert property type trước để đảm bảo có trong bảng Properties
+
+        # Ensure property type exists
         cursor.callproc('UpsertProperty', [property_type])
-        
-        # Lấy PropertyType ID
         property_type_id = get_property_type_id(cursor, property_type)
-        
-        # Tính toán rating theo mapping mới
+
+        # Ratings mapping
         cleanliness, location_point, service, value, communication, convenience = rating_mapping(ratings)
-        
-        # Lấy giá và currency từ price_info
-        price = 0
-        currency = ""
-        price_info = data.get('price')
-        price = price_info.get('night_price', 0)
-        currency = price_info.get('currency', 'VND')
-        
-        # Kiểm tra xem listing đã tồn tại chưa để quyết định CreatedAt
+
+        # Price
+        price_info = data.get('price') or {}
+        price = price_info.get('night_price', 0) or 0
+        currency = price_info.get('currency', 'VND') or 'VND'
+
+        # Existing product check
         cursor.execute("SELECT ProductID FROM Products WHERE ExternalID = %s", [listing_id])
         existing_product = cursor.fetchone()
         is_update = existing_product is not None
-        
-        # Thiết lập timestamp dựa trên insert/update
+
+        # Timestamps
         current_time = datetime.now()
-        created_at = None if is_update else current_time  # NULL nếu update, timestamp nếu insert
-        last_synced_at = current_time  # Luôn cập nhật LastSyncedAt
-        
-        # Tạo UID bằng snowflake generator
+        created_at = None if is_update else current_time
+        last_synced_at = current_time
+
+        # UID
         uid = generate_snowflake_uid()
-        
-        # Thực hiện upsert product với cấu trúc mới vào MySQL
+
+        # Upsert product
         cursor.callproc('UpsertProduct', [
             uid,
-            listing_id,                    # p_ExternalID
-            'airbnb',                      # p_Source (luôn là 'airbnb')
-            name,                          # p_Name (name trong apartment_info)
-            address,                       # p_Address (District + ', ' + Province)
-            province_code,                 # p_ProvinceCode
-            district_code,                 # p_DistrictCode
-            float(latitude),               # p_Latitude (lat trong apartment_info)
-            float(longitude),              # p_Longitude (lng trong apartment_info)
-            property_type_id,              # p_PropertyType (ID từ bảng Properties)
-            None,                          # p_RoomType (NULL)
-            int(person_capacity),          # p_MaxGuests (personCapacity trong apartment_info)
-            None,                          # p_NumBedrooms (NULL)
-            None,                          # p_NumBeds (NULL)
-            None,                          # p_NumBathrooms (NULL)
-            float(price),                  # p_Price (night_price)
-            currency,                      # p_Currency (currency trong price)
-            float(cleanliness),            # p_Cleanliness (CLEANLINESS)
-            float(location_point),         # p_Location (LOCATION)
-            float(service),                # p_Service (ACCURACY)
-            float(value),                  # p_Value (VALUE)
-            float(communication),          # p_Communication (COMMUNICATION)
-            float(convenience),            # p_Convenience (CHECKIN)
-            created_at,                    # p_CreatedAt (NULL nếu update, timestamp nếu insert)
-            last_synced_at                 # p_LastSyncedAt (luôn timestamp hiện tại)
+            listing_id,
+            'airbnb',
+            name,
+            address,
+            province_code,
+            district_code,
+            float(latitude),
+            float(longitude),
+            property_type_id,
+            None,
+            int(person_capacity),
+            None,
+            None,
+            None,
+            float(price),
+            currency,
+            float(cleanliness),
+            float(location_point),
+            float(service),
+            float(value),
+            float(communication),
+            float(convenience),
+            created_at,
+            last_synced_at
         ])
-        
-        # Query lại để lấy ProductID sau khi upsert
+
+        # Retrieve ProductID
         cursor.execute("SELECT ProductID FROM Products WHERE ExternalID = %s", [listing_id])
-        product_result = cursor.fetchone()
-        
-        if not product_result:
+        product_row = cursor.fetchone()
+        if not product_row:
             raise Exception(f"Could not retrieve ProductID for listing {listing_id} after upsert")
-        
-        product_id = product_result[0]
+        product_id = product_row[0]
         print(f"[INFO] Retrieved ProductID: {product_id} for listing {listing_id}")
-        
-        # Upsert amenities vào MySQL
+
+        # Amenities sync
         amenities = data.get('amenities', [])
         amenity_ids = upsert_amenities(cursor, amenities)
-        
         if amenity_ids:
-            # Lấy danh sách amenity_ids hiện tại
-            cursor.execute(
-                "SELECT AmenityID FROM ProductAmenities WHERE ProductID = %s", 
-                [product_id]
-            )
+            cursor.execute("SELECT AmenityID FROM ProductAmenities WHERE ProductID = %s", [product_id])
             existing_amenity_ids = set(row[0] for row in cursor.fetchall())
-            
-            # Tìm amenities cần thêm mới và cần xóa
             new_amenity_ids = set(amenity_ids)
             amenities_to_add = new_amenity_ids - existing_amenity_ids
             amenities_to_remove = existing_amenity_ids - new_amenity_ids
-            
-            # Xóa các amenities không còn cần thiết
+
             if amenities_to_remove:
                 placeholders = ','.join(['%s'] * len(amenities_to_remove))
                 cursor.execute(
                     f"DELETE FROM ProductAmenities WHERE ProductID = %s AND AmenityID IN ({placeholders})",
                     [product_id] + list(amenities_to_remove)
                 )
-            
-            # Thêm các amenities mới
             for amenity_id in amenities_to_add:
                 cursor.execute(
                     "INSERT INTO ProductAmenities (ProductID, AmenityID) VALUES (%s, %s)",
                     [product_id, amenity_id]
                 )
-        
-        # Commit MySQL changes
+
+        # Commit MySQL
         connection.commit()
-        
-        # Upsert vào MongoDB nếu connection có sẵn
+
+        # MongoDB upserts (best-effort)
         if mongodb_db is not None:
             try:
-                # Upsert images
                 if 'images' in data:
                     upsert_images_to_mongodb(mongodb_db, product_id, listing_id, data['images'])
-                
-                # Upsert room tour images
                 if 'room_tour_items' in data:
                     upsert_room_tour_images_to_mongodb(mongodb_db, product_id, listing_id, data['room_tour_items'])
-                
-                # Upsert policies
                 if 'policies' in data:
                     upsert_policies_to_mongodb(mongodb_db, product_id, listing_id, data['policies'])
-                
-                # Upsert highlights
                 if 'highlights' in data:
                     upsert_highlights_to_mongodb(mongodb_db, product_id, listing_id, data['highlights'])
-                
-                # Upsert descriptions
                 if 'descriptions' in data:
                     upsert_descriptions_to_mongodb(mongodb_db, product_id, listing_id, data['descriptions'])
-                
-                # Upsert reviews nếu có dữ liệu
                 if reviews_dict and listing_id in reviews_dict:
                     reviews_data = reviews_dict[listing_id]
                     upsert_reviews_to_mongodb(mongodb_db, product_id, listing_id, reviews_data)
-                
                 print(f"[SUCCESS] MongoDB data for listing {listing_id} processed successfully")
-                
             except Exception as mongo_error:
                 print(f"[ERROR] Error upserting to MongoDB for listing {listing_id}: {mongo_error}")
-                # MongoDB error không làm fail toàn bộ process
-        
-        # In thông báo insert/update
+
         action = "updated" if is_update else "inserted"
         print(f"[SUCCESS] Successfully {action} listing {listing_id} into MySQL and MongoDB with ProductID: {product_id}\n")
-
         return True
-        
+
     except Exception as e:
         print(f"[ERROR] Error upserting listing {listing_id}: {e}")
         connection.rollback()
         return False
-        
     finally:
-        cursor.close()
+        try:
+            cursor.close()
+        except Exception:
+            pass
         connection.close()
 
 def load_reviews_data(reviews_file):

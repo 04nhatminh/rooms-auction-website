@@ -1,167 +1,153 @@
 const { MongoClient } = require('mongodb');
 
-class ImageModel {
-    constructor() {
-        this.client = null;
-        this.db = null;
-        this.connectionString = 'mongodb+srv://11_a2airbnb:anhmanminhnhu@cluster0.cyihew1.mongodb.net/';
-        this.dbName = 'a2airbnb';
-        this.isConnecting = false;
-    }
+// MongoDB connection
+let db = null;
 
-    async connect() {
-        // Nếu đã có connection, return luôn
-        if (this.db) {
-            return this.db;
-        }
-
-        // Nếu đang connecting, đợi
-        if (this.isConnecting) {
-            while (this.isConnecting) {
-                await new Promise(resolve => setTimeout(resolve, 100));
-            }
-            return this.db;
-        }
-
+async function connectToMongoDB() {
+    if (!db) {
         try {
-            this.isConnecting = true;
-            console.log('Connecting to MongoDB...');
+            const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/a2airbnb';
+            const client = new MongoClient(mongoUri);
+            await client.connect();
+            db = client.db('a2airbnb'); // Đảm bảo tên database đúng
+            console.log('✅ Connected to MongoDB');
+        } catch (error) {
+            console.error('❌ MongoDB connection failed:', error);
+            throw error;
+        }
+    }
+    return db;
+}
+
+class ImageModel {
+    // Lấy ảnh đầu tiên của một ProductID
+    static async getFirstImageByProductId(productId) {
+        try {
+            console.log(`🔍 Searching for images with ProductID: ${productId}`);
             
-            this.client = new MongoClient(this.connectionString, {
-                maxPoolSize: 10,
-                serverSelectionTimeoutMS: 5000,
-                connectTimeoutMS: 10000,
+            const database = await connectToMongoDB();
+            const collection = database.collection('images');
+            
+            // Tìm document với ProductID (viết hoa)
+            const document = await collection.findOne({
+                ProductID: parseInt(productId) // Đảm bảo convert sang số
             });
             
-            await this.client.connect();
-            this.db = this.client.db(this.dbName);
-            
-            console.log('Connected to MongoDB successfully');
-            return this.db;
-            
-        } catch (error) {
-            console.error('MongoDB connection error:', error);
-            this.client = null;
-            this.db = null;
-            throw error;
-        } finally {
-            this.isConnecting = false;
-        }
-    }
-
-    async disconnect() {
-        if (this.client) {
-            await this.client.close();
-            this.client = null;
-            this.db = null;
-        }
-    }
-
-    // Lấy hình ảnh đầu tiên của một listing dựa trên ProductID
-    // @param {string} productId - ProductID của product
-    // @returns {string|null} - baseUrl của hình ảnh đầu tiên hoặc null
-    async getFirstImageByProductId(productId) {
-        try {
-            console.log(`Fetching image for ProductID: ${productId}`);
-            const db = await this.connect();
-            
-            if (!db) {
-                throw new Error('Database connection failed');
+            if (!document) {
+                console.log(`❌ No document found for ProductID: ${productId}`);
+                return null;
             }
             
-            const imagesCollection = db.collection('images');
-
-            // Tìm document có ProductID tương ứng
-            const result = await imagesCollection.findOne(
-                { ProductID: productId },
-                { 
-                    projection: { 
-                        'Images.baseUrl': 1
-                    }
-                }
-            );
-
-            console.log(`MongoDB query result for ${productId}:`, result ? 'Found' : 'Not found');
-
-            if (result && result.Images && result.Images.length > 0) {
-                console.log(`Returning image URL: ${result.Images[0].baseUrl}`);
-                return result.Images[0].baseUrl;
+            console.log(`✅ Found document for ProductID: ${productId}`);
+            
+            // Kiểm tra array Images
+            if (!document.Images || !Array.isArray(document.Images) || document.Images.length === 0) {
+                console.log(`❌ No images array found for ProductID: ${productId}`);
+                return null;
             }
-
-            return null;
-
+            
+            // Lấy ảnh đầu tiên từ array
+            const firstImage = document.Images[0];
+            const imageUrl = firstImage.baseUrl;
+            
+            console.log(`✅ Found first image for ProductID ${productId}: ${imageUrl}`);
+            return imageUrl;
+            
         } catch (error) {
             console.error(`Error fetching image for ProductID ${productId}:`, error);
-            return null; // Return null thay vì throw để không break toàn bộ process
+            return null;
         }
     }
 
-    // Lấy tất cả hình ảnh của một listing dựa trên ProductID
-    // @param {string} productId - ProductID của product
-    // @returns {Array} - Mảng các baseUrl hoặc mảng rỗng
-    async getAllImagesByProductId(productId) {
+    // Lấy tất cả ảnh của một ProductID
+    static async getAllImagesByProductId(productId) {
         try {
-            const db = await this.connect();
-            const imagesCollection = db.collection('images');
-
-            const result = await imagesCollection.findOne(
-                { ProductID: productId },
-                { projection: { 'Images.baseUrl': 1 } }
-            );
-
-            if (result && result.Images) {
-                return result.Images.map(img => img.baseUrl);
-            }
-
-            return [];
-
-        } catch (error) {
-            console.error('Error fetching images from MongoDB:', error);
-            throw error;
-        }
-    }
-
-    // Lấy hình ảnh cho nhiều ProductID cùng lúc
-    // @param {Array} productIds - Mảng các ProductID
-    // @returns {Object} - Object với key là ProductID và value là baseUrl đầu tiên
-    async getBatchFirstImages(productIds) {
-        try {
-            console.log(`Fetching batch images for ${productIds.length} ProductIDs`);
-            const db = await this.connect();
+            console.log(`🔍 Fetching all images for ProductID: ${productId}`);
             
-            if (!db) {
-                throw new Error('Database connection failed');
+            const database = await connectToMongoDB();
+            const collection = database.collection('images');
+            
+            const document = await collection.findOne({
+                ProductID: parseInt(productId)
+            });
+            
+            if (!document || !document.Images || !Array.isArray(document.Images)) {
+                console.log(`❌ No images found for ProductID: ${productId}`);
+                return [];
             }
+            
+            // Trả về array các URL từ baseUrl
+            const imageUrls = document.Images
+                .filter(img => img.baseUrl) // Chỉ lấy những ảnh có baseUrl
+                .map(img => img.baseUrl);
+            
+            console.log(`✅ Found ${imageUrls.length} images for ProductID: ${productId}`);
+            return imageUrls;
+            
+        } catch (error) {
+            console.error(`Error fetching images for ProductID ${productId}:`, error);
+            return [];
+        }
+    }
 
-            const imagesCollection = db.collection('images');
-
-            const results = await imagesCollection.find(
-                { ProductID: { $in: productIds } },
-                { 
-                    projection: { 
-                        ProductID: 1,
-                        'Images.baseUrl': 1 
+    // Lấy ảnh đầu tiên cho nhiều ProductID
+    static async getBatchFirstImages(productIds) {
+        try {
+            console.log(`🔍 Fetching batch images for ${productIds.length} ProductIDs`);
+            
+            const database = await connectToMongoDB();
+            const collection = database.collection('images');
+            
+            // Convert tất cả productIds sang số
+            const numericProductIds = productIds.map(id => parseInt(id));
+            
+            // Tìm tất cả documents với ProductID trong array
+            const documents = await collection.find({
+                ProductID: { $in: numericProductIds }
+            }).toArray();
+            
+            const imageMap = {};
+            
+            documents.forEach(doc => {
+                if (doc.Images && Array.isArray(doc.Images) && doc.Images.length > 0) {
+                    const firstImage = doc.Images[0];
+                    if (firstImage.baseUrl) {
+                        imageMap[doc.ProductID] = firstImage.baseUrl;
                     }
                 }
-            ).toArray();
+            });
+            
+            console.log(`✅ Found images for ${Object.keys(imageMap).length}/${productIds.length} ProductIDs`);
+            return imageMap;
+            
+        } catch (error) {
+            console.error('Error in getBatchFirstImages:', error);
+            return {};
+        }
+    }
 
-            console.log(`MongoDB batch query found ${results.length} results out of ${productIds.length} requested`);
-
-            const imageMap = {};
-            results.forEach(result => {
-                if (result.Images && result.Images.length > 0) {
-                    imageMap[result.ProductID] = result.Images[0].baseUrl;
+    // Method debug để xem cấu trúc dữ liệu
+    static async getSampleImages(limit = 5) {
+        try {
+            const database = await connectToMongoDB();
+            const collection = database.collection('images');
+            
+            const samples = await collection.find({}).limit(limit).toArray();
+            
+            console.log('📸 Sample images from MongoDB:');
+            samples.forEach((doc, index) => {
+                console.log(`   ${index + 1}. ProductID: ${doc.ProductID}, Images count: ${doc.Images?.length || 0}`);
+                if (doc.Images && doc.Images.length > 0) {
+                    console.log(`      First image: ${doc.Images[0].baseUrl}`);
                 }
             });
-
-            console.log(`Successfully mapped ${Object.keys(imageMap).length} images`);
-            return imageMap;
-
+            
+            return samples;
         } catch (error) {
-            console.error('Error fetching batch images from MongoDB:', error);
-            return {}; // Return empty object thay vì throw
+            console.error('Error getting sample images:', error);
+            return [];
         }
     }
 }
 
-module.exports = new ImageModel();
+module.exports = ImageModel;

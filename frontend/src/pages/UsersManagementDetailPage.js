@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getUserById, updateUserStatus } from '../api/userAPI';
+// ⬇️ đổi import: dùng default export UserAPI thay vì named functions
+import UserAPI from '../api/userApi';
 import PageHeader from '../components/PageHeader/PageHeader';
 import styles from './UsersManagementDetailPage.module.css';
 
@@ -33,7 +34,7 @@ export default function UsersManagementDetailPage() {
     setLoading(true);
     setError('');
     try {
-      const data = await getUserById(token, id);
+      const data = await UserAPI.getUserById(token, id);
       setUser(data);
       setStatus(data.status || 'active');
       setSuspendedUntil(toLocalDatetimeValue(data.suspendedUntil));
@@ -68,7 +69,7 @@ export default function UsersManagementDetailPage() {
         status,
         suspendedUntil: status === 'suspended' ? fromLocalDatetimeValue(suspendedUntil) : null
       };
-      const updated = await updateUserStatus(token, id, payload);
+      const updated = await UserAPI.updateUserStatus(token, id, payload);
       setUser(updated);
       setMsg('Cập nhật trạng thái thành công.');
     } catch (e) {

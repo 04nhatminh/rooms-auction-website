@@ -1,7 +1,8 @@
 // src/pages/UsersManagementPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getUsers, deleteUser as apiDeleteUser } from '../api/userAPI';
+// ⬇️ đổi import: dùng default export UserAPI thay vì named functions
+import UserAPI from '../api/userApi';
 import PageHeader from '../components/PageHeader/PageHeader';
 
 // 👉 dùng CSS Modules
@@ -24,7 +25,7 @@ const UsersManagementPage = () => {
     }
 
     try {
-      const data = await getUsers(token, 1, 10);
+      const data = await UserAPI.getUsers(token, 1, 10);
       const list = Array.isArray(data) ? data : (data.items || []);
       setUsers(list);
     } catch (err) {
@@ -40,7 +41,7 @@ const UsersManagementPage = () => {
     if (!window.confirm('Bạn có chắc muốn xóa người dùng này?')) return;
 
     try {
-      await apiDeleteUser(token, id);
+      await UserAPI.deleteUser(token, id);
       setUsers(prev => prev.filter(u => (u.id ?? u._id) !== id));
       alert('Xóa người dùng thành công!');
     } catch (err) {
@@ -71,7 +72,6 @@ const UsersManagementPage = () => {
         crumbs={[{ label: 'Dashboard', to: '/admin/dashboard' }, { label: 'Quản lý khách hàng' }]}
       />
 
-      {/* Nếu bạn đã dùng AdminLayout bọc /admin thì không cần div layout này nữa */}
       <div className={styles.layout}>
         <main className={styles.main}>
           <div className={styles.tableContainer}>
@@ -121,6 +121,9 @@ const UsersManagementPage = () => {
                     </tr>
                   );
                 })}
+                {users.length === 0 && (
+                  <tr><td colSpan={7} className={styles.empty}>Không có dữ liệu</td></tr>
+                )}
               </tbody>
             </table>
           </div>

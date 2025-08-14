@@ -137,7 +137,7 @@ async function createUsersTable() {
             DateOfBirth DATE NULL,
             Gender ENUM('male','female','other') NULL,
             Address VARCHAR(512) NULL,
-            AvatarURL VARCHAR(512),
+            AvatarURL TEXT,
             Role ENUM('guest', 'admin') DEFAULT 'guest',
             Rating DECIMAL(3,2) DEFAULT 0.0,
             IsVerified TINYINT(1) DEFAULT FALSE,
@@ -1292,8 +1292,6 @@ async function createSearchDistrictsProcedure() {
 }
 
 async function initSchema() {
-    console.log('🚀 Initializing database schema...');
-    
     try {
         await testConnection();
         

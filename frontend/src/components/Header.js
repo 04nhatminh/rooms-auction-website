@@ -4,7 +4,7 @@ import './Header.css';
 import logo from '../assets/logo.png';
 import SearchBarMini from './SearchBarMini';
 import SearchBar from './SearchBar';
-import UserMenu from './UserMenu';
+import HeaderUserMenu from './HeaderUserMenu';
 
 const Header = () => {
   const [showFullSearch, setShowFullSearch] = useState(false);
@@ -28,7 +28,7 @@ const Header = () => {
         <div className="header-button-actions">
           <button className="circle-btn user-btn">U</button>
           
-          <UserMenu onLogout={() => {/* your logout logic */}} />
+          <HeaderUserMenu onLogout={() => {/* your logout logic */}} />
         </div>
       </div>
 

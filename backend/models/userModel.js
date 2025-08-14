@@ -92,6 +92,9 @@ class UserModel {
                     phoneNumber: user.PhoneNumber,
                     avatarURL: user.AvatarURL,
                     isVerified: user.IsVerified,
+                    dateOfBirth: user.DateOfBirth,
+                    gender: user.Gender,
+                    address: user.Address,
                     verificationToken: user.VerificationToken,
                     verificationTokenExpires: user.VerificationTokenExpires,
                     role: user.Role,
@@ -155,7 +158,10 @@ class UserModel {
                 isVerified: 'IsVerified',
                 verificationToken: 'VerificationToken',
                 verificationTokenExpires: 'VerificationTokenExpires',
-                rating: 'Rating'
+                rating: 'Rating',
+                dateOfBirth: 'DateOfBirth',
+                gender: 'Gender',
+                address: 'Address'
             };
 
             // Xây dựng câu query động

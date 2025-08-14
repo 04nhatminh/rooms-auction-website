@@ -11,4 +11,7 @@ router.get('/:productId/all', ImageController.getAllImages);
 // POST /api/images/batch - Lấy hình ảnh cho nhiều ProductID cùng lúc
 router.post('/batch', ImageController.getBatchImages);
 
+// GET /api/images/product/:productId/main - Lấy hình ảnh chính cho một ProductID
+router.get('/product/:productId/main', ImageController.getMainProductImage);
+
 module.exports = router;

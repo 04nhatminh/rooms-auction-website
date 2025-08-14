@@ -1,6 +1,7 @@
 import menuIcon from '../assets/menu.png';
+import './HeaderUserMenu.css';
 
-const UserMenu = ({ onLogout }) => {
+const HeaderUserMenu = ({ onLogout }) => {
   return (
     <div className="dropdown user-info">
       <button
@@ -70,5 +71,5 @@ const UserMenu = ({ onLogout }) => {
   );
 };
 
-export default UserMenu;
+export default HeaderUserMenu;
 
