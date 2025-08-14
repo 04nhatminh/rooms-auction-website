@@ -14,6 +14,7 @@ import RoomDetailPage from './pages/RoomDetailPage';
 import VerificationSuccessPage from './pages/VerificationSuccessPage';
 import UsersManagementPage from './pages/UsersManagementPage';
 import UserProfilePage from './pages/UserProfilePage';
+import FavoritePage from './pages/FavoritePage';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
             <Route path="/search" element={<SearchResult />} />
             <Route path="/admin/users-management" element={<UsersManagementPage />} />
             <Route path="/profile" element={<UserProfilePage />} />
+            <Route path="/favorite" element={<FavoritePage />} />
           </Routes>
         </div>
       </Router>

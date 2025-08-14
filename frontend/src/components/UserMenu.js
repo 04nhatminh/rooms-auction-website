@@ -59,7 +59,15 @@ const UserMenu = ({ user, onLogout }) => {
       </button>
       {open && (
         <ul className="dropdown-menu dropdown-menu-end custom-dropdown">
-          <li><button className="dropdown-item" type="button">Danh sách yêu thích</button></li>
+          <li>
+            <button 
+              className="dropdown-item" 
+              type="button" 
+              onClick={() => { setOpen(false); navigate('/favorite'); }}
+            >
+              <i className="fa-regular fa-heart me-2"></i>Danh sách yêu thích
+            </button>
+          </li>
           <li><button className="dropdown-item" type="button">Lịch sử đấu giá</button></li>
           <li><button className="dropdown-item" type="button">Lịch sử mua hàng/thanh toán</button></li>
           <li><button className="dropdown-item" type="button" onClick={() => { setOpen(false); navigate('/profile'); }}>Hồ sơ</button></li>
