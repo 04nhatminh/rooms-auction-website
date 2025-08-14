@@ -134,7 +134,7 @@ async function createUsersTable() {
             PhoneNumber VARCHAR(20),
             AvatarURL VARCHAR(512),
             IsVerified BOOLEAN DEFAULT FALSE,
-            Role VARCHAR(20) DEFAULT 'guest',
+            Role ENUM('guest', 'admin') DEFAULT 'guest',
             Rating DECIMAL(3,2) DEFAULT 0.0,
             VerificationToken VARCHAR(255),
             VerificationTokenExpires DATETIME,
