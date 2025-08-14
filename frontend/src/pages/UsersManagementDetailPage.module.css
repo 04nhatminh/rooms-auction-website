@@ -1,0 +1,111 @@
+:root{
+  --bg:#f6f8fb;
+  --card:#ffffff;
+  --text:#1f2937;
+  --muted:#6b7280;
+  --primary:#0f766e;
+  --primary-600:#0ea5a4;
+  --border:#e5e7eb;
+  --shadow:0 10px 25px rgba(15,118,110,0.08);
+  --warn:#f59e0b;
+  --danger:#ef4444;
+  --success:#10b981;
+}
+
+.page{
+  background:var(--bg);
+  min-height:100%;
+  color:var(--text);
+}
+
+/* grid 2 cột: thông tin | trạng thái */
+.detailGrid{
+  display:grid;
+  grid-template-columns: 1.2fr .8fr;
+  gap:22px;
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  box-shadow: var(--shadow);
+  padding:18px;
+}
+
+/* --- Profile Card --- */
+.profileCard{}
+
+.profileHeader{
+  display:flex;
+  gap:16px;
+  align-items:center;
+  margin-bottom:14px;
+}
+
+.avatar{
+  width:84px;
+  height:84px;
+  border-radius:50%;
+  object-fit:cover;
+  box-shadow:0 6px 16px rgba(0,0,0,.12);
+}
+
+.meta{}
+
+.name{ font-size:20px; font-weight:700; line-height:1.25; }
+.email{ color:var(--muted); margin-top:2px; }
+.metaRow{ display:flex; gap:10px; align-items:center; margin-top:6px; }
+.muted{ color:var(--muted); }
+
+/* Badges */
+.badge{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:4px 10px; border-radius:999px; font-size:12px; letter-spacing:.2px;
+  border:1px solid transparent;
+}
+.roleAdmin{ background:#e0f2fe; color:#075985; border-color:#bae6fd; }
+.roleGuest{ background:#ecfeff; color:#155e75; border-color:#cffafe; }
+
+.statusActive{ background:#e6fffa; color:#0f766e; border-color:#b7f7ec; }
+.statusDisabled{ background:#fff1f2; color:#be123c; border-color:#fecdd3; }
+.statusSuspended{ background:#fff7ed; color:#a16207; border-color:#fde68a; }
+
+/* fields */
+.infoGrid{ display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin-top:8px; }
+.field{}
+.fieldLabel{ font-size:12px; color:var(--muted); margin-bottom:4px; }
+.fieldValue{ padding:10px 12px; border:1px solid var(--border); border-radius:10px; background:#fff; }
+
+/* --- Status Card --- */
+.statusCard{}
+.cardTitle{ font-weight:700; font-size:16px; margin-bottom:12px; }
+.formRow{ display:flex; flex-direction:column; gap:6px; margin-bottom:12px; }
+.label{ font-size:13px; color:var(--muted); }
+.input{ width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border); background:#fff; }
+.hint{ font-size:12px; color:var(--muted); margin-top:4px; }
+
+.actions{ display:flex; gap:10px; margin-top:6px; }
+.btn{
+  padding:10px 14px; border-radius:10px; border:1px solid var(--border);
+  background:#fff; cursor:pointer;
+}
+.btn:hover{ background:#f9fafb; }
+.btnPrimary{ background:var(--primary); color:#fff; border-color:transparent; box-shadow:0 8px 18px rgba(15,118,110,.18); }
+.btnPrimary:hover{ background:#0d6a63; }
+.btn:disabled{ opacity:.6; cursor:not-allowed; }
+
+/* alerts */
+.alert{ padding:10px 12px; border-radius:10px; border:1px solid; margin-bottom:12px; font-size:14px; }
+.errorBox{ background:#fff1f2; border-color:#fecdd3; color:#b91c1c; }
+.success{ background:#ecfdf5; border-color:#bbf7d0; color:#065f46; }
+.warn{ background:#fffbeb; border-color:#fde68a; color:#92400e; }
+
+/* states */
+.loading{ padding:16px; }
+.error{ padding:16px; color:#b91c1c; }
+
+/* responsive */
+@media (max-width: 1024px){
+  .detailGrid{ grid-template-columns: 1fr; }
+}

@@ -1,0 +1,79 @@
+.auction-history {
+    margin: 24px 0px 0px 0px;
+    padding-bottom: 24px;
+}
+
+.auction-history-title {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.auction-history-title img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    cursor: pointer;
+}
+
+.auction-history-title h3 {
+    color: #000;
+    font-family: Montserrat;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    margin: 0px;
+}
+
+.auction-history-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+}
+
+.auction-history-table th, .auction-history-table td {
+    text-align: left;
+    padding: 12px 8px;
+    border-bottom: 1px solid #eee;
+}
+
+.auction-history-table th {
+    color: #000000;
+    font-family: Montserrat;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+}
+
+.auction-history-table td {
+    color: #000000;
+    font-family: Montserrat;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+}
+
+.status {
+    padding: 4px 8px;
+    border-radius: 12px;
+    color: #000000;
+    font-family: Montserrat;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+}
+
+.status-leading {
+    background-color: #fde8e8; /* Màu hồng nhạt */
+    color: #d9534f;
+}
+
+.status-outbid {
+    background-color: #fff8e1; /* Màu vàng nhạt */
+    color: #f0ad4e;
+}

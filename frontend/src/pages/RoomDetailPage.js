@@ -24,7 +24,7 @@ const RoomDetailPage = () => {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    axios.get(`/api/room/${UID}`)
+    axios.get(`http://localhost:3000/api/room/${UID}`)
       .then((res) => {
         console.log("✅ API response:", res.data);
         setData(res.data.data);

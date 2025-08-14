@@ -1,28 +1,27 @@
-const db = require('../config/database');
+const pool = require('../config/database');
 const { MongoClient } = require('mongodb');
 
 class ProductModel {
-
     constructor() {
         // Initialize MongoDB connection once
         this.mongoReady = this.initMongo();
     }
 
-    async initMongo() {
+    static async initMongo() {
         try {
             const client = await MongoClient.connect('mongodb+srv://11_a2airbnb:anhmanminhnhu@cluster0.cyihew1.mongodb.net/');
-            this.mongoDb = client.db('a2airbnb');
+            this.mongoDb = client.pool('a2airbnb');
         } catch (err) {
             console.error("MongoDB connection failed:", err);
         }
     }
 
-    async getProductDetails(productExternalID) 
+    static async getProductDetails(productUID) 
     {
         try {
-            const query = 'SELECT * FROM products WHERE ExternalID = ?';
-            const [products] = await db.execute(query, [productExternalID]);
-            console.log(`Fetched product details for ProductID ${productExternalID}:`, products);
+            const query = 'SELECT * FROM products WHERE UID = ?';
+            const [products] = await pool.execute(query, [productUID]);
+            console.log(`Fetched product details for ProductID ${productUID}:`, products);
             return products[0]; // Trả về sản phẩm đầu tiên
         } catch (error) {
             console.error('Error fetching product details:', error);
@@ -30,7 +29,7 @@ class ProductModel {
         }
     }
 
-    async getProductAmenities(productID) {
+    static async getProductAmenities(productID) {
         try {
             const query = `
                 SELECT 
@@ -44,7 +43,7 @@ class ProductModel {
                 WHERE 
                     pa.ProductID = ?
             `;
-            const [amenities] = await db.execute(query, [productID]);
+            const [amenities] = await pool.execute(query, [productID]);
             console.log(`Fetched amenities for ProductID ${productID}:`, amenities);
             return amenities;
         } catch (error) {
@@ -53,7 +52,7 @@ class ProductModel {
         }
     }
 
-    async getProductDescription(productID) {
+    static async getProductDescription(productID) {
 
         // Step 2: Fetch matching document from MongoDB
         const collection = this.mongoDb.collection('descriptions');
@@ -72,7 +71,7 @@ class ProductModel {
 
     }
 
-    async getProductReviews(productID) {
+    static async getProductReviews(productID) {
 
         // Step 2: Fetch matching document from MongoDB
         const collection = this.mongoDb.collection('reviews');
@@ -91,7 +90,7 @@ class ProductModel {
 
     }
 
-    async getProductImages(productID) {
+    static async getProductImages(productID) {
 
         // Step 2: Fetch matching document from MongoDB
         const collection = this.mongoDb.collection('images');
@@ -110,7 +109,7 @@ class ProductModel {
 
     }
 
-    async getProductPolicies(productID) {
+    static async getProductPolicies(productID) {
 
         // Step 2: Fetch matching document from MongoDB
         const collection = this.mongoDb.collection('policies');
@@ -129,7 +128,7 @@ class ProductModel {
 
     }
 
-    async getProductProvinceName(productID) 
+    static async getProductProvinceName(productID) 
     {
         try {
                 const query = `
@@ -142,7 +141,7 @@ class ProductModel {
                 WHERE 
                     pr.ProductID = ?
             `;
-                const [provinceName] = await db.execute(query, [productID]);
+                const [provinceName] = await pool.execute(query, [productID]);
                 console.log(`Fetched product province for ProductID ${productID}:`, provinceName);
                 return provinceName[0]; // Trả về sản phẩm đầu tiên
         } catch (error) {
@@ -151,7 +150,7 @@ class ProductModel {
         }
     }
 
-    async getProductDistrictName(productID) 
+    static async getProductDistrictName(productID) 
     {
         try {
                 const query = `
@@ -164,7 +163,7 @@ class ProductModel {
                 WHERE 
                     p.ProductID = ?
             `;
-                const [districtName] = await db.execute(query, [productID]);
+                const [districtName] = await pool.execute(query, [productID]);
                 console.log(`Fetched product district for ProductID ${productID}:`, districtName);
                 return districtName[0]; // Trả về sản phẩm đầu tiên
         } catch (error) {
@@ -173,7 +172,7 @@ class ProductModel {
         }
     }
 
-    async getProductPropertyTypeName(productID) 
+    static async getProductPropertyTypeName(productID) 
     {
         try {
                 const query = `
@@ -186,7 +185,7 @@ class ProductModel {
                 WHERE 
                     p.ProductID = ?
             `;
-                const [property] = await db.execute(query, [productID]);
+                const [property] = await pool.execute(query, [productID]);
                 console.log(`Fetched product property name for ProductID ${productID}:`, property);
                 return property[0]; // Trả về sản phẩm đầu tiên
         } catch (error) {
@@ -194,6 +193,111 @@ class ProductModel {
             throw error; // Ném lỗi để xử lý ở nơi gọi
         }
     }
+
+
+    // Lấy top products theo điểm trung bình cao nhất trong một province
+    static async getTopRatedProductsByProvince(provinceCode, limit = 15) {
+        try {
+            // Validate inputs
+            if (!provinceCode || typeof provinceCode !== 'string') {
+                throw new Error('Invalid provinceCode');
+            }
+            
+            const numLimit = parseInt(limit);
+            if (isNaN(numLimit) || numLimit <= 0 || numLimit > 100) {
+                throw new Error('Invalid limit');
+            }
+            
+            // Gọi stored procedure
+            const [rows] = await pool.execute(
+                'CALL GetTopProductsByProvince(?, ?)', 
+                [provinceCode, numLimit]
+            );
+            
+            // MySQL stored procedure trả về array of arrays, lấy result set đầu tiên
+            const products = Array.isArray(rows[0]) ? rows[0] : rows;
+            
+            console.log('Stored procedure result count:', products.length);
+            return products;
+            
+        } catch (error) {
+            console.error('Error in getTopRatedProductsByProvince:', error);            
+            throw error;
+        }
+    }
+
+    // Lấy top products theo điểm trung bình cao nhất trong một district
+    static async getTopRatedProductsByDistrict(districtCode, limit = 15) {
+        try {
+            // Validate inputs
+            if (!districtCode || typeof districtCode !== 'string') {
+                throw new Error('Invalid districtCode');
+            }
+            
+            const numLimit = parseInt(limit);
+            if (isNaN(numLimit) || numLimit <= 0 || numLimit > 100) {
+                throw new Error('Invalid limit');
+            }
+            
+            // Gọi stored procedure
+            const [rows] = await pool.execute(
+                'CALL GetTopProductsByDistrict(?, ?)', 
+                [districtCode, numLimit]
+            );
+            
+            // MySQL stored procedure trả về array of arrays, lấy result set đầu tiên
+            const products = Array.isArray(rows[0]) ? rows[0] : rows;
+            
+            console.log('Stored procedure result count:', products.length);
+            return products;
+            
+        } catch (error) {
+            console.error('Error in getTopRatedProductsByDistrict:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Lấy thông tin chi tiết một product theo ID
+     * @param {number} productId - ID của product
+     * @returns {Object} Thông tin chi tiết product
+     */
+    static async getProductById(productId) {
+        try {
+            const query = `
+                SELECT 
+                    p.*,
+                    prop.PropertyName,
+                    prop.PropertyImageURL,
+                    rt.RoomTypeName,
+                    rt.RoomTypeImageURL,
+                    prov.Name AS ProvinceName,
+                    prov.NameEn AS ProvinceNameEn,
+                    dist.Name AS DistrictName,
+                    dist.NameEn AS DistrictNameEn,
+                    ROUND(
+                        (COALESCE(p.CleanlinessPoint, 0) + 
+                         COALESCE(p.LocationPoint, 0) + 
+                         COALESCE(p.ServicePoint, 0) + 
+                         COALESCE(p.ValuePoint, 0) + 
+                         COALESCE(p.CommunicationPoint, 0) + 
+                         COALESCE(p.ConveniencePoint, 0)) / 6, 2
+                    ) AS AverageRating
+                FROM Products p
+                LEFT JOIN Properties prop ON p.PropertyType = prop.PropertyID
+                LEFT JOIN RoomTypes rt ON p.RoomType = rt.RoomTypeID
+                LEFT JOIN Provinces prov ON p.ProvinceCode = prov.ProvinceCode
+                LEFT JOIN Districts dist ON p.DistrictCode = dist.DistrictCode
+                WHERE p.ProductID = ?
+            `;
+
+            const [rows] = await pool.execute(query, [productId]);
+            return rows[0] || null;
+        } catch (error) {
+            console.error('Error in getProductById:', error);
+            throw error;
+        }
+    }
 }
 
-module.exports = new ProductModel();
+module.exports = ProductModel;

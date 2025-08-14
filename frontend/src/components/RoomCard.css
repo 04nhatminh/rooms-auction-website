@@ -1,0 +1,129 @@
+.room-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  /* box-shadow: 0 2px 8px rgba(0,0,0,0.1); */
+}
+
+.room-card:hover {
+  transform: translateY(-2px);
+  /* box-shadow: 0 4px 16px rgba(0,0,0,0.15); */
+}
+
+.room-card-image {
+  border-radius: 24px;
+  width: 100%;
+  aspect-ratio: 1/1;
+  flex: 1;
+  object-fit: cover;
+  /* transition: transform 0.2s ease; */
+}
+
+.room-info {
+  padding: 12px 8px;
+  background: #fff;
+}
+
+.room-name {
+  color: #000;
+  font-family: Montserrat;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  margin: 0 0 8px 0;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+
+  /* padding: 12px 0px; */
+}
+
+.room-address {
+  color: #000;
+  font-family: Montserrat;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  margin: 0 0 8px 0;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+
+.room-address img {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  aspect-ratio: 1/1;
+  margin-right: 4px;
+}
+
+.room-rating {
+  margin: 0 0 8px 0;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+
+.rating-text {
+  color: #000;
+  font-family: Montserrat;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+}
+
+.room-rating img {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  aspect-ratio: 1/1;
+  margin-right: 4px;
+}
+
+.room-price {
+  margin: 0 0 8px 0;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+
+.room-price img {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  aspect-ratio: 1/1;
+  margin-right: 4px;
+}
+
+.price-amount {
+  color: #000;
+  font-family: Montserrat;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+}
+
+.price-period {
+  font-weight: 400;
+  font-size: 13px;
+  color: #000;
+  font-family: Montserrat;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+}

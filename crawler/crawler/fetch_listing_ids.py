@@ -2,7 +2,7 @@ import re, time, pymysql, os
 from playwright.sync_api import sync_playwright
 
 # --- Config kết nối MySQL ---
-MYSQL = dict(host='localhost', user='root', password='n11991999', db='a2airbnb', charset='utf8mb4')
+MYSQL = dict(host='localhost', user='root', password='', db='a2airbnb', charset='utf8mb4')
 
 def get_locations_from_db():
     con = pymysql.connect(**MYSQL)
@@ -13,7 +13,7 @@ def get_locations_from_db():
     return [row[0] for row in rows]
 
 # --- Lưu listing IDs chưa có ---
-def append_listing_ids_to_txt(listing_ids, filename="output/listing_ids.txt"):
+def append_listing_ids_to_txt(listing_ids, filename):
     if not listing_ids:
         print("No IDs to save")
         return
@@ -32,15 +32,12 @@ def append_listing_ids_to_txt(listing_ids, filename="output/listing_ids.txt"):
 
     new_ids = [lid for lid in filtered_ids if lid not in existing_ids]
 
-    with open(filename, mode="r", encoding="utf-8") as f:
-        old_content = f.read()
-
-    with open(filename, mode="w", encoding="utf-8") as f:
+    # Nối vào cuối file
+    with open(filename, mode="a", encoding="utf-8") as f:
         for lid in new_ids:
             f.write(f"{lid}\n")
-        f.write(old_content)
 
-    print(f"Prepended {len(new_ids)} new listing_id(s) to {filename}")
+    print(f"Appended {len(new_ids)} new listing_id(s) to {filename}")
 
 # --- Mô phỏng nhập vào thanh tìm kiếm ---
 def simulate_user_search(page, location_name):
@@ -143,8 +140,8 @@ def main():
         print(f"\nSearching for: {province}")
         ids = loop_through_each_page(province)
         if ids:
-            print(f"Found {len(ids)} listings for {province}")
-            append_listing_ids_to_txt(ids)
+            print(f"\nFound {len(ids)} listings for {province}")
+            append_listing_ids_to_txt(ids, f"output/listing_ids/listing_ids_{province}.txt")
         else:
             print(f"No listings found for {province}")
 

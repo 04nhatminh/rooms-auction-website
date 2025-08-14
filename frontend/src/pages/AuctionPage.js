@@ -1,65 +1,80 @@
-import React, { useState } from 'react';
+import React from 'react';
+import './AuctionPage.css';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import './AuctionPage.css';
+import AuctionTitle from '../components/AuctionTitle/AuctionTitle';
+import AuctionImageGallery from '../components/AuctionImageGallery/AuctionImageGallery';
+import CountdownTimer from '../components/CountdownTimer/CountdownTimer';
+import AuctionInfo from '../components/AuctionInfo/AuctionInfo';
+import BiddingForm from '../components/BiddingForm/BiddingForm';
+import AuctionRoomDetails from '../components/AuctionRoomDetails/AuctionRoomDetails';
+import AuctionHistory from '../components/AuctionHistory/AuctionHistory';
+import PolicySections from '../components/PolicySections/PolicySections';
+
+// Dữ liệu giả lập (mock data) - Trong thực tế sẽ lấy từ API
+const auctionData = {
+    title: 'Leo House - The Song Building (Angia)',
+    images: {
+        main: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQeJQeJyzgAzTEVqXiGe90RGBFhfp_4RcJJMQ&s',
+        thumbnails: [
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQeJQeJyzgAzTEVqXiGe90RGBFhfp_4RcJJMQ&s',
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQeJQeJyzgAzTEVqXiGe90RGBFhfp_4RcJJMQ&s',
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQeJQeJyzgAzTEVqXiGe90RGBFhfp_4RcJJMQ&s',
+        ],
+        moreCount: 10,
+    },
+    auctionDetails: {
+        endDate: new Date(new Date().getTime() + 2.5 * 3600 * 1000), // Ví dụ: còn lại 1h30p
+        stayPeriod: '01/09/2025 - 15/09/2025',
+        startTime: '23:00:00 - 08/08/2025',
+        endTime: '23:00:00 - 14/08/2025',
+        duration: '7 ngày',
+        bidIncrement: 50000,
+        startingPrice: 1000000,
+        currentPrice: 2000000,
+    },
+    roomInfo: {
+        type: 'Toàn bộ căn hộ cho thuê',
+        capacity: '2 phòng khách - 1 phòng ngủ - 1 giường - 1 phòng tắm',
+        location: 'Vũng Tàu, Việt Nam',
+    },
+    fullHistory: [
+        { id: 1, time: '08/08/2025', bidder: 'Meo***meo', price: 1000000, status: 'Bị vượt giá' },
+        { id: 2, time: '10/08/2025', bidder: 'Tui***tui', price: 1500000, status: 'Bị vượt giá' },
+        { id: 3, time: '13/08/2025', bidder: 'Meo***meo', price: 2000000, status: 'Đang dẫn đầu' },
+    ],
+    personalHistory: [
+        { id: 1, time: '08/08/2025', bidder: 'Meo***meo', price: 1000000, status: 'Bị vượt giá' },
+        { id: 2, time: '13/08/2025', bidder: 'Meo***meo', price: 2000000, status: 'Đang dẫn đầu' },
+    ]
+};
 
 const AuctionPage = () => {
-  const [currentBid, setCurrentBid] = useState(500000);
-  const [userBid, setUserBid] = useState('');
-
-  const handleBidSubmit = (e) => {
-    e.preventDefault();
-    // Xử lý logic đấu giá
-    console.log('Bid submitted:', userBid);
-  };
-
-  return (
-    <div className="auction-page">
-      <Header />
-      <main className="auction-content">
-        <div className="auction-header">
-          <h1>Đấu giá phòng trọ</h1>
-          <div className="auction-timer">
-            <span>Thời gian còn lại: 2h 30m 15s</span>
-          </div>
+    return (
+        <div className="auction-page-container">
+            <Header />
+            <main className="auction-main-content">
+                <AuctionTitle />
+                <div className="auction-layout-grid">
+                    <div className="left-column">
+                        <AuctionImageGallery images={auctionData.images} />
+                    </div>
+                    <div className="right-column auction-info-card">
+                        <CountdownTimer details={auctionData.auctionDetails} />
+                        <AuctionInfo details={auctionData.auctionDetails} />
+                        <BiddingForm currentPrice={auctionData.auctionDetails.currentPrice} bidIncrement={auctionData.auctionDetails.bidIncrement} />
+                    </div>
+                </div>
+                <div className="bottom-sections">
+                    <AuctionRoomDetails info={auctionData.roomInfo} />
+                    <AuctionHistory title="Lịch sử đấu giá toàn phòng" bids={auctionData.fullHistory} />
+                    <AuctionHistory title="Lịch sử đấu giá cá nhân" bids={auctionData.personalHistory} />
+                    <PolicySections />
+                </div>
+            </main>
+            <Footer />
         </div>
-
-        <div className="auction-body">
-          <div className="room-info">
-            <img src="/api/placeholder/400/300" alt="Room" />
-            <div className="room-details">
-              <h2>Phòng trọ cao cấp tại Quận 1</h2>
-              <p>25m² • 1 phòng ngủ • 1 phòng tắm</p>
-            </div>
-          </div>
-
-          <div className="bidding-section">
-            <div className="current-bid">
-              <h3>Giá hiện tại</h3>
-              <span className="bid-amount">{currentBid.toLocaleString()} VNĐ</span>
-            </div>
-
-            <form onSubmit={handleBidSubmit} className="bid-form">
-              <input
-                type="number"
-                value={userBid}
-                onChange={(e) => setUserBid(e.target.value)}
-                placeholder="Nhập giá đấu của bạn"
-                min={currentBid + 10000}
-              />
-              <button type="submit">Đặt giá</button>
-            </form>
-
-            <div className="bid-history">
-              <h4>Lịch sử đấu giá</h4>
-              {/* Danh sách lịch sử đấu giá */}
-            </div>
-          </div>
-        </div>
-      </main>
-      <Footer />
-    </div>
-  );
+    );
 };
 
 export default AuctionPage;

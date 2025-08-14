@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+from datetime import datetime
 
 # Thêm thư mục cha vào Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -9,11 +10,15 @@ from crawler.graphql_hashes import extract_sha256_hashes
 from crawler.fetch_reviews import fetch_reviews, extract_reviews_data
 from crawler.headers import encode_listing_id
 from crawler.config import API_DOMAIN
+from crawler.utils import generate_date_sequence_number
 
-def read_listing_ids():
+def read_listing_ids(province):
     # Đọc danh sách listing IDs từ file
     listing_ids = []
-    file_path = "output/listing_ids.txt"
+    
+    # Lấy đường dẫn tới thư mục gốc của crawler (thư mục cha của execute)
+    crawler_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    file_path = os.path.join(crawler_root, "output", "listing_ids", f"listing_ids_{province}.txt")
     
     if not os.path.exists(file_path):
         print(f"[ERROR] File {file_path} is not found!")
@@ -48,16 +53,62 @@ def get_valid_hashes(listing_ids):
     print("[ERROR] Could not get hash from any listing_id!")
     return None
 
-def save_to_json(data, filename):
-    # Lưu dữ liệu vào file JSON
+def save_to_json(new_data, filename):
+    """Lưu dữ liệu vào file JSON, append IDs mới và ghi đè IDs đã có"""
     try:
+        existing_data = []
+        
+        # Đọc dữ liệu hiện tại nếu file tồn tại
+        if os.path.exists(filename):
+            try:
+                with open(filename, 'r', encoding='utf-8') as f:
+                    existing_data = json.load(f)
+                    if not isinstance(existing_data, list):
+                        existing_data = []
+                print(f"[INFO] Found {len(existing_data)} existing records in {filename}")
+            except (json.JSONDecodeError, FileNotFoundError):
+                print(f"[WARNING] Could not read existing {filename}, starting fresh")
+                existing_data = []
+        
+        # Tạo dict để lookup existing data theo listing_id
+        existing_dict = {}
+        for item in existing_data:
+            if item and isinstance(item, dict) and 'listing_id' in item:
+                existing_dict[item['listing_id']] = item
+        
+        # Xử lý new data: thêm mới hoặc ghi đè
+        updated_count = 0
+        added_count = 0
+        
+        for item in new_data:
+            if item and isinstance(item, dict) and 'listing_id' in item:
+                listing_id = item['listing_id']
+                
+                if listing_id in existing_dict:
+                    # Ghi đè data cũ
+                    existing_dict[listing_id] = item
+                    updated_count += 1
+                    print(f"[UPDATE] Overwritten reviews for listing {listing_id}")
+                else:
+                    # Thêm mới
+                    existing_dict[listing_id] = item
+                    added_count += 1
+                    print(f"[NEW] Added new reviews for listing {listing_id}")
+        
+        # Convert dict back to list để maintain order
+        combined_data = list(existing_dict.values())
+        
+        # Ghi lại file với dữ liệu đã merge
         with open(filename, 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
-        print(f"[SUCCESS] Saved data to {filename}")
+            json.dump(combined_data, f, ensure_ascii=False, indent=2)
+        
+        print(f"[SUCCESS] Added {added_count} new records, updated {updated_count} existing records")
+        print(f"[INFO] Total records in file: {len(combined_data)}")
+        
     except Exception as e:
         print(f"[ERROR] Error saving file {filename}: {e}")
 
-def process_reviews(listing_ids, hashes):
+def process_reviews(listing_ids, hashes, output_filename):
     # Xử lý fetch reviews cho tất cả listing_ids
     print(f"\n[INFO] Starting fetch reviews for {len(listing_ids)} listings...")
     
@@ -86,35 +137,64 @@ def process_reviews(listing_ids, hashes):
             })
             continue
     
-    save_to_json(all_reviews_data, "output/listing_reviews.json")
+    save_to_json(all_reviews_data, output_filename)
 
-def main():
+def main(province=None):
     print("=== FETCH REVIEWS ===")
     
-    # 1. Đọc listing_ids từ file
-    listing_ids = read_listing_ids()
-    if not listing_ids:
-        print("[ERROR] No listing IDs found to process!")
+    # Kiểm tra xem province có được truyền vào không
+    if province is None:
+        print("[ERROR] Province parameter is required!")
+        print("Usage: python run_fetch_reviews.py <province_name>")
+        print("Example: python run_fetch_reviews.py 'Ba Ria - Vung Tau'")
         return
     
-    # 2. Lấy hash từ listing_id đầu tiên có thể
-    print(f"\n[INFO] Fetching hash...")
-    hashes = get_valid_hashes(listing_ids)
-    if not hashes:
-        print("[ERROR] No valid hash found, stopping program!")
-        return
+    print(f"[INFO] Processing province: {province}")
     
-    # 3. Tạo thư mục output nếu chưa có
-    os.makedirs("output", exist_ok=True)
-    
-    # 4. Xử lý reviews
     try:
-        process_reviews(listing_ids, hashes)
+        # 1. Đọc listing_ids từ file
+        listing_ids = read_listing_ids(province)
+        if not listing_ids:
+            print("[ERROR] No listing IDs found to process!")
+            return
+        
+        # 2. Lấy hash từ listing_id đầu tiên có thể
+        print(f"\n[INFO] Fetching hash...")
+        hashes = get_valid_hashes(listing_ids)
+        if not hashes:
+            print("[ERROR] No valid hash found, stopping program!")
+            return
+        
+        # 3. Tạo thư mục output/crawled_data nếu chưa có
+        crawler_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        output_dir = os.path.join(crawler_root, "output", "crawled_data")
+        os.makedirs(output_dir, exist_ok=True)
+        
+        # 4. Tạo date_sequence_number cho tên file output
+        date_sequence_number = generate_date_sequence_number("review")
+        output_filename = os.path.join(output_dir, f"review_{date_sequence_number}.json")
+        print(f"[INFO] Output file will be: {output_filename}")
+        
+        # 5. Xử lý reviews
+        process_reviews(listing_ids, hashes, output_filename)
         print("\n=== COMPLETED FETCH REVIEWS ===")
-        print("File created: output/listing_reviews.json")
+        print(f"File created: {output_filename}")
+        
+        # 6. Upsert dữ liệu vào mongodb
+        from database.upsert_room_review import main as upsert_reviews
+        upsert_reviews(output_filename)
+        print("\n=== COMPLETED UPSERT REVIEWS ===")
         
     except Exception as e:
         print(f"[ERROR] Error occurred during processing: {e}")
 
 if __name__ == "__main__":
-    main()
+    # Lấy province từ command line arguments
+    if len(sys.argv) < 2:
+        print("[ERROR] Province parameter is required!")
+        print("Usage: python run_fetch_reviews.py <province_name>")
+        print("Example: python run_fetch_reviews.py 'Ba Ria - Vung Tau'")
+        sys.exit(1)
+    
+    province = sys.argv[1]
+    main(province)

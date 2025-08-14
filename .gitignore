@@ -2,6 +2,7 @@
 node_modules/
 */node_modules/
 .env
+.venv/
 
 # Python cache files
 __pycache__/
@@ -9,3 +10,7 @@ __pycache__/
 **/__pycache__/
 *.py[cod]
 *$py.class
+
+# Sequence
+.sequence_listing_info
+.sequence_review

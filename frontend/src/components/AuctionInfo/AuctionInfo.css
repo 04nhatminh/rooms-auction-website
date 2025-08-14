@@ -1,0 +1,41 @@
+.auction-details-section-title {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.auction-details-section-title img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    cursor: pointer;
+    margin: 0px;
+}
+
+.auction-details-section-title h4 {
+    color: #000;
+    font-family: Montserrat;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    margin: 0px;
+}
+
+.auction-details-section ul {
+    list-style-type: disc;
+    padding-left: 20px;
+    margin: 0px 0px 0px 28px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.auction-details-section ul li {
+    margin-top: 12px;
+    color: #000;
+    font-family: Montserrat;
+    font-size: 13px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+}

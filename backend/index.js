@@ -10,7 +10,7 @@ const port = process.env.APP_PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-//app.use(express.static(path.join(__dirname, '..', 'frontend', 'build'))); // adjust to your build folder
+app.use(express.static(path.join(__dirname, '../frontend')));
 
 app.use('/', routes);
 

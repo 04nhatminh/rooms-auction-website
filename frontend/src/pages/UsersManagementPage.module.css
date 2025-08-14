@@ -1,0 +1,163 @@
+.page {
+  height: 100%;
+  font-family: 'Montserrat', sans-serif;
+  color: #374151;
+}
+
+/* Nếu bạn đã dùng AdminLayout bọc /admin thì có thể bỏ .layout/.main */
+.layout {
+  display: block;
+}
+
+.main {
+  padding: 0;
+}
+
+/* --- Title (không bắt buộc vì đã có PageHeader) --- */
+.pageTitle {
+  font-size: 1.875rem;
+  font-weight: 800;
+  color: #333;
+  margin-bottom: 2rem;
+}
+
+/* --- Table Card --- */
+.tableContainer {
+  background-color: #fff;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  table-layout: auto;
+  border-collapse: collapse;
+  font-size: 0.9375rem; /* giữ như tbody cũ */
+}
+
+.table thead {
+  background-color: #008489;
+  color: #000; /* giữ nguyên từ CSS gốc của bạn */
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.table th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+}
+
+.table th:last-child { text-align: center; }
+
+.tableHeader {
+  color: #fff;
+}
+
+.row {
+  border-bottom: 1px solid #e5e7eb;
+  transition: background-color 0.2s ease;
+}
+
+.row:hover { background-color: #f9fafb; }
+
+.table td {
+  padding: 0.5rem 1rem;
+  text-align: left;
+}
+
+.table td:last-child { text-align: center; }
+
+/* --- Verified badge (đang dùng trong JSX) --- */
+.status {
+  font-weight: 500;
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+}
+
+.verified {
+  color: #065f46;
+  background: #ecfdf5;
+  border-color: #bbf7d0;
+}
+
+.unverified {
+  color: #b91c1c;
+  background: #fff1f2;
+  border-color: #fecdd3;
+}
+
+/* --- Optional: status chung nếu sau này dùng (active/disabled/suspended) --- */
+.statusBadge { padding: 4px 8px; border-radius: 8px; text-transform: capitalize; }
+.statusActive { background:#e6ffed; color:#087f5b; }
+.statusDisabled { background:#fff5f5; color:#c92a2a; }
+.statusSuspended { background:#fff9db; color:#ad6800; }
+
+/* --- Role badge --- */
+.roleBadge {
+  background-color: #dcfce7;
+  color: #166534;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-weight: 500;
+}
+
+/* --- Actions --- */
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btnEdit,
+.btnDelete {
+  color: #fff;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btnEdit { background-color: #fbbf24; }
+.btnEdit:hover { background-color: #f59e0b; }
+
+.btnDelete { background-color: #ef4444; }
+.btnDelete:hover { background-color: #dc2626; }
+
+/* --- Loading & Error --- */
+.loading,
+.error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+
+.error { color: #ef4444; }
+
+/* --- (Tùy chọn) Responsive dạng stack --- */
+/*
+@media (max-width: 768px) {
+  .table thead { display: none; }
+  .table, .row, .table td { display: block; width: 100%; }
+  .row { border-bottom: 1px solid #e5e7eb; }
+  .table td {
+    display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  }
+  .table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #6b7280;
+  }
+}
+*/
