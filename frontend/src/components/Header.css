@@ -7,6 +7,43 @@
   flex-wrap: wrap;
 }
 
+/* Responsive cho tablet và mobile */
+@media (max-width: 1024px) {
+  .header {
+    padding: 12px 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    padding: 8px 16px;
+    gap: 12px;
+  }
+  
+  /* Ẩn logo text trên mobile */
+  .logo-text {
+    display: none;
+  }
+  
+  /* Giảm size logo */
+  .logo-image {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+  
+  /* Ẩn hẳn logo trên màn hình rất nhỏ */
+  .logo {
+    display: none;
+  }
+}
+
 .logo {
   display: flex;
   align-items: center;
@@ -43,6 +80,43 @@
   padding: 6px 6px;
 }
 
+/* Responsive cho search */
+@media (max-width: 768px) {
+  .search {
+    padding: 4px 4px;
+    flex: 1;
+    max-width: fit-content;
+    margin: 0 auto;
+  }
+  
+  .search .search-icon {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .search .search-icon img {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .search {
+    padding: 3px 3px;
+    min-width: 120px;
+  }
+  
+  .search .search-icon {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .search .search-icon img {
+    width: 12px;
+    height: 12px;
+  }
+}
+
 .search-content {
   display: flex;
   align-items: center;
@@ -61,6 +135,42 @@
   overflow: hidden;
   text-overflow: ellipsis;
   position: relative;
+}
+
+/* Responsive cho search content */
+@media (max-width: 1024px) {
+  .search-content span {
+    padding: 0px 20px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 768px) {
+  .search-content span {
+    padding: 0px 12px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .search-content {
+    min-width: 0;
+  }
+  
+  .search-content span {
+    padding: 0px 8px;
+    font-size: 11px;
+  }
+  
+  /* Chỉ hiển thị 1 span đầu tiên trên mobile */
+  .search-content span:not(:first-child) {
+    display: none;
+  }
+  
+  /* Thay đổi text cho mobile */
+  .search-content span:first-child::after {
+    display: none;
+  }
 }
 
 .search-content span:not(:last-child)::after {
@@ -100,6 +210,33 @@
   gap: 8px;
   flex-shrink: 0;
   align-items: center;
+}
+
+/* Responsive cho button actions */
+@media (max-width: 800px) {
+  .header-button-actions {
+    gap: 4px;
+  }
+  
+  .circle-btn {
+    width: 36px !important;
+    height: 36px !important;
+  }
+  
+  .menu-btn .menu-icon {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .user-btn {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 600px) {
+  .header-button-actions {
+    display: none;
+  }
 }
 
 .circle-btn {
