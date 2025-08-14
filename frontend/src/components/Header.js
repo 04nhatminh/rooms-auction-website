@@ -1,13 +1,15 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Header.css';
 import logo from '../assets/logo.png';
 import menuIcon from '../assets/menu.png';
 import searchIcon from '../assets/search.png';
 
 const Header = () => {
+  const navigate = useNavigate();
   return (
     <header className="header">
-      <div className="logo">
+      <div className="logo" onClick={() => navigate('/')}>
         <img src={logo} alt="Logo" className="logo-image" />
         <span className="logo-text">bidstay</span>
       </div>

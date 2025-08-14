@@ -31,6 +31,16 @@
   margin-top: 4px;
 }
 
+/* Special styling for location input wrapper */
+.location-input-wrapper {
+  position: relative;
+}
+
+/* Special styling for guest input wrapper */
+.guest-input-wrapper {
+  position: relative;
+}
+
 .search-input label {
   display: block;
   color: #080808;

@@ -1,0 +1,55 @@
+.auction-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 28px;
+}
+
+.auction-title h2 {
+  font-size: 24px;
+  font-family: Montserrat;
+  font-style: normal;
+  font-weight: 650;
+  line-height: normal;
+  margin: 0;
+  flex: 1;
+  width: fit-content;
+}
+
+.user-actions {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #000;
+  font-family: Montserrat, sans-serif;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  text-decoration-line: underline;
+  padding: 4px 0;
+  transition: opacity 0.2s ease;
+}
+
+.action-btn:hover {
+  opacity: 0.8;
+  border-radius: 12px;
+}
+
+.action-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}

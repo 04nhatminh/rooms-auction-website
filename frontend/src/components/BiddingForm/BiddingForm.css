@@ -1,0 +1,124 @@
+.bidding-form {
+    width: 100%;
+    height: 100%;
+}
+
+.bidding-form-title {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+}
+
+.bidding-form-title img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    cursor: pointer;
+}
+
+.bidding-form-title h4 {
+    color: #000;
+    font-family: Montserrat;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    margin: 0px 0px;
+}
+
+.current-price-display {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 12px 0;
+}
+
+.current-price-display p {
+    margin: 0;
+    font-size: 14px;
+    color: #000;
+    font-family: Montserrat;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    letter-spacing: 0.64px;
+}
+
+.current-price-display span {
+    color: #000;
+    text-align: right;
+    font-family: Montserrat;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+}
+
+.suggested-bids {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.suggested-bids button {
+    padding: 10px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    color: #000;
+    font-family: Montserrat;
+    font-size: 13px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+}
+
+.suggested-bids button:hover {
+    background-color: #f0f0f0;
+}
+
+.bid-input-container {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+}
+
+.bid-input {
+    width: 100%;
+    height: 48px;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    color: #000;
+    font-family: Montserrat;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+}
+
+.submit-bid-button {
+    width: 40%;
+    height: 48px;
+    padding: 0 14px;
+    border: none;
+    background-color: #FF5555;
+    color: #FFF;
+    font-family: Montserrat;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.submit-bid-button:hover {
+    background-color: #c9302c;
+}

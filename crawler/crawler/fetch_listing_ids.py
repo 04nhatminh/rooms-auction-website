@@ -2,7 +2,7 @@ import re, time, pymysql, os
 from playwright.sync_api import sync_playwright
 
 # --- Config kết nối MySQL ---
-MYSQL = dict(host='localhost', user='root', password='n11991999', db='a2airbnb', charset='utf8mb4')
+MYSQL = dict(host='localhost', user='root', password='', db='a2airbnb', charset='utf8mb4')
 
 def get_locations_from_db():
     con = pymysql.connect(**MYSQL)
@@ -13,7 +13,7 @@ def get_locations_from_db():
     return [row[0] for row in rows]
 
 # --- Lưu listing IDs chưa có ---
-def append_listing_ids_to_txt(listing_ids, filename="output/listing_ids.txt"):
+def append_listing_ids_to_txt(listing_ids, filename):
     if not listing_ids:
         print("No IDs to save")
         return
@@ -89,8 +89,8 @@ def loop_through_each_page(name):
         # Tìm kiếm lần đầu tiên
         simulate_user_search(page, name)
 
-        # Lặp tối đa 3 trang
-        for page_index in range(3):
+        # Lặp tối đa 5 trang
+        for page_index in range(5):
             print(f"[INFO] --- Page {page_index+1} ---")
 
             # Đợi response được bắt (API StaysSearch)
@@ -140,8 +140,8 @@ def main():
         print(f"\nSearching for: {province}")
         ids = loop_through_each_page(province)
         if ids:
-            print(f"Found {len(ids)} listings for {province}")
-            append_listing_ids_to_txt(ids)
+            print(f"\nFound {len(ids)} listings for {province}")
+            append_listing_ids_to_txt(ids, f"output/listing_ids/listing_ids_{province}.txt")
         else:
             print(f"No listings found for {province}")
 
