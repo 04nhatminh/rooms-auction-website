@@ -2,12 +2,12 @@ const ProductModel = require('../models/productModel');
 
 class ProductController {
     static async getFullProductDataByExternalId(req, res) {
-        const productExternalID = req.params.UID;
-        console.log('GET /api/room/' + productExternalID);
+        const productUID = req.params.UID;
+        console.log('GET /api/room/' + productUID);
 
         try {
             // Fetch all in parallel
-            const productDetails = await ProductModel.getProductDetails(productExternalID);
+            const productDetails = await ProductModel.getProductDetails(productUID);
             const productID = productDetails.ProductID;
             const [
                 productProvinceName,
@@ -77,7 +77,8 @@ class ProductController {
                 parseInt(limit)
             );
 
-            console.log('Controller: Got products:', products.length);
+            console.log('Controller: Got product UIDs: ', products.map(p => p.UID));
+            // console.log('Controller: Got products:', products.length);
 
             return res.status(200).json({
                 success: true,

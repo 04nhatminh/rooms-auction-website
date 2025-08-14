@@ -2,15 +2,12 @@ const pool = require('../config/database');
 const { MongoClient } = require('mongodb');
 
 class ProductModel {
-    constructor() {
-        // Initialize MongoDB connection once
-        this.mongoReady = this.initMongo();
-    }
-
+    // Initialize MongoDB connection when class is loaded
     static async initMongo() {
         try {
             const client = await MongoClient.connect('mongodb+srv://11_a2airbnb:anhmanminhnhu@cluster0.cyihew1.mongodb.net/');
-            this.mongoDb = client.pool('a2airbnb');
+            this.mongoDb = client.db('a2airbnb');
+            console.log('MongoDB connected successfully');
         } catch (err) {
             console.error("MongoDB connection failed:", err);
         }
@@ -299,5 +296,8 @@ class ProductModel {
         }
     }
 }
+
+// Initialize MongoDB connection when module is loaded
+ProductModel.initMongo();
 
 module.exports = ProductModel;
