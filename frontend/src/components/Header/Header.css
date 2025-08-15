@@ -5,15 +5,17 @@
   border-bottom: 1px solid #DDDDDD;
   padding: 8px 64px 10px;
   height: auto; 
-  transition: height 0.6s ease;
+  transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   overflow: visible;
+  z-index: 999;
 }
 
-/* When expanded, give the header extra height to host the full bar */
+/* When expanded, ensure header stays on top */
 .header.expanded {
   height: auto; 
   position: relative;
-  overflow: visible;  
+  overflow: visible;
+  z-index: 1000;
 }
 
 /* Top row stays fixed (logo | mini | actions) */
@@ -34,18 +36,19 @@
   flex: 1;
   display: flex;
   justify-content: center;
-  transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+              transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   will-change: transform, opacity;
 }
 
 .header-mini-slot .search { /* the pill */
-  transition: inherit;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .header.expanded .header-mini-slot {
   opacity: 0;
-  transform: scale(0.96);     /* subtle shrink */
-  pointer-events: none;       /* avoid clicks while morphing */
+  transform: scale(0.94) translateY(-5px);
+  pointer-events: none;
 }
 
 /* FULL → morph in (floats, centered vertically) */
@@ -75,10 +78,46 @@
   justify-content: center;
   margin-top: -20px !important;
   margin-bottom: -32px !important;
+  opacity: 0;
+  transform: scale(0.95) translateY(10px);
+  transition: opacity 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform, opacity;
+  position: relative;
+  z-index: 1000;
+}
+
+.header.expanded .header-full-search {
+  opacity: 1;
+  transform: scale(1) translateY(0);
 }
 
 .header-full-search .search-bar {
   margin-top: 0 !important;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  z-index: 1001;
+}
+
+/* Ensure all dropdowns in search bar have high z-index */
+.header-full-search .search-bar .dropdown,
+.header-full-search .search-bar .dropdown-menu,
+.header-full-search .search-bar .guest-dropdown,
+.header-full-search .search-bar .location-dropdown,
+.header-full-search .search-bar .calendar-dropdown,
+.header-full-search .search-bar .search-dropdown {
+  z-index: 1050 !important;
+  position: relative;
+}
+
+/* Specific dropdown positioning */
+.header-full-search .dropdown-menu,
+.header-full-search .guest-dropdown,
+.header-full-search .location-dropdown,
+.header-full-search .calendar-dropdown {
+  position: absolute !important;
+  z-index: 1050 !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
 }
 
 /* Override any existing margin-top on search bar */
