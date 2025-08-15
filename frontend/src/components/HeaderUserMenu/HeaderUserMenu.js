@@ -1,7 +1,10 @@
+import { useNavigate } from 'react-router-dom';
 import menuIcon from '../../assets/menu.png';
 import './HeaderUserMenu.css';
 
 const HeaderUserMenu = ({ onLogout }) => {
+  const navigate = useNavigate();
+
   return (
     <div className="dropdown user-info">
       <button
@@ -16,7 +19,7 @@ const HeaderUserMenu = ({ onLogout }) => {
 
       <ul className="dropdown-menu dropdown-menu-end custom-dropdown">
         <li>
-          <button className="dropdown-item" type="button">
+          <button className="dropdown-item" type="button" onClick={() => navigate('/favorite')}>
             <i className="fa-regular fa-heart me-2"></i>Danh sách yêu thích
           </button>
         </li>
@@ -31,7 +34,7 @@ const HeaderUserMenu = ({ onLogout }) => {
           </button>
         </li>
         <li>
-          <button className="dropdown-item" type="button">
+          <button className="dropdown-item" type="button" onClick={() => navigate('/profile')}>
             <i className="fa-solid fa-user me-2"></i>Hồ sơ
           </button>
         </li>

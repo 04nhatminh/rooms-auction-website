@@ -89,7 +89,17 @@ const HomePage = () => {
 
           {/* Thay thế cụm nút Login/Signup bằng menu người dùng */}
           {user ? (
-            <HeaderUserMenu user={user} onLogout={handleLogout} />
+            <div className="user-section">
+              <div className="welcome-button">
+                Chào mừng, {(() => {
+                  if (!user.fullName?.trim()) return 'Bạn';
+                  const names = user.fullName.trim().split(' ');
+                  // Lấy tên cuối (lastname)
+                  return names[names.length - 1];
+                })()}
+              </div>
+              <HeaderUserMenu user={user} onLogout={handleLogout} />
+            </div>
           ) : (
             <div className="login-signup">
               <button className='home-login-button' onClick={() => navigate('/login')}>Đăng nhập</button>

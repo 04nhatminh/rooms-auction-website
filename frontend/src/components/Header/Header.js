@@ -5,9 +5,12 @@ import logo from '../../assets/logo.png';
 import SearchBarMini from './SearchBarMini';
 import SearchBar from '../SearchBar/SearchBar';
 import HeaderUserMenu from '../HeaderUserMenu/HeaderUserMenu';
+import UserAvatar from '../UserAvatar/UserAvatar';
+import UserAPI from '../../api/userApi';
 
 const Header = () => {
   const [showFullSearch, setShowFullSearch] = useState(false);
+  const [user, setUser] = useState(null);
   const headerRef = useRef(null);
 
   // Shared search state
@@ -26,6 +29,33 @@ const Header = () => {
 
   const [selectedLocationId, setSelectedLocationId] = useState(null);
   const [selectedType, setSelectedType] = useState(null);
+
+  // Load user info
+  useEffect(() => {
+    const loadUserInfo = async () => {
+      try {
+        // Try localStorage first for quick load
+        const userData = localStorage.getItem('userData');
+        if (userData) {
+          const parsedUser = JSON.parse(userData);
+          setUser(parsedUser);
+        }
+
+        // Then fetch latest from API
+        const response = await UserAPI.getProfile();
+        if (response.user) {
+          setUser(response.user);
+          localStorage.setItem('userData', JSON.stringify(response.user));
+        }
+      } catch (error) {
+        // If error (like not logged in), keep user as null
+        console.log('User not logged in or error fetching profile');
+        setUser(null);
+      }
+    };
+
+    loadUserInfo();
+  }, []);
 
   // Handle click outside header to close full search
   useEffect(() => {
@@ -127,8 +157,7 @@ const Header = () => {
 
         {!showFullSearch && (
           <div className="header-button-actions">
-            <button className="circle-btn user-btn">U</button>
-            
+            <UserAvatar size="medium" />
             <HeaderUserMenu onLogout={() => {/* your logout logic */}} />
           </div>
         )}
