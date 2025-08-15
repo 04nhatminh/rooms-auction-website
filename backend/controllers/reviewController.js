@@ -42,66 +42,6 @@ class ReviewController {
         return { productIds, uidToProductId };
     }
 
-    // API lấy total_reviews cho một uid
-    // GET /api/reviews/:uid
-    static async getTotalReviews(req, res) {
-        try {
-            const { uid } = req.params;
-
-            if (!uid) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'UID is required'
-                });
-            }
-
-            // Map UID -> productId
-            const { productId, uidToProductId } = await ReviewController.mapUIDsToProductIds(uid);
-
-            // Không tìm được productId nào
-            if (!productId) {
-                return res.status(200).json({
-                    success: true,
-                    message: 'No productId resolved from provided uid',
-                    data: {
-                        totalRequested: 1,
-                        totalResolvedProductIds: 0,
-                        totalFound: 0,
-                        uidToProductId,
-                        reviewsMapByUID: {}
-                    }
-                });
-            }
-
-            const totalReviews = await ReviewModel.getTotalReviewsByProductId(productId);
-
-            if (totalReviews === null) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'No reviews found for this productId',
-                    data: { productId }
-                });
-            }
-
-            return res.status(200).json({
-                success: true,
-                message: 'Total reviews retrieved successfully',
-                data: {
-                    productId,
-                    totalReviews
-                }
-            });
-
-        } catch (error) {
-            console.error('Error in getTotalReviews:', error);
-            return res.status(500).json({
-                success: false,
-                message: 'Internal server error',
-                error: error.message
-            });
-        }
-    }
-
     // API lấy total_reviews cho nhiều productId cùng lúc
     // POST /api/reviews/batch
     // Body: { productIds: ["id1", "id2", "id3"] }

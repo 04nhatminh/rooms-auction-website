@@ -42,82 +42,6 @@ class ImageController {
         return { productIds, uidToProductId };
     }
 
-    // API lấy hình ảnh đầu tiên cho một ProductID
-    // GET /api/images/:productId
-    static async getFirstImage(req, res) {
-        try {
-            const { productId } = req.params;
-
-            if (!productId) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'ProductID is required'
-                });
-            }
-
-            const imageUrl = await ImageModel.getFirstImageByProductId(productId);
-
-            if (!imageUrl) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'No image found for this ProductID',
-                    data: { productId }
-                });
-            }
-
-            return res.status(200).json({
-                success: true,
-                message: 'Image retrieved successfully',
-                data: {
-                    productId,
-                    imageUrl
-                }
-            });
-
-        } catch (error) {
-            console.error('Error in getFirstImage:', error);
-            return res.status(500).json({
-                success: false,
-                message: 'Internal server error',
-                error: error.message
-            });
-        }
-    }
-
-    // API lấy tất cả hình ảnh cho một ProductID
-    // GET /api/images/:productId/all
-    static async getAllImages(req, res) {
-        try {
-            const { productId } = req.params;
-
-            if (!productId) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'ProductID is required'
-                });
-            }
-
-            const imageUrls = await ImageModel.getAllImagesByProductId(productId);
-
-            return res.status(200).json({
-                success: true,
-                message: 'Images retrieved successfully',
-                data: {
-                    productId,
-                    totalImages: imageUrls.length,
-                    imageUrls
-                }
-            });
-
-        } catch (error) {
-            console.error('Error in getAllImages:', error);
-            return res.status(500).json({
-                success: false,
-                message: 'Internal server error',
-                error: error.message
-            });
-        }
-    }
 
     // API lấy hình ảnh cho nhiều UIDs cùng lúc
     // POST /api/images/batch
@@ -189,37 +113,6 @@ class ImageController {
                     imageMap: {},
                     error: error.message
                 }
-            });
-        }
-    }
-
-    // GET /api/images/product/:productId/main - Lấy ảnh chính của sản phẩm
-    static async getMainProductImage(req, res) {
-        try {
-            const { productId } = req.params;
-            
-            // Sử dụng ImageModel để lấy ảnh đầu tiên
-            const imageUrl = await ImageModel.getFirstImageByProductId(productId);
-
-            if (!imageUrl) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Không tìm thấy ảnh cho sản phẩm này'
-                });
-            }
-
-            res.json({
-                success: true,
-                url: imageUrl,
-                alt: `Ảnh sản phẩm ${productId}`,
-                productId: productId
-            });
-        } catch (error) {
-            console.error('Error getting main product image:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Lỗi server khi lấy ảnh sản phẩm',
-                error: error.message
             });
         }
     }

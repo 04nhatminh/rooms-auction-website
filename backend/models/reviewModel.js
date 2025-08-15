@@ -58,43 +58,6 @@ class ReviewModel {
         }
     }
 
-    // Lấy total_reviews cho một productId
-    // @param {string} productId - product_id (tương ứng với ProductID)
-    // @returns {number|null} - total_reviews hoặc null
-    async getTotalReviewsByProductId(productId) {
-        try {
-            console.log(`Fetching total reviews for product_id: ${productId}`);
-            const db = await this.connect();
-            
-            if (!db) {
-                throw new Error('Database connection failed');
-            }
-            
-            const reviewsCollection = db.collection('reviews');
-
-            const result = await reviewsCollection.findOne(
-                { ProductID: productId },
-                { 
-                    projection: { 
-                        total_reviews: 1
-                    }
-                }
-            );
-
-            console.log(`MongoDB reviews query result for ${productId}:`, result ? `Found ${result.total_reviews} reviews` : 'Not found');
-
-            if (result && typeof result.total_reviews === 'number') {
-                return result.total_reviews;
-            }
-
-            return null;
-
-        } catch (error) {
-            console.error(`Error fetching reviews for product_id ${productId}:`, error);
-            return null;
-        }
-    }
-
     // Lấy total_reviews cho nhiều product_id cùng lúc
     // @param {Array} productIds - Mảng các product_id
     // @returns {Object} - Object với key là product_id và value là total_reviews
