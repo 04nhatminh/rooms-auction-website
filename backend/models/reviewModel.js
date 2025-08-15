@@ -1,71 +1,33 @@
 const { MongoClient } = require('mongodb');
-const pool = require('../config/database');
+
+// MongoDB connection
+let db = null;
+
+async function connectToMongoDB() {
+    if (!db) {
+        try {
+            const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/a2airbnb';
+            const client = new MongoClient(mongoUri);
+            await client.connect();
+            db = client.db('a2airbnb');
+            console.log('Connected to MongoDB to fetch reviews');
+        } catch (error) {
+            console.error('MongoDB connection failed when fetching reviews:', error);
+            throw error;
+        }
+    }
+    return db;
+}
 
 class ReviewModel {
-    constructor() {
-        this.client = null;
-        this.db = null;
-        this.connectionString = 'mongodb+srv://11_a2airbnb:anhmanminhnhu@cluster0.cyihew1.mongodb.net/';
-        this.dbName = 'a2airbnb';
-        this.isConnecting = false;
-    }
-
-    async connect() {
-        // Nếu đã có connection, return luôn
-        if (this.db) {
-            return this.db;
-        }
-
-        // Nếu đang connecting, đợi
-        if (this.isConnecting) {
-            while (this.isConnecting) {
-                await new Promise(resolve => setTimeout(resolve, 100));
-            }
-            return this.db;
-        }
-
-        try {
-            this.isConnecting = true;
-            console.log('Connecting to MongoDB...');
-            
-            this.client = new MongoClient(this.connectionString, {
-                maxPoolSize: 10,
-                serverSelectionTimeoutMS: 5000,
-                connectTimeoutMS: 10000,
-            });
-            
-            await this.client.connect();
-            this.db = this.client.db(this.dbName);
-            
-            console.log('Connected to MongoDB successfully');
-            return this.db;
-            
-        } catch (error) {
-            console.error('MongoDB connection error:', error);
-            this.client = null;
-            this.db = null;
-            throw error;
-        } finally {
-            this.isConnecting = false;
-        }
-    }
-
-    async disconnect() {
-        if (this.client) {
-            await this.client.close();
-            this.client = null;
-            this.db = null;
-        }
-    }
-
     // Lấy total_reviews cho nhiều product_id cùng lúc
     // @param {Array} productIds - Mảng các product_id
     // @returns {Object} - Object với key là product_id và value là total_reviews
     async getBatchTotalReviews(productIds) {
         try {
             console.log(`Fetching batch reviews for ${productIds.length} product_ids`);
-            const db = await this.connect();
-            
+            const db = await connectToMongoDB();
+
             if (!db) {
                 throw new Error('Database connection failed');
             }

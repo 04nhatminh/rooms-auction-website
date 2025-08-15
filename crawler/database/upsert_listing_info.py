@@ -719,6 +719,87 @@ def upsert_product_from_listing_data(listing_data, mongodb_db=None, reviews_dict
             pass
         connection.close()
 
+def load_all_listing_files():
+    """Load all listing info files from default location and crawled_data directory"""
+    listing_files = []
+    
+    # Add default file
+    default_file = "output/listing_info.json"
+    if os.path.exists(default_file):
+        listing_files.append(default_file)
+        print(f"[INFO] Found default listing file: {default_file}")
+    
+    # Check crawled_data directory
+    crawled_data_dir = "output/crawled_data"
+    if os.path.exists(crawled_data_dir):
+        for filename in os.listdir(crawled_data_dir):
+            if filename.startswith("listing_info_") and filename.endswith(".json"):
+                file_path = os.path.join(crawled_data_dir, filename)
+                listing_files.append(file_path)
+                print(f"[INFO] Found listing file: {file_path}")
+    
+    return listing_files
+
+def load_all_reviews_files():
+    """Load all reviews files from default location and crawled_data directory"""
+    reviews_files = []
+    
+    # Add default file
+    default_file = "output/listing_reviews.json"
+    if os.path.exists(default_file):
+        reviews_files.append(default_file)
+        print(f"[INFO] Found default reviews file: {default_file}")
+    
+    # Check crawled_data directory
+    crawled_data_dir = "output/crawled_data"
+    if os.path.exists(crawled_data_dir):
+        for filename in os.listdir(crawled_data_dir):
+            if filename.startswith("review_") and filename.endswith(".json"):
+                file_path = os.path.join(crawled_data_dir, filename)
+                reviews_files.append(file_path)
+                print(f"[INFO] Found reviews file: {file_path}")
+    
+    return reviews_files
+
+def load_reviews_data_from_files(reviews_files):
+    """Load reviews data from multiple files and merge into single dictionary"""
+    reviews_dict = {}
+    
+    for reviews_file in reviews_files:
+        if not os.path.exists(reviews_file):
+            print(f"[WARNING] File {reviews_file} not found! Skipping...")
+            continue
+        
+        try:
+            with open(reviews_file, 'r', encoding='utf-8') as f:
+                reviews_data_list = json.load(f)
+
+            print(f"[INFO] Loading reviews from {reviews_file} with {len(reviews_data_list)} listings...")
+
+            for item in reviews_data_list:
+                listing_id = item.get('listing_id')
+                data = item.get('data', {})
+                reviews = data.get('reviews', [])
+                
+                if listing_id and reviews:
+                    if listing_id in reviews_dict:
+                        print(f"[WARNING] Duplicate listing_id {listing_id} found, merging reviews...")
+                        # Merge reviews by externalId to avoid duplicates
+                        existing_review_ids = set(r.get('externalId') for r in reviews_dict[listing_id])
+                        new_reviews = [r for r in reviews if r.get('externalId') not in existing_review_ids]
+                        reviews_dict[listing_id].extend(new_reviews)
+                    else:
+                        reviews_dict[listing_id] = reviews
+            
+            print(f"[INFO] Loaded reviews from {reviews_file}")
+            
+        except Exception as e:
+            print(f"[ERROR] Error loading reviews file {reviews_file}: {e}")
+            continue
+    
+    print(f"[INFO] Total reviews loaded for {len(reviews_dict)} listings")
+    return reviews_dict
+
 def load_reviews_data(reviews_file):
     # Đọc dữ liệu reviews và tạo dictionary mapping listing_id -> reviews
     reviews_dict = {}
@@ -749,13 +830,14 @@ def load_reviews_data(reviews_file):
         return reviews_dict
 
 def main():
-    # Đọc dữ liệu listing info và upsert vào cả MySQL và MongoDB
-    listing_info_file = "output/listing_info.json"
-    reviews_file = "output/listing_reviews.json"
-    
-    if not os.path.exists(listing_info_file):
-        print(f"[ERROR] File {listing_info_file} not found!")
+    # Load all listing files from default location and crawled_data directory
+    listing_files = load_all_listing_files()
+    if not listing_files:
+        print("[ERROR] No listing files found!")
         return
+    
+    # Load all reviews files from default location and crawled_data directory
+    reviews_files = load_all_reviews_files()
     
     try:
         # Kết nối MongoDB
@@ -766,22 +848,30 @@ def main():
         else:
             print("[WARNING] MongoDB connection failed, will only update MySQL")
         
-        # Load reviews data
-        reviews_dict = load_reviews_data(reviews_file)
+        # Load reviews data from all files
+        reviews_dict = load_reviews_data_from_files(reviews_files)
         
-        # Đọc listing info (đã bao gồm price data)
-        with open(listing_info_file, 'r', encoding='utf-8') as f:
-            listing_data_list = json.load(f)
+        # Process all listing files
+        all_listing_data = []
+        for listing_file in listing_files:
+            try:
+                with open(listing_file, 'r', encoding='utf-8') as f:
+                    listing_data_list = json.load(f)
+                print(f"[INFO] Loaded {len(listing_data_list)} listings from {listing_file}")
+                all_listing_data.extend(listing_data_list)
+            except Exception as e:
+                print(f"[ERROR] Error loading listing file {listing_file}: {e}")
+                continue
 
-        print(f"[INFO] Processing {len(listing_data_list)} listings...")
+        print(f"[INFO] Total listings to process: {len(all_listing_data)}")
 
         success_count = 0
         error_count = 0
         skipped_count = 0
         
-        for i, listing_data in enumerate(listing_data_list):
+        for i, listing_data in enumerate(all_listing_data):
             listing_id = listing_data.get('listing_id', '')
-            print(f"[INFO] Processing listing {i+1}/{len(listing_data_list)}: {listing_id}")
+            print(f"[INFO] Processing listing {i+1}/{len(all_listing_data)}: {listing_id}")
 
             # Upsert vào cả MySQL và MongoDB (bao gồm reviews)
             result = upsert_product_from_listing_data(listing_data, mongodb_db, reviews_dict)
@@ -795,7 +885,7 @@ def main():
         print(f"Completed! Processed {success_count} listings, {error_count} errors, {skipped_count} skipped (no location)")
 
     except Exception as e:
-        print(f"[ERROR] Error processing JSON file: {e}")
+        print(f"[ERROR] Error processing files: {e}")
 
 if __name__ == "__main__":
     os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

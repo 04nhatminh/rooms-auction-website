@@ -9,10 +9,10 @@ async function connectToMongoDB() {
             const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/a2airbnb';
             const client = new MongoClient(mongoUri);
             await client.connect();
-            db = client.db('a2airbnb'); // Đảm bảo tên database đúng
-            console.log('✅ Connected to MongoDB');
+            db = client.db('a2airbnb');
+            console.log('Connected to MongoDB to fetch images');
         } catch (error) {
-            console.error('❌ MongoDB connection failed:', error);
+            console.error('MongoDB connection failed when fetching images:', error);
             throw error;
         }
     }
