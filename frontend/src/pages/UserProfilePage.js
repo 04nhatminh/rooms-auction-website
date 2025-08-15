@@ -234,10 +234,21 @@ const UserProfilePage = () => {
                       src={avatarPreview}
                       alt="Avatar"
                       className="h-24 w-24 rounded-full border border-slate-200 object-cover"
+                      style={{ 
+                        borderRadius: '50%',
+                        aspectRatio: '1 / 1',
+                        objectFit: 'cover'
+                      }}
                       onError={() => setShowAvatarImg(false)}
                     />
                   ) : (
-                    <div className="h-24 w-24 rounded-full border border-slate-200 bg-gradient-to-br from-[#278C9F] to-[#7CD1E5] text-white flex items-center justify-center text-2xl font-extrabold select-none">
+                    <div 
+                      className="h-24 w-24 rounded-full border border-slate-200 bg-gradient-to-br from-[#278C9F] to-[#7CD1E5] text-white flex items-center justify-center text-2xl font-extrabold select-none"
+                      style={{ 
+                        borderRadius: '50%',
+                        aspectRatio: '1 / 1'
+                      }}
+                    >
                       {(profile.fullName?.trim()?.[0] || 'U').toUpperCase()}
                     </div>
                   )}
