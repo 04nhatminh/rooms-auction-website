@@ -6,7 +6,7 @@ import StarOutlineIcon from '../../assets/star_outline.png';
 import PriceTagIcon from '../../assets/price.png';
 import PlaceHolderImg from '../../assets/placeholder.jpg';
 
-const RoomCard = ({ product }) => {
+const RoomCard = ({ product, durationDays = 1 }) => {
   const navigate = useNavigate();
   const defaultImage = PlaceHolderImg;
 
@@ -94,8 +94,8 @@ const RoomCard = ({ product }) => {
 
         <p className="room-price">
           <img src={PriceTagIcon} alt="Price" />
-          <span className="price-amount">{formatPrice(product?.Price)}</span>
-          <span className="price-period">&nbsp;cho 1 đêm</span>
+          <span className="price-amount">{formatPrice(product?.Price * durationDays)}</span>
+          <span className="price-period">&nbsp;cho {durationDays} đêm</span>
         </p>
 
       </div>

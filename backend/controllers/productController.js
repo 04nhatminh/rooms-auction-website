@@ -87,7 +87,7 @@ class ProductController {
     }
 
     // API lấy top products theo province
-    // GET /api/products/top-rated?provinceCode=01&limit=15
+    // GET /api/products/top-rated/province?provinceCode=01&limit=15
     static async getTopRatedProductsByProvince(req, res) {
         try {
             const { provinceCode, limit = 15, method = 'main' } = req.query;
@@ -124,7 +124,7 @@ class ProductController {
     }
 
     // API lấy top products theo district
-    // GET /api/products/district/top-rated?districtCode=01&limit=15
+    // GET /api/products/top-rated/district?districtCode=01&limit=15
     static async getTopRatedProductsByDistrict(req, res) {
         try {
             const { districtCode, limit = 15, method = 'main' } = req.query;
@@ -135,7 +135,8 @@ class ProductController {
                 parseInt(limit)
             );
 
-            console.log('Controller: Got products:', products.length);
+            // Remove ProductID, ExternalID from each product
+            products = products.map(({ ProductID: _, ExternalID: __, ...product }) => product);
 
             return res.status(200).json({
                 success: true,
