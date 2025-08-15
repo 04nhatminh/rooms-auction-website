@@ -6,22 +6,22 @@ import './App.css';
 import { LocationProvider } from './contexts/LocationContext';
 
 // Import pages
-import HomePage from './pages/HomePage';
-import SearchResult from './pages/SearchResult';
-import LoginPage from './pages/LoginPage';
-import SignUpPage from './pages/SignUpPage';
-import RoomDetailPage from './pages/RoomDetailPage';
-import VerificationSuccessPage from './pages/VerificationSuccessPage';
+import HomePage from './pages/HomePage/HomePage';
+import SearchResult from './pages/SearchResult/SearchResult';
+import LoginPage from './pages/LoginPage/LoginPage';
+import SignUpPage from './pages/SignupPage/SignUpPage';
+import RoomDetailPage from './pages/RoomDetailPage/RoomDetailPage';
+import VerificationSuccessPage from './pages/VerificationSuccessPage/VerificationSuccessPage';
 import AdminLayout from './layouts/AdminLayout';
-import UsersManagementPage from './pages/UsersManagementPage';
-import UsersManagementDetailPage from './pages/UsersManagementDetailPage';
-import AuctionPage from './pages/AuctionPage';
-import AuctionCheckPage from './pages/AuctionCheckPage'
+import UsersManagementPage from './pages/UsersManagementPage/UsersManagementPage';
+import UsersManagementDetailPage from './pages/UsersManagementDetailPage/UsersManagementDetailPage';
+import AuctionPage from './pages/AuctionPage/AuctionPage';
+import AuctionCheckPage from './pages/AuctionCheckPage/AuctionCheckPage'
+import UserProfilePage from './pages/UserProfilePage/UserProfilePage';
+import FavoritePage from './pages/FavoritePage/FavoritePage';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import UserProfilePage from './pages/UserProfilePage';
-import FavoritePage from './pages/FavoritePage';
 
 function App() {
   return (
