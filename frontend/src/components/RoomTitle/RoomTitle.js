@@ -3,13 +3,67 @@ import { useProduct } from '../../contexts/ProductContext';
 import './RoomTitle.css';
 import shareIcon from '../../assets/share.png';
 import heartIcon from '../../assets/heart.png';
+import heartRedIcon from '../../assets/heart_red.png';
 import saveIcon from '../../assets/save.png';
 
 const RoomTitle = () => {
   const { data } = useProduct();
   const [showShare, setShowShare] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [loadingFavorite, setLoadingFavorite] = useState(false);
   const shareRef = useRef(null);
   const shareLink = window.location.href;
+  const UID = data?.details?.UID;
+  const ProductID = data?.details?.ProductID;
+  // Lấy trạng thái yêu thích ban đầu
+  useEffect(() => {
+    async function fetchFavorite() {
+      try {
+        setLoadingFavorite(true);
+        const token = localStorage.getItem('token');
+        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000'}/favorite` , {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token || ''}`
+          }
+        });
+        const dataRes = await res.json();
+        if (res.ok && dataRes.favorites) {
+          setIsFavorite(dataRes.favorites.some(f => f.ProductID === ProductID));
+        }
+      } catch (e) {
+        setIsFavorite(false);
+      } finally {
+        setLoadingFavorite(false);
+      }
+    }
+    if (UID) fetchFavorite();
+  }, [UID]);
+
+  // Xử lý toggle yêu thích
+  const handleToggleFavorite = async () => {
+  if (!ProductID) return;
+    setLoadingFavorite(true);
+    try {
+      if (isFavorite) {
+        // Bỏ yêu thích
+        const res = await import('../../api/favoritesApi');
+        await res.default.removeFavorite(ProductID);
+        setIsFavorite(false);
+        alert('Đã bỏ khỏi yêu thích');
+      } else {
+        // Thêm vào yêu thích
+        const res = await import('../../api/favoritesApi');
+        await res.default.addFavorite(ProductID);
+        setIsFavorite(true);
+        alert('Đã thêm vào yêu thích');
+      }
+    } catch (e) {
+      alert('Lỗi thao tác yêu thích: ' + (e.message || '')); 
+    } finally {
+      setLoadingFavorite(false);
+    }
+  };
 
   useEffect(() => {
     function onDocClick(e) {
@@ -45,15 +99,14 @@ const RoomTitle = () => {
             <div className="share-popup">
               <div className="share-arrow" />
               <input className="share-input" readOnly value={shareLink} />
-              
               <button className="copy-btn" onClick={handleCopy}>Sao chép</button>
             </div>
           )}
         </div>
 
-        <button className="action-btn">
-          <img src={heartIcon} alt="Favorite" className="action-icon" />
-          Yêu thích
+        <button className="action-btn" onClick={handleToggleFavorite} disabled={loadingFavorite}>
+          <img src={isFavorite ? heartRedIcon : heartIcon} alt="Favorite" className="action-icon" />
+          {isFavorite ? 'Đã yêu thích' : 'Yêu thích'}
         </button>
         <button className="action-btn">
           <img src={saveIcon} alt="Save" className="action-icon" />
