@@ -22,15 +22,10 @@ export const LocationProvider = ({ children }) => {
     try {
       if (!searchTerm || searchTerm.trim().length < 2) {
         // Trả về top popular locations nếu không có search term
-        return {
-          success: true,
-          data: {
-            suggestions: popularLocations.slice(0, limit)
-          }
-        };
+        return await getPopularLocations(limit);
       }
 
-      const response = await LocationAPI.getLocationSuggestions(searchTerm, limit);
+      const response = await LocationAPI.searchLocations(searchTerm, limit);
       return response;
     } catch (error) {
       console.error('Error searching locations:', error);
@@ -52,7 +47,30 @@ export const LocationProvider = ({ children }) => {
 
   // Function để lấy location suggestions theo từ khóa
   const getLocationSuggestions = async (searchTerm, limit = 10) => {
-    return await searchLocations(searchTerm, limit);
+    if (!searchTerm || searchTerm.trim().length < 2) {
+      // Trả về popular locations nếu không có search term
+      return await getPopularLocations(limit);
+    }
+    
+    try {
+      const response = await LocationAPI.searchLocations(searchTerm, limit);
+      return response;
+    } catch (error) {
+      console.error('Error getting location suggestions:', error);
+      
+      // Fallback: filter popular locations nếu API fail
+      const filteredPopular = popularLocations.filter(location => 
+        location.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        location.displayText.toLowerCase().includes(searchTerm.toLowerCase())
+      ).slice(0, limit);
+
+      return {
+        success: true,
+        data: {
+          suggestions: filteredPopular
+        }
+      };
+    }
   };
 
   // Function để lấy popular locations (với cache)

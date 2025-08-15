@@ -1,4 +1,5 @@
 const { MongoClient } = require('mongodb');
+const pool = require('../config/database');
 
 class ReviewModel {
     constructor() {

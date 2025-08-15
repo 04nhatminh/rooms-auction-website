@@ -1291,6 +1291,23 @@ async function createSearchDistrictsProcedure() {
     `);
 }
 
+async function dropSearchProductIDFromUIDProcedureIfExists() {
+    await pool.query(`
+        DROP PROCEDURE IF EXISTS SearchProductIDFromUID;
+    `);
+}
+
+async function createSearchProductIDFromUIDProcedure() {
+    await pool.query(`
+        CREATE PROCEDURE SearchProductIDFromUID(
+            IN p_uid BIGINT UNSIGNED
+        )
+        BEGIN
+            SELECT ProductID FROM Products WHERE UID = p_uid;
+        END;
+    `);
+}
+
 async function initSchema() {
     try {
         await testConnection();
@@ -1425,6 +1442,10 @@ async function initSchema() {
         await dropSearchDistrictsProcedureIfExists();
         await createSearchDistrictsProcedure();
         console.log('✅ SearchDistricts procedure ready');
+
+        await dropSearchProductIDFromUIDProcedureIfExists();
+        await createSearchProductIDFromUIDProcedure();
+        console.log('✅ SearchProductIDFromUID procedure ready');
 
         console.log('\n🎉 Database schema initialization completed successfully!');
         

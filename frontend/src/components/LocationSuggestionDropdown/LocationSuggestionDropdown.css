@@ -4,11 +4,9 @@
   left: -32px;
   z-index: 1000;
   margin-top: 8px;
-  width: fit-content;
-  min-width: 320px;
-  max-width: 500px;
-  
-  /* Animation setup */
+  width: 400px;
+  min-width: 400px;
+  max-width: 600px;
   opacity: 0;
   transform: translateY(-10px) scale(0.95);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -31,6 +29,7 @@
   border: 1px solid rgba(0, 0, 0, 0.05);
   overflow: hidden;
   max-height: 400px;
+  width: 100%;
   overflow-y: auto;
   
   /* Backdrop blur effect for modern look */
@@ -47,8 +46,8 @@
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  white-space: nowrap;
-  min-width: 0; /* Allow text truncation */
+  width: 100%;
+  min-height: 64px;
 }
 
 .suggestion-item:last-child {
@@ -106,8 +105,8 @@
   flex-direction: column;
   flex-grow: 1;
   gap: 4px;
-  min-width: 0; /* Allow text truncation */
-  overflow: hidden;
+  min-width: 0;
+  max-width: 320px;
 }
 
 .suggestion-name {
@@ -115,10 +114,10 @@
   font-family: Montserrat;
   font-size: 14px;
   font-weight: 600;
-  line-height: 1.2;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.3;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .suggestion-type {
@@ -126,10 +125,9 @@
   font-family: Montserrat;
   font-size: 13px;
   font-weight: 400;
-  line-height: 1.2;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.3;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .suggestion-count {
@@ -215,7 +213,8 @@
 @media (max-width: 768px) {
   .location-suggestions-dropdown {
     margin-top: 4px;
-    min-width: 280px;
+    width: 360px;
+    min-width: 320px;
     max-width: 400px;
   }
   
@@ -227,6 +226,7 @@
   .suggestion-item {
     padding: 14px 16px;
     gap: 10px;
+    min-height: 56px;
   }
   
   .suggestion-icon {
@@ -246,6 +246,10 @@
   .suggestion-count {
     font-size: 10px;
     padding: 4px 8px;
+  }
+  
+  .suggestion-main {
+    max-width: 240px;
   }
 }
 
