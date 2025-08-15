@@ -1,13 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import LocationAPI from '../../api/locationApi';
+import { useLocation } from '../../contexts/LocationContext';
 import LocationSuggestionDropdown from '../LocationSuggestionDropdown/LocationSuggestionDropdown';
 import GuestCounterDropdown from '../GuestCounterDropdown/GuestCounterDropdown';
 import searchIcon from '../../assets/search.png';
 import './SearchBar.css';
 
 const SearchBar = ({ 
-  popularLocations = [], 
   onClose,
   initialSearchData = {},
   initialGuestCounts = { adults: 1, children: 0, infants: 0 },
@@ -18,6 +17,12 @@ const SearchBar = ({
   onLocationUpdate
 }) => {
   const navigate = useNavigate();
+  const { 
+    popularLocations, 
+    getLocationSuggestions, 
+    hasLoadedAllData,
+    isLoadingAll 
+  } = useLocation();
   
   // State để lưu trữ các giá trị input
   const [searchData, setSearchData] = useState({
@@ -48,6 +53,24 @@ const SearchBar = ({
   const guestInputRef = useRef(null);
   const guestDropdownRef = useRef(null);
 
+  // Helpers định dạng 'YYYY-MM-DD'
+  const fmt = (d) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
+  const addDaysStr = (yyyyMMdd, days) => {
+    const [y, m, d] = yyyyMMdd.split('-').map(Number);
+    const dt = new Date(Date.UTC(y, m - 1, d));
+    dt.setUTCDate(dt.getUTCDate() + days);
+    // Trả về string theo local (không UTC) để hợp với input[type=date]
+    return fmt(new Date(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate()));
+  };
+
+  // Hôm nay (local)
+  const [todayStr] = useState(() => fmt(new Date()));
+
   // Hàm xử lý thay đổi input
   const handleInputChange = (field, value) => {
     // Không cho phép thay đổi guests input trực tiếp
@@ -55,10 +78,38 @@ const SearchBar = ({
       return;
     }
     
-    const newSearchData = {
-      ...searchData,
-      [field]: value
-    };
+    const newSearchData = { ...searchData, [field]: value };
+
+    // Ràng buộc ngày:
+    if (field === 'checkinDate') {
+      // Không cho check-in < hôm nay
+      if (value && value < todayStr) {
+        newSearchData.checkinDate = todayStr;
+      }
+      // Nếu đã có checkout nhưng checkout <= checkin -> sửa checkout = checkin + 1
+      if (newSearchData.checkoutDate) {
+        const minCheckout = addDaysStr(newSearchData.checkinDate || todayStr, 1);
+        if (newSearchData.checkoutDate <= (newSearchData.checkinDate || todayStr)) {
+          newSearchData.checkoutDate = minCheckout;
+        }
+      }
+    }
+
+    if (field === 'checkoutDate') {
+      // checkout phải > checkin (nếu có checkin); nếu chưa có checkin thì tối thiểu >= hôm nay
+      const checkin = newSearchData.checkinDate;
+      if (checkin) {
+        const minCheckout = addDaysStr(checkin, 1);
+        if (value && value <= checkin) {
+          newSearchData.checkoutDate = minCheckout;
+        }
+      } else {
+        // Chưa có checkin: không cho chọn quá khứ
+        if (value && value < todayStr) {
+          newSearchData.checkoutDate = todayStr; // hoặc addDaysStr(todayStr, 1) nếu muốn luôn ≥ hôm nay + 1
+        }
+      }
+    }
     
     setSearchData(newSearchData);
     
@@ -88,18 +139,14 @@ const SearchBar = ({
       return;
     }
 
-    // Nếu ít hơn 2 ký tự, ẩn suggestions
-    if (searchTerm.trim().length < 2) {
-      setShowSuggestions(false);
-      setSuggestions([]);
-      return;
-    }
+    // Bỏ logic ẩn suggestions khi < 1 ký tự vì điều kiện trên đã xử lý
+    // Bây giờ sẽ search ngay cả với 1 ký tự để cập nhật suggestions khi xóa text
 
     // Debounce search để tránh gọi API liên tục
     searchTimeoutRef.current = setTimeout(async () => {
       try {
         setIsLoadingSuggestions(true);
-        const response = await LocationAPI.getLocationSuggestions(searchTerm, 8);
+        const response = await getLocationSuggestions(searchTerm, 8);
         
         if (response.success) {
           setSuggestions(response.data.suggestions || []);
@@ -107,10 +154,15 @@ const SearchBar = ({
           setSelectedSuggestionIndex(-1);
         } else {
           // Fallback: filter popular locations nếu API fail
-          const filteredPopular = popularLocations.filter(location => 
-            location.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            location.displayText?.toLowerCase().includes(searchTerm.toLowerCase())
-          ).slice(0, 8);
+        const filteredPopular = popularLocations.filter(location => {
+          const nm = location.name ?? location.Name ?? '';
+          const dt = location.displayText ?? '';
+          const term = searchTerm.toLowerCase();
+          return (
+            (nm && nm.toLowerCase().includes(term)) ||
+            (dt && dt.toLowerCase().includes(term))
+          );
+        }).slice(0, 8);
           
           setSuggestions(filteredPopular);
           setShowSuggestions(true);
@@ -120,21 +172,36 @@ const SearchBar = ({
         console.error('Error fetching suggestions:', error);
         
         // Fallback: filter popular locations nếu API fail
-        const filteredPopular = popularLocations.filter(location => 
-          location.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          location.displayText?.toLowerCase().includes(searchTerm.toLowerCase())
-        ).slice(0, 8);
+      const term = searchTerm.toLowerCase();
+      const filteredPopular = popularLocations.filter(location => {
+        const nm = location.name ?? location.Name ?? '';
+        const dt = location.displayText ?? '';
+        return (
+          (nm && nm.toLowerCase().includes(term)) ||
+          (dt && dt.toLowerCase().includes(term))
+        );
+      }).slice(0, 8);
         
         setSuggestions(filteredPopular);
         setShowSuggestions(filteredPopular.length > 0);
       } finally {
         setIsLoadingSuggestions(false);
       }
-    }, 300); // Delay 300ms
+    }, 200); // Giảm delay xuống 200ms cho UX tốt hơn
   };
+
+  // Nếu popularLocations vừa load xong trong lúc input trống -> cập nhật dropdown
+  useEffect(() => {
+    if (!searchData.location || searchData.location.trim().length === 0) {
+      setSuggestions(popularLocations.slice(0, 8));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [popularLocations]);
 
   // Hàm chọn suggestion
   const handleSuggestionClick = (suggestion) => {
+    console.log('🔍 Suggestion clicked:', suggestion);
+    
     const newSearchData = {
       ...searchData,
       location: suggestion.displayText
@@ -146,6 +213,12 @@ const SearchBar = ({
     setShowSuggestions(false);
     setSuggestions([]);
     setSelectedSuggestionIndex(-1);
+    
+    console.log('🔍 Updated location info:', {
+      locationId: suggestion.id,
+      type: suggestion.type,
+      displayText: suggestion.displayText
+    });
     
     // Notify parent of changes
     if (onSearchDataUpdate) {
@@ -286,7 +359,7 @@ const SearchBar = ({
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Kiểm tra field Địa điểm không được trống
@@ -302,19 +375,51 @@ const SearchBar = ({
     // Tạo guest string từ guest counts
     const totalGuests = guestCounts.adults + guestCounts.children;
 
+    let finalLocationId = selectedLocationId;
+    let finalType = selectedType;
+
+    // Nếu chưa có locationId (user gõ tự do mà không chọn từ dropdown)
+    // thì thử tìm kiếm để lấy locationId
+    if (!selectedLocationId || selectedLocationId === 'None') {
+      console.log('🔍 No locationId selected, trying to find matching location...');
+      try {
+        const response = await getLocationSuggestions(searchData.location.trim(), 1);
+        if (response.success && response.data.suggestions.length > 0) {
+          const firstMatch = response.data.suggestions[0];
+          finalLocationId = firstMatch.id;
+          finalType = firstMatch.type;
+          console.log('🔍 Found matching location:', firstMatch);
+        }
+      } catch (error) {
+        console.error('🔍 Error finding location:', error);
+      }
+    }
+
+    console.log('🔍 Submit search with data:', {
+      location: searchData.location,
+      selectedLocationId,
+      selectedType,
+      finalLocationId,
+      finalType,
+      searchData,
+      guestCounts
+    });
+
     // Lấy thông tin từ các input, nếu trống thì là 'None'
     const searchParams = new URLSearchParams({
       location: searchData.location.trim()
                   .replace(/\s+/g, '-') || 'None'
                   .toLowerCase(),
-      locationId: selectedLocationId,
-      type: selectedType,
+      locationId: finalLocationId || 'None',
+      type: finalType || 'None',
       checkinDate: searchData.checkinDate || 'None',
       checkoutDate: searchData.checkoutDate || 'None',
       numAdults: guestCounts.adults || 0,
       numChildren: guestCounts.children || 0,
       numInfants: guestCounts.infants || 0
     });
+
+    console.log('🔍 Search URL params:', searchParams.toString());
 
     // Navigate đến trang SearchResult với parameters
     navigate(`/search?${searchParams.toString()}`);
@@ -357,6 +462,7 @@ const SearchBar = ({
             onChange={(e) => handleInputChange('checkinDate', e.target.value)}
             onFocus={(e) => e.target.type = 'date'} 
             onBlur={(e) => e.target.type = 'text'}
+            min={todayStr}
           />
         </div>
         <div className="search-input">
@@ -368,6 +474,7 @@ const SearchBar = ({
             onChange={(e) => handleInputChange('checkoutDate', e.target.value)}
             onFocus={(e) => e.target.type = 'date'} 
             onBlur={(e) => e.target.type = 'text'}
+            min={searchData.checkinDate ? addDaysStr(searchData.checkinDate, 1) : todayStr}
           />
         </div>
         <div className="search-input guest-input-wrapper">

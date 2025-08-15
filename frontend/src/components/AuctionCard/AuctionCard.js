@@ -1,12 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import './RoomCard.css';
+import './AuctionCard.css';
 import LocationIcon from '../../assets/location.png';
 import StarOutlineIcon from '../../assets/star_outline.png';
 import PriceTagIcon from '../../assets/price.png';
 import PlaceHolderImg from '../../assets/placeholder.jpg';
 
-const RoomCard = ({ product, durationDays = 1 }) => {
+const AuctionCard = ({ product, durationDays = 1 }) => {
   const navigate = useNavigate();
   const defaultImage = PlaceHolderImg;
 
@@ -52,15 +52,15 @@ const RoomCard = ({ product, durationDays = 1 }) => {
   // Xử lý sự kiện click vào card
   const handleCardClick = () => {
     if (product) {
-      const roomId = product.UID;
-      if (roomId) {
-        navigate(`/room/${roomId}`);
+      const auctionId = product.UID;
+      if (auctionId) {
+        navigate(`/auction/${auctionId}`);
       }
     }
   };
 
   return (
-    <div className="room-card" onClick={handleCardClick}>
+    <div className="auction-card" onClick={handleCardClick}>
       <img 
         src={
           product?.mongoImageUrl || 
@@ -69,30 +69,30 @@ const RoomCard = ({ product, durationDays = 1 }) => {
           defaultImage
         } 
         alt={product?.ProductName || 'Room'} 
-        className="room-card-image"
+        className="auction-card-image"
         onError={(e) => {
           e.target.src = defaultImage;
         }}
       />
 
-      <div className="room-info">
-        <h3 className="room-name">
+      <div className="auction-info">
+        <h3 className="auction-name">
           {getRoomDisplayName(product)}
         </h3>
 
-        <p className="room-address">
+        <p className="auction-address">
           <img src={LocationIcon} alt="Location" />
           <span>{product?.DistrictName}, {product?.ProvinceName || 'Việt Nam'}</span>
         </p>
 
-        <div className="room-rating">
+        <div className="auction-rating">
           <img src={StarOutlineIcon} alt="Star Rating" />
           <span className="rating-text">
             {product?.AverageRating?.toFixed(1)} - {product.totalReviews} đánh giá
           </span>
         </div>
 
-        <p className="room-price">
+        <p className="auction-price">
           <img src={PriceTagIcon} alt="Price" />
           <span className="price-amount">{formatPrice(product?.Price * durationDays)}</span>
           <span className="price-period">&nbsp;cho {durationDays} đêm</span>
@@ -103,4 +103,4 @@ const RoomCard = ({ product, durationDays = 1 }) => {
   );
 };
 
-export default RoomCard;
+export default AuctionCard;

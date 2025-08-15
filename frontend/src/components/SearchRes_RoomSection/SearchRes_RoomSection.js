@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import RoomCard from '../RoomCard/RoomCard';
+import { imageApi } from '../../api/imageApi';
+import { reviewApi } from '../../api/reviewApi';
 import './SearchRes_RoomSection.css';
 
-const SearchRes_RoomSection = ({ topRatedProducts }) => {
+const SearchRes_RoomSection = ({ topRatedProducts, durationDays }) => {
   const cacheRef = React.useRef(new Map());
   const currentRequestRef = useRef(null);
   const [error, setError] = useState(null);
@@ -11,7 +13,14 @@ const SearchRes_RoomSection = ({ topRatedProducts }) => {
 
   useEffect(() => {
       const fetchProductsWithImages = async () => {
-        const cacheArray = (topRatedProducts || []).map(product => product.ProductID);
+        // Nếu không có products để fetch, set state và return
+        if (!topRatedProducts || topRatedProducts.length === 0) {
+          setProducts([]);
+          setLoading(false);
+          return;
+        }
+
+        const cacheArray = topRatedProducts.map(product => product.ProductID);
         
         // Kiểm tra cache trước
         if (cacheRef.current.has(cacheArray)) {
@@ -32,71 +41,54 @@ const SearchRes_RoomSection = ({ topRatedProducts }) => {
   
         try {
           setLoading(true);
-          setError(null);
-          
-          // 1. Lấy danh sách ProductID để fetch images và reviews
-          const productIds = topRatedProducts
-            .map(topRatedProduct => topRatedProduct.ProductID)
+          setError(null);          
+          // 1. Lấy danh sách UID để fetch images và reviews
+          const uids = topRatedProducts
+            .map(topRatedProduct => topRatedProduct.UID)
             .filter(id => id); // Loại bỏ null/undefined
-  
-          if (productIds.length > 0) {
-            // 3. Fetch images từ MongoDB batch bằng ProductID
-            const imageResponse = await fetch('http://localhost:3000/api/images/batch', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ productIds }),
-              signal: abortController.signal
-            });
-  
-            if (abortController.signal.aborted) return;
-  
+
+          if (uids.length > 0) {
+            // 2. Fetch images từ MongoDB batch bằng UID
             let imageMap = {};
+            const imageResponse = await imageApi.getBatchImages(uids, abortController.signal);
   
-            if (imageResponse.ok) {
-              const imageData = await imageResponse.json();
-              imageMap = imageData.success ? imageData.data.imageMap : {};
+            // Kiểm tra abort sau khi fetch images
+            if (abortController.signal.aborted) return;
+
+            if (imageResponse.success) {
+              imageMap = imageResponse.data.imagesMapByUID;
             } else {
               console.warn('Failed to fetch images from MongoDB');
             }
-  
-            // 4. Fetch reviews từ MongoDB batch bằng ProductID
+
+            // 4. Fetch reviews từ MongoDB batch bằng UID
             let reviewsMap = {};
-            if (productIds.length > 0) {
-              const reviewsResponse = await fetch('http://localhost:3000/api/reviews/batch', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ productIds }),
-                signal: abortController.signal
-              });
-  
-              if (abortController.signal.aborted) return;
-  
-              if (reviewsResponse.ok) {
-                const reviewsData = await reviewsResponse.json();
-                reviewsMap = reviewsData.success ? reviewsData.data.reviewsMap : {};
-              } else {
-                console.warn('Failed to fetch reviews from MongoDB');
-              }
+            const reviewsResponse = await reviewApi.getBatchReviews(uids, abortController.signal);
+            
+            // Kiểm tra abort sau khi fetch reviews
+            if (abortController.signal.aborted) return;
+
+            if (reviewsResponse.success) {
+              reviewsMap = reviewsResponse.data.reviewsMapByUID;
+            } else {
+              console.warn('Failed to fetch reviews from MongoDB');
             }
   
-            // 5. Gắn imageUrl và totalReviews vào products
-            const productsWithImagesAndReviews = topRatedProducts.map(topRatedProduct => ({
-              ...topRatedProduct,
-              mongoImageUrl: topRatedProduct.ProductID ? imageMap[topRatedProduct.ProductID] : null,
-              totalReviews: topRatedProduct.ProductID ? reviewsMap[topRatedProduct.ProductID] : null
+            // 5. Gắn imageUrl và totalReviews vào topRatedProducts
+            const productsWithImagesAndReviews = topRatedProducts.map(product => ({
+              ...product,
+              mongoImageUrl: product.UID ? imageMap[product.UID] : null,
+              totalReviews: product.UID ? reviewsMap[product.UID] : null
             }));
   
             // Lưu vào cache
             cacheRef.current.set(cacheArray, productsWithImagesAndReviews);
             setProducts(productsWithImagesAndReviews);
           } else {
+            // Không có UID để fetch, sử dụng trực tiếp topRatedProducts
+            setProducts(topRatedProducts);
             // Lưu vào cache
             cacheRef.current.set(cacheArray, topRatedProducts);
-            setProducts(topRatedProducts);
           }
   
         } catch (err) {
@@ -133,11 +125,21 @@ const SearchRes_RoomSection = ({ topRatedProducts }) => {
       );
     }
 
+    if (error) {
+      return (
+        <section className="search-res-content-room-section">
+          <div className="search-res-error-container">
+            <p>Có lỗi xảy ra khi tải dữ liệu: {error}</p>
+          </div>
+        </section>
+      );
+    }
+
   return (
     <section className="search-res-content-room-section">
       <div className="search-res-room-card-container">
-        {(topRatedProducts || []).map((product, idx) => (
-          <RoomCard key={product.ProductID || idx} product={product} />
+        {(products || []).map((product, idx) => (
+          <RoomCard key={product.ProductID || idx} product={product} durationDays={durationDays} />
         ))}
       </div>
     </section>

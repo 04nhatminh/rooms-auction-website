@@ -104,7 +104,7 @@ const HomePage = () => {
           <p className="banner-subtitle">Ưu đãi linh hoạt cho mọi hành trình</p>
         </div>
       </div>
-      <SearchBar popularLocations={popularLocations} />
+      <SearchBar />
       <CardSection title="Tìm theo loại chỗ nghỉ" items={accommodationTypes} />
       <CardSection title="Điểm đến nổi bật tại Việt Nam" items={destinations} />
       {roomSectionConfigs.map((config, index) => (

@@ -1,46 +1,45 @@
 const ReviewModel = require('../models/reviewModel');
+const pool = require('../config/database');
 
 class ReviewController {
-    // API lấy total_reviews cho một productId
-    // GET /api/reviews/:productId
-    static async getTotalReviews(req, res) {
-        try {
-            const { productId } = req.params;
+    static async getProductIdByUID(uid) {
+        // Kết quả CALL trong mysql2/promise thường là: [ [rows], otherMeta ]
+        const [spResult] = await pool.query('CALL a2airbnb.SearchProductIDFromUID(?)', [uid]);
 
-            if (!productId) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'ProductId is required'
-                });
-            }
+        // Một số MySQL driver trả [ [rows], [fields], ... ]; lấy mảng rows đầu
+        const rowsLevel1 = Array.isArray(spResult) ? spResult[0] : spResult;
+        const firstRow = Array.isArray(rowsLevel1) ? rowsLevel1[0] : rowsLevel1?.[0];
 
-            const totalReviews = await ReviewModel.getTotalReviewsByProductId(productId);
+        if (!firstRow) return null;
 
-            if (totalReviews === null) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'No reviews found for this productId',
-                    data: { productId }
-                });
-            }
+        // Ưu tiên product_id, fallback productId, hoặc lấy cột đầu tiên
+        return firstRow.product_id ?? firstRow.productId ?? Object.values(firstRow)[0] ?? null;
+    }
 
-            return res.status(200).json({
-                success: true,
-                message: 'Total reviews retrieved successfully',
-                data: {
-                    productId,
-                    totalReviews
+    // Map nhiều UID -> productId (chạy song song)
+    // @returns { productIds: string[], uidToProductId: Record<string,string|null> }
+    static async mapUIDsToProductIds(uids) {
+        const results = await Promise.all(
+            uids.map(async (uid) => {
+                try {
+                    const pid = await ReviewController.getProductIdByUID(uid);
+                    return { uid, productId: pid ?? null };
+                } catch (e) {
+                    // Nếu lỗi tra cứu từng UID, set null để không chặn cả batch
+                    return { uid, productId: null, _error: e.message };
                 }
-            });
+            })
+        );
 
-        } catch (error) {
-            console.error('Error in getTotalReviews:', error);
-            return res.status(500).json({
-                success: false,
-                message: 'Internal server error',
-                error: error.message
-            });
+        const uidToProductId = {};
+        const productIds = [];
+
+        for (const r of results) {
+            uidToProductId[r.uid] = r.productId;
+            if (r.productId) productIds.push(r.productId);
         }
+
+        return { productIds, uidToProductId };
     }
 
     // API lấy total_reviews cho nhiều productId cùng lúc
@@ -48,32 +47,54 @@ class ReviewController {
     // Body: { productIds: ["id1", "id2", "id3"] }
     static async getBatchTotalReviews(req, res) {
         try {
-            const { productIds } = req.body;
+            const { uids } = req.body;
 
-            if (!productIds || !Array.isArray(productIds) || productIds.length === 0) {
+            if (!uids || !Array.isArray(uids) || uids.length === 0) {
                 return res.status(400).json({
                     success: false,
-                    message: 'ProductIds array is required and must not be empty'
+                    message: 'Uids array is required and must not be empty'
                 });
             }
 
-            if (productIds.length > 100) {
+            if (uids.length > 100) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Too many productIds. Maximum 100 allowed per request.'
+                    message: 'Too many uids. Maximum 100 allowed per request.'
+                });
+            }
+
+            // Map UID -> productId
+            const { productIds, uidToProductId } = await ReviewController.mapUIDsToProductIds(uids);
+
+            // Không tìm được productId nào
+            if (productIds.length === 0) {
+                return res.status(200).json({
+                    success: true,
+                    message: 'No productIds resolved from provided uids',
+                    data: {
+                        totalRequested: uids.length,
+                        totalResolvedProductIds: 0,
+                        totalFound: 0,
+                        uidToProductId,
+                        reviewsMapByUID: {}
+                    }
                 });
             }
 
             console.log(`Processing batch reviews request for ${productIds.length} productIds`);
             const reviewsMap = await ReviewModel.getBatchTotalReviews(productIds);
 
+            const reviewsMapByUID = {};
+            for (const uid of uids) {
+                const pid = uidToProductId[uid];
+                reviewsMapByUID[uid] = pid ? (reviewsMap[pid] ?? null) : null;
+            }
+
             return res.status(200).json({
                 success: true,
                 message: 'Batch reviews retrieved successfully',
                 data: {
-                    totalRequested: productIds.length,
-                    totalFound: Object.keys(reviewsMap).length,
-                    reviewsMap
+                    reviewsMapByUID
                 }
             });
 

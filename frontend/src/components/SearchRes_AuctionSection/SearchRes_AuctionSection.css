@@ -1,0 +1,21 @@
+.search-res-content-auction-section {
+  padding: 16px 56px;
+}
+
+.search-res-auction-card-container {
+  padding-top: 4px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 20px;
+  overflow: hidden;
+  position: relative;
+}
+
+.search-res-loading-container {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.5rem;
+  width: 100%;
+}
+
