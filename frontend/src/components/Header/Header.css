@@ -3,15 +3,15 @@
   --header-top-h: 72px;
   position: relative;
   border-bottom: 1px solid #DDDDDD;
-  padding: 8px 64px;
-  height: calc(var(--header-top-h) + 6px); 
+  padding: 8px 64px 10px;
+  height: auto; 
   transition: height 0.6s ease;
   overflow: visible;
 }
 
 /* When expanded, give the header extra height to host the full bar */
 .header.expanded {
-  height: 200px; 
+  height: auto; 
   position: relative;
   overflow: visible;  
 }
@@ -25,7 +25,7 @@
 }
 
 .header.expanded .header-top {
-  height:200px;
+  height: auto;
 }
 
 /* MINI → morph out */
@@ -37,9 +37,11 @@
   transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: transform, opacity;
 }
+
 .header-mini-slot .search { /* the pill */
   transition: inherit;
 }
+
 .header.expanded .header-mini-slot {
   opacity: 0;
   transform: scale(0.96);     /* subtle shrink */
@@ -60,11 +62,30 @@
   will-change: transform, opacity;
 }
 
-
 .header.expanded .header-full-floating {
   opacity: 1;
   transform: translate(-45%, 50%) scale(1); /* perfect center */
   width: clamp(880px, 68vw, 1200px);
+}
+
+/* New style for full search when inside header-top */
+.header-full-search {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  margin-top: -20px !important;
+  margin-bottom: -32px !important;
+}
+
+.header-full-search .search-bar {
+  margin-top: 0 !important;
+}
+
+/* Override any existing margin-top on search bar */
+.header.expanded .search-bar,
+.header.expanded .search-bar-container,
+.header.expanded .search-container {
+  margin-top: 0 !important;
 }
 
 /* (Optional) Respect reduced motion */
@@ -77,13 +98,13 @@
 }
 
 
-.logo {
+.header-logo {
   display: flex;
   align-items: center;
 }
 
 
-.logo a {
+.header-logo a {
   display: inline-flex;  /* or display:flex */
   align-items: center;
   text-decoration: none; /* no underline */
@@ -92,17 +113,18 @@
 }
 
 
-.logo-image {
+.header-logo-image {
   width: clamp(48px, 6vw, 64px);
   height: clamp(48px, 6vw, 64px);
   display: block;
 }
 
-.logo-text {
+.header-logo-text {
   background: linear-gradient(180deg, #278C9F 0%, #53B0BC 100%);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  font-family: Montserrat;
   margin-top: 10px;
   font-size: 24px;
   font-style: normal;

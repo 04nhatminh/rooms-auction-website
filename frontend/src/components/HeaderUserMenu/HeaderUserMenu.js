@@ -14,7 +14,7 @@ const HeaderUserMenu = ({ onLogout }) => {
         <img src={menuIcon} alt="Menu" className="menu-icon" />
       </button>
 
-      <ul className="dropdown-menu dropdown-menu-end custom-dropdown" aria-labelledby="userMenuButton">
+      <ul className="dropdown-menu dropdown-menu-end custom-dropdown">
         <li>
           <button className="dropdown-item" type="button">
             <i className="fa-regular fa-heart me-2"></i>Danh sách yêu thích
@@ -27,7 +27,7 @@ const HeaderUserMenu = ({ onLogout }) => {
         </li>
         <li>
           <button className="dropdown-item" type="button">
-            <i className="fa-solid fa-clock-rotate-left me-2"></i>Lịch sử mua hàng/thanh toán
+            <i className="fa-solid fa-clock-rotate-left me-2"></i>Lịch sử mua hàng
           </button>
         </li>
         <li>
