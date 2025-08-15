@@ -9,18 +9,24 @@ const SearchBarMini = ({ onActivate, searchData = {} }) => {
     if (!dateString) return '';
     try {
       const date = new Date(dateString);
+      if (isNaN(date.getTime())) return '';
       return date.toLocaleDateString('vi-VN', { 
         day: '2-digit', 
-        month: '2-digit' 
+        month: '2-digit',
+        year: 'numeric'
       });
     } catch {
-      return dateString;
+      return '';
     }
   };
 
   // Get display text for each field
   const getLocationText = () => {
-    return searchData.location || 'Địa điểm bất kỳ';
+    if (searchData.location && searchData.location.trim()) {
+      const locationName = searchData.location.replace(/-/g, ' ');
+      return `Chỗ ở tại ${locationName}`;
+    }
+    return 'Địa điểm bất kỳ';
   };
 
   const getDateText = () => {

@@ -41,6 +41,26 @@ class LocationAPI {
     if (!res.ok) throw new Error((await res.json()).message || 'Failed to search locations');
     return res.json();
   }
+
+  // Lấy chi tiết province theo code
+  static async getProvinceDetails(provinceCode) {
+    const res = await fetch(`${API_BASE_URL}/api/locations/provinces/${provinceCode}`, {
+      method: 'GET',
+      headers: this.getHeaders()
+    });
+    if (!res.ok) throw new Error((await res.json()).message || 'Failed to fetch province details');
+    return res.json();
+  }
+
+  // Lấy chi tiết district theo code
+  static async getDistrictDetails(districtCode) {
+    const res = await fetch(`${API_BASE_URL}/api/locations/districts/${districtCode}`, {
+      method: 'GET',
+      headers: this.getHeaders()
+    });
+    if (!res.ok) throw new Error((await res.json()).message || 'Failed to fetch district details');
+    return res.json();
+  }
 }
 
 export default LocationAPI;

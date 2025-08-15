@@ -1,12 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import './Header.css';
 import logo from '../../assets/logo.png';
 import SearchBarMini from './SearchBarMini';
 import SearchBar from '../SearchBar/SearchBar';
 import HeaderUserMenu from '../HeaderUserMenu/HeaderUserMenu';
+import LocationAPI from '../../api/locationApi';
 
 const Header = () => {
+  const location = useLocation();
   const [showFullSearch, setShowFullSearch] = useState(false);
   const headerRef = useRef(null);
 
@@ -76,6 +78,63 @@ const Header = () => {
   useEffect(() => {
     updateGuestDisplayText(guestCounts);
   }, [guestCounts]);
+
+  // Extract and display search parameters from URL
+  useEffect(() => {
+    const updateSearchDataFromURL = async () => {
+      const urlParams = new URLSearchParams(location.search);
+      
+      const locationId = urlParams.get('locationId');
+      const type = urlParams.get('type');
+      const checkinDate = urlParams.get('checkinDate');
+      const checkoutDate = urlParams.get('checkoutDate');
+      const numAdults = urlParams.get('numAdults');
+      const numChildren = urlParams.get('numChildren');
+      const numInfants = urlParams.get('numInfants');
+
+      // Update location info
+      let locationName = urlParams.get('location') || '';
+      if (locationId && !locationName) {
+        try {
+          let locationData;
+          if (type === 'district') {
+            locationData = await LocationAPI.getDistrictDetails(locationId);
+          } else {
+            locationData = await LocationAPI.getProvinceDetails(locationId);
+          }
+          locationName = locationData?.data?.name || '';
+        } catch (error) {
+          console.error('Error fetching location details:', error);
+        }
+      }
+
+      // Update guest counts if provided
+      if (numAdults || numChildren || numInfants) {
+        const newGuestCounts = {
+          adults: parseInt(numAdults) || 1,
+          children: parseInt(numChildren) || 0,
+          infants: parseInt(numInfants) || 0
+        };
+        setGuestCounts(newGuestCounts);
+      }
+
+      // Update search data
+      setSearchData(prev => ({
+        ...prev,
+        location: locationName,
+        checkinDate: checkinDate || '',
+        checkoutDate: checkoutDate || ''
+      }));
+
+      // Update selected location info
+      if (locationId) {
+        setSelectedLocationId(locationId);
+        setSelectedType(type);
+      }
+    };
+
+    updateSearchDataFromURL();
+  }, [location.search]);
 
   // Handle data updates from SearchBar
   const handleSearchDataUpdate = (newData) => {
