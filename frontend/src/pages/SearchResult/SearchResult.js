@@ -3,7 +3,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { productApi } from '../../api/productApi';
 import Header from '../../components/Header/Header';
+import TabLayout from '../../components/TabLayout/TabLayout';
 import SearchRes_RoomSection from '../../components/SearchRes_RoomSection/SearchRes_RoomSection';
+import SearchRes_AuctionSection from '../../components/SearchRes_AuctionSection/SearchRes_AuctionSection';
 import Footer from '../../components/Footer/Footer';
 import './SearchResult.css';
 
@@ -13,6 +15,7 @@ const SearchResult = () => {
   const location = useLocation();
   const [topRatedProducts, setTopRatedProducts] = useState([]);
   const [durationDays, setDurationDays] = useState(1); // Mặc định là 1 ngày
+  const [activeTab, setActiveTab] = useState('room'); // Mặc định tab Room
   const abortRef = useRef(null);
 
   useEffect(() => {
@@ -104,10 +107,30 @@ const SearchResult = () => {
     return () => controller.abort();
   }, [location.search]);
 
+  // Handler cho việc thay đổi tab
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+  };
+
+  // Render nội dung dựa trên tab được chọn
+  const renderDisplayResult = () => {
+    switch (activeTab) {
+      case 'room':
+        return <SearchRes_RoomSection topRatedProducts={topRatedProducts} durationDays={durationDays} />;
+      case 'auction':
+        return <SearchRes_AuctionSection topRatedProducts={topRatedProducts} durationDays={durationDays} />;
+      default:
+        return <SearchRes_RoomSection topRatedProducts={topRatedProducts} durationDays={durationDays} />;
+    }
+  };
+
   return (
     <>
       <Header />
-      <SearchRes_RoomSection topRatedProducts={topRatedProducts} durationDays={durationDays} />
+      <TabLayout activeTab={activeTab} onTabChange={handleTabChange} />
+      <div className="display-result">
+        {renderDisplayResult()}
+      </div>
       <Footer />
     </>
   );
