@@ -39,19 +39,34 @@
 .signup-header {
   display: flex;
   justify-content: left;
-  padding: 16px 128px 0px 128px;
+  padding: 16px 100px 0px 128px;
+}
+
+@media screen and (max-width: 768px) {
+  .signup-content {
+    grid-template-columns: 1fr;
+  }
+
+  .signup-header {
+    padding: 0px 0px 32px 0px;
+  }
+
+  .signup-form {
+    padding-left: 32px;
+  }
 }
 
 .logo {
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-left: -8px;
 }
 
 .logo-image {
   width: clamp(48px, 6vw, 64px);
   height: clamp(48px, 6vw, 64px);
-  margin-right: 12px;
+  margin-right: 8px;
 }
 
 .logo-text {
@@ -60,6 +75,7 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   margin-top: 10px;
+  font-family: Montserrat;
   font-size: 24px;
   font-style: normal;
   font-weight: 620;
@@ -321,15 +337,19 @@
   line-height: normal;
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
   .signup-content {
     grid-template-columns: 1fr;
     height: auto;
+
   }
   
   .signup-left-column {
     padding: 24px 32px;
+  }
+
+  .signup-form {
+    padding-left: 0px;
   }
   
   .signup-image {
