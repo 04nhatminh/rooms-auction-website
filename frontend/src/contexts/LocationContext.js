@@ -15,6 +15,7 @@ const normalizeProvince = (p) => {
     Name,
     NameEn,
     displayText: Name,
+    secondaryText: p?.secondaryText ?? 'Tỉnh',
     searchText: `${Name} ${NameEn}`.trim().toLowerCase(),
   };
 };
@@ -30,6 +31,7 @@ const normalizeDistrict = (d) => {
     Name,
     NameEn,
     displayText: Name,
+    secondaryText: d?.secondaryText ?? 'Thành phố',
     searchText: `${Name} ${NameEn}`.trim().toLowerCase(),
   };
 };
@@ -199,11 +201,17 @@ export const LocationProvider = ({ children }) => {
       // Nếu chưa có data local, gọi API
       const response = await LocationAPI.searchLocations(searchTerm, limit);
       if (response?.success) {
+        // Convert API search response format to suggestions format
+        const results = response.data?.results || {};
+        const provinces = (results.provinces || []).map(p => ({ ...p, type: 'province' }));
+        const districts = (results.districts || []).map(d => ({ ...d, type: 'district' }));
+        const combinedSuggestions = [...provinces, ...districts];
+        
         return {
           ...response,
           data: {
             ...response.data,
-            suggestions: (response.data?.suggestions ?? []).map(normalizeGeneric),
+            suggestions: combinedSuggestions.map(normalizeGeneric),
           },
         };
       }
@@ -250,11 +258,17 @@ export const LocationProvider = ({ children }) => {
       // Nếu chưa có data local, gọi API
       const response = await LocationAPI.searchLocations(searchTerm, limit);
       if (response?.success) {
+        // Convert API search response format to suggestions format
+        const results = response.data?.results || {};
+        const provinces = (results.provinces || []).map(p => ({ ...p, type: 'province' }));
+        const districts = (results.districts || []).map(d => ({ ...d, type: 'district' }));
+        const combinedSuggestions = [...provinces, ...districts];
+        
         return {
           ...response,
           data: {
             ...response.data,
-            suggestions: (response.data?.suggestions ?? []).map(normalizeGeneric),
+            suggestions: combinedSuggestions.map(normalizeGeneric),
           },
         };
       }
