@@ -6,27 +6,33 @@ import GuestCounterDropdown from '../GuestCounterDropdown/GuestCounterDropdown';
 import searchIcon from '../../assets/search.png';
 import './SearchBar.css';
 
-const SearchBar = ({ popularLocations = [] }) => {
+const SearchBar = ({ 
+  popularLocations = [], 
+  onClose,
+  initialSearchData = {},
+  initialGuestCounts = { adults: 1, children: 0, infants: 0 },
+  initialLocationId = null,
+  initialType = null,
+  onSearchDataUpdate,
+  onGuestCountsUpdate,
+  onLocationUpdate
+}) => {
   const navigate = useNavigate();
   
   // State để lưu trữ các giá trị input
   const [searchData, setSearchData] = useState({
-    location: '',
-    checkinDate: '',
-    checkoutDate: '',
-    guests: ''
+    location: initialSearchData.location || '',
+    checkinDate: initialSearchData.checkinDate || '',
+    checkoutDate: initialSearchData.checkoutDate || '',
+    guests: initialSearchData.guests || ''
   });
 
   // State cho id của location đã chọn
-  const [selectedLocationId, setSelectedLocationId] = useState(null);
-  const [selectedType, setSelectedType] = useState(null);
+  const [selectedLocationId, setSelectedLocationId] = useState(initialLocationId);
+  const [selectedType, setSelectedType] = useState(initialType);
 
   // State cho guest counter
-  const [guestCounts, setGuestCounts] = useState({
-    adults: 1,
-    children: 0,
-    infants: 0
-  });
+  const [guestCounts, setGuestCounts] = useState(initialGuestCounts);
   const [showGuestDropdown, setShowGuestDropdown] = useState(false);
 
   // State cho location suggestion
@@ -49,10 +55,17 @@ const SearchBar = ({ popularLocations = [] }) => {
       return;
     }
     
-    setSearchData(prev => ({
-      ...prev,
+    const newSearchData = {
+      ...searchData,
       [field]: value
-    }));
+    };
+    
+    setSearchData(newSearchData);
+    
+    // Notify parent of changes
+    if (onSearchDataUpdate) {
+      onSearchDataUpdate(newSearchData);
+    }
 
     // Nếu là location field, thực hiện search suggestions
     if (field === 'location') {
@@ -122,26 +135,43 @@ const SearchBar = ({ popularLocations = [] }) => {
 
   // Hàm chọn suggestion
   const handleSuggestionClick = (suggestion) => {
-    setSearchData(prev => ({
-      ...prev,
+    const newSearchData = {
+      ...searchData,
       location: suggestion.displayText
-    }));
+    };
+    
+    setSearchData(newSearchData);
     setSelectedLocationId(suggestion.id);
     setSelectedType(suggestion.type);
     setShowSuggestions(false);
     setSuggestions([]);
     setSelectedSuggestionIndex(-1);
+    
+    // Notify parent of changes
+    if (onSearchDataUpdate) {
+      onSearchDataUpdate(newSearchData);
+    }
+    if (onLocationUpdate) {
+      onLocationUpdate(suggestion.id, suggestion.type);
+    }
   };
 
   // Hàm xử lý thay đổi guest count
   const handleGuestCountChange = (type, count) => {
-    setGuestCounts(prev => ({
-      ...prev,
+    const newGuestCounts = {
+      ...guestCounts,
       [type]: count
-    }));
+    };
+    
+    setGuestCounts(newGuestCounts);
     
     // Cập nhật display text cho guest input
-    updateGuestDisplayText({ ...guestCounts, [type]: count });
+    updateGuestDisplayText(newGuestCounts);
+    
+    // Notify parent of changes
+    if (onGuestCountsUpdate) {
+      onGuestCountsUpdate(newGuestCounts);
+    }
   };
 
   // Hàm cập nhật text hiển thị cho guest input
@@ -166,10 +196,17 @@ const SearchBar = ({ popularLocations = [] }) => {
       }
     }
     
-    setSearchData(prev => ({
-      ...prev,
+    const newSearchData = {
+      ...searchData,
       guests: displayText
-    }));
+    };
+    
+    setSearchData(newSearchData);
+    
+    // Notify parent of changes
+    if (onSearchDataUpdate) {
+      onSearchDataUpdate(newSearchData);
+    }
   };
 
   // Hàm xử lý focus vào guest input

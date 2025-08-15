@@ -3,7 +3,44 @@ import React from 'react';
 import './Header.css';
 import searchIcon from '../../assets/search.png';
 
-const SearchBarMini = ({ onActivate }) => {
+const SearchBarMini = ({ onActivate, searchData = {} }) => {
+  // Format dates for display
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('vi-VN', { 
+        day: '2-digit', 
+        month: '2-digit' 
+      });
+    } catch {
+      return dateString;
+    }
+  };
+
+  // Get display text for each field
+  const getLocationText = () => {
+    return searchData.location || 'Địa điểm bất kỳ';
+  };
+
+  const getDateText = () => {
+    const checkin = formatDate(searchData.checkinDate);
+    const checkout = formatDate(searchData.checkoutDate);
+    
+    if (checkin && checkout) {
+      return `${checkin} - ${checkout}`;
+    } else if (checkin) {
+      return `Từ ${checkin}`;
+    } else if (checkout) {
+      return `Đến ${checkout}`;
+    }
+    return 'Ngày bất kỳ';
+  };
+
+  const getGuestText = () => {
+    return searchData.guests || 'Thêm khách';
+  };
+
   return (
     <div
       className="search"
@@ -11,9 +48,9 @@ const SearchBarMini = ({ onActivate }) => {
       onClick={onActivate} // call parent function to open big search
     >
       <div className="search-content">
-        <span>Địa điểm bất kỳ</span>
-        <span>Ngày bất kỳ</span>
-        <span>Thêm khách</span>
+        <span title={getLocationText()}>{getLocationText()}</span>
+        <span title={getDateText()}>{getDateText()}</span>
+        <span title={getGuestText()}>{getGuestText()}</span>
       </div>
       <button className="search-icon" type="button" aria-label="Tìm kiếm">
         <img src={searchIcon} alt="" />
