@@ -1,0 +1,84 @@
+.auction-check {
+  max-width: 920px;
+  margin: 24px auto;
+  padding: 0 16px;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: #1a1a1a;
+}
+
+.auction-check__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.auction-check__header h1 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.auction-check__back {
+  border: 1px solid #e1e1e1;
+  background: #fff;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+.auction-check__back:hover {
+  background: #f8f8f8;
+}
+
+.auction-check__warning {
+  background: #fff7e6;
+  border: 1px solid #ffe5b4;
+  color: #8a5a00;
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+
+.auction-check__card {
+  background: #ffffff;
+  border: 1px solid #eaeaea;
+  border-radius: 16px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+  padding: 18px 16px;
+}
+
+.auction-check__card .row {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 12px;
+  padding: 10px 0;
+  align-items: center;
+  border-bottom: 1px dashed #eee;
+}
+.auction-check__card .row:last-child {
+  border-bottom: none;
+}
+
+.auction-check__card .label {
+  color: #666;
+  font-weight: 600;
+}
+
+.auction-check__card .value {
+  color: #111;
+}
+
+.auction-check__console {
+  margin-top: 22px;
+}
+
+.code-block {
+  background: #0a0a0a;
+  color: #e6e6e6;
+  padding: 14px;
+  border-radius: 10px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+}

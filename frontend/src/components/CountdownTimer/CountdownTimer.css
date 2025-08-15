@@ -1,0 +1,26 @@
+.countdown-timer {
+    text-align: center;
+    background-color: #FF5555;
+    padding: 16px;
+    border-radius: 8px;
+}
+
+.countdown-timer p {
+    margin: 0 0 4px 0;
+    color: #FFF;
+    font-family: Montserrat;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+}
+
+.countdown-timer span {
+    color: #FFF;
+    font-family: Montserrat;
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+    letter-spacing: 1.6px;
+}

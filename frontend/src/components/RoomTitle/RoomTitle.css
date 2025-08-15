@@ -1,0 +1,112 @@
+.room-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32px 0px;
+  position: relative;
+  flex-wrap: wrap;
+  gap: 1rem;
+  overflow: visible;
+}
+
+.room-title h2 {
+  font-size: 24px;
+  font-family: Montserrat;
+  font-style: normal;
+  font-weight: 650;
+  line-height: normal;
+  margin: 0;
+  flex: 1;
+  width: fit-content;
+}
+
+.user-actions {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.share-wrapper {
+  position: relative;
+  display: inline-block; 
+}
+
+.share-popup {
+  position: absolute;
+  top: calc(100% + 10px);   
+  right: 0;                 
+  z-index: 9999;          
+  display: flex;
+  align-items: left;
+  gap: 8px;
+  flex-direction: column;
+  word-break: break-all;
+
+  background: #1e1e1e;
+  padding: 8px 8px 8px 12px;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  min-width: 350px;        
+}
+
+.share-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #fff;
+  outline: none;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.share-arrow {
+  position: absolute;
+  top: -6px; right: 18px;
+  width: 12px; height: 12px;
+  background: #1e1e1e;
+  transform: rotate(45deg);
+}
+
+.copy-btn {
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.copy-btn:hover { 
+  background: #2563eb;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #000;
+  font-family: Montserrat, sans-serif;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  text-decoration-line: underline;
+  padding: 4px 0;
+  transition: opacity 0.2s ease;
+}
+
+.action-btn:hover {
+  opacity: 0.8;
+  border-radius: 12px;
+}
+
+.action-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}

@@ -1,5 +1,6 @@
 const { OAuth2Client } = require('google-auth-library');
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const jwt = require('jsonwebtoken');
 
 const userModel = require('../models/userModel');
 const authModel = require('../models/authModel');
@@ -55,6 +56,7 @@ exports.googleCallback = async (req, res) => {
           phoneNumber: '',
           AvatarURL: picture,
           isVerified: true,              // Google user mặc định xác thực
+          role: 'guest',                  // Mặc định là user, có thể thay đổi sau
           rating: 0.0,
           verificationToken: null,
           verificationTokenExpires: null
@@ -70,9 +72,21 @@ exports.googleCallback = async (req, res) => {
         userID: user.id
       });
     }
+    // Tạo JWT token
+    const token = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+        role: user.role
+      },
+      process.env.JWT_SECRET || 'your-secret-key',
+      { expiresIn: '1d' }
+    );
+
+    const { hashPassword, verificationToken, verificationTokenExpires, ...safeUser } = user;
 
     // 7. Trả thông tin user cho frontend
-    return res.status(200).json({ user });
+    return res.status(200).json({ user: safeUser, token });
   } catch (err) {
     console.error('[Google OAuth Error]', err);
     return res.status(401).json({ message: 'Xác thực Google thất bại' });

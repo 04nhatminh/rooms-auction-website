@@ -1,64 +1,13 @@
 const db = require('../config/database');
 
 class UserModel {
-    // Tìm user theo điều kiện
-    async findOne(criteria) {
-        try {
-            let query = 'SELECT * FROM users WHERE ';
-            const values = [];
-            const conditions = [];
-
-            if (criteria.email) {
-                conditions.push('Email = ?');
-                values.push(criteria.email);
-            }
-            if (criteria.id) {
-                conditions.push('UserID = ?');
-                values.push(criteria.id);
-            }
-            if (criteria.verificationToken) {
-                conditions.push('VerificationToken = ?');
-                values.push(criteria.verificationToken);
-            }
-
-            if (conditions.length === 0) {
-                throw new Error('Không có điều kiện tìm kiếm');
-            }
-
-            query += conditions.join(' AND ');
-            
-            const [rows] = await db.execute(query, values);
-            if (rows.length > 0) {
-                const user = rows[0];
-                return {
-                    id: user.UserID,
-                    fullName: user.FullName,
-                    email: user.Email,
-                    hashPassword: user.HashPassword,
-                    phoneNumber: user.PhoneNumber,
-                    avatarURL: user.AvatarURL,
-                    isVerified: user.IsVerified,
-                    verificationToken: user.VerificationToken,
-                    verificationTokenExpires: user.VerificationTokenExpires,
-                    rating: user.Rating,
-                    createdAt: user.CreatedAt,
-                    updatedAt: user.UpdatedAt
-                };
-            }
-            return null;
-        } catch (error) {
-            console.error('Error in findOne:', error);
-            throw error;
-        }
-    }
-
     // Tạo user mới với verification token
     async create(userData) {
         try {
             const { fullName, email, hashPassword, phoneNumber, AvatarURL, isVerified, rating, verificationToken, verificationTokenExpires } = userData;
             
             const query = `
-                INSERT INTO users (FullName, Email, HashPassword, PhoneNumber, AvatarURL, IsVerified, Rating, VerificationToken, VerificationTokenExpires)
+                INSERT INTO Users (FullName, Email, HashPassword, PhoneNumber, AvatarURL, IsVerified, Rating, VerificationToken, VerificationTokenExpires)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
             
@@ -93,7 +42,7 @@ class UserModel {
     async verifyUser(verificationToken) {
         try {
             const query = `
-                UPDATE users 
+                UPDATE Users 
                 SET IsVerified = TRUE, VerificationToken = NULL, VerificationTokenExpires = NULL 
                 WHERE VerificationToken = ? AND VerificationTokenExpires > NOW()
             `;
@@ -106,10 +55,33 @@ class UserModel {
         }
     }
 
-    // Lấy user theo ID
-    async findById(id) {
+    // Tìm user theo điều kiện
+    async findOne(criteria) {
         try {
-            const [rows] = await db.execute('SELECT * FROM users WHERE UserID = ?', [id]);
+            let query = 'SELECT * FROM Users WHERE ';
+            const values = [];
+            const conditions = [];
+
+            if (criteria.email) {
+                conditions.push('Email = ?');
+                values.push(criteria.email);
+            }
+            if (criteria.id) {
+                conditions.push('UserID = ?');
+                values.push(criteria.id);
+            }
+            if (criteria.verificationToken) {
+                conditions.push('VerificationToken = ?');
+                values.push(criteria.verificationToken);
+            }
+
+            if (conditions.length === 0) {
+                throw new Error('Không có điều kiện tìm kiếm');
+            }
+
+            query += conditions.join(' AND ');
+            
+            const [rows] = await db.execute(query, values);
             if (rows.length > 0) {
                 const user = rows[0];
                 return {
@@ -120,9 +92,45 @@ class UserModel {
                     phoneNumber: user.PhoneNumber,
                     avatarURL: user.AvatarURL,
                     isVerified: user.IsVerified,
+                    dateOfBirth: user.DateOfBirth,
+                    gender: user.Gender,
+                    address: user.Address,
                     verificationToken: user.VerificationToken,
                     verificationTokenExpires: user.VerificationTokenExpires,
+                    role: user.Role,
                     rating: user.Rating,
+                    createdAt: user.CreatedAt,
+                    updatedAt: user.UpdatedAt
+                };
+            }
+            return null;
+        } catch (error) {
+            console.error('Error in findOne:', error);
+            throw error;
+        }
+    }
+
+    // Lấy user theo ID
+    async findById(id) {
+        try {
+            const [rows] = await db.execute('SELECT * FROM Users WHERE UserID = ?', [id]);
+            if (rows.length > 0) {
+                const user = rows[0];
+                return {
+                    id: user.UserID,
+                    fullName: user.FullName,
+                    email: user.Email,
+                    phoneNumber: user.PhoneNumber,
+                    dateOfBirth: user.DateOfBirth,
+                    gender: user.Gender,
+                    address: user.Address,
+                    avatarURL: user.AvatarURL,
+                    isVerified: user.IsVerified,
+                    role: user.Role,
+                    rating: user.Rating,
+                    status: user.status,
+                    suspendedUntil: user.SuspendedUntil,
+                    unpaidStrikeCount: user.UnpaidStrikeCount,
                     createdAt: user.CreatedAt,
                     updatedAt: user.UpdatedAt
                 };
@@ -150,7 +158,10 @@ class UserModel {
                 isVerified: 'IsVerified',
                 verificationToken: 'VerificationToken',
                 verificationTokenExpires: 'VerificationTokenExpires',
-                rating: 'Rating'
+                rating: 'Rating',
+                dateOfBirth: 'DateOfBirth',
+                gender: 'Gender',
+                address: 'Address'
             };
 
             // Xây dựng câu query động
@@ -166,7 +177,7 @@ class UserModel {
             }
 
             values.push(id);
-            const query = `UPDATE users SET ${fields.join(', ')}, UpdatedAt = CURRENT_TIMESTAMP WHERE UserID = ?`;
+            const query = `UPDATE Users SET ${fields.join(', ')}, UpdatedAt = CURRENT_TIMESTAMP WHERE UserID = ?`;
             
             const [result] = await db.execute(query, values);
             
@@ -181,10 +192,26 @@ class UserModel {
         }
     }
 
+    // Cập nhật trạng thái user
+    async updateStatus(id, status, suspendedUntil) {
+        try {
+            const [r] = await db.execute(
+            `UPDATE Users
+            SET status = ?, SuspendedUntil = ?
+            WHERE UserID = ?`,
+            [status, status === 'suspended' ? suspendedUntil : null, id]
+            );
+            return r.affectedRows;
+        } catch (e) {
+            console.error('Error in updateStatus:', e);
+            throw e;
+        }
+    }
+
     // Xóa user
     async delete(id) {
         try {
-            const [result] = await db.execute('DELETE FROM users WHERE UserID = ?', [id]);
+            const [result] = await db.execute('DELETE FROM Users WHERE UserID = ?', [id]);
             return result.affectedRows > 0;
         } catch (error) {
             console.error('Error in delete:', error);
@@ -192,27 +219,43 @@ class UserModel {
         }
     }
 
-    // Lấy tất cả users
+    // Lấy tất cả Users
     async getAll(limit = 50, offset = 0) {
         try {
-            const [rows] = await db.execute(
-                'SELECT UserID, FullName, Email, PhoneNumber, AvatarURL, IsVerified, Rating, CreatedAt, UpdatedAt FROM users ORDER BY CreatedAt DESC LIMIT ? OFFSET ?',
-                [limit, offset]
-            );
-            
-            // Convert to camelCase
+            limit = parseInt(limit);
+            offset = parseInt(offset);
+
+            console.log('Limit:', limit, 'Type:', typeof limit);
+            console.log('Offset:', offset, 'Type:', typeof offset);
+
+            const sql = `
+            SELECT UserID, FullName, Email, PhoneNumber, AvatarURL, IsVerified, Role, Rating, CreatedAt, UpdatedAt 
+            FROM Users 
+            ORDER BY UserID ASC 
+            LIMIT ${limit} OFFSET ${offset}
+            `;
+
+            const [rows] = await db.execute(sql); // KHÔNG truyền [limit, offset] nữa
+
             const users = rows.map(user => ({
                 id: user.UserID,
                 fullName: user.FullName,
                 email: user.Email,
                 phoneNumber: user.PhoneNumber,
+                dateOfBirth: user.DateOfBirth,
+                gender: user.Gender,
+                address: user.Address,
                 avatarURL: user.AvatarURL,
                 isVerified: user.IsVerified,
+                role: user.Role,
                 rating: user.Rating,
+                status: user.status,
+                suspendedUntil: user.SuspendedUntil,
+                unpaidStrikeCount: user.UnpaidStrikeCount,
                 createdAt: user.CreatedAt,
                 updatedAt: user.UpdatedAt
             }));
-            
+
             return users;
         } catch (error) {
             console.error('Error in getAll:', error);
@@ -223,7 +266,7 @@ class UserModel {
     // Đếm tổng số users
     async count() {
         try {
-            const [rows] = await db.execute('SELECT COUNT(*) as total FROM users');
+            const [rows] = await db.execute('SELECT COUNT(*) as total FROM Users');
             return rows[0].total;
         } catch (error) {
             console.error('Error in count:', error);

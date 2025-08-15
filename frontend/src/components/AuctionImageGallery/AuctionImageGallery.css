@@ -1,0 +1,36 @@
+.auction-image-gallery {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.auction-main-image img {
+    width: 100%;
+    height: 54.4vh;
+    border-radius: 8px;
+}
+
+.auction-thumbnail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+}
+
+.auction-thumbnail-grid img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.auction-thumbnail-grid .auction-more-photos {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #fff;
+    cursor: pointer;
+}
