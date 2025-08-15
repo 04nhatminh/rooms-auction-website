@@ -110,8 +110,8 @@
 
 .calendar-day {
   display: flex;
-  height: 48px;
-  width: 48px;
+  height: 44px;
+  width: 44px;
   padding: 4px;
   flex-direction: column;
   justify-content: center;
