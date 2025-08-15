@@ -1,4 +1,5 @@
 .card {
+  border: none !important;
   display: flex;
   flex-direction: column;
   overflow: hidden;

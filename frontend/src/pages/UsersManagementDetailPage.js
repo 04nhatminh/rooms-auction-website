@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-// ⬇️ đổi import: dùng default export UserAPI thay vì named functions
 import UserAPI from '../api/userApi';
 import PageHeader from '../components/PageHeader/PageHeader';
 import styles from './UsersManagementDetailPage.module.css';

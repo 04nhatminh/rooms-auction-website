@@ -22,7 +22,7 @@
 }
 
 .room-info {
-  padding: 12px 8px;
+  padding: 12px 0px;
   background: #fff;
 }
 
@@ -52,10 +52,8 @@
   line-height: normal;
   margin: 0 0 8px 0;
   overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
+  display: flex;
   line-clamp: 1;
-  -webkit-box-orient: vertical;
 }
 
 .room-address img {
@@ -69,10 +67,9 @@
 .room-rating {
   margin: 0 0 8px 0;
   overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
+  overflow: hidden;
+  display: flex;
   line-clamp: 1;
-  -webkit-box-orient: vertical;
 }
 
 .rating-text {
@@ -95,10 +92,9 @@
 .room-price {
   margin: 0 0 8px 0;
   overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
+  overflow: hidden;
+  display: flex;
   line-clamp: 1;
-  -webkit-box-orient: vertical;
 }
 
 .room-price img {

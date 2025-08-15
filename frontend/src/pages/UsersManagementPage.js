@@ -1,7 +1,5 @@
-// src/pages/UsersManagementPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-// ⬇️ đổi import: dùng default export UserAPI thay vì named functions
 import UserAPI from '../api/userApi';
 import PageHeader from '../components/PageHeader/PageHeader';
 

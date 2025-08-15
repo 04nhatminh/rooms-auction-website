@@ -95,7 +95,7 @@ const RoomCard = ({ product }) => {
         <p className="room-price">
           <img src={PriceTagIcon} alt="Price" />
           <span className="price-amount">{formatPrice(product?.Price)}</span>
-          <span className="price-period"> cho 1 đêm</span>
+          <span className="price-period">&nbsp;cho 1 đêm</span>
         </p>
 
       </div>

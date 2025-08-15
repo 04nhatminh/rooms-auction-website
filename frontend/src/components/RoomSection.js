@@ -197,34 +197,6 @@ const RoomSection = memo(({ title, provinceCode = '01', limit = 15 }) => {
     );
   }
 
-  // if (error) {
-  //   return (
-  //     <section className="content-room-section">
-  //       <h2>{title}</h2>
-  //       <div className="error-container">
-  //         <p className="error-message">Lỗi: {error}</p>
-  //         <button 
-  //           className="retry-button"
-  //           onClick={() => window.location.reload()}
-  //         >
-  //           Thử lại
-  //         </button>
-  //       </div>
-  //     </section>
-  //   );
-  // }
-
-  // if (!products || products.length === 0) {
-  //   return (
-  //     <section className="content-room-section">
-  //       <h2>{title}</h2>
-  //       <div className="no-data-container">
-  //         <p>Không có dữ liệu chỗ nghỉ để hiển thị.</p>
-  //       </div>
-  //     </section>
-  //   );
-  // }
-
   return (
     <section className="content-room-section">
       <div className="room-section-header">
