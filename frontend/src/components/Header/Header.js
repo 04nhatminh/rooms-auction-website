@@ -1,16 +1,13 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import './Header.css';
 import logo from '../../assets/logo.png';
 import SearchBarMini from './SearchBarMini';
-import SearchBar from '../SearchBar/SearchBar';
 import HeaderUserMenu from '../HeaderUserMenu/HeaderUserMenu';
 import LocationAPI from '../../api/locationApi';
 
 const Header = () => {
   const location = useLocation();
-  const [showFullSearch, setShowFullSearch] = useState(false);
-  const headerRef = useRef(null);
 
   // Shared search state
   const [searchData, setSearchData] = useState({
@@ -28,23 +25,6 @@ const Header = () => {
 
   const [selectedLocationId, setSelectedLocationId] = useState(null);
   const [selectedType, setSelectedType] = useState(null);
-
-  // Handle click outside header to close full search
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (headerRef.current && !headerRef.current.contains(event.target)) {
-        setShowFullSearch(false);
-      }
-    };
-
-    if (showFullSearch) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showFullSearch]);
 
   // Update guest display text when guest counts change
   const updateGuestDisplayText = (counts) => {
@@ -151,46 +131,26 @@ const Header = () => {
   };
 
   return (
-    <header ref={headerRef} className={`header ${showFullSearch ? 'expanded' : ''}`}>
+    <header className="header">
       <div className="header-top">
-        {!showFullSearch && (
-          <div className="header-logo">
-            <Link to="/" >
-              <img src={logo} alt="Logo" className="header-logo-image" />
-              <span className="header-logo-text">bidstay</span>
-            </Link>
-          </div>
-        )}
+        <div className="header-logo">
+          <Link to="/" >
+            <img src={logo} alt="Logo" className="header-logo-image" />
+            <span className="header-logo-text">bidstay</span>
+          </Link>
+        </div>
 
-        {!showFullSearch ? (
-          <div className="header-mini-slot">
-            <SearchBarMini 
-              onActivate={() => setShowFullSearch(true)}
-              searchData={searchData}
-            />
-          </div>
-        ) : (
-          <div className="header-full-search">
-            <SearchBar 
-              onClose={() => setShowFullSearch(false)}
-              initialSearchData={searchData}
-              initialGuestCounts={guestCounts}
-              initialLocationId={selectedLocationId}
-              initialType={selectedType}
-              onSearchDataUpdate={handleSearchDataUpdate}
-              onGuestCountsUpdate={handleGuestCountsUpdate}
-              onLocationUpdate={handleLocationUpdate}
-            />
-          </div>
-        )}
+        <div className="header-mini-slot">
+          <SearchBarMini 
+            searchData={searchData}
+          />
+        </div>
 
-        {!showFullSearch && (
-          <div className="header-button-actions">
-            <button className="circle-btn user-btn">U</button>
-            
-            <HeaderUserMenu onLogout={() => {/* your logout logic */}} />
-          </div>
-        )}
+        <div className="header-button-actions">
+          <button className="circle-btn user-btn">U</button>
+          
+          <HeaderUserMenu onLogout={() => {/* your logout logic */}} />
+        </div>
       </div>
     </header>
   );

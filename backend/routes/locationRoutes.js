@@ -14,6 +14,9 @@ router.get('/search', LocationController.searchLocations);
 // GET /api/locations/provinces - Lấy tất cả provinces
 router.get('/provinces', LocationController.getAllProvinces);
 
+// GET /api/locations/districts - Lấy tất cả districts
+router.get('/districts', LocationController.getAllDistricts);
+
 // GET /api/locations/provinces/:provinceCode/districts - Lấy districts theo province
 router.get('/provinces/:provinceCode/districts', LocationController.getDistrictsByProvince);
 

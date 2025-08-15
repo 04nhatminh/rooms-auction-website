@@ -32,6 +32,14 @@ const SearchResult = () => {
     const checkinStr = urlParams.get('checkinDate');
     const checkoutStr = urlParams.get('checkoutDate');
 
+    console.log('🔍 SearchResult URL params:', {
+      locationId,
+      type,
+      checkinStr,
+      checkoutStr,
+      allParams: Object.fromEntries(urlParams)
+    });
+
     if (checkinStr && checkoutStr) {
       const checkin = new Date(checkinStr);
       const checkout = new Date(checkoutStr);
@@ -53,11 +61,14 @@ const SearchResult = () => {
       setDurationDays(1);
     }
 
-    // Không có locationId => clear danh sách
-    if (!locationId) {
+    // Không có locationId hoặc locationId === 'None' => clear danh sách
+    if (!locationId || locationId === 'None') {
+      console.log('🔍 No valid locationId, clearing products');
       setTopRatedProducts([]);
       return;
     }
+
+    console.log('🔍 Fetching products for location:', { locationId, type });
 
     // Hủy request trước đó (nếu có)
     if (abortRef.current) {
@@ -70,13 +81,16 @@ const SearchResult = () => {
       try {
         let resp;
         if (type === 'district') {
+          console.log('🔍 Fetching products by district:', locationId);
           resp = await productApi.getTopRatedProductsByDistrict(locationId, LIMIT, controller.signal);
         } else {
           // Mặc định coi là province
+          console.log('🔍 Fetching products by province:', locationId);
           resp = await productApi.getTopRatedProducts(locationId, LIMIT, controller.signal);
         }
 
         const products = resp?.data?.products;
+        console.log('🔍 API Response:', { resp, products });
         setTopRatedProducts(Array.isArray(products) ? products : []);
       } catch (err) {
         if (err?.name !== 'AbortError') {

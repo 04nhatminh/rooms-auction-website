@@ -42,6 +42,26 @@ class LocationAPI {
     return res.json();
   }
 
+  // Lấy tất cả provinces
+  static async getAllProvinces() {
+    const res = await fetch(`${API_BASE_URL}/api/locations/provinces`, {
+      method: 'GET',
+      headers: this.getHeaders()
+    });
+    if (!res.ok) throw new Error((await res.json()).message || 'Failed to fetch all provinces');
+    return res.json();
+  }
+
+  // Lấy tất cả districts
+  static async getAllDistricts() {
+    const res = await fetch(`${API_BASE_URL}/api/locations/districts`, {
+      method: 'GET',
+      headers: this.getHeaders()
+    });
+    if (!res.ok) throw new Error((await res.json()).message || 'Failed to fetch all districts');
+    return res.json();
+  }
+
   // Lấy chi tiết province theo code
   static async getProvinceDetails(provinceCode) {
     const res = await fetch(`${API_BASE_URL}/api/locations/provinces/${provinceCode}`, {

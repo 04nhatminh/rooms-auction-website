@@ -3,7 +3,7 @@ import React from 'react';
 import './Header.css';
 import searchIcon from '../../assets/search.png';
 
-const SearchBarMini = ({ onActivate, searchData = {} }) => {
+const SearchBarMini = ({ searchData = {} }) => {
   // Format dates for display
   const formatDate = (dateString) => {
     if (!dateString) return '';
@@ -48,11 +48,7 @@ const SearchBarMini = ({ onActivate, searchData = {} }) => {
   };
 
   return (
-    <div
-      className="search"
-      style={{ cursor: 'pointer' }}
-      onClick={onActivate} // call parent function to open big search
-    >
+    <div className="search">
       <div className="search-content">
         <span title={getLocationText()}>{getLocationText()}</span>
         <span title={getDateText()}>{getDateText()}</span>

@@ -6,9 +6,14 @@ class LocationModel {
     // @returns {Object} Object chứa top provinces và districts
     static async getPopularLocations(limit = 20) {
         try {
-            const [topDistricts] = await pool.execute('CALL GetPopularDistricts(?)', [limit]);
+            const provinceLimit = Math.floor(limit * 0.6); // 60% provinces
+            const districtLimit = Math.ceil(limit * 0.4);  // 40% districts
+            
+            const [topProvinces] = await pool.execute('CALL GetPopularProvinces(?)', [provinceLimit]);
+            const [topDistricts] = await pool.execute('CALL GetPopularDistricts(?)', [districtLimit]);
 
             return {
+                provinces: topProvinces[0] || [], // Lấy data từ index 0
                 districts: topDistricts[0] || []  // Lấy data từ index 0
             };
         } catch (error) {
@@ -57,42 +62,22 @@ class LocationModel {
     // @param {string} searchTerm - Từ khóa tìm kiếm (không bắt buộc)
     // @param {number} limit - Giới hạn số kết quả trả về
     // @returns {Array} Danh sách provinces
-    static async getAllProvinces(searchTerm = null, limit = 50) {
+    static async getAllProvinces() {
         try {
-            let query = `
-                SELECT 
-                    ProvinceCode,
-                    Name,
-                    NameEn,
-                    FullName,
-                    FullNameEn,
-                    CodeName
-                FROM Provinces
-            `;
-            
-            let queryParams = [];
-            
-            // Thêm điều kiện tìm kiếm nếu có searchTerm
-            if (searchTerm && searchTerm.trim().length > 0) {
-                query += ` 
-                WHERE 
-                    Name LIKE ? OR 
-                    NameEn LIKE ? OR 
-                    FullName LIKE ? OR 
-                    FullNameEn LIKE ? OR 
-                    CodeName LIKE ?
-                `;
-                const searchPattern = `%${searchTerm.trim()}%`;
-                queryParams.push(searchPattern, searchPattern, searchPattern, searchPattern, searchPattern);
-            }
-            
-            query += ` ORDER BY Name ASC LIMIT ?`;
-            queryParams.push(parseInt(limit));
-            
-            const [rows] = await pool.execute(query, queryParams);
-            return rows;
+            const [rows] = await pool.execute('CALL GetAllProvinces()');
+            return rows[0] || []; // Lấy data từ index 0 như các stored procedure khác
         } catch (error) {
             console.error('Error in getAllProvinces:', error);
+            throw error;
+        }
+    }
+
+    static async getAllDistricts() {
+        try {
+            const [rows] = await pool.execute('CALL GetAllDistricts()');
+            return rows[0] || []; // Lấy data từ index 0 như các stored procedure khác
+        } catch (error) {
+            console.error('Error in getAllDistricts:', error);
             throw error;
         }
     }

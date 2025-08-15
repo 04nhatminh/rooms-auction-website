@@ -11,6 +11,22 @@ class LocationController {
             
             // Format cho auto suggestion giống getLocationSuggestions
             const suggestions = [];
+            
+            // Thêm provinces
+            results.provinces.forEach(province => {
+                suggestions.push({
+                    id: province.code,
+                    type: 'province',
+                    name: province.Name,
+                    nameEn: province.NameEn,
+                    fullName: province.FullName,
+                    displayText: province.Name,
+                    secondaryText: 'Tỉnh',
+                    productCount: province.ProductCount
+                });
+            });
+            
+            // Thêm districts
             results.districts.forEach(district => {
                 suggestions.push({
                     id: district.code,
@@ -93,25 +109,39 @@ class LocationController {
     }
 
     // API lấy tất cả provinces
-    // GET /api/locations/provinces?search=...&limit=50
+    // GET /api/locations/provinces
     static async getAllProvinces(req, res) {
-        try {
-            const { search, limit = 50 } = req.query;
-            
-            const provinces = await LocationModel.getAllProvinces(search, parseInt(limit));
+        try {            
+            const provinces = await LocationModel.getAllProvinces();
             
             return res.status(200).json({
                 success: true,
                 message: 'Provinces retrieved successfully',
-                data: {
-                    total: provinces.length,
-                    searchTerm: search || null,
-                    limit: parseInt(limit),
-                    provinces
-                }
+                data: provinces
             });
         } catch (error) {
             console.error('Error in getAllProvinces:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Internal server error',
+                error: error.message
+            });
+        }
+    }
+
+    // API lấy tất cả districts
+    // GET /api/locations/districts
+    static async getAllDistricts(req, res) {
+        try {
+            const districts = await LocationModel.getAllDistricts();
+
+            return res.status(200).json({
+                success: true,
+                message: 'Districts retrieved successfully',
+                data: districts
+            });
+        } catch (error) {
+            console.error('Error in getAllDistricts:', error);
             return res.status(500).json({
                 success: false,
                 message: 'Internal server error',

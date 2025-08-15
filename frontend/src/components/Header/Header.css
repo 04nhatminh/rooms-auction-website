@@ -5,17 +5,8 @@
   border-bottom: 1px solid #DDDDDD;
   padding: 8px 64px 10px;
   height: auto; 
-  transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   overflow: visible;
   z-index: 999;
-}
-
-/* When expanded, ensure header stays on top */
-.header.expanded {
-  height: auto; 
-  position: relative;
-  overflow: visible;
-  z-index: 1000;
 }
 
 /* Top row stays fixed (logo | mini | actions) */
@@ -26,114 +17,12 @@
   height: calc(var(--header-top-h) + 2px);
 }
 
-.header.expanded .header-top {
-  height: auto;
-}
-
-/* MINI → morph out */
+/* MINI search bar slot */
 .header-mini-slot {
   --header-top-h: 72px;
   flex: 1;
   display: flex;
   justify-content: center;
-  transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
-              transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  will-change: transform, opacity;
-}
-
-.header-mini-slot .search { /* the pill */
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.header.expanded .header-mini-slot {
-  opacity: 0;
-  transform: scale(0.94) translateY(-5px);
-  pointer-events: none;
-}
-
-/* FULL → morph in (floats, centered vertically) */
-.header-full-floating {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%) scale(0.98); /* start a tad high & small */
-  opacity: 0;
-  z-index: 300;
-  transition:
-    opacity 0.35s ease,
-    transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform, opacity;
-}
-
-.header.expanded .header-full-floating {
-  opacity: 1;
-  transform: translate(-45%, 50%) scale(1); /* perfect center */
-  width: clamp(880px, 68vw, 1200px);
-}
-
-/* New style for full search when inside header-top */
-.header-full-search {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  margin-top: -20px !important;
-  margin-bottom: -32px !important;
-  opacity: 0;
-  transform: scale(0.95) translateY(10px);
-  transition: opacity 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-              transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  will-change: transform, opacity;
-  position: relative;
-  z-index: 1000;
-}
-
-.header.expanded .header-full-search {
-  opacity: 1;
-  transform: scale(1) translateY(0);
-}
-
-.header-full-search .search-bar {
-  margin-top: 0 !important;
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  position: relative;
-  z-index: 1001;
-}
-
-/* Ensure all dropdowns in search bar have high z-index */
-.header-full-search .search-bar .dropdown,
-.header-full-search .search-bar .dropdown-menu,
-.header-full-search .search-bar .guest-dropdown,
-.header-full-search .search-bar .location-dropdown,
-.header-full-search .search-bar .calendar-dropdown,
-.header-full-search .search-bar .search-dropdown {
-  z-index: 1050 !important;
-  position: relative;
-}
-
-/* Specific dropdown positioning */
-.header-full-search .dropdown-menu,
-.header-full-search .guest-dropdown,
-.header-full-search .location-dropdown,
-.header-full-search .calendar-dropdown {
-  position: absolute !important;
-  z-index: 1050 !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
-}
-
-/* Override any existing margin-top on search bar */
-.header.expanded .search-bar,
-.header.expanded .search-bar-container,
-.header.expanded .search-container {
-  margin-top: 0 !important;
-}
-
-/* (Optional) Respect reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  .header,
-  .header-mini-slot,
-  .header-full-floating {
-    transition: none !important;
-  }
 }
 
 
@@ -192,7 +81,6 @@
 
 .search-content span {
   padding: 0px 32px;
-  cursor: pointer;
   font-family: Montserrat, sans-serif;
   font-size: 14px;
   font-style: normal;
