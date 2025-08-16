@@ -19,6 +19,7 @@ import HaNoiImg from '../../assets/ha_noi.png';
 import VungTauImg from '../../assets/vung_tau.jpg';
 import DaLatImg from '../../assets/da_lat.jpg';
 import NhaTrangImg from '../../assets/nha_trang.jpg';
+import WishlistBox from '../../components/WishlistBox/WishlistBox';
 
 
 
@@ -76,7 +77,7 @@ const HomePage = () => {
   };
 
   return (
-    <>
+    <div className="homepage-wrapper">
       {isLoadingLocations}
       <div className="home-banner">
         <img src={HomeBackground} alt="Home Banner" className="banner-image" />
@@ -125,8 +126,9 @@ const HomePage = () => {
           limit={config.limit}
         />
       ))}
+      <WishlistBox />
       <Footer />
-    </>
+    </div>
   );
 };
 

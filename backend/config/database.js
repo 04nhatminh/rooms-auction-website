@@ -327,6 +327,26 @@ async function createFavoritesTable() {
     }
 }
 
+async function createWishlistTable() {
+    await pool.execute(`
+        CREATE TABLE IF NOT EXISTS Wishlist (
+            WishlistID INT AUTO_INCREMENT PRIMARY KEY,
+            UserID INT NOT NULL,
+            ProductID INT NOT NULL,
+            CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE,
+            FOREIGN KEY (ProductID) REFERENCES Products(ProductID) ON DELETE CASCADE,
+            UNIQUE KEY unique_user_product (UserID, ProductID)
+        );
+    `);
+
+    try {
+        await pool.execute(`CREATE INDEX idx_Wishlist_UserID ON Wishlist(UserID)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
+}
+
 async function createAmenityGroupsTable() {
     await pool.execute(`
         CREATE TABLE IF NOT EXISTS AmenityGroups (
@@ -1335,6 +1355,9 @@ async function initSchema() {
 
         await createFavoritesTable();
         console.log('✅ Favorites table ready');
+
+        await createWishlistTable();
+        console.log('✅ Wishlist table ready');
 
         await createAmenityGroupsTable();
         console.log('✅ AmenityGroups table ready');
