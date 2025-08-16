@@ -34,7 +34,7 @@ const Description = () => {
     });
   }, [data]);
 
-  const VISIBLE_COUNT = 2;
+  const VISIBLE_COUNT = 1;
   const visible = expanded ? sections : sections.slice(0, VISIBLE_COUNT);
 
   if (!sections.length) return null;

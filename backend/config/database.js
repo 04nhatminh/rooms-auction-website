@@ -1311,6 +1311,63 @@ async function createSearchDistrictsProcedure() {
     `);
 }
 
+async function dropSearchProductIDFromUIDProcedureIfExists() {
+    await pool.query(`
+        DROP PROCEDURE IF EXISTS SearchProductIDFromUID;
+    `);
+}
+
+async function createSearchProductIDFromUIDProcedure() {
+    await pool.query(`
+        CREATE PROCEDURE SearchProductIDFromUID(
+            IN p_uid BIGINT UNSIGNED
+        )
+        BEGIN
+            SELECT ProductID FROM Products WHERE UID = p_uid;
+        END;
+    `);
+}
+
+async function dropGetAllProvincesProcedureIfExists() {
+    await pool.query(`
+        DROP PROCEDURE IF EXISTS GetAllProvinces;
+    `);
+}
+
+async function createGetAllProvincesProcedure() {
+    await pool.query(`
+        CREATE PROCEDURE GetAllProvinces()
+        BEGIN
+            SELECT 
+                ProvinceCode AS code,
+                Name,
+                NameEn,
+                'province' AS type
+            FROM Provinces;
+        END;
+    `);
+}
+
+async function dropGetAllDistrictsProcedureIfExists() {
+    await pool.query(`
+        DROP PROCEDURE IF EXISTS GetAllDistricts;
+    `);
+}
+
+async function createGetAllDistrictsProcedure() {
+    await pool.query(`
+        CREATE PROCEDURE GetAllDistricts()
+        BEGIN
+            SELECT 
+                DistrictCode AS code,
+                Name,
+                NameEn,
+                'district' AS type
+            FROM Districts;
+        END;
+    `);
+}
+
 async function initSchema() {
     try {
         await testConnection();
@@ -1448,6 +1505,18 @@ async function initSchema() {
         await dropSearchDistrictsProcedureIfExists();
         await createSearchDistrictsProcedure();
         console.log('✅ SearchDistricts procedure ready');
+
+        await dropSearchProductIDFromUIDProcedureIfExists();
+        await createSearchProductIDFromUIDProcedure();
+        console.log('✅ SearchProductIDFromUID procedure ready');
+
+        await dropGetAllProvincesProcedureIfExists();
+        await createGetAllProvincesProcedure();
+        console.log('✅ GetAllProvinces procedure ready');
+
+        await dropGetAllDistrictsProcedureIfExists();
+        await createGetAllDistrictsProcedure();
+        console.log('✅ GetAllDistricts procedure ready');
 
         console.log('\n🎉 Database schema initialization completed successfully!');
         

@@ -1,0 +1,10 @@
+.display-result {
+  min-height: 400px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .display-result {
+    min-height: 300px;
+  }
+}

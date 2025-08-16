@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef, memo } from 'react';
 import RoomCard from '../RoomCard/RoomCard';
 import './RoomSection.css';
+import { imageApi } from '../../api/imageApi';
+import { reviewApi } from '../../api/reviewApi';
+import { productApi } from '../../api/productApi';
 import chevronLeftGrayIcon from '../../assets/chevron_left_gray.png';
 import chevronRightGrayIcon from '../../assets/chevron_right_gray.png';
 import chevronLeftBlackIcon from '../../assets/chevron_left_black.png';
@@ -76,79 +79,50 @@ const RoomSection = memo(({ title, provinceCode = '01', limit = 15 }) => {
         setError(null);
         
         // 1. Fetch products từ MySQL
-        const response = await fetch(
-          `http://localhost:3000/api/room/top-rated?provinceCode=${provinceCode}&limit=${limit}`,
-          { signal: abortController.signal }
-        );
+        const response = await productApi.getTopRatedProducts(provinceCode, limit, abortController.signal);
         
+        // Kiểm tra abort sau mỗi API call
         if (abortController.signal.aborted) return;
         
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        if (!data.success) {
-          throw new Error(data.message || 'Failed to load products');
-        }
+        const products = response.data.products;
 
-        const products = data.data.products;
-        
-        // 2. Lấy danh sách ProductID để fetch images và reviews
-        const productIds = products
-          .map(product => product.ProductID)
+        // 2. Lấy danh sách UID để fetch images và reviews
+        const uids = products
+          .map(product => product.UID)
           .filter(id => id); // Loại bỏ null/undefined
 
-        if (productIds.length > 0) {
-          // 3. Fetch images từ MongoDB batch bằng ProductID
-          const imageResponse = await fetch('http://localhost:3000/api/images/batch', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ productIds }),
-            signal: abortController.signal
-          });
-
+        if (uids.length > 0) {
+          // 3. Fetch images từ MongoDB batch bằng UID
+          let imageMap = {};
+          const imageResponse = await imageApi.getBatchImages(uids, abortController.signal);
+          
+          // Kiểm tra abort sau khi fetch images
           if (abortController.signal.aborted) return;
 
-          let imageMap = {};
-
-          if (imageResponse.ok) {
-            const imageData = await imageResponse.json();
-            imageMap = imageData.success ? imageData.data.imageMap : {};
+          if (imageResponse.success) {
+            imageMap = imageResponse.data.imagesMapByUID;
           } else {
             console.warn('Failed to fetch images from MongoDB');
           }
 
-          // 4. Fetch reviews từ MongoDB batch bằng ProductID
+          // 4. Fetch reviews từ MongoDB batch bằng UID
           let reviewsMap = {};
-          if (productIds.length > 0) {
-            const reviewsResponse = await fetch('http://localhost:3000/api/reviews/batch', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ productIds }),
-              signal: abortController.signal
-            });
+          const reviewsResponse = await reviewApi.getBatchReviews(uids, abortController.signal);
+          
+          // Kiểm tra abort sau khi fetch reviews
+          if (abortController.signal.aborted) return;
 
-            if (abortController.signal.aborted) return;
-
-            if (reviewsResponse.ok) {
-              const reviewsData = await reviewsResponse.json();
-              reviewsMap = reviewsData.success ? reviewsData.data.reviewsMap : {};
-            } else {
-              console.warn('Failed to fetch reviews from MongoDB');
-            }
+          if (reviewsResponse.success) {
+            reviewsMap = reviewsResponse.data.reviewsMapByUID;
+          } else {
+            console.warn('Failed to fetch reviews from MongoDB');
           }
 
           // 5. Gắn imageUrl và totalReviews vào products
           const productsWithImagesAndReviews = products.map(product => ({
             ...product,
-            mongoImageUrl: product.ProductID ? imageMap[product.ProductID] : null,
-            totalReviews: product.ProductID ? reviewsMap[product.ProductID] : null
+            mongoImageUrl: product.UID ? imageMap[product.UID] : null,
+            totalReviews: product.UID ? reviewsMap[product.UID] : null
           }));
 
           // Lưu vào cache
