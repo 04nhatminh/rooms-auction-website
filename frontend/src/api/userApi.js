@@ -7,7 +7,7 @@ export const getUsers = async (token, page = 1, limit = 10) => {
     headers: { 'Authorization': `Bearer ${token}` }
   });
   if (!res.ok) {
-      const msg = await UserAPI.Message(res);
+    const msg = await safeMessage(res);
     throw new Error(msg || 'Không thể lấy danh sách người dùng.');
   }
   return res.json();
