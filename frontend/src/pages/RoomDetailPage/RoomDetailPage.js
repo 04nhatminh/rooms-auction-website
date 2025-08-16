@@ -16,12 +16,15 @@ import Location from '../../components/Location/Location';
 import HouseRules from '../../components/HouseRules/HouseRules';
 import Footer from '../../components/Footer/Footer';
 import BookingCard from '../../components/BookingCard/BookingCard';
+import WishlistBox from '../../components/WishlistBox/WishlistBox';
 import './RoomDetailPage.css';
 
 const RoomDetailPage = () => {
   const { UID } = useParams(); // get UID from URL
   const [data, setData] = useState(null);
   const [error, setError] = useState(null)
+  const [wishlistItem, setWishlistItem] = useState(null);
+  const [wishlistChanged, setWishlistChanged] = useState(false);
 
   useEffect(() => {
     axios.get(`http://localhost:3000/api/room/${UID}`)
@@ -43,8 +46,9 @@ const RoomDetailPage = () => {
         <DateRangeProvider>
           <Header />
             <main className="room-detail-content">
-                <RoomTitle />
+                <RoomTitle onSave={() => setWishlistItem({ ...data.details, _ts: Date.now() })} wishlistChanged={wishlistChanged} />
                 <ImageGallery />
+                <WishlistBox newWishlistItem={wishlistItem} onRemove={() => setWishlistChanged(v => !v)} />
               <div className="main-content">
                 <div className="left-column">
                   <Overview />

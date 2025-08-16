@@ -7,6 +7,8 @@ import { LocationProvider } from './contexts/LocationContext';
 
 // Import pages
 import HomePage from './pages/HomePage/HomePage';
+import AuctionHistoryPage from './pages/AuctionHistoryPage/AuctionHistoryPage';
+import TransactionHistoryPage from './pages/TransactionHistoryPage/TransactionHistoryPage';
 import SearchResult from './pages/SearchResult/SearchResult';
 import LoginPage from './pages/LoginPage/LoginPage';
 import SignUpPage from './pages/SignupPage/SignUpPage';
@@ -38,6 +40,8 @@ function App() {
             <Route path="/search" element={<SearchResult />} />
             <Route path="/profile" element={<UserProfilePage />} />
             <Route path="/favorite" element={<FavoritePage />} />
+            <Route path="/auction-history" element={<AuctionHistoryPage />} />
+            <Route path="/transaction-history" element={<TransactionHistoryPage />} />
             <Route path="/admin" element={<AdminLayout />}>
               <Route path="users-management" element={<UsersManagementPage />} />
               <Route path="users-management/:id" element={<UsersManagementDetailPage />} />

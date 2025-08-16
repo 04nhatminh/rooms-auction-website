@@ -4,9 +4,14 @@ import './Header.css';
 import logo from '../../assets/logo.png';
 import SearchBarMini from './SearchBarMini';
 import HeaderUserMenu from '../HeaderUserMenu/HeaderUserMenu';
+import UserAvatar from '../UserAvatar/UserAvatar';
+import UserAPI from '../../api/userApi';
 import LocationAPI from '../../api/locationApi';
 
 const Header = () => {
+  const [showFullSearch, setShowFullSearch] = useState(false);
+  const [user, setUser] = useState(null);
+  const headerRef = useRef(null);
   const location = useLocation();
 
   // Shared search state
@@ -26,6 +31,50 @@ const Header = () => {
   const [selectedLocationId, setSelectedLocationId] = useState(null);
   const [selectedType, setSelectedType] = useState(null);
 
+  // Load user info
+  useEffect(() => {
+    const loadUserInfo = async () => {
+      try {
+        // Try localStorage first for quick load
+        const userData = localStorage.getItem('userData');
+        if (userData) {
+          const parsedUser = JSON.parse(userData);
+          setUser(parsedUser);
+        }
+
+        // Then fetch latest from API
+        const response = await UserAPI.getProfile();
+        if (response.user) {
+          setUser(response.user);
+          localStorage.setItem('userData', JSON.stringify(response.user));
+        }
+      } catch (error) {
+        // If error (like not logged in), keep user as null
+        console.log('User not logged in or error fetching profile');
+        setUser(null);
+      }
+    };
+
+    loadUserInfo();
+  }, []);
+
+  // Handle click outside header to close full search
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (headerRef.current && !headerRef.current.contains(event.target)) {
+        setShowFullSearch(false);
+      }
+    };
+
+    if (showFullSearch) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showFullSearch]);
+  
   // Update guest display text when guest counts change
   const updateGuestDisplayText = (counts) => {
     const totalGuests = counts.adults + counts.children;
@@ -133,24 +182,43 @@ const Header = () => {
   return (
     <header className="header">
       <div className="header-top">
-        <div className="header-logo">
-          <Link to="/" >
-            <img src={logo} alt="Logo" className="header-logo-image" />
-            <span className="header-logo-text">bidstay</span>
-          </Link>
-        </div>
+        {!showFullSearch && (
+          <div className="header-logo">
+            <Link to="/" >
+              <img src={logo} alt="Logo" className="header-logo-image" />
+              <span className="header-logo-text">bidstay</span>
+            </Link>
+          </div>
+        )}
 
-        <div className="header-mini-slot">
-          <SearchBarMini 
-            searchData={searchData}
-          />
-        </div>
+        {!showFullSearch ? (
+          <div className="header-mini-slot">
+            <SearchBarMini 
+              onActivate={() => setShowFullSearch(true)}
+              searchData={searchData}
+            />
+          </div>
+        ) : (
+          <div className="header-full-search">
+            <SearchBar 
+              onClose={() => setShowFullSearch(false)}
+              initialSearchData={searchData}
+              initialGuestCounts={guestCounts}
+              initialLocationId={selectedLocationId}
+              initialType={selectedType}
+              onSearchDataUpdate={handleSearchDataUpdate}
+              onGuestCountsUpdate={handleGuestCountsUpdate}
+              onLocationUpdate={handleLocationUpdate}
+            />
+          </div>
+        )}
 
-        <div className="header-button-actions">
-          <button className="circle-btn user-btn">U</button>
-          
-          <HeaderUserMenu onLogout={() => {/* your logout logic */}} />
-        </div>
+        {!showFullSearch && (
+          <div className="header-button-actions">
+            <UserAvatar size="medium" />
+            <HeaderUserMenu onLogout={() => {/* your logout logic */}} />
+          </div>
+        )}
       </div>
     </header>
   );

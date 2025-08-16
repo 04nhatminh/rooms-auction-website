@@ -2,7 +2,7 @@ const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:300
 // const API_BASE_URL = process.env.REACT_APP_API_BASE_URL?.replace(/\/$/, '') || 'http://localhost:3000';
 const ADMIN_PREFIX = '/admin';
 
-class UserAPI {
+class UserApi {
   static getHeaders() {
     const token = localStorage.getItem('token');
     return {
@@ -45,7 +45,7 @@ class UserAPI {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     if (!res.ok) {
-      const msg = await UserAPI.Message(res);
+      const msg = await UserApi.Message(res);
       throw new Error(msg || 'Không thể lấy danh sách người dùng.');
     }
     return res.json();
@@ -57,7 +57,7 @@ class UserAPI {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     if (!res.ok) {
-      const msg = await UserAPI.safeMessage(res);
+      const msg = await UserApi.safeMessage(res);
       throw new Error(msg || 'Không thể xóa người dùng.');
     }
     return res.json();
@@ -96,4 +96,4 @@ class UserAPI {
   };
 }
 
-export default UserAPI;
+export default UserApi;

@@ -19,6 +19,7 @@ import HaNoiImg from '../../assets/ha_noi.png';
 import VungTauImg from '../../assets/vung_tau.jpg';
 import DaLatImg from '../../assets/da_lat.jpg';
 import NhaTrangImg from '../../assets/nha_trang.jpg';
+import WishlistBox from '../../components/WishlistBox/WishlistBox';
 
 
 
@@ -76,7 +77,7 @@ const HomePage = () => {
   };
 
   return (
-    <>
+    <div className="homepage-wrapper">
       {isLoadingLocations}
       <div className="home-banner">
         <img src={HomeBackground} alt="Home Banner" className="banner-image" />
@@ -89,7 +90,17 @@ const HomePage = () => {
 
           {/* Thay thế cụm nút Login/Signup bằng menu người dùng */}
           {user ? (
-            <HeaderUserMenu user={user} onLogout={handleLogout} />
+            <div className="user-section">
+              <div className="welcome-button">
+                Chào mừng, {(() => {
+                  if (!user.fullName?.trim()) return 'Bạn';
+                  const names = user.fullName.trim().split(' ');
+                  // Lấy tên cuối (lastname)
+                  return names[names.length - 1];
+                })()}
+              </div>
+              <HeaderUserMenu user={user} onLogout={handleLogout} />
+            </div>
           ) : (
             <div className="login-signup">
               <button className='home-login-button' onClick={() => navigate('/login')}>Đăng nhập</button>
@@ -115,8 +126,9 @@ const HomePage = () => {
           limit={config.limit}
         />
       ))}
+      <WishlistBox />
       <Footer />
-    </>
+    </div>
   );
 };
 

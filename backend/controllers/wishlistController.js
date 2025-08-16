@@ -1,8 +1,8 @@
 const pool = require('../config/database');
 
-class FavoriteController {
-    // GET /favorite - Lấy danh sách yêu thích
-    async getUserFavorites(req, res) {
+class WishlistController {
+    // GET /wishlist - Lấy danh sách wishlist
+    async getUserWishlist(req, res) {
         try {
             const userId = req.user?.UserID || req.user?.id;
             if (!userId) {
@@ -14,13 +14,13 @@ class FavoriteController {
 
             const [rows] = await pool.query(`
                 SELECT 
-                    f.ProductID,
+                    w.ProductID,
                     p.UID,
                     p.Name AS ProductName,
                     p.Price,
                     p.Currency,
                     pr.Name AS ProvinceName,
-                    f.CreatedAt,
+                    w.CreatedAt,
                     ROUND((
                         COALESCE(p.CleanlinessPoint, 0) + 
                         COALESCE(p.LocationPoint, 0) + 
@@ -29,15 +29,15 @@ class FavoriteController {
                         COALESCE(p.CommunicationPoint, 0) + 
                         COALESCE(p.ConveniencePoint, 0)
                     ) / 6, 2) AS AvgRating
-                FROM Favorites f
-                JOIN Products p ON p.ProductID = f.ProductID
+                FROM Wishlist w
+                JOIN Products p ON p.ProductID = w.ProductID
                 LEFT JOIN Provinces pr ON p.ProvinceCode = pr.ProvinceCode  
-                WHERE f.UserID = ?
-                ORDER BY f.CreatedAt DESC
+                WHERE w.UserID = ?
+                ORDER BY w.CreatedAt DESC
             `, [userId]);
 
             // Lấy ảnh cho từng sản phẩm bằng cách gọi internal API
-            const favoritesWithImages = await Promise.all(
+            const wishlistWithImages = await Promise.all(
                 rows.map(async (item) => {
                     try {
                         // Gọi API lấy ảnh chính
@@ -58,20 +58,20 @@ class FavoriteController {
             
             return res.json({ 
                 success: true, 
-                favorites: favoritesWithImages 
+                wishlist: wishlistWithImages 
             });
         } catch (error) {
-            console.error('getUserFavorites error:', error);
+            console.error('getUserWishlist error:', error);
             res.status(500).json({ 
                 success: false, 
-                message: 'Lỗi server khi tải danh sách yêu thích',
+                message: 'Lỗi server khi tải danh sách wishlist',
                 error: error.message 
             });
         }
     }
 
-    // DELETE /favorite/:productId - Xóa khỏi yêu thích
-    async removeFavorite(req, res) {
+    // DELETE /wishlist/:productId - Xóa khỏi wishlist
+    async removeWishlist(req, res) {
         try {
             const userId = req.user?.UserID || req.user?.id;
             const { productId } = req.params;
@@ -84,33 +84,33 @@ class FavoriteController {
             }
 
             const [result] = await pool.query(
-                'DELETE FROM Favorites WHERE UserID = ? AND ProductID = ?',
+                'DELETE FROM Wishlist WHERE UserID = ? AND ProductID = ?',
                 [userId, productId]
             );
 
             if (result.affectedRows === 0) {
                 return res.status(404).json({ 
                     success: false, 
-                    message: 'Không tìm thấy sản phẩm trong danh sách yêu thích' 
+                    message: 'Không tìm thấy sản phẩm trong danh sách wishlist' 
                 });
             }
 
             res.json({ 
                 success: true, 
-                message: 'Đã xóa khỏi danh sách yêu thích' 
+                message: 'Đã xóa khỏi danh sách wishlist' 
             });
         } catch (error) {
-            console.error('removeFavorite error:', error);
+            console.error('removeWishlist error:', error);
             res.status(500).json({ 
                 success: false, 
-                message: 'Lỗi server khi xóa yêu thích',
+                message: 'Lỗi server khi xóa wishlist',
                 error: error.message 
             });
         }
     }
 
-    // POST /favorite/:productId - Thêm vào yêu thích
-    async addFavorite(req, res) {
+    // POST /wishlist/:productId - Thêm vào wishlist
+    async addWishlist(req, res) {
         try {
             const userId = req.user?.UserID || req.user?.id;
             const { productId } = req.params;
@@ -135,25 +135,25 @@ class FavoriteController {
                 });
             }
 
-            // Thêm vào favorites (ignore nếu đã tồn tại)
+            // Thêm vào wishlist (ignore nếu đã tồn tại)
             await pool.query(`
-                INSERT IGNORE INTO Favorites (UserID, ProductID) 
+                INSERT IGNORE INTO Wishlist (UserID, ProductID) 
                 VALUES (?, ?)
             `, [userId, productId]);
 
             res.json({ 
                 success: true, 
-                message: 'Đã thêm vào danh sách yêu thích' 
+                message: 'Đã thêm vào danh sách wishlist' 
             });
         } catch (error) {
-            console.error('addFavorite error:', error);
+            console.error('addWishlist error:', error);
             res.status(500).json({ 
                 success: false, 
-                message: 'Lỗi server khi thêm yêu thích',
+                message: 'Lỗi server khi thêm wishlist',
                 error: error.message 
             });
         }
     }
 }
 
-module.exports = new FavoriteController();
+module.exports = new WishlistController();
