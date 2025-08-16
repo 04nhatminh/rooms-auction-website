@@ -7,7 +7,11 @@ from datetime import datetime
 def connect_to_mongodb():
     # Kết nối đến MongoDB
     try:
+<<<<<<< HEAD
+        client = MongoClient('mongodb://localhost:27017/')
+=======
         client = MongoClient('mongodb+srv://11_a2airbnb:anhmanminhnhu@cluster0.cyihew1.mongodb.net/')
+>>>>>>> new-users-management
         db = client['a2airbnb']
         print("Connected to MongoDB successfully!\n")
         return db

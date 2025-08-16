@@ -145,39 +145,3 @@
     position: relative;
     z-index: 2;
 }
-
-/* User section with welcome button */
-.user-section {
-    display: flex;
-    gap: 16px;
-    align-items: center;
-}
-
-.user-section .welcome-button {
-    padding: 10px 20px;
-    background: linear-gradient(135deg, rgba(39, 140, 159, 0.7), rgba(83, 176, 188, 0.7));
-    color: white;
-    border-radius: 24px;
-    font-family: Montserrat, sans-serif;
-    font-size: 16px;
-    font-weight: 500;
-    line-height: 1.2;
-    white-space: nowrap;
-    box-shadow: 0 4px 12px rgba(39, 140, 159, 0.2);
-    user-select: none;
-    pointer-events: none;
-    backdrop-filter: blur(8px);
-    border: 2px solid rgba(255, 255, 255, 0.3);
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .user-section {
-        gap: 12px;
-    }
-    
-    .user-section .welcome-button {
-        font-size: 14px;
-        padding: 8px 16px;
-    }
-}

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import FavoritesApi from '../../api/favoritesApi';
-import HeaderSimple from '../../components/HeaderSimple/HeaderSimple';
+import logo from '../../assets/logo.png';
 
-const API_BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:3000';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000';
 
 const FavoritePage = () => {
     const [favorites, setFavorites] = useState([]);
@@ -70,13 +70,25 @@ const FavoritePage = () => {
         }
     };
 
-    const handleViewProduct = (uid) => {
-        navigate(`/room/${uid}`);
+    const handleViewProduct = (productId) => {
+        navigate(`/product/${productId}`);
     };
 
     return React.createElement('div', { className: "min-h-dvh bg-slate-100" },
         // Header
-        React.createElement(HeaderSimple),
+        React.createElement('header', { className: "sticky top-0 z-10 border-b border-slate-200 bg-white/80 backdrop-blur" },
+            React.createElement('div', { className: "mx-auto flex max-w-6xl items-center justify-between px-4 py-3" },
+                React.createElement('button', { 
+                    type: "button",
+                    onClick: () => navigate('/'),
+                    className: "flex items-center gap-3",
+                    'aria-label': "Quay về trang chủ"
+                },
+                    React.createElement('img', { src: logo, alt: "Logo", className: "w-10 h-10" }),
+                    React.createElement('span', { className: "text-2xl font-semibold bg-gradient-to-b from-[#278C9F] to-[#53B0BC] text-transparent bg-clip-text mt-1" }, "bidstay")
+                ),
+            )
+        ),
 
         // Main Content
         React.createElement('main', { className: "mx-auto max-w-6xl px-4 py-6" },
@@ -118,7 +130,6 @@ const FavoritePage = () => {
             !loading && !error && favorites.length > 0 && React.createElement('div', { className: "grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" },
                 favorites.map(item => {
                     const id = item.ProductID;
-                    const uid = item.UID; // fallback nếu không có UID
                     const name = item.ProductName || '—';
                     const imageUrl = item.MainImageURL || null; // Sử dụng ảnh từ API
                     const price = item.Price;
@@ -126,7 +137,7 @@ const FavoritePage = () => {
                     const location = item.ProvinceName || '—';
                     
                     return React.createElement('div', { 
-                        key: uid, // Sử dụng UID làm key nếu có
+                        key: id, // Sử dụng ProductID làm key
                         className: "rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow flex flex-col"
                     },
                         // Image Container
@@ -171,7 +182,7 @@ const FavoritePage = () => {
                             
                             React.createElement('button', {
                                 className: "mt-auto w-full text-xs font-medium rounded-lg border border-slate-300 py-2 hover:bg-slate-50 transition-colors",
-                                onClick: () => handleViewProduct(uid)
+                                onClick: () => handleViewProduct(id)
                             }, "Xem chi tiết")
                         )
                     );

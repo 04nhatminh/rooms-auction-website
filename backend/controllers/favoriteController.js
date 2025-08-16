@@ -15,7 +15,6 @@ class FavoriteController {
             const [rows] = await pool.query(`
                 SELECT 
                     f.ProductID,
-                    p.UID,
                     p.Name AS ProductName,
                     p.Price,
                     p.Currency,
