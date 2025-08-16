@@ -1,0 +1,16 @@
+.transaction-history-page {
+  padding: 32px;
+}
+.transaction-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+.transaction-table th, .transaction-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+.transaction-table th {
+  background: #f5f5f5;
+}
