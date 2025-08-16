@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UserAPI from '../../api/userApi';
-import HeaderSimple from '../../components/HeaderSimple/HeaderSimple';
+import HeaderUserMenu from '../../components/HeaderUserMenu/HeaderUserMenu';
+import logo from '../../assets/logo.png'; // NEW
 
 const isValidAvatarURL = (val) => {
   if (!val || typeof val !== 'string') return false;
@@ -141,6 +142,13 @@ const UserProfilePage = () => {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('userData');
+    localStorage.removeItem('token');
+    setUser(null);
+    navigate('/login');
+  };
+
   const togglePwdVisible = (key) => {
     setPwdForm(f => ({ ...f, show: { ...f.show, [key]: !f.show[key] } }));
   };
@@ -173,10 +181,27 @@ const UserProfilePage = () => {
 
   return (
     <div className="min-h-dvh bg-slate-100 text-slate-800">
-      <HeaderSimple />
+      <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/80 backdrop-blur">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
+          {/* Logo về trang chủ - REPLACED */}
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className="flex items-center gap-3"
+            aria-label="Quay về trang chủ"
+          >
+            <img src={logo} alt="Logo" className="w-10 h-10" />
+            <span className="text-2xl font-semibold bg-gradient-to-b from-[#278C9F] to-[#53B0BC] text-transparent bg-clip-text mt-1">
+              bidstay
+            </span>
+          </button>
+          {/* User menu on the right */}
+          {user && <HeaderUserMenu user={user} onLogout={handleLogout} />}
+        </div>
+      </header>
 
       <main className="mx-auto max-w-5xl px-4 py-6">
-        <h1 className="text-xl font-semibold mb-4">Quản lý Hồ sơ của bạn</h1>
+        <h1 className="text-xl font-semibold mb-4">Quản lý User Profile</h1>
         {/* Tabs */}
         <div className="mb-4 flex gap-2">
           <button
@@ -212,22 +237,8 @@ const UserProfilePage = () => {
                       onError={() => setShowAvatarImg(false)}
                     />
                   ) : (
-                    <div 
-                      className="h-24 w-24 rounded-full border border-slate-200 bg-gradient-to-br from-[#278C9F] to-[#7CD1E5] text-white flex items-center justify-center text-2xl font-extrabold select-none"
-                      style={{ 
-                        borderRadius: '50%',
-                        minWidth: '96px',
-                        minHeight: '96px',
-                        width: '96px',
-                        height: '96px'
-                      }}
-                    >
-                      {(() => {
-                        if (!profile.fullName?.trim()) return 'U';
-                        const names = profile.fullName.trim().split(' ');
-                        // Lấy chữ cái đầu của tên cuối (lastname)
-                        return names[names.length - 1].charAt(0).toUpperCase();
-                      })()}
+                    <div className="h-24 w-24 rounded-full border border-slate-200 bg-gradient-to-br from-[#278C9F] to-[#7CD1E5] text-white flex items-center justify-center text-2xl font-extrabold select-none">
+                      {(profile.fullName?.trim()?.[0] || 'U').toUpperCase()}
                     </div>
                   )}
                   <div className="space-y-2">
