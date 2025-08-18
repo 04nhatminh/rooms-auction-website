@@ -723,14 +723,8 @@ def load_all_listing_files():
     """Load all listing info files from default location and crawled_data directory"""
     listing_files = []
     
-    # Add default file
-    default_file = "output/listing_info.json"
-    if os.path.exists(default_file):
-        listing_files.append(default_file)
-        print(f"[INFO] Found default listing file: {default_file}")
-    
     # Check crawled_data directory
-    crawled_data_dir = "output/crawled_data"
+    crawled_data_dir = "../output/crawled_data"
     if os.path.exists(crawled_data_dir):
         for filename in os.listdir(crawled_data_dir):
             if filename.startswith("listing_info_") and filename.endswith(".json"):
@@ -744,14 +738,8 @@ def load_all_reviews_files():
     """Load all reviews files from default location and crawled_data directory"""
     reviews_files = []
     
-    # Add default file
-    default_file = "output/listing_reviews.json"
-    if os.path.exists(default_file):
-        reviews_files.append(default_file)
-        print(f"[INFO] Found default reviews file: {default_file}")
-    
     # Check crawled_data directory
-    crawled_data_dir = "output/crawled_data"
+    crawled_data_dir = "../output/crawled_data"
     if os.path.exists(crawled_data_dir):
         for filename in os.listdir(crawled_data_dir):
             if filename.startswith("review_") and filename.endswith(".json"):

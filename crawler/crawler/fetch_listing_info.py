@@ -37,7 +37,7 @@ def fetch_price(listing_id, hash_val, encoded_id, domain):
     
     # Danh sách các khoảng thời gian để thử
     date_ranges = [
-        # Thử các khoảng thời gian khác nhau
+        # Thử các khoảng thời gian cách nhau 1 ngày
         (7, 8),   # 7-8 ngày tới
         (10, 11), # 10-11 ngày tới
         (14, 15), # 14-15 ngày tới  
@@ -48,12 +48,25 @@ def fetch_price(listing_id, hash_val, encoded_id, domain):
         (90, 91), # 90-91 ngày tới
         (120, 121), # 120-121 ngày tới
         (150, 151), # 150-151 ngày tới
-        (180, 181) # 180-181 ngày tới
+        (180, 181), # 180-181 ngày tới
+        
+        # Thêm 4 cặp cách nhau 2 ngày
+        (7, 9),   # 7-9 ngày tới (2 ngày)
+        (14, 16), # 14-16 ngày tới (2 ngày)
+        (30, 32), # 30-32 ngày tới (2 ngày)
+        (60, 62), # 60-62 ngày tới (2 ngày)
+        
+        # Thêm 4 cặp cách nhau 3 ngày
+        (7, 10),  # 7-10 ngày tới (3 ngày)
+        (14, 17), # 14-17 ngày tới (3 ngày)
+        (30, 33), # 30-33 ngày tới (3 ngày)
+        (60, 63), # 60-63 ngày tới (3 ngày)
     ]
     
     for i, (checkin_days, checkout_days) in enumerate(date_ranges):
         try:
-            print(f"[INFO] Trying ({checkin_days}-{checkout_days}) for listing {listing_id}")
+            days_duration = checkout_days - checkin_days
+            print(f"[INFO] Trying ({checkin_days}-{checkout_days}) for listing {listing_id} - {days_duration} days")
             
             # Tạo variables cho request
             checkin = (datetime.today() + timedelta(days=checkin_days)).strftime("%Y-%m-%d")
@@ -100,7 +113,7 @@ def fetch_price(listing_id, hash_val, encoded_id, domain):
             
             # Kiểm tra xem có dữ liệu không
             if price_items:
-                return price_items
+                return price_items, days_duration  # Trả về cả price_items và số ngày để xử lý sau
             else:
                 continue
                 
@@ -108,12 +121,18 @@ def fetch_price(listing_id, hash_val, encoded_id, domain):
             continue
                 
     
-    # Nếu tất cả đều thất bại, trả về list rỗng
+    # Nếu tất cả đều thất bại, trả về list rỗng và 1 ngày
     print(f"[ERROR] All attempts failed for getting price of listing {listing_id}")
-    return []
+    return [], 1
 
 # Extract data
-def extract_listing_data(info, price, listing_id):
+def extract_listing_data(info, price_data, listing_id):
+    # Xử lý price_data (có thể là tuple (price_items, days_duration) hoặc chỉ là price_items)
+    if isinstance(price_data, tuple):
+        price, days_duration = price_data
+    else:
+        price = price_data
+        days_duration = 1
     data = {
         "images": [],
         "apartment_info": {},
@@ -253,7 +272,12 @@ def extract_listing_data(info, price, listing_id):
                 title = nested.get("localizedTitle", "")
                 if "đêm" in title or "night" in title:
                     micros = int(total.get("amountMicros", 0))
-                    data["price"]["night_price"] = int(micros / 1_000_000)
+                    # Chia giá cho số ngày nếu lớn hơn 1
+                    if days_duration > 1:
+                        night_price = int(micros / 1_000_000) // days_duration
+                    else:
+                        night_price = int(micros / 1_000_000)
+                    data["price"]["night_price"] = night_price
       
     return {
         "listing_id": listing_id,
