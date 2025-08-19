@@ -1,34 +1,37 @@
 :root{
   --text:#1f2937;          /* xám đậm cho title */
-  --muted:#9ca3af;         /* xám nhạt cho crumb mờ */
-  --primary-600:#0ea5a4;   /* xanh ngọc cho link "Danh sách" */
+  --muted: #9ca3af;         /* xám nhạt cho crumb mờ */
+  --primary-600: #0ea5a4;   /* xanh ngọc cho link "Danh sách" */
 }
 
 .header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between; /* >>> breadcrumb trái, title phải */
-  margin-bottom:14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* >>> breadcrumb trái, title phải */
+  margin-bottom: 14px;
 }
 
 .crumbs{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  color:var(--muted);
-  white-space:nowrap;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  font-family: Montserrat;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .back{
-  background:transparent;
-  border:0; padding:0;
-  color:var(--muted);
-  cursor:pointer;
-  font:inherit;
+  background: transparent;
+  border: 0; padding: 0;
+  color: var(--muted);
+  cursor: pointer;
+  font: inherit;
 }
 
 .back:hover{ 
-  text-decoration:underline; 
+  text-decoration: underline; 
 }
 
 .sep{ 
@@ -36,47 +39,47 @@
 }
 
 .link{
-  color:var(--primary-600);
-  text-decoration:none;
+  color: var(--primary-600);
+  text-decoration: none;
 }
 
 .link:hover{ 
-  text-decoration:underline; 
+  text-decoration: underline; 
 }
 
 .muted{ 
-  color:var(--muted); 
+  color: var(--muted); 
 }
 
 .right{
-  display:flex;
-  align-items:center;
-  gap:10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .title{
-  margin:0;
+  margin: 0;
   font-family: Montserrat;
-  font-size:26px;          /* tăng/giảm nếu muốn to hơn */
-  line-height:1.2;
-  font-weight:700;         /* đậm như ảnh */
-  color:var(--text);
+  font-size: 24px;          /* tăng/giảm nếu muốn to hơn */
+  line-height: 1.2;
+  font-weight: 700;         /* đậm như ảnh */
+  color: black;
 }
 
 .actions{ 
-  display:flex; 
-  gap:8px; 
+  display: flex; 
+  gap: 8px; 
 }
 
 @media (max-width: 640px){
   .header{ 
-    flex-direction:column; 
-    align-items:flex-start; 
-    gap:6px; 
+    flex-direction: column; 
+    align-items: flex-start; 
+    gap: 6px; 
   }
 
   .right{ 
-    width:100%; 
-    justify-content:space-between; 
+    width: 100%; 
+    justify-content: space-between; 
   }
 }

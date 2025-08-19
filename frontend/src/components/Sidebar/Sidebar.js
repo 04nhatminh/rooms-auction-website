@@ -1,8 +1,9 @@
 import { NavLink } from 'react-router-dom';
 import styles from './Sidebar.module.css';
 import logo from '../../assets/logo.png';
+import menuIcon from '../../assets/menu_white.png';
 
-export default function Sidebar({ onLogout, compact = true }) {
+export default function Sidebar({ onLogout, compact = false, onToggle }) {
   const menu = [
     { to: '/admin/dashboard', label: 'Dashboard', icon: '🏠' },
     { to: '/admin/users-management', label: 'Quản lý khách hàng', icon: '👥' },
@@ -13,29 +14,42 @@ export default function Sidebar({ onLogout, compact = true }) {
   return (
     <aside className={`${styles.sidebar} ${compact ? styles.compact : ''}`}>
       <div className={styles.content}>
-        <div className={styles.header}>
-          <div className={styles.logo}>
-            <img src={logo} className={styles.logoImg} alt="Logo" />
-            <h2 className={styles.logoText}>A2BnB Admin</h2>
-          </div>
-          <nav className={styles.nav}>
-            {menu.map(m => (
-              <NavLink
-                key={m.to}
-                to={m.to}
-                className={({ isActive }) =>
-                  `${styles.navItem} ${isActive ? styles.active : ''}`
-                }
-              >
-                <span className={styles.icon}>{m.icon}</span>
-                <span>{m.label}</span>
-              </NavLink>
-            ))}
-          </nav>
+        <div className={styles.topBar}>
+          <button 
+            className={styles.menuButton}
+            onClick={onToggle}
+            title={compact ? 'Mở rộng sidebar' : 'Thu gọn sidebar'}
+          >
+            <img src={menuIcon} className={styles.menuIcon} alt="Menu" />
+          </button>
+          {!compact && (
+            <div className={styles.logoSection}>
+              <h2 className={styles.logoText}>A2BnB Admin</h2>
+            </div>
+          )}
         </div>
 
-        <button onClick={onLogout} className={styles.logout}>
-          ← Đăng xuất
+        {/* Navigation Menu */}
+        <nav className={styles.nav}>
+          {menu.map(m => (
+            <NavLink
+              key={m.to}
+              to={m.to}
+              className={({ isActive }) =>
+                `${styles.navItem} ${isActive ? styles.active : ''}`
+              }
+              title={compact ? m.label : ''}
+            >
+              <span className={styles.navIcon}>{m.icon}</span>
+              {!compact && <span className={styles.navLabel}>{m.label}</span>}
+            </NavLink>
+          ))}
+        </nav>
+
+        {/* Logout Button */}
+        <button onClick={onLogout} className={styles.logout} title={compact ? 'Đăng xuất' : ''}>
+          <span className={styles.logoutIcon}>←</span>
+          {!compact && <span className={styles.logoutLabel}>Đăng xuất</span>}
         </button>
       </div>
     </aside>

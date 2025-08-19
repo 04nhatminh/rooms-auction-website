@@ -1,7 +1,7 @@
 .page {
   height: 100%;
-  font-family: 'Montserrat', sans-serif;
-  color: #374151;
+  font-family: 'Montserrat';
+  color: #000000;
 }
 
 .layout {
@@ -12,33 +12,11 @@
   padding: 0;
 }
 
-/* --- Action Bar --- */
-.actionBar {
+.controlsBar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
-  padding: 1.5rem;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
-}
-
-.actionLeft {
-  flex: 1;
-}
-
-.pageTitle {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #111827;
-  margin: 0;
-}
-
-.actionRight {
-  display: flex;
-  gap: 1rem;
+  margin-bottom: 1rem;
 }
 
 .addBtn {
@@ -47,8 +25,9 @@
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: 6px;
+  font-family: Montserrat;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s ease;
   display: flex;
@@ -60,7 +39,37 @@
   background-color: #006b6f;
 }
 
-/* --- Table Container --- */
+.searchContainer {
+  position: relative;
+  min-width: 50vh;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.5rem 2.5rem 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.searchInput:focus {
+  border-color: #008489;
+  box-shadow: 0 0 0 2px rgba(0, 132, 137, 0.1);
+}
+
+.searchIcon {
+  width: 1rem;
+  height: 1rem;
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+  font-size: 1rem;
+}
+
 .tableContainer {
   background-color: #fff;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -72,23 +81,26 @@
 
 .table {
   width: 100%;
-  table-layout: auto;
+  table-layout: fixed;
   border-collapse: collapse;
-  font-size: 0.875rem;
+  font-size: 14px;
 }
 
 .table thead {
   background-color: #008489;
   color: #fff;
-  font-size: 0.875rem;
+  font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .table th {
-  padding: 1rem;
+  padding: 1rem 0.75rem;
   text-align: left;
+  font-family: Montserrat;
+  font-size: 14px;
   font-weight: 600;
+  overflow: hidden;
 }
 
 .table th:last-child {
@@ -109,73 +121,56 @@
 }
 
 .table td {
-  padding: 1rem;
+  padding: 0.75rem;
   text-align: left;
   vertical-align: middle;
+  font-family: Montserrat;
+  font-size: 13px;
+  overflow: hidden;
 }
 
 .table td:last-child {
   text-align: center;
 }
 
-.textCenter {
-  text-align: center !important;
+.colId { width: 5%; }
+.colUid { width: 15%; }
+.colName { width: 20%; }
+.colType { width: 15%; }
+.colDistrict { width: 15%; }
+.colProvince { width: 12%; }
+.colPrice { width: 12%; }
+.colSource { width: 10%; }
+.colActions { width: 20%; }
+
+.uidText, .nameText, .districtText, .provinceText {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
-/* --- Product Info --- */
-.productInfo {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.productName {
+.priceText {
   font-weight: 500;
-  color: #111827;
+  color: #008489;
 }
 
-.roomNumber {
-  font-size: 0.75rem;
-  color: #6b7280;
-}
-
-/* --- Badges --- */
-.propertyType {
-  background-color: #dbeafe;
-  color: #1e40af;
-  font-size: 0.75rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: 9999px;
-  font-weight: 500;
-}
-
-.region {
-  background-color: #fef3c7;
-  color: #92400e;
-  font-size: 0.75rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: 9999px;
-  font-weight: 500;
-}
-
-/* --- Actions --- */
 .actions {
   display: flex;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.25rem;
 }
 
-.btnView,
-.btnEdit,
-.btnDelete {
+.btnView, .btnEdit, .btnDelete {
   border: none;
-  padding: 0.5rem;
+  padding: 0.375rem;
   border-radius: 0.25rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 1rem;
-  width: 32px;
-  height: 32px;
+  font-size: 0.875rem;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -208,22 +203,9 @@
   background-color: #fca5a5;
 }
 
-/* --- Empty State --- */
 .empty {
   text-align: center;
   padding: 3rem;
-}
-
-.emptyState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-}
-
-.emptyIcon {
-  font-size: 3rem;
-  opacity: 0.5;
 }
 
 .emptyText {
@@ -232,39 +214,19 @@
   font-weight: 500;
 }
 
-.emptyAddBtn {
-  background-color: #008489;
-  color: #fff;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.emptyAddBtn:hover {
-  background-color: #006b6f;
-}
-
-/* --- Pagination --- */
 .pagination {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 1rem;
-  padding: 1rem;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
 }
 
 .pageBtn {
-  background-color: #f3f4f6;
+  background-color: #ffffff;
   border: 1px solid #d1d5db;
-  color: #374151;
+  color: #000000;
+  font-family: Montserrat;
+  font-size: 0.875rem;
   padding: 0.5rem 1rem;
   border-radius: 6px;
   cursor: pointer;
@@ -272,7 +234,7 @@
 }
 
 .pageBtn:hover:not(:disabled) {
-  background-color: #e5e7eb;
+  background: #eafeff;
 }
 
 .pageBtn:disabled {
@@ -282,12 +244,10 @@
 
 .pageInfo {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: #000000;
 }
 
-/* --- Loading & Error --- */
-.loading,
-.error {
+.loading, .error {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -314,84 +274,4 @@
 
 .retryBtn:hover {
   background-color: #006b6f;
-}
-
-/* --- Responsive Design --- */
-@media (max-width: 768px) {
-  .actionBar {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: stretch;
-  }
-
-  .actionRight {
-    justify-content: center;
-  }
-
-  .table {
-    font-size: 0.75rem;
-  }
-
-  .table th,
-  .table td {
-    padding: 0.5rem;
-  }
-
-  .actions {
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
-  .btnView,
-  .btnEdit,
-  .btnDelete {
-    width: 100%;
-    height: auto;
-    padding: 0.25rem 0.5rem;
-  }
-}
-
-@media (max-width: 640px) {
-  /* Stack table on very small screens */
-  .table thead {
-    display: none;
-  }
-
-  .table,
-  .row,
-  .table td {
-    display: block;
-    width: 100%;
-  }
-
-  .row {
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-    padding: 1rem;
-  }
-
-  .table td {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #f3f4f6;
-  }
-
-  .table td:last-child {
-    border-bottom: none;
-  }
-
-  .table td::before {
-    content: attr(data-label);
-    font-weight: 600;
-    color: #6b7280;
-    min-width: 120px;
-  }
-
-  .actions {
-    flex-direction: row;
-    justify-content: flex-end;
-  }
 }

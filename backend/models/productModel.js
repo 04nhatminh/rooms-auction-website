@@ -260,15 +260,18 @@ class ProductModel {
         try {
             const query = `
                 SELECT 
-                    p.ProductID as id,
+                    p.ProductID,
                     p.UID,
-                    p.Name as name,
-                    p.Address,
-                    p.ProvinceCode,
-                    p.NumBedrooms as bedrooms,
-                    p.NumBathrooms as bathrooms,
-                    p.CreatedAt as createdAt
+                    p.Name as productName,
+                    ppt.PropertyName as propertyTypeName,
+                    d.Name as districtName,
+                    pr.Name as provinceName,
+                    p.Price,
+                    p.Source
                 FROM Products p
+                JOIN Properties ppt ON p.PropertyType = ppt.PropertyID
+                JOIN Districts d ON p.DistrictCode = d.DistrictCode
+                JOIN Provinces pr ON p.ProvinceCode = pr.ProvinceCode
                 ORDER BY p.ProductID ASC
                 LIMIT ${limit} OFFSET ${offset}
             `;

@@ -1,4 +1,29 @@
-:root{ --bg:#f6f8fb; }
-.layout{ display:flex; height:100vh; background:var(--bg); }
-.main{ flex:1; padding:28px; }
-@media (max-width:1024px){ .main{ padding:20px; } }
+:root { 
+  --bg: #f6f8fb; 
+}
+
+.layout { 
+  display: flex; 
+  height: 100vh; 
+  background: var(--bg); 
+}
+
+.main { 
+  flex: 1; 
+  padding: 24px; 
+  overflow-y: auto;
+  height: 100vh;
+  transition: all 0.3s ease;
+  margin-left: 240px;
+}
+
+.mainExpanded {
+  margin-left: 70px;
+}
+
+@media (max-width: 1024px) { 
+  .main { 
+    padding: 20px;
+    margin-left: 20px;
+  } 
+}

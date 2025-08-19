@@ -2,15 +2,37 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/PageHeader/PageHeader';
 import styles from './AdminProductsManagementPage.module.css';
+import SearchIcon from '../../assets/search_black.png';
+import ViewIcon from '../../assets/view.png';
+import EditIcon from '../../assets/edit.png';
+import DeleteIcon from '../../assets/delete.png';
 import productApi from '../../api/productApi';
 
 const AdminProductsManagementPage = () => {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [searchUID, setSearchUID] = useState('');
+
+  useEffect(() => {
+    loadProducts();
+  }, [currentPage]);
+
+  useEffect(() => {
+    // Filter products by UID search
+    if (searchUID.trim() === '') {
+      setFilteredProducts(products);
+    } else {
+      const filtered = products.filter(product => 
+        product.UID?.toLowerCase().includes(searchUID.toLowerCase())
+      );
+      setFilteredProducts(filtered);
+    }
+  }, [products, searchUID]);
 
   useEffect(() => {
     loadProducts();
@@ -75,6 +97,16 @@ const AdminProductsManagementPage = () => {
     navigate(`/admin/edit-product/${productId}`);
   };
 
+  const formatCurrency = (price) => {
+    if (!price || isNaN(price)) return '-';
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(price);
+  };
+
   const formatPropertyType = (type) => {
     const types = {
       'apartment': 'Căn hộ',
@@ -132,122 +164,120 @@ const AdminProductsManagementPage = () => {
         ]}
       />
 
+      <div className={styles.controlsBar}>
+        <div className={styles.searchContainer}>
+          <input
+            type="text"
+            placeholder="Tìm kiếm theo UID..."
+            value={searchUID}
+            onChange={(e) => setSearchUID(e.target.value)}
+            className={styles.searchInput}
+          />
+          <img src={SearchIcon} alt="Tìm kiếm" className={styles.searchIcon} />
+        </div>
+
+        <button onClick={handleAddProduct} className={styles.addBtn}>
+          + Thêm sản phẩm mới
+        </button>
+
+      </div>
+
       <div className={styles.layout}>
         <main className={styles.main}>
-          {/* Action Bar */}
-          <div className={styles.actionBar}>
-            <div className={styles.actionLeft}>
-              <h2 className={styles.pageTitle}>
-                Danh sách sản phẩm ({products.length})
-              </h2>
-            </div>
-            <div className={styles.actionRight}>
-              <button 
-                onClick={handleAddProduct}
-                className={styles.addBtn}
-              >
-                + Thêm sản phẩm mới
-              </button>
-            </div>
-          </div>
 
-          {/* Products Table */}
           <div className={styles.tableContainer}>
             <table className={styles.table}>
               <thead>
                 <tr className={styles.tableHeader}>
-                  <th>ID</th>
-                  <th>Tên sản phẩm</th>
-                  <th>Loại hình</th>
-                  <th>Vùng miền</th>
-                  <th>Số phòng ngủ</th>
-                  <th>Số phòng tắm</th>
-                  <th>Ngày tạo</th>
-                  <th>Hành động</th>
+                  <th className={styles.colId}>ID</th>
+                  <th className={styles.colUid}>UID</th>
+                  <th className={styles.colName}>Tên sản phẩm</th>
+                  <th className={styles.colType}>Loại</th>
+                  <th className={styles.colDistrict}>Huyện</th>
+                  <th className={styles.colProvince}>Tỉnh</th>
+                  <th className={styles.colPrice}>Giá</th>
+                  <th className={styles.colSource}>Nguồn</th>
+                  <th className={styles.colActions}>Hành động</th>
                 </tr>
               </thead>
+
               <tbody>
-                {products.map((product) => {
-                  const id = product.id ?? product._id;
+                {filteredProducts.map((product) => {
+                  const productId = product.ProductID;
                   return (
-                    <tr key={id} className={styles.row}>
-                      <td>{id}</td>
-                      <td>
-                        <div className={styles.productInfo}>
-                          <div className={styles.productName}>
-                            {product.name}
-                          </div>
-                          {product.roomNumber && (
-                            <div className={styles.roomNumber}>
-                              Phòng: {product.roomNumber}
-                            </div>
-                          )}
-                        </div>
-                      </td>
-                      <td>
-                        <span className={styles.propertyType}>
-                          {formatPropertyType(product.propertyType)}
+                    <tr key={productId} className={styles.row}>
+                      <td className={styles.colId}>{productId}</td>
+
+                      <td className={styles.colUid}>
+                        <span className={styles.uidText} title={product.UID}>
+                          {product.UID}
                         </span>
                       </td>
-                      <td>
-                        <span className={styles.region}>
-                          {formatRegion(product.region)}
+
+                      <td className={styles.colName}>
+                        <span className={styles.nameText} title={product.productName}>
+                          {product.productName}
                         </span>
                       </td>
-                      <td className={styles.textCenter}>
-                        {product.bedrooms || 1}
+
+                      <td className={styles.colType}>{product.propertyTypeName}</td>
+
+                      <td className={styles.colDistrict}>
+                        <span className={styles.districtText} title={product.districtName}>
+                          {product.districtName}
+                        </span>
                       </td>
-                      <td className={styles.textCenter}>
-                        {product.bathrooms || 1}
+
+                      <td className={styles.colProvince}>
+                        <span className={styles.provinceText} title={product.provinceName}>
+                          {product.provinceName}
+                        </span>
                       </td>
-                      <td>
-                        {product.createdAt 
-                          ? new Date(product.createdAt).toLocaleDateString('vi-VN')
-                          : '-'
-                        }
+
+                      <td className={styles.colPrice}>
+                        <span className={styles.priceText}>
+                          {formatCurrency(product.Price)}
+                        </span>
                       </td>
-                      <td>
+
+                      <td className={styles.colSource}>{product.Source}</td>
+                      
+                      <td className={styles.colActions}>
                         <div className={styles.actions}>
-                          <button
-                            className={styles.btnView}
-                            onClick={() => navigate(`/product/${id}`)}
+                          <button className={styles.btnView}
+                            onClick={() => navigate(`/product/${productId}`)}
                             title="Xem chi tiết"
                           >
-                            👁️
+                            <img src={ViewIcon} alt="Xem chi tiết" />
                           </button>
+
                           <button
                             className={styles.btnEdit}
-                            onClick={() => handleEditProduct(id)}
+                            onClick={() => handleEditProduct(productId)}
                             title="Chỉnh sửa"
                           >
-                            ✏️
+                            <img src={EditIcon} alt="Chỉnh sửa" />
                           </button>
+
                           <button
                             className={styles.btnDelete}
-                            onClick={() => handleDeleteProduct(id)}
+                            onClick={() => handleDeleteProduct(productId)}
                             title="Xóa"
                           >
-                            🗑️
+                            <img src={DeleteIcon} alt="Xóa" />
                           </button>
                         </div>
                       </td>
+
                     </tr>
                   );
                 })}
-                {products.length === 0 && (
+
+                {filteredProducts.length === 0 && searchUID.trim() === '' && (
                   <tr>
                     <td colSpan={8} className={styles.empty}>
-                      <div className={styles.emptyState}>
-                        <div className={styles.emptyIcon}>📦</div>
-                        <div className={styles.emptyText}>
-                          Chưa có sản phẩm nào
-                        </div>
-                        <button 
-                          onClick={handleAddProduct}
-                          className={styles.emptyAddBtn}
-                        >
-                          Thêm sản phẩm đầu tiên
-                        </button>
+                      <div className={styles.emptyText}>
+                        Chưa có sản phẩm nào
                       </div>
                     </td>
                   </tr>
@@ -256,7 +286,7 @@ const AdminProductsManagementPage = () => {
             </table>
           </div>
 
-          {/* Pagination */}
+          {/* Paging */}
           {totalPages > 1 && (
             <div className={styles.pagination}>
               <button
