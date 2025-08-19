@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UserAPI from '../../api/userApi';
 import PageHeader from '../../components/PageHeader/PageHeader';
-
-// 👉 dùng CSS Modules
 import styles from './UsersManagementPage.module.css';
 
 const UsersManagementPage = () => {
