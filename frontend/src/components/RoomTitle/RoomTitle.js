@@ -2,8 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useProduct } from '../../contexts/ProductContext';
 import './RoomTitle.css';
 import shareIcon from '../../assets/share.png';
-import heartIcon from '../../assets/heart.png';
-import heartRedIcon from '../../assets/heart_red.png';
+import favoriteIcon from '../../assets/favorite.png';
+import favoriteFilledIcon from '../../assets/favorite_filled.png';
 import saveIcon from '../../assets/save.png';
 
 const RoomTitle = ({ onSave, wishlistChanged }) => {
@@ -126,10 +126,10 @@ const RoomTitle = ({ onSave, wishlistChanged }) => {
             </div>
           )}
         </div>
-        <button className="action-btn" onClick={handleToggleFavorite} disabled={loadingFavorite}>
-          <img src={isFavorite ? heartRedIcon : heartIcon} alt="Favorite" className="action-icon" />
-          {isFavorite ? 'Đã yêu thích' : 'Yêu thích'}
-        </button>
+            <button className="action-btn" onClick={handleToggleFavorite} disabled={loadingFavorite}>
+              <img src={isFavorite ? favoriteFilledIcon : favoriteIcon} alt={isFavorite ? 'Đã yêu thích' : 'Yêu thích'} className="action-icon" />
+              {isFavorite ? 'Đã yêu thích' : 'Yêu thích'}
+            </button>
         <button
           className="action-btn"
           onClick={async () => {

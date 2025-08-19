@@ -1,14 +1,19 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './RoomCard.css';
 import LocationIcon from '../../assets/location.png';
 import StarOutlineIcon from '../../assets/star_outline.png';
 import PriceTagIcon from '../../assets/price.png';
 import PlaceHolderImg from '../../assets/placeholder.jpg';
+import favoriteIcon from '../../assets/favorite.png';
+import favoriteFilledIcon from '../../assets/favorite_filled.png';
+import FavoritesApi from '../../api/favoritesApi';
 
 const RoomCard = ({ product }) => {
   const navigate = useNavigate();
   const defaultImage = PlaceHolderImg;
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [loadingFavorite, setLoadingFavorite] = useState(false);
 
   // Format giá tiền
   const formatPrice = (price, currency = 'VND') => {
@@ -59,21 +64,74 @@ const RoomCard = ({ product }) => {
     }
   };
 
+  useEffect(() => {
+    let mounted = true;
+    async function fetchFavoriteStatus() {
+      try {
+        const data = await FavoritesApi.getUserFavorites();
+        if (mounted && data.favorites) {
+          setIsFavorite(data.favorites.some(f => f.ProductID === product.ProductID));
+        }
+      } catch (err) {
+        // Không cần alert khi load trạng thái ban đầu
+      }
+    }
+    fetchFavoriteStatus();
+    return () => { mounted = false; };
+  }, [product.ProductID]);
+
+  // Toggle favorite
+  const handleToggleFavorite = async (e) => {
+    e.stopPropagation();
+    if (loadingFavorite) return;
+    setLoadingFavorite(true);
+    try {
+      if (isFavorite) {
+        await FavoritesApi.removeFavorite(product.ProductID);
+        setIsFavorite(false);
+        alert('Đã bỏ khỏi danh sách yêu thích!');
+      } else {
+        await FavoritesApi.addFavorite(product.ProductID);
+        setIsFavorite(true);
+        alert('Đã thêm vào danh sách yêu thích!');
+      }
+    } catch (err) {
+      alert('Có lỗi khi cập nhật yêu thích: ' + (err.message || ''));
+    } finally {
+      setLoadingFavorite(false);
+    }
+  };
+
   return (
     <div className="room-card" onClick={handleCardClick}>
-      <img 
-        src={
-          product?.mongoImageUrl || 
-          product?.PropertyImageURL || 
-          product?.RoomTypeImageURL || 
-          defaultImage
-        } 
-        alt={product?.ProductName || 'Room'} 
-        className="room-card-image"
-        onError={(e) => {
-          e.target.src = defaultImage;
-        }}
-      />
+      <div className="room-card-image-container" style={{ position: 'relative' }}>
+        <img
+          src={
+            product?.mongoImageUrl || 
+            product?.PropertyImageURL || 
+            product?.RoomTypeImageURL || 
+            defaultImage
+          } 
+          alt={product?.ProductName || 'Room'} 
+          className="room-card-image"
+          onError={(e) => {
+            e.target.src = defaultImage;
+          }}
+        />
+        <button
+          className="favorite-btn"
+          style={{ position: 'absolute', top: 10, right: 10, zIndex: 2 }}
+          onClick={handleToggleFavorite}
+          disabled={loadingFavorite}
+          aria-label={isFavorite ? 'Bỏ yêu thích' : 'Thêm vào yêu thích'}
+        >
+          <img
+            src={isFavorite ? favoriteFilledIcon : favoriteIcon}
+            alt={isFavorite ? 'Đã yêu thích' : 'Yêu thích'}
+            style={{ width: 28, height: 28 }}
+          />
+        </button>
+      </div>
 
       <div className="room-info">
         <h3 className="room-name">
