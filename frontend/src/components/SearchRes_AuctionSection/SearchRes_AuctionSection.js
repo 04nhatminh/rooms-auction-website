@@ -148,9 +148,13 @@ const SearchRes_AuctionSection = ({ activeAuctions }) => {
   return (
     <section className="search-res-content-auction-section">
       <div className="search-res-auction-card-container">
-        {(auctions || []).map((auction, idx) => (
-          <AuctionCard key={auction.AuctionUID || idx} auction={auction} />
-        ))}
+        {auctions.length === 0 ? (
+          <p>Không có kết quả nào</p>
+        ) : (
+          (auctions || []).map((auction, idx) => (
+            <AuctionCard key={auction.AuctionUID || idx} auction={auction} />
+          ))
+        )}
       </div>
     </section>
   );

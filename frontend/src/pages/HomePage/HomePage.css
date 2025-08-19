@@ -33,70 +33,6 @@
   margin-top: 8px !important;
 }
 
-/* .login-signup {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-}
-
-.login-signup .home-login-button {
-    display: flex;
-    padding: 10px 24px;
-    border: 2px solid #FFF;
-    border-radius: 8px;
-    height: 48px;
-    min-width: fit-content;
-    flex-direction: row;
-    background: transparent;
-    justify-content: center;
-    align-items: center;
-    flex: 1 0 0;
-    align-self: stretch;
-    transition: all 0.3s ease;
-
-    color: var(--Neutrals, #FFF);
-    font-family: Montserrat;
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 650;
-    line-height: normal;
-    cursor: pointer;
-}
-
-.login-signup .home-login-button:hover {
-    transform: translateY(-1px);
-}
-
-.login-signup .home-signup-button {
-    display: flex;
-    padding: 10px 24px;
-    border: None;
-    background: #FFF !important;
-    border-radius: 8px;
-    height: 48px;
-    flex-direction: column;
-    background: transparent;
-    justify-content: center;
-    align-items: center;
-    flex: 1 0 0;
-    align-self: stretch;
-    transition: all 0.3s ease;
-
-    color: #000;
-    text-align: center;
-    font-family: Montserrat;
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 600;
-    line-height: normal;
-    cursor: pointer;
-}
-
-.login-signup .home-signup-button:hover {
-    transform: translateY(-1px);
-} */
-
-
 .home-banner {
     position: relative;
     width: 100%;
@@ -144,4 +80,24 @@
     line-height: normal;
     position: relative;
     z-index: 2;
+}
+
+@media screen and (max-width: 880px) {
+    .banner-title {
+        font-size: 48px;
+    }
+
+    .banner-subtitle {
+        font-size: 24px;
+    }
+}
+
+@media screen and (max-width: 740px) {
+    .banner-title {
+        font-size: 36px;
+    }
+
+    .banner-subtitle {
+        font-size: 16px;
+    }
 }

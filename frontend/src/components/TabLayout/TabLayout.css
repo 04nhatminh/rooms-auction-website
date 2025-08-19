@@ -96,7 +96,7 @@
 }
 
 /* Responsive design */
-@media (max-width: 768px) {
+@media (max-width: 840px) {
   .tab-container {
     padding: 0 16px;
   }
@@ -125,7 +125,7 @@
   }
   
   .tab-subscript {
-    font-size: 12px;
+    display: none;
   }
 }
 
@@ -142,6 +142,6 @@
   }
   
   .tab-subscript {
-    font-size: 11px;
+    display: none;
   }
 }

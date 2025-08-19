@@ -177,3 +177,37 @@
 .user-btn:hover {
   background-color: #333 !important;
 }
+
+@media screen and (max-width: 1200px) {
+  .header {
+    padding: 0px 16px 2px;
+  }
+
+  .header-logo-image {
+    width: clamp(48px, 4vw, 56px);
+    height: clamp(48px, 4vw, 56px);
+    display: block;
+  }
+
+  .header-logo-text {
+    font-size: 18px;
+  }
+}
+
+@media screen and (max-width: 920px) {
+  .header {
+    padding: 0px 16px 2px;
+  }
+
+  .header-logo-image {
+    display: none;
+  }
+
+  .header-logo-text {
+    display: none;
+  }
+
+  .header-user-actions {
+    display: none;
+  }
+}

@@ -148,11 +148,13 @@ const Header = () => {
           <SearchBarMini searchData={searchData} />
         </div>
 
-        {isAuthenticated() ? (
-          <HeaderUserMenu />
-        ) : (
-          <SignInUpAction type="others" />
-        )}
+        <div className="header-user-actions">
+          {isAuthenticated() ? (
+            <HeaderUserMenu />
+          ) : (
+            <SignInUpAction type="others" />
+          )}
+        </div>
       </div>
     </header>
   );
