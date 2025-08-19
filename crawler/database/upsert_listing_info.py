@@ -584,17 +584,10 @@ def upsert_product_from_listing_data(listing_data, mongodb_db=None, reviews_dict
         if sharing_location:
             province_code, district_code = extract_location_from_sharing_location(sharing_location, cursor)
             if province_code is None and district_code is None:
-                try:
-                    address = sharing_location if isinstance(sharing_location, str) else (
-                        sharing_location.get('address') if isinstance(sharing_location, dict) else str(sharing_location)
-                    )
-                except Exception:
-                    address = "N/A"
-                print(f"[WARNING] Proceeding without mapped location for listing {listing_id}; address='{address}'")
-            else:
-                address = get_district_province_names(province_code, district_code, cursor)
+                print(f"[SKIP] Listing {listing_id}: Cannot extract location information.\n")
+                return "skipped"
         else:
-            print(f"[SKIP] Listing {listing_id}: No sharing_location data, skipping...")
+            print(f"[SKIP] Listing {listing_id}: No sharing_location data, skipping...\n")
             return "skipped"
 
         # Ensure property type exists
@@ -607,6 +600,9 @@ def upsert_product_from_listing_data(listing_data, mongodb_db=None, reviews_dict
         # Price
         price_info = data.get('price') or {}
         price = price_info.get('night_price', 0) or 0
+        if (price <= 0):
+            print(f"[SKIP] Listing {listing_id}: Can't get price {price}, skipping...\n")
+            return "skipped"
         currency = price_info.get('currency', 'VND') or 'VND'
 
         # Existing product check
@@ -724,7 +720,7 @@ def load_all_listing_files():
     listing_files = []
     
     # Check crawled_data directory
-    crawled_data_dir = "../output/crawled_data"
+    crawled_data_dir = "output/crawled_data"
     if os.path.exists(crawled_data_dir):
         for filename in os.listdir(crawled_data_dir):
             if filename.startswith("listing_info_") and filename.endswith(".json"):
@@ -739,7 +735,7 @@ def load_all_reviews_files():
     reviews_files = []
     
     # Check crawled_data directory
-    crawled_data_dir = "../output/crawled_data"
+    crawled_data_dir = "output/crawled_data"
     if os.path.exists(crawled_data_dir):
         for filename in os.listdir(crawled_data_dir):
             if filename.startswith("review_") and filename.endswith(".json"):

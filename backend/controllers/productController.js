@@ -160,50 +160,6 @@ class ProductController {
         }
     }
 
-    // API lấy chi tiết product theo ID
-    // GET /api/products/:id
-    // static async getProductDetails(req, res) {
-    //     try {
-    //         const { id } = req.params;
-
-    //         if (!id || isNaN(id)) {
-    //             return res.status(400).json({
-    //                 success: false,
-    //                 message: 'Valid product ID is required'
-    //             });
-    //         }
-
-    //         const product = await ProductModel.getProductById(parseInt(id));
-
-    //         if (!product) {
-    //             return res.status(404).json({
-    //                 success: false,
-    //                 message: 'Product not found'
-    //             });
-    //         }
-
-    //         // Lấy amenities của product
-    //         const amenities = await ProductModel.getProductAmenities(parseInt(id));
-
-    //         return res.status(200).json({
-    //             success: true,
-    //             message: 'Product details retrieved successfully',
-    //             data: {
-    //                 product,
-    //                 amenities
-    //             }
-    //         });
-
-    //     } catch (error) {
-    //         console.error('Error in getProductDetails:', error);
-    //         return res.status(500).json({
-    //             success: false,
-    //             message: 'Internal server error',
-    //             error: error.message
-    //         });
-    //     }
-    // }
-
     // API tìm kiếm products theo multiple criteria
     // GET /api/products/search
     static async searchProducts(req, res) {
@@ -327,6 +283,177 @@ class ProductController {
 
         } catch (error) {
             console.error('Error in searchProducts:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Internal server error',
+                error: error.message
+            });
+        }
+    }
+
+    // Admin Methods
+    // GET /api/room/admin/list - Lấy danh sách tất cả sản phẩm cho admin
+    static async getAllProductsForAdmin(req, res) {
+        try {
+            const { page = 1, limit = 10 } = req.query;
+            const offset = (parseInt(page) - 1) * parseInt(limit);
+
+            console.log(`\ngetAllProductsForAdmin - page: ${page}, limit: ${limit}, offset: ${offset}`);
+
+            const pool = require('../config/database');
+            const countQuery = `SELECT COUNT(*) as total FROM Products`;
+
+            console.log('Executing count query...');
+            const [countResult] = await pool.execute(countQuery);
+            const total = countResult[0].total;
+            console.log(`Total products: ${total}`);
+
+            console.log('Executing main query with params:', [parseInt(limit), offset]);
+            const products = await ProductModel.getAllProductsForAdmin(parseInt(limit), parseInt(offset));
+            console.log(`Retrieved ${products.length} products`);
+
+            const totalPages = Math.ceil(total / parseInt(limit));
+
+            return res.status(200).json({
+                success: true,
+                data: {
+                    items: products,
+                    totalPages,
+                    currentPage: parseInt(page),
+                    totalItems: total
+                }
+            });
+
+        } catch (error) {
+            console.error('Error in getAllProductsForAdmin:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Internal server error',
+                error: error.message
+            });
+        }
+    }
+
+    // POST /api/room/admin/create - Tạo sản phẩm mới
+    static async createProduct(req, res) {
+        try {
+            const {
+                name,
+                roomNumber,
+                bedrooms,
+                bathrooms,
+                description,
+                region,
+                province,
+                district,
+                propertyType,
+                amenities,
+                images
+            } = req.body;
+
+            // Validation cơ bản
+            if (!name || !region || !province) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Tên sản phẩm, vùng miền và tỉnh là bắt buộc'
+                });
+            }
+
+            const pool = require('../config/database');
+            
+            // Tạo UID unique
+            const uid = `ROOM_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+            // Insert vào bảng Products
+            const insertQuery = `
+                INSERT INTO Products (
+                    UID, Name, Address, ProvinceCode, DistrictCode,
+                    NumBedrooms, NumBathrooms, PropertyType, CreatedAt
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+            `;
+
+            const [result] = await pool.execute(insertQuery, [
+                uid,
+                name,
+                roomNumber || '',
+                province,
+                district,
+                bedrooms || 1,
+                bathrooms || 1,
+                propertyType || 1
+            ]);
+
+            const productId = result.insertId;
+
+            // TODO: Insert description, amenities, images vào các bảng liên quan
+
+            return res.status(201).json({
+                success: true,
+                message: 'Tạo sản phẩm thành công',
+                data: {
+                    id: productId,
+                    uid: uid
+                }
+            });
+
+        } catch (error) {
+            console.error('Error in createProduct:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Internal server error',
+                error: error.message
+            });
+        }
+    }
+
+    // PUT /api/room/admin/:id - Cập nhật sản phẩm
+    static async updateProduct(req, res) {
+        try {
+            const { id } = req.params;
+            const updateData = req.body;
+
+            // TODO: Implement update logic
+            
+            return res.status(200).json({
+                success: true,
+                message: 'Cập nhật sản phẩm thành công',
+                data: { id }
+            });
+
+        } catch (error) {
+            console.error('Error in updateProduct:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Internal server error',
+                error: error.message
+            });
+        }
+    }
+
+    // DELETE /api/room/admin/:id - Xóa sản phẩm
+    static async deleteProduct(req, res) {
+        try {
+            const { id } = req.params;
+
+            const pool = require('../config/database');
+            const deleteQuery = `DELETE FROM Products WHERE ProductID = ?`;
+            
+            const [result] = await pool.execute(deleteQuery, [id]);
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Không tìm thấy sản phẩm'
+                });
+            }
+
+            return res.status(200).json({
+                success: true,
+                message: 'Xóa sản phẩm thành công'
+            });
+
+        } catch (error) {
+            console.error('Error in deleteProduct:', error);
             return res.status(500).json({
                 success: false,
                 message: 'Internal server error',

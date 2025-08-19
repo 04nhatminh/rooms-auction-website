@@ -1,0 +1,397 @@
+.page {
+  height: 100%;
+  font-family: 'Montserrat', sans-serif;
+  color: #374151;
+}
+
+.layout {
+  display: block;
+}
+
+.main {
+  padding: 0;
+}
+
+/* --- Action Bar --- */
+.actionBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.actionLeft {
+  flex: 1;
+}
+
+.pageTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.actionRight {
+  display: flex;
+  gap: 1rem;
+}
+
+.addBtn {
+  background-color: #008489;
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.addBtn:hover {
+  background-color: #006b6f;
+}
+
+/* --- Table Container --- */
+.tableContainer {
+  background-color: #fff;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.table {
+  width: 100%;
+  table-layout: auto;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.table thead {
+  background-color: #008489;
+  color: #fff;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+}
+
+.table th:last-child {
+  text-align: center;
+}
+
+.tableHeader {
+  color: #fff;
+}
+
+.row {
+  border-bottom: 1px solid #e5e7eb;
+  transition: background-color 0.2s ease;
+}
+
+.row:hover {
+  background-color: #f9fafb;
+}
+
+.table td {
+  padding: 1rem;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.table td:last-child {
+  text-align: center;
+}
+
+.textCenter {
+  text-align: center !important;
+}
+
+/* --- Product Info --- */
+.productInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.productName {
+  font-weight: 500;
+  color: #111827;
+}
+
+.roomNumber {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+/* --- Badges --- */
+.propertyType {
+  background-color: #dbeafe;
+  color: #1e40af;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-weight: 500;
+}
+
+.region {
+  background-color: #fef3c7;
+  color: #92400e;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-weight: 500;
+}
+
+/* --- Actions --- */
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btnView,
+.btnEdit,
+.btnDelete {
+  border: none;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btnView {
+  background-color: #e0f2fe;
+  color: #0891b2;
+}
+
+.btnView:hover {
+  background-color: #bae6fd;
+}
+
+.btnEdit {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.btnEdit:hover {
+  background-color: #fde68a;
+}
+
+.btnDelete {
+  background-color: #fecaca;
+  color: #dc2626;
+}
+
+.btnDelete:hover {
+  background-color: #fca5a5;
+}
+
+/* --- Empty State --- */
+.empty {
+  text-align: center;
+  padding: 3rem;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.emptyIcon {
+  font-size: 3rem;
+  opacity: 0.5;
+}
+
+.emptyText {
+  font-size: 1.125rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.emptyAddBtn {
+  background-color: #008489;
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.emptyAddBtn:hover {
+  background-color: #006b6f;
+}
+
+/* --- Pagination --- */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.pageBtn {
+  background-color: #f3f4f6;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pageBtn:hover:not(:disabled) {
+  background-color: #e5e7eb;
+}
+
+.pageBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pageInfo {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+/* --- Loading & Error --- */
+.loading,
+.error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+
+.error {
+  color: #ef4444;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.retryBtn {
+  background-color: #008489;
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.retryBtn:hover {
+  background-color: #006b6f;
+}
+
+/* --- Responsive Design --- */
+@media (max-width: 768px) {
+  .actionBar {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .actionRight {
+    justify-content: center;
+  }
+
+  .table {
+    font-size: 0.75rem;
+  }
+
+  .table th,
+  .table td {
+    padding: 0.5rem;
+  }
+
+  .actions {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .btnView,
+  .btnEdit,
+  .btnDelete {
+    width: 100%;
+    height: auto;
+    padding: 0.25rem 0.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Stack table on very small screens */
+  .table thead {
+    display: none;
+  }
+
+  .table,
+  .row,
+  .table td {
+    display: block;
+    width: 100%;
+  }
+
+  .row {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    padding: 1rem;
+  }
+
+  .table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f3f4f6;
+  }
+
+  .table td:last-child {
+    border-bottom: none;
+  }
+
+  .table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #6b7280;
+    min-width: 120px;
+  }
+
+  .actions {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+}

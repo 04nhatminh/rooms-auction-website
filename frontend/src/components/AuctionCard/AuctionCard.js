@@ -94,8 +94,14 @@ const AuctionCard = ({ product, durationDays = 1 }) => {
 
         <p className="auction-price">
           <img src={PriceTagIcon} alt="Price" />
-          <span className="price-amount">{formatPrice(product?.Price * durationDays)}</span>
-          <span className="price-period">&nbsp;cho {durationDays} đêm</span>
+          <span className='price-title'>Giá khởi điểm:</span>
+          <span className="price-amount">&nbsp;{formatPrice(product?.Price * durationDays)}</span>
+        </p>
+
+        <p className="auction-price">
+          <img src={PriceTagIcon} alt="Price" />
+          <span className='price-title'>Giá hiện tại:</span>
+          <span className="price-amount">&nbsp;{formatPrice(product?.Price * durationDays)}</span>
         </p>
 
       </div>

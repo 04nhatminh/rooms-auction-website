@@ -254,44 +254,28 @@ class ProductModel {
         }
     }
 
-    /**
-     * Lấy thông tin chi tiết một product theo ID
-     * @param {number} productId - ID của product
-     * @returns {Object} Thông tin chi tiết product
-     */
-    static async getProductById(productId) {
+    // Lấy danh sách tất cả sản phẩm cho admin
+    static async getAllProductsForAdmin(limit, offset) 
+    {
         try {
             const query = `
                 SELECT 
-                    p.*,
-                    prop.PropertyName,
-                    prop.PropertyImageURL,
-                    rt.RoomTypeName,
-                    rt.RoomTypeImageURL,
-                    prov.Name AS ProvinceName,
-                    prov.NameEn AS ProvinceNameEn,
-                    dist.Name AS DistrictName,
-                    dist.NameEn AS DistrictNameEn,
-                    ROUND(
-                        (COALESCE(p.CleanlinessPoint, 0) + 
-                         COALESCE(p.LocationPoint, 0) + 
-                         COALESCE(p.ServicePoint, 0) + 
-                         COALESCE(p.ValuePoint, 0) + 
-                         COALESCE(p.CommunicationPoint, 0) + 
-                         COALESCE(p.ConveniencePoint, 0)) / 6, 2
-                    ) AS AverageRating
+                    p.ProductID as id,
+                    p.UID,
+                    p.Name as name,
+                    p.Address,
+                    p.ProvinceCode,
+                    p.NumBedrooms as bedrooms,
+                    p.NumBathrooms as bathrooms,
+                    p.CreatedAt as createdAt
                 FROM Products p
-                LEFT JOIN Properties prop ON p.PropertyType = prop.PropertyID
-                LEFT JOIN RoomTypes rt ON p.RoomType = rt.RoomTypeID
-                LEFT JOIN Provinces prov ON p.ProvinceCode = prov.ProvinceCode
-                LEFT JOIN Districts dist ON p.DistrictCode = dist.DistrictCode
-                WHERE p.ProductID = ?
+                ORDER BY p.ProductID ASC
+                LIMIT ${limit} OFFSET ${offset}
             `;
-
-            const [rows] = await pool.execute(query, [productId]);
-            return rows[0] || null;
+            const [products] = await pool.execute(query, [limit, offset]);
+            return products;
         } catch (error) {
-            console.error('Error in getProductById:', error);
+            console.error('Error fetching all products for admin:', error);
             throw error;
         }
     }

@@ -6,7 +6,7 @@ export default function Sidebar({ onLogout, compact = true }) {
   const menu = [
     { to: '/admin/dashboard', label: 'Dashboard', icon: '🏠' },
     { to: '/admin/users-management', label: 'Quản lý khách hàng', icon: '👥' },
-    { to: '/admin/products-management', label: 'Quản lý phòng', icon: '🏘️' },
+    { to: '/admin/products-management', label: 'Quản lý sản phẩm', icon: '🏘️' },
     { to: '/admin/bookings-management', label: 'Quản lý đặt phòng', icon: '📆' },
   ];
 
