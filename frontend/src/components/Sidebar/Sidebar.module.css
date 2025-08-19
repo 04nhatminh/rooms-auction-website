@@ -6,7 +6,7 @@
   --hover: rgba(255,255,255,.08);
   --active: rgba(16,185,129,.18);
   --border: rgba(255,255,255,.15);
-  --sidebar-padding: 16px; /* Consistent padding */
+  --sidebar-padding: 12px;
 }
 
 .sidebar{
@@ -32,22 +32,21 @@
   padding: var(--sidebar-padding);
 }
 
-/* Top Bar */
 .topBar{
   display: flex;
   align-items: center;
   justify-content: flex-start;
   gap: 12px;
   margin-bottom: 20px;
-  padding-left: 0; /* Align to left start */
+  padding-left: 0;
 }
 
 .menuButton{
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
+  padding: 12px;
+  border-radius: 8px;
   transition: background 0.2s ease;
   display: flex;
   align-items: center;
@@ -64,22 +63,7 @@
   object-fit: contain;
 }
 
-.logoSection{
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-left: 8px; /* Same left margin as nav items */
-}
-
-.logoImg{
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  background: #fff;
-  object-fit: cover;
-}
-
-.logoText{
+.menuText{
   font-family: Montserrat;
   font-size: 18px;
   font-weight: 600;
@@ -88,7 +72,6 @@
   white-space: nowrap;
 }
 
-/* Navigation */
 .nav{
   display: flex;
   flex-direction: column;
@@ -102,7 +85,7 @@
   justify-content: flex-start;
   gap: 12px;
   padding: 12px var(--sidebar-padding);
-  margin-left: 0; /* Consistent left alignment */
+  margin-left: 0;
   border-radius: 8px;
   text-decoration: none;
   color: var(--text);
@@ -177,14 +160,13 @@
   flex: 1;
 }
 
-/* Compact Mode */
 .compact .content{
-  padding: 12px 12px;
+  padding: 12px;
 }
 
 .compact .topBar{
   justify-content: center;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .compact .logoSection{
@@ -192,7 +174,7 @@
 }
 
 .compact .navItem{
-  padding: 12px 12px;
+  padding: 12px;
   justify-content: center;
   gap: 0;
 }
@@ -202,7 +184,7 @@
 }
 
 .compact .logout{
-  padding: 12px 12px;
+  padding: 12px;
   justify-content: center;
   gap: 0;
 }

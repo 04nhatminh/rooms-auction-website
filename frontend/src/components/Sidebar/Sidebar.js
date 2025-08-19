@@ -23,9 +23,7 @@ export default function Sidebar({ onLogout, compact = false, onToggle }) {
             <img src={menuIcon} className={styles.menuIcon} alt="Menu" />
           </button>
           {!compact && (
-            <div className={styles.logoSection}>
-              <h2 className={styles.logoText}>A2BnB Admin</h2>
-            </div>
+            <h2 className={styles.menuText}>Bidstay Admin</h2>
           )}
         </div>
 
