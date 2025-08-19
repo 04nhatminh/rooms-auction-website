@@ -1,15 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
-import AuctionCard from '../AuctionCard/AuctionCard';
+import { useSearchCache } from '../../contexts/SearchCacheContext';
 import { imageApi } from '../../api/imageApi';
 import { reviewApi } from '../../api/reviewApi';
+import AuctionCard from '../AuctionCard/AuctionCard';
 import './SearchRes_AuctionSection.css';
 
 const SearchRes_AuctionSection = ({ activeAuctions }) => {
-  const cacheRef = React.useRef(new Map());
   const currentRequestRef = useRef(null);
   const [auctions, setAuctions] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { 
+    getCachedData, 
+    setCachedData, 
+    hasCachedData, 
+    generateAuctionCacheKey 
+  } = useSearchCache();
 
   useEffect(() => {
       const fetchAuctionsWithImages = async () => {
@@ -20,11 +26,11 @@ const SearchRes_AuctionSection = ({ activeAuctions }) => {
           return;
         }
 
-        const cacheArray = activeAuctions.map(auction => auction.AuctionUID);
+        const cacheKey = generateAuctionCacheKey(activeAuctions);
 
         // Kiểm tra cache trước
-        if (cacheRef.current.has(cacheArray)) {
-          const cachedData = cacheRef.current.get(cacheArray);
+        if (cacheKey && hasCachedData(cacheKey)) {
+          const cachedData = getCachedData(cacheKey);
           setAuctions(cachedData);
           setLoading(false);
           return;
@@ -82,13 +88,17 @@ const SearchRes_AuctionSection = ({ activeAuctions }) => {
             }));
   
             // Lưu vào cache
-            cacheRef.current.set(cacheArray, auctionsWithImagesAndReviews);
+            if (cacheKey) {
+              setCachedData(cacheKey, auctionsWithImagesAndReviews);
+            }
             setAuctions(auctionsWithImagesAndReviews);
           } else {
             // Không có UID để fetch, sử dụng trực tiếp activeAuctions
             setAuctions(activeAuctions);
             // Lưu vào cache
-            cacheRef.current.set(cacheArray, activeAuctions);
+            if (cacheKey) {
+              setCachedData(cacheKey, activeAuctions);
+            }
           }
   
         } catch (err) {

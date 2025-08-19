@@ -1,37 +1,32 @@
 // src/pages/SearchResult/SearchResult.js
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { SearchCacheProvider, useSearchCache } from '../../contexts/SearchCacheContext';
 import { productApi } from '../../api/productApi';
 import { auctionApi } from '../../api/auctionApi';
 import Header from '../../components/Header/Header';
+import Footer from '../../components/Footer/Footer';
 import TabLayout from '../../components/TabLayout/TabLayout';
 import SearchRes_RoomSection from '../../components/SearchRes_RoomSection/SearchRes_RoomSection';
 import SearchRes_AuctionSection from '../../components/SearchRes_AuctionSection/SearchRes_AuctionSection';
-import Footer from '../../components/Footer/Footer';
 import './SearchResult.css';
 
 const LIMIT = 20;
 
-const SearchResult = () => {
+const SearchResultContent = () => {
   const location = useLocation();
   const [topRatedProducts, setTopRatedProducts] = useState([]);
   const [activeAuctions, setActiveAuctions] = useState(null);
   const [durationDays, setDurationDays] = useState(1); // Mặc định là 1 ngày
   const [activeTab, setActiveTab] = useState('room'); // Mặc định tab Room
   const abortRef = useRef(null);
+  const { clearCache } = useSearchCache();
 
   useEffect(() => {
+    // Clear cache khi search params thay đổi (chuyển trang search mới)
+    clearCache();
+    
     const urlParams = new URLSearchParams(location.search);
-    //   const params = {
-    //   location: urlParams.get('location'),
-    //   locationId: urlParams.get('locationId'),
-    //   type: urlParams.get('type'),
-    //   checkinDate: urlParams.get('checkinDate'),
-    //   checkoutDate: urlParams.get('checkoutDate'),
-    //   numAdults: urlParams.get('numAdults'),
-    //   numChildren: urlParams.get('numChildren'),
-    //   numInfants: urlParams.get('numInfants')
-    // };
     const locationId = urlParams.get('locationId');
     const type = (urlParams.get('type') || '').toLowerCase();
     const checkinStr = urlParams.get('checkinDate');
@@ -132,6 +127,14 @@ const SearchResult = () => {
       </div>
       <Footer />
     </>
+  );
+};
+
+const SearchResult = () => {
+  return (
+    <SearchCacheProvider>
+      <SearchResultContent />
+    </SearchCacheProvider>
   );
 };
 

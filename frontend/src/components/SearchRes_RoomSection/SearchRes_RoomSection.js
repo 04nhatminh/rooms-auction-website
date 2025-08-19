@@ -1,15 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
-import RoomCard from '../RoomCard/RoomCard';
+import { useSearchCache } from '../../contexts/SearchCacheContext';
 import { imageApi } from '../../api/imageApi';
 import { reviewApi } from '../../api/reviewApi';
+import RoomCard from '../RoomCard/RoomCard';
 import './SearchRes_RoomSection.css';
 
 const SearchRes_RoomSection = ({ topRatedProducts, durationDays }) => {
-  const cacheRef = React.useRef(new Map());
   const currentRequestRef = useRef(null);
   const [error, setError] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { 
+    getCachedData, 
+    setCachedData, 
+    hasCachedData, 
+    generateRoomCacheKey 
+  } = useSearchCache();
 
   useEffect(() => {
       const fetchProductsWithImages = async () => {
@@ -20,11 +26,11 @@ const SearchRes_RoomSection = ({ topRatedProducts, durationDays }) => {
           return;
         }
 
-        const cacheArray = topRatedProducts.map(product => product.ProductID);
+        const cacheKey = generateRoomCacheKey(topRatedProducts);
         
         // Kiểm tra cache trước
-        if (cacheRef.current.has(cacheArray)) {
-          const cachedData = cacheRef.current.get(cacheArray);
+        if (cacheKey && hasCachedData(cacheKey)) {
+          const cachedData = getCachedData(cacheKey);
           setProducts(cachedData);
           setLoading(false);
           return;
@@ -82,13 +88,17 @@ const SearchRes_RoomSection = ({ topRatedProducts, durationDays }) => {
             }));
   
             // Lưu vào cache
-            cacheRef.current.set(cacheArray, productsWithImagesAndReviews);
+            if (cacheKey) {
+              setCachedData(cacheKey, productsWithImagesAndReviews);
+            }
             setProducts(productsWithImagesAndReviews);
           } else {
             // Không có UID để fetch, sử dụng trực tiếp topRatedProducts
             setProducts(topRatedProducts);
             // Lưu vào cache
-            cacheRef.current.set(cacheArray, topRatedProducts);
+            if (cacheKey) {
+              setCachedData(cacheKey, topRatedProducts);
+            }
           }
   
         } catch (err) {
