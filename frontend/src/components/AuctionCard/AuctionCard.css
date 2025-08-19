@@ -33,14 +33,38 @@
   height: 80px;
   background: linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0));
   display: flex;
+  justify-content: space-between;
   align-items: flex-end;
   padding: 8px 12px;
   border-radius: 0 0 24px 24px;
 }
 
+.bid-count-section {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+}
+
+.bid-count-text {
+  color: #FFF;
+  font-family: Montserrat;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  padding: 4px;
+}
+
+.countdown-section {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+}
+
 .countdown-text {
   color: #FFF;
-  text-align: center;
+  text-align: right;
   font-family: Montserrat;
   font-size: 16px;
   font-style: normal;

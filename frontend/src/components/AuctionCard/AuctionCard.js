@@ -125,7 +125,12 @@ const AuctionCard = ({ auction }) => {
         />
         
         <div className="auction-countdown-overlay">
-          <span className='countdown-text'>{formatCountdown()} </span>
+          <div className="bid-count-section">
+            <span className='bid-count-text'>{auction?.BidCount || 0} lượt đấu giá</span>
+          </div>
+          <div className="countdown-section">
+            <span className='countdown-text'>{formatCountdown()}</span>
+          </div>
         </div>
       </div>
 
