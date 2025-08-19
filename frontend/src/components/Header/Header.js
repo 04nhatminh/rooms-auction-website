@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useUser } from '../../contexts/UserContext';
 import './Header.css';
 import logo from '../../assets/logo.png';
 import SearchBarMini from './SearchBarMini';
 import HeaderUserMenu from '../HeaderUserMenu/HeaderUserMenu';
+import SignInUpAction from '../SignInUpAction/SignInUpAction';
 import LocationAPI from '../../api/locationApi';
 
 const Header = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useUser();
 
   // Shared search state
   const [searchData, setSearchData] = useState({
@@ -140,17 +144,15 @@ const Header = () => {
           </Link>
         </div>
 
-        <div className="header-mini-slot">
-          <SearchBarMini 
-            searchData={searchData}
-          />
+        <div className="header-mini">
+          <SearchBarMini searchData={searchData} />
         </div>
 
-        <div className="header-button-actions">
-          <button className="circle-btn user-btn">U</button>
-          
-          <HeaderUserMenu onLogout={() => {/* your logout logic */}} />
-        </div>
+        {isAuthenticated() ? (
+          <HeaderUserMenu />
+        ) : (
+          <SignInUpAction type="others" />
+        )}
       </div>
     </header>
   );

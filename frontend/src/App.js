@@ -4,6 +4,7 @@ import './App.css';
 
 // Import contexts
 import { LocationProvider } from './contexts/LocationContext';
+import { UserProvider } from './contexts/UserContext';
 
 // Import pages
 import HomePage from './pages/HomePage/HomePage';
@@ -27,8 +28,9 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 
 function App() {
   return (
-    <LocationProvider>
-      <Router>
+    <UserProvider>
+      <LocationProvider>
+        <Router>
         <div className="App">
           <Routes>
             <Route path="/" element={<HomePage />} />
@@ -53,6 +55,7 @@ function App() {
         </div>
       </Router>
     </LocationProvider>
+  </UserProvider>
   );
 }
 

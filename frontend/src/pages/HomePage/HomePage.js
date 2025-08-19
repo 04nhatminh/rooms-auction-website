@@ -1,10 +1,10 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useLocation } from '../../contexts/LocationContext';
-import './HomePage.css';
+import { useUser } from '../../contexts/UserContext';
 import SearchBar from '../../components/SearchBar/SearchBar';
 import CardSection from '../../components/CardSection/CardSection';
 import RoomSection from '../../components/RoomSection/RoomSection';
+import SignInUpAction from '../../components/SignInUpAction/SignInUpAction';
 import HeaderUserMenu from '../../components/HeaderUserMenu/HeaderUserMenu';
 import Footer from '../../components/Footer/Footer';
 import logo from '../../assets/logo.png';
@@ -19,11 +19,11 @@ import HaNoiImg from '../../assets/ha_noi.png';
 import VungTauImg from '../../assets/vung_tau.jpg';
 import DaLatImg from '../../assets/da_lat.jpg';
 import NhaTrangImg from '../../assets/nha_trang.jpg';
-
-
+import './HomePage.css';
 
 const HomePage = () => {
   const { popularLocations, isLoading: isLoadingLocations, error: locationError, getPopularLocations } = useLocation();
+  const { user, isAuthenticated } = useUser();
   
   // Load popular locations khi component mount (chỉ khi chưa có data)
   useEffect(() => {
@@ -58,23 +58,6 @@ const HomePage = () => {
     { title: "Khám phá nơi lưu trú tại Sa Pa", provinceCode: "10", limit: 15 }
   ], []);
 
-  const [user, setUser] = React.useState(null);
-  const navigate = useNavigate();
-
-  React.useEffect(() => {
-    try {
-      const stored = localStorage.getItem('userData');
-      if (stored) setUser(JSON.parse(stored));
-    } catch (_) {}
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem('userData');
-    localStorage.removeItem('token');
-    setUser(null);
-    navigate('/login');
-  };
-
   return (
     <>
       {isLoadingLocations}
@@ -87,14 +70,10 @@ const HomePage = () => {
             <span className="home-logo-text">bidstay</span>
           </div>
 
-          {/* Thay thế cụm nút Login/Signup bằng menu người dùng */}
-          {user ? (
-            <HeaderUserMenu user={user} onLogout={handleLogout} />
+          {isAuthenticated() ? (
+            <HeaderUserMenu />
           ) : (
-            <div className="login-signup">
-              <button className='home-login-button' onClick={() => navigate('/login')}>Đăng nhập</button>
-              <button className='home-signup-button' onClick={() => navigate('/signup')}>Đăng ký</button>
-            </div>
+            <SignInUpAction type="home" />
           )}
         </div>
 

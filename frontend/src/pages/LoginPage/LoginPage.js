@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '../../contexts/UserContext';
 import './LoginPage.css';
 import logo from '../../assets/logo.png';
 import hiddenIcon from '../../assets/hidden.png';
@@ -9,6 +10,7 @@ import backgroundImage from '../../assets/login_bg.jpg';
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useUser();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -65,14 +67,18 @@ const Login = () => {
       if (response.ok) {
         alert('✅ Đăng nhập thành công!');
         // Chuẩn hóa userData
-        localStorage.setItem('userData', JSON.stringify({
+        const userData = {
           fullName: data.user.fullName,
           name: data.user.fullName,   // giữ tương thích ngược nếu header dùng 'name'
           email: data.user.email,
           id: data.user.id,
           role: data.user.role
-        }));
+        };
+        
+        // Sử dụng login function từ UserContext thay vì trực tiếp localStorage
+        login(userData);
         localStorage.setItem('token', data.token);
+        
         // Redirect
         if (data.user.role === 'admin') {
           navigate('/admin/users-management');
@@ -124,13 +130,16 @@ const Login = () => {
 
       if (res.ok) {
         // Chuẩn hóa userData
-        localStorage.setItem('userData', JSON.stringify({
+        const userData = {
           fullName: data.user.fullName,
           name: data.user.fullName,   // giữ tương thích ngược
           email: data.user.email,
           id: data.user.id,
           role: data.user.role
-        }));
+        };
+        
+        // Sử dụng login function từ UserContext
+        login(userData);
         localStorage.setItem('token', data.token);
         navigate('/');
       } else {

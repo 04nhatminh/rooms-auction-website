@@ -1,42 +1,13 @@
-.banner-header {
-    position: absolute;
-    top: 32px;
-    left: 44px;
-    right: 44px;
+.login-signup {
     display: flex;
-    justify-content: space-between;
+    gap: 16px;
     align-items: center;
-    z-index: 3;
 }
 
-.home-logo {
-  display: flex;
-  align-items: center;
-}
-
-.home-logo-image {
-  width: clamp(48px, 6vw, 60px) !important;
-  height: clamp(48px, 6vw, 60px) !important;
-}
-
-.home-logo-text {
-  background: linear-gradient(180deg, #ffffff 0%, #85e8e6 100%) !important;
-  background-clip: text !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  font-family: Montserrat;
-  font-size: 24px !important;
-  font-style: normal;
-  font-weight: 620;
-  line-height: normal;
-  white-space: nowrap;
-  margin-top: 8px !important;
-}
-
-/* .login-signup {
-  display: flex;
-  gap: 16px;
-  align-items: center;
+.others-login-signup {
+    display: flex;
+    gap: 12px;
+    align-items: center;
 }
 
 .login-signup .home-login-button {
@@ -94,54 +65,61 @@
 
 .login-signup .home-signup-button:hover {
     transform: translateY(-1px);
-} */
+}
 
-
-.home-banner {
-    position: relative;
-    width: 100%;
-    height: 92vh;
-    overflow: hidden;
+.others-login-signup .others-login-button {
     display: flex;
-    flex-direction: column;
+    padding: 10px 20px;
+    /* border: 2px solid #000; */
+    border-radius: 8px;
+    height: 48px;
+    min-width: fit-content;
+    flex-direction: row;
+    /* background: transparent; */
+    background-color: #000;
     justify-content: center;
     align-items: center;
+    flex: 1 0 0;
+    align-self: stretch;
+    transition: all 0.3s ease;
+
+    color: #FFF;
+    font-family: Montserrat;
+    font-size: 13px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    cursor: pointer;
 }
 
-.banner-image {
-    width: 100vw;
-    height: 100%;
-    object-fit: cover;
-    position: absolute;
-    top: 0;
-    left: 0;
-    padding: 12px 16px 12px 16px;
-    border-radius: 32px;
-    z-index: 1;
+.others-login-signup .others-login-button:hover {
+    transform: translateY(-1px);
 }
 
-.banner-title {
-    color: #ffffff;
+.others-login-signup .others-signup-button {
+    display: flex;
+    padding: 10px 24px;
+    border: None;
+    border-radius: 8px;
+    height: 48px;
+    flex-direction: column;
+    background: #278b9f;
+    justify-content: center;
+    align-items: center;
+    flex: 1 0 0;
+    align-self: stretch;
+    transition: all 0.3s ease;
+
+    color: #FFF;
     text-align: center;
     font-family: Montserrat;
-    font-size: 56px;
+    font-size: 13px;
     font-style: normal;
-    font-weight: 700;
+    font-weight: 600;
     line-height: normal;
-    text-transform: uppercase;
-    position: relative;
-    z-index: 2;
-    margin-bottom: 16px;
+    cursor: pointer;
 }
 
-.banner-subtitle {
-    color: #ffffff;
-    text-align: center;
-    font-family: Montserrat;
-    font-size: 20px;
-    font-style: normal;
-    font-weight: 650;
-    line-height: normal;
-    position: relative;
-    z-index: 2;
+.others-login-signup .others-signup-button:hover {
+    transform: translateY(-1px);
 }

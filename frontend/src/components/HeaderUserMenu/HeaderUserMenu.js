@@ -1,9 +1,22 @@
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useUser } from '../../contexts/UserContext';
 import menuIcon from '../../assets/menu.png';
 import './HeaderUserMenu.css';
 
-const HeaderUserMenu = ({ onLogout }) => {
+const HeaderUserMenu = () => {
+  const navigate = useNavigate();
+  const { user, logout } = useUser();
+
+  const handleLogout = () => {
+    logout();
+    // navigate('/login');
+  };
+
   return (
-    <div className="dropdown user-info">
+    <div className="dropdown user-info" 
+      style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <button className="circle-btn user-btn">U</button>
       <button
         className="circle-btn menu-btn btn"
         type="button"
@@ -62,7 +75,7 @@ const HeaderUserMenu = ({ onLogout }) => {
         <li><hr className="dropdown-divider" /></li>
 
         <li>
-          <button className="dropdown-item" type="button" onClick={onLogout}>
+          <button className="dropdown-item" type="button" onClick={handleLogout}>
             Đăng xuất
           </button>
         </li>
