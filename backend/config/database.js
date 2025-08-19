@@ -37,6 +37,16 @@ async function testConnection() {
     }
 }
 
+async function createSystemParametersTable() {
+    await pool.execute(`
+        CREATE TABLE IF NOT EXISTS SystemParameters (
+            ParamID INT PRIMARY KEY AUTO_INCREMENT,
+            ParamName VARCHAR(255) NOT NULL,
+            ParamValue VARCHAR(255) NOT NULL
+        )
+    `);
+}
+
 async function createAdministrativeRegionsTable() {
     await pool.execute(`
         CREATE TABLE IF NOT EXISTS AdministrativeRegions (
@@ -376,7 +386,10 @@ async function createAuctionTable() {
     await pool.execute(`
         CREATE TABLE IF NOT EXISTS Auction (
             AuctionID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            AuctionUID BIGINT UNSIGNED,
             ProductID INT,
+            StayPeriodStart DATE,
+            StayPeriodEnd DATE,
             StartTime TIMESTAMP NULL DEFAULT NULL,
             EndTime TIMESTAMP NULL DEFAULT NULL,
             InstantPrice DECIMAL(10, 2),
@@ -724,7 +737,7 @@ async function createUpsertProductProcedure() {
                         NumBedrooms = p_NumBedrooms,
                         NumBeds = p_NumBeds,
                         NumBathrooms = p_NumBathrooms,
-                        Price = p_Price,
+                        Price = CASE WHEN p_Price > 0 THEN p_Price ELSE Price END,
                         Currency = p_Currency,
                         CleanlinessPoint = p_Cleanliness,
                         LocationPoint = p_Location,
@@ -1353,6 +1366,9 @@ async function initSchema() {
         await testConnection();
         
         console.log('\n📋 Creating tables...');
+
+        await createSystemParametersTable();
+        console.log('✅ SystemParameters table ready');
 
         await createAdministrativeRegionsTable();
         console.log('✅ AdministrativeRegions table ready');

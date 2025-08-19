@@ -6,6 +6,7 @@ const userRoutes = require('./userRoutes');
 const authRoutes = require('./authRoutes');
 const adminRoutes = require('./adminRoutes');
 const productRoutes = require('./productRoutes');
+const auctionRoutes = require('./auctionRoutes');
 const imageRoutes = require('./imageRoutes');
 const reviewRoutes = require('./reviewRoutes');
 const locationRoutes = require('./locationRoutes');
@@ -15,6 +16,7 @@ const favoriteRoutes = require('./favoriteRoutes');
 // Demo routes - điều hướng đến /demo
 router.use('/api/demo', demoRoutes);
 router.use('/api/room', productRoutes);
+router.use('/api/auction', auctionRoutes);
 router.use('/api/images', imageRoutes);
 router.use('/api/reviews', reviewRoutes);
 router.use('/api/locations', locationRoutes);

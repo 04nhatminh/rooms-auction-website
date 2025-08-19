@@ -4,28 +4,28 @@ import { imageApi } from '../../api/imageApi';
 import { reviewApi } from '../../api/reviewApi';
 import './SearchRes_AuctionSection.css';
 
-const SearchRes_AuctionSection = ({ topRatedProducts, durationDays }) => {
+const SearchRes_AuctionSection = ({ activeAuctions }) => {
   const cacheRef = React.useRef(new Map());
   const currentRequestRef = useRef(null);
+  const [auctions, setAuctions] = useState([]);
   const [error, setError] = useState(null);
-  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-      const fetchProductsWithImages = async () => {
-        // Nếu không có products để fetch, set state và return
-        if (!topRatedProducts || topRatedProducts.length === 0) {
-          setProducts([]);
+      const fetchAuctionsWithImages = async () => {
+        // Nếu không có auctions để fetch, set state và return
+        if (!activeAuctions || activeAuctions.length === 0) {
+          setAuctions([]);
           setLoading(false);
           return;
         }
 
-        const cacheArray = topRatedProducts.map(product => product.ProductID);
-        
+        const cacheArray = activeAuctions.map(auction => auction.AuctionUID);
+
         // Kiểm tra cache trước
         if (cacheRef.current.has(cacheArray)) {
           const cachedData = cacheRef.current.get(cacheArray);
-          setProducts(cachedData);
+          setAuctions(cachedData);
           setLoading(false);
           return;
         }
@@ -43,8 +43,8 @@ const SearchRes_AuctionSection = ({ topRatedProducts, durationDays }) => {
           setLoading(true);
           setError(null);          
           // 1. Lấy danh sách UID để fetch images và reviews
-          const uids = topRatedProducts
-            .map(topRatedProduct => topRatedProduct.UID)
+          const uids = activeAuctions
+            .map(activeAuction => activeAuction.ProductUID)
             .filter(id => id); // Loại bỏ null/undefined
 
           if (uids.length > 0) {
@@ -74,21 +74,21 @@ const SearchRes_AuctionSection = ({ topRatedProducts, durationDays }) => {
               console.warn('Failed to fetch reviews from MongoDB');
             }
   
-            // 5. Gắn imageUrl và totalReviews vào topRatedProducts
-            const productsWithImagesAndReviews = topRatedProducts.map(product => ({
-              ...product,
-              mongoImageUrl: product.UID ? imageMap[product.UID] : null,
-              totalReviews: product.UID ? reviewsMap[product.UID] : null
+            // 5. Gắn imageUrl và totalReviews vào activeAuction
+            const auctionsWithImagesAndReviews = activeAuctions.map(auction => ({
+              ...auction,
+              mongoImageUrl: auction.ProductUID ? imageMap[auction.ProductUID] : null,
+              totalReviews: auction.ProductUID ? reviewsMap[auction.ProductUID] : null
             }));
   
             // Lưu vào cache
-            cacheRef.current.set(cacheArray, productsWithImagesAndReviews);
-            setProducts(productsWithImagesAndReviews);
+            cacheRef.current.set(cacheArray, auctionsWithImagesAndReviews);
+            setAuctions(auctionsWithImagesAndReviews);
           } else {
-            // Không có UID để fetch, sử dụng trực tiếp topRatedProducts
-            setProducts(topRatedProducts);
+            // Không có UID để fetch, sử dụng trực tiếp activeAuctions
+            setAuctions(activeAuctions);
             // Lưu vào cache
-            cacheRef.current.set(cacheArray, topRatedProducts);
+            cacheRef.current.set(cacheArray, activeAuctions);
           }
   
         } catch (err) {
@@ -96,7 +96,7 @@ const SearchRes_AuctionSection = ({ topRatedProducts, durationDays }) => {
             console.log('Request was aborted');
             return;
           }
-          console.error('Error fetching products:', err);
+          console.error('Error fetching auctions:', err);
           setError(err.message);
         } finally {
           if (!abortController.signal.aborted) {
@@ -105,7 +105,7 @@ const SearchRes_AuctionSection = ({ topRatedProducts, durationDays }) => {
         }
       };
   
-      fetchProductsWithImages();
+      fetchAuctionsWithImages();
   
       // Cleanup function
       return () => {
@@ -113,8 +113,8 @@ const SearchRes_AuctionSection = ({ topRatedProducts, durationDays }) => {
           currentRequestRef.current.abort();
         }
       };
-    }, [topRatedProducts]);
-  
+    }, [activeAuctions]);
+
     if (loading) {
       return (
         <section className="search-res-content-auction-section">
@@ -138,8 +138,8 @@ const SearchRes_AuctionSection = ({ topRatedProducts, durationDays }) => {
   return (
     <section className="search-res-content-auction-section">
       <div className="search-res-auction-card-container">
-        {(products || []).map((product, idx) => (
-          <AuctionCard key={product.ProductID || idx} product={product} durationDays={durationDays} />
+        {(auctions || []).map((auction, idx) => (
+          <AuctionCard key={auction.AuctionUID || idx} auction={auction} />
         ))}
       </div>
     </section>

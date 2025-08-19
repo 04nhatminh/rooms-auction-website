@@ -50,7 +50,7 @@ function App() {
               {/* <Route path="edit-product/:id" element={<AdminEditProductPage />} /> */}
               {/* <Route path="bookings-management" element={<BookingsManagementPage />} /> */}
             </Route>
-            <Route path="/auction" element={<AuctionPage />} />
+            <Route path="/auction/:UID" element={<AuctionPage />} />
           </Routes>
         </div>
       </Router>

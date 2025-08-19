@@ -4,21 +4,49 @@
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.2s ease;
-  /* box-shadow: 0 2px 8px rgba(0,0,0,0.1); */
 }
 
 .auction-card:hover {
   transform: translateY(-2px);
-  /* box-shadow: 0 4px 16px rgba(0,0,0,0.15); */
+}
+
+.auction-card-image-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1/1;
+  border-radius: 24px;
+  overflow: hidden;
 }
 
 .auction-card-image {
   border-radius: 24px;
   width: 100%;
-  aspect-ratio: 1/1;
-  flex: 1;
+  height: 100%;
   object-fit: cover;
-  /* transition: transform 0.2s ease; */
+}
+
+.auction-countdown-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0));
+  display: flex;
+  align-items: flex-end;
+  padding: 8px 12px;
+  border-radius: 0 0 24px 24px;
+}
+
+.countdown-text {
+  color: #FFF;
+  text-align: center;
+  font-family: Montserrat;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 650;
+  line-height: normal;
+  padding: 4px;
 }
 
 .auction-info {
@@ -103,6 +131,15 @@
   flex-shrink: 0;
   aspect-ratio: 1/1;
   margin-right: 4px;
+}
+
+.price-title {
+  color: #000;
+  font-family: Montserrat;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
 }
 
 .price-amount {
