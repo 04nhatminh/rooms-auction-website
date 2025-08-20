@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { systemParametersApi } from '../../api/systemParametersApi';
 import PageHeader from '../../components/PageHeader/PageHeader';
 import styles from './SystemConfigPage.module.css';
 
@@ -19,50 +20,13 @@ export default function SystemConfigPage() {
   const fetchSystemParameters = async () => {
     try {
       setLoading(true);
-      // TODO: Replace with actual API call
-      // const response = await fetch('/api/admin/system-parameters');
-      // const data = await response.json();
+      setError('');
       
-      // Mock data for demonstration
-      const mockData = [
-        { 
-          ParamID: 1, 
-          ParamName: 'StartPriceFactor', 
-          ParamValue: '0.7', 
-          Description: 'Hệ số nhân để tính giá khởi điểm của phiên đấu giá dựa trên giá trị gốc',
-          DataType: 'number'
-        },
-        { 
-          ParamID: 2, 
-          ParamName: 'BidIncrementFactor', 
-          ParamValue: '0.05', 
-          Description: 'Tỷ lệ phần trăm hoặc hệ số để tính bước giá tăng tối thiểu khi đấu giá',
-          DataType: 'number'
-        },
-        { 
-          ParamID: 3, 
-          ParamName: 'AuctionDurationDays', 
-          ParamValue: '5', 
-          Description: 'Số ngày phiên đấu giá kéo dài tối thiểu (ngày)',
-          DataType: 'number'
-        },
-        { 
-          ParamID: 4, 
-          ParamName: 'BidLeadTimeDays', 
-          ParamValue: '14', 
-          Description: 'Số ngày chuẩn bị trước khi cho phép bắt đầu đấu giá (ngày)',
-          DataType: 'number'
-        },
-        { 
-          ParamID: 5, 
-          ParamName: 'PaymentDeadlineDays', 
-          ParamValue: '3', 
-          Description: 'Thời hạn hoàn tất thanh toán (ngày)',
-          DataType: 'number'
-        }
-      ];
-      
-      setSystemParams(mockData);
+      const response = await systemParametersApi.getAllParameters();
+
+      // Trích xuất mảng dữ liệu từ phản hồi API
+      const parametersData = response.data || [];
+      setSystemParams(parametersData);
       setLoading(false);
     } catch (err) {
       setError('Không thể tải dữ liệu cấu hình hệ thống');

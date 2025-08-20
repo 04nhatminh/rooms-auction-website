@@ -1,19 +1,14 @@
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000';
 
-export const imageApi = {
-    // Lấy nhiều hình ảnh theo UIDs
-    getBatchImages: async (uids, abortSignal = null) => {
+export const systemParametersApi = {
+    // Lấy nhiều tham số hệ thống theo UIDs
+    getAllParameters: async (abortSignal = null) => {
         try {
-            if (!uids || !Array.isArray(uids) || uids.length === 0) {
-                throw new Error('UIDs array is required and must not be empty');
-            }
-
             const fetchOptions = {
-                method: 'POST',
+                method: 'GET',
                 headers: {
                 'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ uids }),
+                }
             };
 
             // Thêm AbortSignal nếu được cung cấp
@@ -21,7 +16,7 @@ export const imageApi = {
                 fetchOptions.signal = abortSignal;
             }
 
-            const response = await fetch(`${API_BASE_URL}/api/images/image-batch`, fetchOptions);
+            const response = await fetch(`${API_BASE_URL}/api/system-parameters/get-parameters`, fetchOptions);
 
             if (!response.ok) {
                 const errorData = await response.json();
@@ -32,13 +27,13 @@ export const imageApi = {
             return data;
         } catch (error) {
             if (error.name === 'AbortError') {
-                console.log('Image API request was aborted');
+                console.log('System Parameters API request was aborted');
                 throw error;
             }
-            console.error('Error fetching batch images:', error);
+            console.error('Error fetching system parameters:', error);
             throw error;
         }
     }
 };
 
-export default imageApi;
+export default systemParametersApi;

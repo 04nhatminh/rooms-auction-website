@@ -11,6 +11,7 @@ const imageRoutes = require('./imageRoutes');
 const reviewRoutes = require('./reviewRoutes');
 const locationRoutes = require('./locationRoutes');
 const favoriteRoutes = require('./favoriteRoutes');
+const systemParametersController = require('./systemParametersRoutes');
 
 
 // Demo routes - điều hướng đến /demo
@@ -24,6 +25,7 @@ router.use('/', authRoutes);
 router.use('/user', userRoutes);
 router.use('/admin', adminRoutes);
 router.use('/favorite', favoriteRoutes);
+router.use('/api/system-parameters', systemParametersController);
 
 router.get('/', (req, res) => {
     res.status(200).json({

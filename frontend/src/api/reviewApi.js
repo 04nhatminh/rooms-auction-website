@@ -38,7 +38,7 @@ export const reviewApi = {
         console.error('Error fetching batch reviews:', error);
         throw error;
         }
-    },
+    }
 };
 
 export default reviewApi;

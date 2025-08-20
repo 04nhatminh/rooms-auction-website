@@ -2,7 +2,7 @@ const ImageModel = require('../models/imageModel');
 const pool = require('../config/database');
 
 class ImageController {
-        static async getProductIdByUID(uid) {
+    static async getProductIdByUID(uid) {
         // Kết quả CALL trong mysql2/promise thường là: [ [rows], otherMeta ]
         const [spResult] = await pool.query('CALL a2airbnb.SearchProductIDFromUID(?)', [uid]);
 
