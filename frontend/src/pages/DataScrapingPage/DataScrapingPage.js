@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PageHeader from '../../components/PageHeader/PageHeader';
 import styles from './DataScrapingPage.module.css';
 
 export default function DataScrapingPage() {
@@ -92,10 +93,10 @@ export default function DataScrapingPage() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <h1>Thu thập dữ liệu</h1>
-        <p>Quản lý việc thu thập dữ liệu từ các nguồn bên ngoài</p>
-      </div>
+      <PageHeader
+        title="Thu thập dữ liệu"
+        crumbs={[{ label: 'Dashboard', to: '/admin/dashboard' }, { label: 'Thu thập dữ liệu' }]}
+      />
 
       <div className={styles.tabContainer}>
         <div className={styles.tabHeader}>
@@ -103,14 +104,12 @@ export default function DataScrapingPage() {
             className={`${styles.tabButton} ${activeTab === 'listing' ? styles.active : ''}`}
             onClick={() => setActiveTab('listing')}
           >
-            <span className={styles.tabIcon}>🏠</span>
             Listing Info
           </button>
           <button
             className={`${styles.tabButton} ${activeTab === 'review' ? styles.active : ''}`}
             onClick={() => setActiveTab('review')}
           >
-            <span className={styles.tabIcon}>⭐</span>
             Review
           </button>
         </div>
@@ -119,16 +118,15 @@ export default function DataScrapingPage() {
           {activeTab === 'listing' && (
             <div className={styles.tabPane}>
               <div className={styles.formSection}>
-                <h3>Thu thập thông tin listing</h3>
                 <form onSubmit={handleListingSubmit} className={styles.form}>
                   <div className={styles.inputGroup}>
-                    <label htmlFor="listingLocation">Tên tỉnh:</label>
+                    <label htmlFor="listingLocation">Chọn tỉnh muốn thu thập:</label>
                     <input
                       id="listingLocation"
                       type="text"
                       value={listingLocationName}
                       onChange={(e) => setListingLocationName(e.target.value)}
-                      placeholder="Nhập tên tỉnh muốn crawl..."
+                      placeholder="Chọn tỉnh muốn thu thập..."
                       className={styles.input}
                       disabled={isListingRunning}
                     />
@@ -179,10 +177,9 @@ export default function DataScrapingPage() {
           {activeTab === 'review' && (
             <div className={styles.tabPane}>
               <div className={styles.formSection}>
-                <h3>Thu thập dữ liệu review</h3>
                 <form onSubmit={handleReviewSubmit} className={styles.form}>
                   <div className={styles.inputGroup}>
-                    <label htmlFor="reviewLocation">Tên tỉnh:</label>
+                    <label htmlFor="reviewLocation">Chọn tỉnh muốn thu thập:</label>
                     <input
                       id="reviewLocation"
                       type="text"
