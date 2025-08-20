@@ -1,4 +1,4 @@
-.search {
+/* .search {
   display: flex;
   width: fit-content;
   height: fit-content;
@@ -62,4 +62,120 @@
   width: 14px;
   height: 14px;
   object-fit: contain;
+} */
+
+.header-search-container {
+  position: relative;
+  justify-content:center;
+  align-items: center;
+}
+
+.header-search-bar {
+  display: flex;
+  background: white;
+  border-radius: 50px;
+  border: 0.5px solid #DDD;
+  padding: 2px 0px 2px 32px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin: 0 auto;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-search-input {
+  padding: 4px 8px;
+  align-items: center;
+  width: 10vw;
+  margin-top: 4px;
+}
+
+.header-location-input-wrapper {
+  position: relative;
+  width: 12vw;
+}
+
+.header-guest-input-wrapper {
+  position: relative;
+  width: 8vw;
+}
+
+.header-search-input label {
+  display: block;
+  color: #080808;
+  font-family: Montserrat;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  margin-bottom: -4px;
+}
+
+.header-search-input input {
+  border: none;
+  outline: none;
+  width: 100%;
+  color: #8C8C8C;
+  font-family: Montserrat;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  margin-left: -1px;
+}
+
+.header-search-button {
+  background-color: #278C9F;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  height: 36px;
+  aspect-ratio: 1;
+  align-self: center;
+  margin-right: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-search-button:hover {
+  background-color: #1F6B7A;
+}
+
+.header-search-icon {
+  width: 16px;
+  height: 16px;
+}
+
+@media screen and (max-width: 920px) {
+  .header-search-bar {
+    width: 100%;
+    padding: 2px 0px 2px 16px;
+  }
+
+  .header-search-input {
+    width: calc(100% - 32px);
+  }
+
+  .header-location-input-wrapper,
+  .header-guest-input-wrapper {
+    width: calc(50% - 16px);
+  }
+  
+}
+
+@media screen and (max-width: 768px) {
+  .header-search-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header-search-input {
+    width: 100%;
+  }
+
+  .header-location-input-wrapper,
+  .header-guest-input-wrapper {
+    width: 100%;
+  }
 }

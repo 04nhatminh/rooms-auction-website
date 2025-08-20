@@ -7,52 +7,95 @@ import searchIcon from '../../assets/search.png';
 import './SearchBar.css';
 
 const SearchBar = ({ 
-  onClose,
-  initialSearchData = {},
+  inittialSearchData = {},
   initialGuestCounts = { adults: 1, children: 0, infants: 0 },
   initialLocationId = null,
-  initialType = null,
+  initialLocationType = null,
   onSearchDataUpdate,
   onGuestCountsUpdate,
   onLocationUpdate
 }) => {
   const navigate = useNavigate();
-  const { 
-    popularLocations, 
-    getLocationSuggestions, 
-    hasLoadedAllData,
-    isLoadingAll 
-  } = useLocation();
-  
-  // State để lưu trữ các giá trị input
+  const { popularLocations, getLocationSuggestions } = useLocation();
+
+  // State lưu thông tin search: địa điểm, ngày checkin, checkout, và text hiển thị số khách
   const [searchData, setSearchData] = useState({
-    location: initialSearchData.location || '',
-    checkinDate: initialSearchData.checkinDate || '',
-    checkoutDate: initialSearchData.checkoutDate || '',
-    guests: initialSearchData.guests || ''
+    location: inittialSearchData.location || '',
+    checkinDate: inittialSearchData.checkinDate || '',
+    checkoutDate: inittialSearchData.checkoutDate || '',
+    guests: inittialSearchData.guests || ''
   });
 
-  // State cho id của location đã chọn
+  // State lưu id và type của location được chọn
   const [selectedLocationId, setSelectedLocationId] = useState(initialLocationId);
-  const [selectedType, setSelectedType] = useState(initialType);
+  const [selectedLocationType, setSelectedLocationType] = useState(initialLocationType);
 
-  // State cho guest counter
+  // State lưu số khách từng loại (người lớn, trẻ em, em bé), trạng thái guest dropdown
   const [guestCounts, setGuestCounts] = useState(initialGuestCounts);
   const [showGuestDropdown, setShowGuestDropdown] = useState(false);
 
-  // State cho location suggestion
+  // State lưu thông tin cho dropdown location
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
 
   // Refs
-  const locationInputRef = useRef(null);
-  const suggestionsRef = useRef(null);
-  const searchTimeoutRef = useRef(null);
-  const guestInputRef = useRef(null);
-  const guestDropdownRef = useRef(null);
+  const locationInputRef = useRef(null); // Ref ô input địa điểm, check click không nằm trong input thì đóng dropdown gợi ý
+  const suggestionsRef = useRef(null); // Ref LocationSuggestionDropdown, nếu click ngoài cả input và dropdown thì đóng danh sách gợi ý
+  const searchTimeoutRef = useRef(null); // Biến lưu timer trong cơ chế debounce search
+  const guestInputRef = useRef(null); // Ref ô input số khách, khi user click ra ngoài input thì đóng dropdown chọn số khách
+  const guestDropdownRef = useRef(null); // Ref GuestCounterDropdown, nếu click ngoài cả input khách và dropdown khách thì đóng dropdown
 
+
+  // ====== Helper function format hiển thị ======
+  // Format date để hiển thị
+  const formatDisplayDate = (dateString) => {
+    if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return '';
+      return date.toLocaleDateString('vi-VN', { 
+        day: '2-digit', 
+        month: '2-digit',
+        year: 'numeric'
+      });
+    } catch {
+      return '';
+    }
+  };
+
+  // Hiển thị location text
+  const getLocationText = () => {
+    if (searchData.location && searchData.location.trim()) {
+      const locationName = searchData.location.replace(/-/g, ' ');
+      return `Chỗ ở tại ${locationName}`;
+    }
+    return 'Địa điểm bất kỳ';
+  };
+
+  // Hiển thị ngày checkin/checkout
+  const getDateText = () => {
+    const checkin = formatDisplayDate(searchData.checkinDate);
+    const checkout = formatDisplayDate(searchData.checkoutDate);
+    
+    if (checkin && checkout) {
+      return `${checkin} - ${checkout}`;
+    } else if (checkin) {
+      return `Từ ${checkin}`;
+    } else if (checkout) {
+      return `Đến ${checkout}`;
+    }
+    return 'Ngày bất kỳ';
+  };
+
+  // Hiển thị số khách
+  const getGuestText = () => {
+    return searchData.guests || 'Thêm khách';
+  };
+
+
+  // ====== Helper function để search ======
   // Helpers định dạng 'YYYY-MM-DD'
   const formatDate = (date) => {
     const y = date.getFullYear();
@@ -72,7 +115,8 @@ const SearchBar = ({
   // Hôm nay (local)
   const [todayStr] = useState(() => formatDate(new Date()));
 
-  // Hàm xử lý thay đổi input
+
+  // ====== Handle input change ======
   const handleInputChange = (field, value) => {
     // Không cho phép thay đổi guests input trực tiếp
     if (field === 'guests') {
@@ -114,7 +158,7 @@ const SearchBar = ({
     
     setSearchData(newSearchData);
     
-    // Notify parent of changes
+    // Callback để thông báo thay đổi
     if (onSearchDataUpdate) {
       onSearchDataUpdate(newSearchData);
     }
@@ -125,130 +169,88 @@ const SearchBar = ({
     }
   };
 
-  // Hàm tìm kiếm location suggestions
+
+  // ====== Handle location change ======
   const handleLocationSearch = async (searchTerm) => {
-    // Clear timeout cũ
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current);
-    }
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
 
     // Nếu searchTerm trống, hiển thị popular locations
-    if (!searchTerm || searchTerm.trim().length === 0) {
+    if (!searchTerm?.trim()) {
       setSuggestions(popularLocations.slice(0, 8));
       setShowSuggestions(true);
       setSelectedSuggestionIndex(-1);
       return;
     }
 
-    // Debounce search để tránh gọi API liên tục
     searchTimeoutRef.current = setTimeout(async () => {
       try {
         setIsLoadingSuggestions(true);
         const response = await getLocationSuggestions(searchTerm, 8);
-        
+
         if (response.success) {
           setSuggestions(response.data.suggestions || []);
-          setShowSuggestions(true);
-          setSelectedSuggestionIndex(-1);
         } else {
-          // Fallback: filter popular locations nếu API fail
-        const filteredPopular = popularLocations.filter(location => {
-          const nm = location.name ?? location.Name ?? '';
-          const dt = location.displayText ?? '';
-          const term = searchTerm.toLowerCase();
-          return (
-            (nm && nm.toLowerCase().includes(term)) ||
-            (dt && dt.toLowerCase().includes(term))
-          );
-        }).slice(0, 8);
-          
-          setSuggestions(filteredPopular);
-          setShowSuggestions(true);
-          setSelectedSuggestionIndex(-1);
+          setSuggestions(filterPopularLocations(searchTerm));
         }
-      } catch (error) {
-        console.error('Error fetching suggestions:', error);
-        
-        // Fallback: filter popular locations nếu API fail
-      const term = searchTerm.toLowerCase();
-      const filteredPopular = popularLocations.filter(location => {
-        const nm = location.name ?? location.Name ?? '';
-        const dt = location.displayText ?? '';
-        return (
-          (nm && nm.toLowerCase().includes(term)) ||
-          (dt && dt.toLowerCase().includes(term))
-        );
-      }).slice(0, 8);
-        
-        setSuggestions(filteredPopular);
-        setShowSuggestions(filteredPopular.length > 0);
+        setShowSuggestions(true);
+        setSelectedSuggestionIndex(-1);
+      } catch {
+        setSuggestions(filterPopularLocations(searchTerm));
+        setShowSuggestions(true);
       } finally {
         setIsLoadingSuggestions(false);
       }
-    }, 200); // Giảm delay xuống 200ms
+    }, 200);
   };
 
-  // Nếu popularLocations vừa load xong trong lúc input trống -> cập nhật dropdown
-  useEffect(() => {
-    if (!searchData.location || searchData.location.trim().length === 0) {
-      setSuggestions(popularLocations.slice(0, 8));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [popularLocations]);
+  // Lọc danh sách địa điểm phổ biến dựa trên từ khóa tìm kiếm
+  const filterPopularLocations = (term) => {
+    const t = term.toLowerCase();
+    const filteredLocations = popularLocations.filter(location => {
+      const name = location.name ?? location.Name ?? '';
+      const display = location.displayText ?? '';
+      return (name && name.toLowerCase().includes(t)) || 
+            (display && display.toLowerCase().includes(t));
+    });
+    return filteredLocations.slice(0, 8);
+  };
 
-  // Hàm chọn suggestion
-  const handleSuggestionClick = (suggestion) => {    
-    const newSearchData = {
-      ...searchData,
-      location: suggestion.displayText
-    };
+  // Xử lý khi người dùng nhấp vào gợi ý
+  const handleSuggestionClick = (suggestion) => {
+    const newSearchData = { ...searchData, location: suggestion.displayText };
     
     setSearchData(newSearchData);
     setSelectedLocationId(suggestion.id);
-    setSelectedType(suggestion.type);
+    setSelectedLocationType(suggestion.type);
     setShowSuggestions(false);
     setSuggestions([]);
     setSelectedSuggestionIndex(-1);
-    
-    // Notify parent of changes
-    if (onSearchDataUpdate) {
-      onSearchDataUpdate(newSearchData);
-    }
-    if (onLocationUpdate) {
-      onLocationUpdate(suggestion.id, suggestion.type);
-    }
+
+    // Callback để thông báo thay đổi
+    if (onSearchDataUpdate) { onSearchDataUpdate(newSearchData); }
+    if (onLocationUpdate) { onLocationUpdate(suggestion.id, suggestion.type); }
   };
 
-  // Hàm xử lý thay đổi guest count
+
+  // ====== Handle guest change ======
   const handleGuestCountChange = (type, count) => {
-    const newGuestCounts = {
-      ...guestCounts,
-      [type]: count
-    };
-    
+    const newGuestCounts = { ...guestCounts, [type]: count };
+
     setGuestCounts(newGuestCounts);
-    
-    // Cập nhật display text cho guest input
     updateGuestDisplayText(newGuestCounts);
-    
-    // Notify parent of changes
-    if (onGuestCountsUpdate) {
-      onGuestCountsUpdate(newGuestCounts);
-    }
+
+    // Callback để thông báo thay đổi
+    if (onGuestCountsUpdate) { onGuestCountsUpdate(newGuestCounts); }
   };
 
-  // Hàm cập nhật text hiển thị cho guest input
+  // Cập nhật hiển thị cho số lượng khách
   const updateGuestDisplayText = (counts) => {
     const totalGuests = counts.adults + counts.children;
+
     let displayText = '';
-    
-    if (totalGuests === 0) {
-      displayText = '';
-    } else if (totalGuests === 1) {
-      displayText = '1 khách';
-    } else {
-      displayText = `${totalGuests} khách`;
-    }
+    if (totalGuests === 0) { displayText = ''; } 
+    else if (totalGuests === 1) { displayText = '1 khách'; } 
+    else { displayText = `${totalGuests} khách`; }
     
     // Thêm thông tin em bé nếu có
     if (counts.infants > 0) {
@@ -259,27 +261,24 @@ const SearchBar = ({
       }
     }
     
-    const newSearchData = {
-      ...searchData,
-      guests: displayText
-    };
-    
+    const newSearchData = { ...searchData, guests: displayText };
     setSearchData(newSearchData);
-    
-    // Notify parent of changes
-    if (onSearchDataUpdate) {
-      onSearchDataUpdate(newSearchData);
-    }
+    if (onSearchDataUpdate) { onSearchDataUpdate(newSearchData); }
   };
 
 
-  // Hàm xử lý focus vào guest input
+  // ====== Handle event ======
   const handleGuestFocus = () => {
     setShowGuestDropdown(true);
   };
 
+  const handleLocationFocus = () => {
+    if (!searchData.location || searchData.location.trim().length === 0) {
+      setSuggestions(popularLocations.slice(0, 8));
+    }
+    setShowSuggestions(true);
+  };
 
-  // Xử lý keyboard navigation
   const handleKeyDown = (e) => {
     if (!showSuggestions || suggestions.length === 0) return;
 
@@ -313,48 +312,6 @@ const SearchBar = ({
     }
   };
 
-
-  // Xử lý click outside để đóng suggestions và guest dropdown
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      // Xử lý location suggestions
-      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target) &&
-          locationInputRef.current && !locationInputRef.current.contains(event.target)) {
-        setShowSuggestions(false);
-        setSelectedSuggestionIndex(-1);
-      }
-      
-      // Xử lý guest dropdown
-      if (guestDropdownRef.current && !guestDropdownRef.current.contains(event.target) &&
-          guestInputRef.current && !guestInputRef.current.contains(event.target)) {
-        setShowGuestDropdown(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-
-  // Khởi tạo guest display text ban đầu
-  useEffect(() => {
-    updateGuestDisplayText(guestCounts);
-  }, []); // Only run once on mount
-
-
-  // Hiển thị popular locations khi focus vào input trống
-  const handleLocationFocus = () => {
-    if (!searchData.location || searchData.location.trim().length === 0) {
-      setSuggestions(popularLocations.slice(0, 8));
-      setShowSuggestions(true);
-    } else if (suggestions.length > 0) {
-      setShowSuggestions(true);
-    }
-  };
-
-  // Hàm xử lý submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -372,7 +329,7 @@ const SearchBar = ({
     const totalGuests = guestCounts.adults + guestCounts.children;
 
     let finalLocationId = selectedLocationId;
-    let finalType = selectedType;
+    let finalType = selectedLocationType;
 
     // Nếu chưa có locationId (user gõ tự do mà không chọn từ dropdown)
     // thì thử tìm kiếm để lấy locationId
@@ -394,7 +351,7 @@ const SearchBar = ({
     console.log('Submit search with data:', {
       location: searchData.location,
       selectedLocationId,
-      selectedType,
+      selectedLocationType,
       finalLocationId,
       finalType,
       searchData,
@@ -420,6 +377,43 @@ const SearchBar = ({
     // Navigate đến trang SearchResult với parameters
     navigate(`/search?${searchParams.toString()}`);
   };
+
+
+  // ====== Effect ======
+  // Nếu popularLocations vừa load xong trong lúc input trống -> cập nhật dropdown
+  useEffect(() => {
+    if (!searchData.location || searchData.location.trim().length === 0) {
+      setSuggestions(popularLocations.slice(0, 8));
+    }
+  }, [popularLocations]);
+
+  // Khởi tạo guest display text ban đầu
+  useEffect(() => {
+    updateGuestDisplayText(guestCounts);
+  }, []);
+
+  // Xử lý click outside để đóng suggestions và guest dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Xử lý location suggestions
+      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target) &&
+          locationInputRef.current && !locationInputRef.current.contains(event.target)) {
+        setShowSuggestions(false);
+        setSelectedSuggestionIndex(-1);
+      }
+      
+      // Xử lý guest dropdown
+      if (guestDropdownRef.current && !guestDropdownRef.current.contains(event.target) &&
+          guestInputRef.current && !guestInputRef.current.contains(event.target)) {
+        setShowGuestDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
     <div className="search-container">

@@ -181,7 +181,7 @@
   gap: 8px;
   color: #64748b;
   font-style: italic;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background: #FFF;
 }
 
 .no-results-icon {
