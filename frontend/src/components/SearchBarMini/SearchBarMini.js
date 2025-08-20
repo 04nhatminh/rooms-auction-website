@@ -47,49 +47,13 @@ const SearchBarMini = ({
 
 
   // ====== Helper function format hiển thị ======
-  // Format date để hiển thị
-  const formatDisplayDate = (dateString) => {
-    if (!dateString) return '';
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return '';
-      return date.toLocaleDateString('vi-VN', { 
-        day: '2-digit', 
-        month: '2-digit',
-        year: 'numeric'
-      });
-    } catch {
-      return '';
-    }
-  };
-
   // Hiển thị location text
   const getLocationText = () => {
     if (searchData.location && searchData.location.trim()) {
-      const locationName = searchData.location.replace(/-/g, ' ');
-      return `Chỗ ở tại ${locationName}`;
+      const locationName = searchData.location.replace(/_/g, ' ');
+      return `${locationName}`;
     }
     return 'Địa điểm bất kỳ';
-  };
-
-  // Hiển thị ngày checkin/checkout
-  const getDateText = () => {
-    const checkin = formatDisplayDate(searchData.checkinDate);
-    const checkout = formatDisplayDate(searchData.checkoutDate);
-    
-    if (checkin && checkout) {
-      return `${checkin} - ${checkout}`;
-    } else if (checkin) {
-      return `Từ ${checkin}`;
-    } else if (checkout) {
-      return `Đến ${checkout}`;
-    }
-    return 'Ngày bất kỳ';
-  };
-
-  // Hiển thị số khách
-  const getGuestText = () => {
-    return searchData.guests || 'Thêm khách';
   };
 
 
@@ -377,17 +341,60 @@ const SearchBarMini = ({
 
 
   // ====== Effect ======
+  // Cập nhật searchData khi nhận được dữ liệu mới
+  useEffect(() => {
+    if (receivedSearchData && Object.keys(receivedSearchData).length > 0) {
+      setSearchData({
+        location: receivedSearchData.location || '',
+        checkinDate: receivedSearchData.checkinDate || '',
+        checkoutDate: receivedSearchData.checkoutDate || '',
+        guests: receivedSearchData.guests || ''
+      });
+
+      if (receivedSearchData.locationId) {
+        setSelectedLocationId(receivedSearchData.locationId);
+      }
+      if (receivedSearchData.locationType) {
+        setSelectedLocationType(receivedSearchData.locationType);
+      }
+
+      // Cập nhật guest counts nếu có trong receivedSearchData
+      if (receivedSearchData.guestCounts) {
+        setGuestCounts(receivedSearchData.guestCounts);
+      }
+    }
+  }, [receivedSearchData]);
+
+  // Cập nhật giá trị khi initialLocationId, initialLocationType, initialGuestCounts thay đổi
+  useEffect(() => {
+    if (initialLocationId) {
+      setSelectedLocationId(initialLocationId);
+    }
+  }, [initialLocationId]);
+
+  useEffect(() => {
+    if (initialLocationType) {
+      setSelectedLocationType(initialLocationType);
+    }
+  }, [initialLocationType]);
+
+  useEffect(() => {
+    if (initialGuestCounts) {
+      setGuestCounts(initialGuestCounts);
+    }
+  }, [initialGuestCounts]);
+
   // Nếu popularLocations vừa load xong trong lúc input trống -> cập nhật dropdown
   useEffect(() => {
     if (!searchData.location || searchData.location.trim().length === 0) {
       setSuggestions(popularLocations.slice(0, 8));
     }
-  }, [popularLocations]);
+  }, [popularLocations, searchData.location]);
 
   // Khởi tạo guest display text ban đầu
   useEffect(() => {
     updateGuestDisplayText(guestCounts);
-  }, []);
+  }, [guestCounts]);
 
   // Xử lý click outside để đóng suggestions và guest dropdown
   useEffect(() => {
@@ -422,7 +429,7 @@ const SearchBarMini = ({
             ref={locationInputRef}
             type="text" 
             placeholder="Tìm kiếm điểm đến" 
-            value={searchData.location}
+            value={getLocationText()}
             onChange={(e) => handleInputChange('location', e.target.value)}
             onFocus={handleLocationFocus}
             onKeyDown={handleKeyDown}

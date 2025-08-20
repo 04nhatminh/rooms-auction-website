@@ -145,7 +145,15 @@ const Header = () => {
         </div>
 
         <div className="header-mini">
-          <SearchBarMini searchData={searchData} />
+          <SearchBarMini 
+            receivedSearchData={searchData}
+            initialGuestCounts={guestCounts}
+            initialLocationId={selectedLocationId}
+            initialLocationType={selectedType}
+            onSearchDataUpdate={handleSearchDataUpdate}
+            onGuestCountsUpdate={handleGuestCountsUpdate}
+            onLocationUpdate={handleLocationUpdate}
+          />
         </div>
 
         <div className="header-user-actions">

@@ -48,53 +48,6 @@ const SearchBar = ({
   const guestDropdownRef = useRef(null); // Ref GuestCounterDropdown, nếu click ngoài cả input khách và dropdown khách thì đóng dropdown
 
 
-  // ====== Helper function format hiển thị ======
-  // Format date để hiển thị
-  const formatDisplayDate = (dateString) => {
-    if (!dateString) return '';
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return '';
-      return date.toLocaleDateString('vi-VN', { 
-        day: '2-digit', 
-        month: '2-digit',
-        year: 'numeric'
-      });
-    } catch {
-      return '';
-    }
-  };
-
-  // Hiển thị location text
-  const getLocationText = () => {
-    if (searchData.location && searchData.location.trim()) {
-      const locationName = searchData.location.replace(/-/g, ' ');
-      return `Chỗ ở tại ${locationName}`;
-    }
-    return 'Địa điểm bất kỳ';
-  };
-
-  // Hiển thị ngày checkin/checkout
-  const getDateText = () => {
-    const checkin = formatDisplayDate(searchData.checkinDate);
-    const checkout = formatDisplayDate(searchData.checkoutDate);
-    
-    if (checkin && checkout) {
-      return `${checkin} - ${checkout}`;
-    } else if (checkin) {
-      return `Từ ${checkin}`;
-    } else if (checkout) {
-      return `Đến ${checkout}`;
-    }
-    return 'Ngày bất kỳ';
-  };
-
-  // Hiển thị số khách
-  const getGuestText = () => {
-    return searchData.guests || 'Thêm khách';
-  };
-
-
   // ====== Helper function để search ======
   // Helpers định dạng 'YYYY-MM-DD'
   const formatDate = (date) => {
@@ -361,7 +314,7 @@ const SearchBar = ({
     // Lấy thông tin từ các input, nếu trống thì là 'None'
     const searchParams = new URLSearchParams({
       location: searchData.location.trim()
-                  .replace(/\s+/g, '-') || 'None'
+                  .replace(/\s+/g, '_') || 'None'
                   .toLowerCase(),
       locationId: finalLocationId || 'None',
       type: finalType || 'None',
