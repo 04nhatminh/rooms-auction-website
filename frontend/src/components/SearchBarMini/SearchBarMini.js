@@ -345,10 +345,10 @@ const SearchBarMini = ({
   useEffect(() => {
     if (receivedSearchData && Object.keys(receivedSearchData).length > 0) {
       setSearchData({
-        location: receivedSearchData.location || '',
-        checkinDate: receivedSearchData.checkinDate || '',
-        checkoutDate: receivedSearchData.checkoutDate || '',
-        guests: receivedSearchData.guests || ''
+        location: (receivedSearchData.location) ? receivedSearchData.location : '',
+        checkinDate: (receivedSearchData.checkinDate && receivedSearchData.checkinDate !== 'None') ? receivedSearchData.checkinDate : '',
+        checkoutDate: (receivedSearchData.checkoutDate && receivedSearchData.checkoutDate !== 'None') ? receivedSearchData.checkoutDate : '',
+        guests: (receivedSearchData.guests) ? receivedSearchData.guests : ''
       });
 
       if (receivedSearchData.locationId) {
@@ -452,7 +452,7 @@ const SearchBarMini = ({
           <input 
             type="text" 
             placeholder="Thêm ngày" 
-            value={searchData.checkinDate}
+            value={searchData.checkinDate || ''}
             onChange={(e) => handleInputChange('checkinDate', e.target.value)}
             onFocus={(e) => e.target.type = 'date'} 
             onBlur={(e) => e.target.type = 'text'}
@@ -464,7 +464,7 @@ const SearchBarMini = ({
           <input 
             type="text" 
             placeholder="Thêm ngày" 
-            value={searchData.checkoutDate}
+            value={searchData.checkoutDate || ''}
             onChange={(e) => handleInputChange('checkoutDate', e.target.value)}
             onFocus={(e) => e.target.type = 'date'} 
             onBlur={(e) => e.target.type = 'text'}

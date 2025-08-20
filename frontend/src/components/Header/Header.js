@@ -106,8 +106,8 @@ const Header = () => {
       setSearchData(prev => ({
         ...prev,
         location: locationName,
-        checkinDate: checkinDate || '',
-        checkoutDate: checkoutDate || ''
+        checkinDate: (checkinDate && checkinDate !== 'None') ? checkinDate : '',
+        checkoutDate: (checkoutDate && checkoutDate !== 'None') ? checkoutDate : ''
       }));
 
       // Update selected location info
