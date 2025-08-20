@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from '../../contexts/LocationContext';
 import PageHeader from '../../components/PageHeader/PageHeader';
 import styles from './DataScrapingPage.module.css';
 
 export default function DataScrapingPage() {
+  const { allProvinces, loadAllLocationsData } = useLocation();
   const [activeTab, setActiveTab] = useState('listing');
   const [listingLocationName, setListingLocationName] = useState('');
   const [reviewLocationName, setReviewLocationName] = useState('');
@@ -10,6 +12,11 @@ export default function DataScrapingPage() {
   const [isReviewRunning, setIsReviewRunning] = useState(false);
   const [listingLogs, setListingLogs] = useState([]);
   const [reviewLogs, setReviewLogs] = useState([]);
+
+  // Load provinces data when component mounts
+  useEffect(() => {
+    loadAllLocationsData();
+  }, [loadAllLocationsData]);
 
   const handleListingSubmit = async (e) => {
     e.preventDefault();
@@ -121,15 +128,20 @@ export default function DataScrapingPage() {
                 <form onSubmit={handleListingSubmit} className={styles.form}>
                   <div className={styles.inputGroup}>
                     <label htmlFor="listingLocation">Chọn tỉnh muốn thu thập:</label>
-                    <input
+                    <select
                       id="listingLocation"
-                      type="text"
                       value={listingLocationName}
                       onChange={(e) => setListingLocationName(e.target.value)}
-                      placeholder="Chọn tỉnh muốn thu thập..."
                       className={styles.input}
                       disabled={isListingRunning}
-                    />
+                    >
+                      <option value="">Chọn tỉnh muốn thu thập...</option>
+                      {allProvinces.map((province) => (
+                        <option key={province.id} value={province.Name}>
+                          {province.Name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <button
                     type="submit"
@@ -180,15 +192,20 @@ export default function DataScrapingPage() {
                 <form onSubmit={handleReviewSubmit} className={styles.form}>
                   <div className={styles.inputGroup}>
                     <label htmlFor="reviewLocation">Chọn tỉnh muốn thu thập:</label>
-                    <input
+                    <select
                       id="reviewLocation"
-                      type="text"
                       value={reviewLocationName}
                       onChange={(e) => setReviewLocationName(e.target.value)}
-                      placeholder="Nhập tên tỉnh muốn crawl..."
                       className={styles.input}
                       disabled={isReviewRunning}
-                    />
+                    >
+                      <option value="">Chọn tỉnh muốn thu thập...</option>
+                      {allProvinces.map((province) => (
+                        <option key={province.id} value={province.Name}>
+                          {province.Name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <button
                     type="submit"
