@@ -2,12 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from '../../contexts/LocationContext';
 import PageHeader from '../../components/PageHeader/PageHeader';
 import styles from './DataScrapingPage.module.css';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000';
 
 export default function DataScrapingPage() {
   const { allProvinces, loadAllLocationsData } = useLocation();
   const [activeTab, setActiveTab] = useState('listing');
   const [listingLocationName, setListingLocationName] = useState('');
+  const [listingLocationNameEn, setListingLocationNameEn] = useState('');
   const [reviewLocationName, setReviewLocationName] = useState('');
+  const [reviewLocationNameEn, setReviewLocationNameEn] = useState('');
   const [isListingRunning, setIsListingRunning] = useState(false);
   const [isReviewRunning, setIsReviewRunning] = useState(false);
   const [listingLogs, setListingLogs] = useState([]);
@@ -20,35 +23,48 @@ export default function DataScrapingPage() {
 
   const handleListingSubmit = async (e) => {
     e.preventDefault();
-    if (!listingLocationName.trim()) {
-      alert('Vui lòng nhập tên tỉnh');
+    if (!listingLocationNameEn.trim()) {
+      alert('Vui lòng chọn tỉnh');
       return;
     }
 
     setIsListingRunning(true);
     const timestamp = new Date().toLocaleString();
-    setListingLogs(prev => [...prev, `[${timestamp}] Bắt đầu thu thập dữ liệu listing cho: ${listingLocationName}`]);
+    setListingLogs(prev => [...prev, `[${timestamp}] Bắt đầu thu thập dữ liệu listing cho: ${listingLocationName} (${listingLocationNameEn})`]);
 
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch('/api/admin/scraping/listing', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     'Authorization': `Bearer ${localStorage.getItem('token')}`
-      //   },
-      //   body: JSON.stringify({ locationName: listingLocationName })
-      // });
+      const response = await fetch(`${API_BASE_URL}/admin/scraping/listing`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ locationName: listingLocationNameEn })
+      });
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const result = await response.json();
       
       const endTimestamp = new Date().toLocaleString();
-      setListingLogs(prev => [...prev, `[${endTimestamp}] Hoàn thành thu thập dữ liệu listing cho: ${listingLocationName}`]);
+      
+      if (result.success) {
+        setListingLogs(prev => [...prev, `[${endTimestamp}] Hoàn thành thu thập dữ liệu listing cho: ${listingLocationName}`]);
+        
+        // Thêm output từ Python script vào logs nếu có
+        if (result.output) {
+          const outputLines = result.output.split('\n').filter(line => line.trim());
+          outputLines.forEach(line => {
+            setListingLogs(prev => [...prev, `[${endTimestamp}] ${line}`]);
+          });
+        }
+      } else {
+        setListingLogs(prev => [...prev, `[${endTimestamp}] Lỗi: ${result.message}`]);
+      }
+      
       setListingLocationName('');
+      setListingLocationNameEn('');
     } catch (error) {
       const errorTimestamp = new Date().toLocaleString();
-      setListingLogs(prev => [...prev, `[${errorTimestamp}] Lỗi: ${error.message}`]);
+      setListingLogs(prev => [...prev, `[${errorTimestamp}] Lỗi kết nối: ${error.message}`]);
     } finally {
       setIsListingRunning(false);
     }
@@ -56,35 +72,48 @@ export default function DataScrapingPage() {
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
-    if (!reviewLocationName.trim()) {
-      alert('Vui lòng nhập tên tỉnh');
+    if (!reviewLocationNameEn.trim()) {
+      alert('Vui lòng chọn tỉnh');
       return;
     }
 
     setIsReviewRunning(true);
     const timestamp = new Date().toLocaleString();
-    setReviewLogs(prev => [...prev, `[${timestamp}] Bắt đầu thu thập dữ liệu review cho: ${reviewLocationName}`]);
+    setReviewLogs(prev => [...prev, `[${timestamp}] Bắt đầu thu thập dữ liệu review cho: ${reviewLocationName} (${reviewLocationNameEn})`]);
 
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch('/api/admin/scraping/review', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     'Authorization': `Bearer ${localStorage.getItem('token')}`
-      //   },
-      //   body: JSON.stringify({ locationName: reviewLocationName })
-      // });
+      const response = await fetch(`${API_BASE_URL}/admin/scraping/review`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ locationName: reviewLocationNameEn })
+      });
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const result = await response.json();
       
       const endTimestamp = new Date().toLocaleString();
-      setReviewLogs(prev => [...prev, `[${endTimestamp}] Hoàn thành thu thập dữ liệu review cho: ${reviewLocationName}`]);
+      
+      if (result.success) {
+        setReviewLogs(prev => [...prev, `[${endTimestamp}] ${result.message}`]);
+        
+        // Thêm output từ Python script vào logs nếu có
+        if (result.output) {
+          const outputLines = result.output.split('\n').filter(line => line.trim());
+          outputLines.forEach(line => {
+            setReviewLogs(prev => [...prev, `[${endTimestamp}] ${line}`]);
+          });
+        }
+      } else {
+        setReviewLogs(prev => [...prev, `[${endTimestamp}] Lỗi: ${result.message}`]);
+      }
+      
       setReviewLocationName('');
+      setReviewLocationNameEn('');
     } catch (error) {
       const errorTimestamp = new Date().toLocaleString();
-      setReviewLogs(prev => [...prev, `[${errorTimestamp}] Lỗi: ${error.message}`]);
+      setReviewLogs(prev => [...prev, `[${errorTimestamp}] Lỗi kết nối: ${error.message}`]);
     } finally {
       setIsReviewRunning(false);
     }
@@ -131,7 +160,11 @@ export default function DataScrapingPage() {
                     <select
                       id="listingLocation"
                       value={listingLocationName}
-                      onChange={(e) => setListingLocationName(e.target.value)}
+                      onChange={(e) => {
+                        const selectedProvince = allProvinces.find(p => p.Name === e.target.value);
+                        setListingLocationName(e.target.value);
+                        setListingLocationNameEn(selectedProvince?.NameEn || '');
+                      }}
                       className={styles.input}
                       disabled={isListingRunning}
                     >
@@ -195,7 +228,11 @@ export default function DataScrapingPage() {
                     <select
                       id="reviewLocation"
                       value={reviewLocationName}
-                      onChange={(e) => setReviewLocationName(e.target.value)}
+                      onChange={(e) => {
+                        const selectedProvince = allProvinces.find(p => p.Name === e.target.value);
+                        setReviewLocationName(e.target.value);
+                        setReviewLocationNameEn(selectedProvince?.NameEn || '');
+                      }}
                       className={styles.input}
                       disabled={isReviewRunning}
                     >

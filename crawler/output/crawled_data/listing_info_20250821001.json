@@ -1,0 +1,2043 @@
+[
+  {
+    "listing_id": "318062051461989467146801685",
+    "data": {},
+    "error": "'NoneType' object has no attribute 'get'",
+    "fetch_date": "2025-08-21T05:51:41.071930"
+  },
+  {
+    "listing_id": "1467808657118719225",
+    "data": {
+      "images": [
+        {
+          "id": "2258609041",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh nhà/phòng cho thuê 1",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-1467808657118719225/original/60461663-4902-4fec-975c-7be9d3d432f2.jpeg"
+        },
+        {
+          "id": "2258609042",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh nhà/phòng cho thuê 2",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-1467808657118719225/original/2c9ce90f-85ea-43a1-98c3-0211e0217531.jpeg"
+        },
+        {
+          "id": "2258609045",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh nhà/phòng cho thuê 3",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-1467808657118719225/original/dba405e4-31c8-4b54-8114-859cda8b370a.jpeg"
+        },
+        {
+          "id": "2258609049",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh nhà/phòng cho thuê 4",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-1467808657118719225/original/e4f776ed-eadb-4a38-b221-0f528f13f989.jpeg"
+        },
+        {
+          "id": "2258609050",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh nhà/phòng cho thuê 5",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-1467808657118719225/original/c75bc0d9-6994-4673-bb79-335c86302308.jpeg"
+        },
+        {
+          "id": "2258609066",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh nhà/phòng cho thuê 6",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-1467808657118719225/original/07fbd739-69dd-446f-9bd0-71506896e14e.jpeg"
+        },
+        {
+          "id": "2258609069",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh nhà/phòng cho thuê 7",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-1467808657118719225/original/3e3b68c9-70b5-40ab-b020-e028299d80f9.jpeg"
+        },
+        {
+          "id": "2258609071",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh nhà/phòng cho thuê 8",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-1467808657118719225/original/7aff2a37-8c50-4908-8357-3553abecba3d.jpeg"
+        },
+        {
+          "id": "2258609074",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh nhà/phòng cho thuê 9",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-1467808657118719225/original/070d2ae0-0e65-40c1-a56a-e6332d21d6c5.jpeg"
+        },
+        {
+          "id": "2258609081",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh nhà/phòng cho thuê 10",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-1467808657118719225/original/634f3b95-588d-4373-a7ee-2fe10f799140.jpeg"
+        }
+      ],
+      "apartment_info": {
+        "sharing_location": "Tuy Hòa",
+        "lat": 13.10431,
+        "lng": 109.30593,
+        "id": "1467808657118719225",
+        "name": "Phòng Đa Răng",
+        "personCapacity": 2,
+        "pictureUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-1467808657118719225/original/60461663-4902-4fec-975c-7be9d3d432f2.jpeg",
+        "propertyType": "Toàn bộ căn hộ cho thuê"
+      },
+      "room_tour_items": [
+        {
+          "title": null,
+          "imageIds": [
+            "2258609041",
+            "2258609042",
+            "2258609045",
+            "2258609049",
+            "2258609050",
+            "2258609066",
+            "2258609069",
+            "2258609071",
+            "2258609074",
+            "2258609081"
+          ]
+        }
+      ],
+      "ratings": [],
+      "policies": {
+        "house_rules": [
+          "Nhận phòng sau 14:00",
+          "Tự nhận phòng bằng bàn phím",
+          "Tối đa 2 khách"
+        ],
+        "safety_properties": [
+          "Chỗ ở có camera an ninh ngoài nhà",
+          "Đã lắp máy phát hiện khí CO",
+          "Đã lắp máy báo khói"
+        ],
+        "house_rules_subtitle": "Vì nơi bạn ở là nhà riêng của người khác nên hãy cẩn thận và tôn trọng khi sử dụng nhé."
+      },
+      "highlights": [
+        {
+          "title": "Lặn ngụp",
+          "subtitle": "Đây là một trong số ít chỗ ở có bể bơi tại khu vực này.",
+          "type": "SYSTEM_POOL"
+        },
+        {
+          "title": "Tự nhận phòng",
+          "subtitle": "Tự nhận phòng bằng cách nhập mã số vào cửa.",
+          "type": "SYSTEM_CHECK_IN"
+        },
+        {
+          "title": "Đẹp và có thể đi bộ",
+          "subtitle": "Khu vực này có cảnh đẹp và dễ đi lại.",
+          "type": "SYSTEM_LOCATION"
+        }
+      ],
+      "descriptions": [
+        {
+          "title": null,
+          "htmlText": "Trải nghiệm thời gian lưu trú đặc biệt tại căn hộ khách sạn của chúng tôi, có tầm nhìn ra một phần đại dương và cảnh quan thành phố toàn cảnh. Nội thất cao cấp, được tuyển chọn tỉ mỉ đảm bảo bầu không khí tinh tế nhưng ấm cúng. Mỗi chi tiết được thiết kế để mang lại sự thoải mái tối đa và thư giãn hoàn toàn sau một ngày khám phá."
+        }
+      ],
+      "amenities": [
+        {
+          "group_title": "Phòng tắm",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Máy sấy tóc",
+              "icon": "SYSTEM_HAIRDRYER"
+            },
+            {
+              "available": true,
+              "title": "Sản phẩm vệ sinh",
+              "icon": "SYSTEM_CLEANING_SUPPLIES"
+            },
+            {
+              "available": true,
+              "title": "Dầu gội đầu",
+              "icon": "SYSTEM_SHAMPOO"
+            },
+            {
+              "available": true,
+              "title": "Xà phòng tắm",
+              "icon": "SYSTEM_SOAP"
+            },
+            {
+              "available": true,
+              "title": "Nước nóng",
+              "icon": "SYSTEM_HOT_WATER"
+            },
+            {
+              "available": true,
+              "title": "Sữa tắm",
+              "icon": "SYSTEM_SOAP"
+            }
+          ]
+        },
+        {
+          "group_title": "Phòng ngủ và giặt ủi",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Tiện nghi thiết yếu",
+              "icon": "SYSTEM_TOILETRIES"
+            },
+            {
+              "available": true,
+              "title": "Móc treo quần áo",
+              "icon": "SYSTEM_HANGERS"
+            },
+            {
+              "available": true,
+              "title": "Bộ chăn ga gối",
+              "icon": "SYSTEM_BLANKETS"
+            },
+            {
+              "available": true,
+              "title": "Mành chắn sáng cho phòng",
+              "icon": "SYSTEM_BLACKOUT_SHADES"
+            },
+            {
+              "available": true,
+              "title": "Nơi để quần áo",
+              "icon": "SYSTEM_WARDROBE"
+            }
+          ]
+        },
+        {
+          "group_title": "Giải trí",
+          "amenities": [
+            {
+              "available": true,
+              "title": "TV",
+              "icon": "SYSTEM_TV"
+            },
+            {
+              "available": true,
+              "title": "Thiết bị tập thể dục",
+              "icon": "SYSTEM_GYM"
+            }
+          ]
+        },
+        {
+          "group_title": "Hệ thống sưởi và làm mát",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Điều hòa nhiệt độ",
+              "icon": "SYSTEM_SNOWFLAKE"
+            }
+          ]
+        },
+        {
+          "group_title": "An toàn nhà ở",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Chỗ ở có camera an ninh ngoài nhà",
+              "icon": "SYSTEM_SURVEILLANCE"
+            },
+            {
+              "available": true,
+              "title": "Máy báo khói",
+              "icon": "SYSTEM_DETECTOR_SMOKE"
+            },
+            {
+              "available": true,
+              "title": "Máy phát hiện khí CO",
+              "icon": "SYSTEM_DETECTOR_CO"
+            }
+          ]
+        },
+        {
+          "group_title": "Internet và văn phòng",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Wi-fi",
+              "icon": "SYSTEM_WI_FI"
+            }
+          ]
+        },
+        {
+          "group_title": "Đồ dùng nấu bếp và ăn uống",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Bếp",
+              "icon": "SYSTEM_COOKING_BASICS"
+            },
+            {
+              "available": true,
+              "title": "Đồ nấu ăn cơ bản",
+              "icon": "SYSTEM_COOKING_BASICS"
+            },
+            {
+              "available": true,
+              "title": "Tủ lạnh mini",
+              "icon": "SYSTEM_MINI_BAR"
+            },
+            {
+              "available": true,
+              "title": "Ấm đun nước nóng",
+              "icon": "SYSTEM_WATER_KETTLE"
+            },
+            {
+              "available": true,
+              "title": "Cà phê",
+              "icon": "SYSTEM_COFFEE_MAKER"
+            }
+          ]
+        },
+        {
+          "group_title": "Các đặc điểm về vị trí",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Lối vào riêng",
+              "icon": "SYSTEM_DOOR"
+            }
+          ]
+        },
+        {
+          "group_title": "Chỗ đỗ xe và cơ sở vật chất",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Bể bơi",
+              "icon": "SYSTEM_POOL"
+            },
+            {
+              "available": true,
+              "title": "Thang máy",
+              "icon": "SYSTEM_ELEVATOR"
+            },
+            {
+              "available": true,
+              "title": "Phòng tập thể hình",
+              "icon": "SYSTEM_GYM"
+            },
+            {
+              "available": true,
+              "title": "Chỗ đỗ xe ngoài khuôn viên, có thu phí",
+              "icon": "SYSTEM_MAPS_CAR_RENTAL"
+            },
+            {
+              "available": true,
+              "title": "Chỗ đỗ xe có thu phí trong khuôn viên",
+              "icon": "SYSTEM_MAPS_CAR_RENTAL"
+            }
+          ]
+        },
+        {
+          "group_title": "Dịch vụ",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Cho phép gửi hành lý",
+              "icon": "SYSTEM_LUGGAGE_DROP"
+            },
+            {
+              "available": true,
+              "title": "Cho phép ở dài hạn",
+              "icon": "SYSTEM_CALENDAR"
+            },
+            {
+              "available": true,
+              "title": "Tự nhận phòng",
+              "icon": "SYSTEM_KEY"
+            },
+            {
+              "available": true,
+              "title": "Bàn phím",
+              "icon": "SYSTEM_BUZZER"
+            },
+            {
+              "available": true,
+              "title": "Có dịch vụ dọn vệ sinh trong thời gian ở",
+              "icon": "SYSTEM_CLEAN"
+            }
+          ]
+        },
+        {
+          "group_title": "Không bao gồm",
+          "amenities": [
+            {
+              "available": false,
+              "title": "Máy giặt",
+              "icon": "SYSTEM_NO_WASHER"
+            },
+            {
+              "available": false,
+              "title": "Máy sấy quần áo",
+              "icon": "SYSTEM_NO_DRYER"
+            },
+            {
+              "available": false,
+              "title": "Hệ thống sưởi",
+              "icon": "SYSTEM_NO_HEATER"
+            }
+          ]
+        }
+      ],
+      "price": {
+        "night_price": 700000,
+        "currency": "VND"
+      }
+    },
+    "fetch_date": "2025-08-21T05:51:42.675912"
+  },
+  {
+    "listing_id": "1079312258568733524",
+    "data": {
+      "images": [
+        {
+          "id": "1831686922",
+          "orientation": "LANDSCAPE",
+          "accessibilityLabel": "Hình ảnh Phòng ngủ 1",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6MTA3OTMxMjI1ODU2ODczMzUyNA%3D%3D/original/e4a64207-0330-4f2a-b502-1761124fb052.jpeg"
+        },
+        {
+          "id": "1831685343",
+          "orientation": "LANDSCAPE",
+          "accessibilityLabel": "Hình ảnh Phòng ngủ 2",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6MTA3OTMxMjI1ODU2ODczMzUyNA%3D%3D/original/b345abca-8b24-4de3-b76a-0e558e527504.jpeg"
+        },
+        {
+          "id": "1831648049",
+          "orientation": "LANDSCAPE",
+          "accessibilityLabel": "Hình ảnh Phòng ngủ 3",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6MTA3OTMxMjI1ODU2ODczMzUyNA%3D%3D/original/d672e96b-73bb-470d-9ad4-e3482540a8db.jpeg"
+        },
+        {
+          "id": "1831648061",
+          "orientation": "LANDSCAPE",
+          "accessibilityLabel": "Hình ảnh Phòng ngủ 4",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6MTA3OTMxMjI1ODU2ODczMzUyNA%3D%3D/original/bb39800b-8431-4e4d-8df0-2d1b087bd5d7.jpeg"
+        },
+        {
+          "id": "1831685345",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Phòng ngủ 5",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6MTA3OTMxMjI1ODU2ODczMzUyNA%3D%3D/original/75c6553a-0f57-4e9f-8e03-bd5584326691.jpeg"
+        },
+        {
+          "id": "1831685346",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Phòng ngủ 6",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6MTA3OTMxMjI1ODU2ODczMzUyNA%3D%3D/original/18baa47e-0198-4367-a7fa-de501b40b683.jpeg"
+        },
+        {
+          "id": "1831685352",
+          "orientation": "LANDSCAPE",
+          "accessibilityLabel": "Hình ảnh Phòng ngủ 7",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6MTA3OTMxMjI1ODU2ODczMzUyNA%3D%3D/original/3a3db969-3c56-4aa1-a9cb-2541c672d8b2.jpeg"
+        },
+        {
+          "id": "1915697675",
+          "orientation": "LANDSCAPE",
+          "accessibilityLabel": "Hình ảnh Phòng ngủ 8",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6MTA3OTMxMjI1ODU2ODczMzUyNA%3D%3D/original/3682504b-1108-4156-876f-ca6cbb7fd28a.jpeg"
+        },
+        {
+          "id": "1831665405",
+          "orientation": "LANDSCAPE",
+          "accessibilityLabel": "Hình ảnh Phòng tắm đầy đủ 1",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6MTA3OTMxMjI1ODU2ODczMzUyNA%3D%3D/original/169835cd-e04d-4e98-9e14-d5435669e0bd.jpeg"
+        },
+        {
+          "id": "1830434238",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Phòng tắm đầy đủ 2",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6MTA3OTMxMjI1ODU2ODczMzUyNA%3D%3D/original/5fd4464c-2ddb-4c8d-bd91-fb339fa9ffa3.jpeg"
+        },
+        {
+          "id": "1831665404",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Phòng tắm đầy đủ 3",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6MTA3OTMxMjI1ODU2ODczMzUyNA%3D%3D/original/05077492-6243-4e64-b7c8-525dd22f0864.jpeg"
+        },
+        {
+          "id": "1830158288",
+          "orientation": "LANDSCAPE",
+          "accessibilityLabel": "Hình ảnh Ngoại thất 1",
+          "baseUrl": "https://a0.muscache.com/im/pictures/miso/Hosting-1079312258568733524/original/fb03503a-7802-4cab-86c7-3fbcf9c84883.jpeg"
+        },
+        {
+          "id": "1830157953",
+          "orientation": "LANDSCAPE",
+          "accessibilityLabel": "Hình ảnh Ngoại thất 2",
+          "baseUrl": "https://a0.muscache.com/im/pictures/miso/Hosting-1079312258568733524/original/bd3ea8ae-9491-42f4-89c8-a67511d016fb.jpeg"
+        },
+        {
+          "id": "1830158254",
+          "orientation": "LANDSCAPE",
+          "accessibilityLabel": "Hình ảnh Ngoại thất 3",
+          "baseUrl": "https://a0.muscache.com/im/pictures/miso/Hosting-1079312258568733524/original/18387a11-1920-4582-b3ab-61388b0c79e1.jpeg"
+        },
+        {
+          "id": "1830158012",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Ngoại thất 4",
+          "baseUrl": "https://a0.muscache.com/im/pictures/miso/Hosting-1079312258568733524/original/1e12b983-f9b7-4cc4-9707-9e0802baf985.jpeg"
+        },
+        {
+          "id": "1830442463",
+          "orientation": "LANDSCAPE",
+          "accessibilityLabel": "Hình ảnh Ngoại thất 5",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6MTA3OTMxMjI1ODU2ODczMzUyNA%3D%3D/original/2829a49b-65f6-4c89-9b56-6bb1985d4250.jpeg"
+        },
+        {
+          "id": "1830442475",
+          "orientation": "LANDSCAPE",
+          "accessibilityLabel": "Hình ảnh Ngoại thất 6",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6MTA3OTMxMjI1ODU2ODczMzUyNA%3D%3D/original/683a7147-7e47-4c80-b917-e25c48065006.jpeg"
+        },
+        {
+          "id": "1830874288",
+          "orientation": "LANDSCAPE",
+          "accessibilityLabel": "Hình ảnh Ngoại thất 7",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6MTA3OTMxMjI1ODU2ODczMzUyNA%3D%3D/original/796b20f0-4ed9-46e8-be5f-a4658b7a13dd.jpeg"
+        },
+        {
+          "id": "1830874289",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Ngoại thất 8",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6MTA3OTMxMjI1ODU2ODczMzUyNA%3D%3D/original/fc4fd55a-be0d-41a3-899e-ee38e12aee9f.jpeg"
+        }
+      ],
+      "apartment_info": {
+        "sharing_location": "Thành phố Tuy Hòa",
+        "id": "1079312258568733524",
+        "name": "Mai Home 01",
+        "personCapacity": 2,
+        "pictureUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6MTA3OTMxMjI1ODU2ODczMzUyNA%3D%3D/original/e4a64207-0330-4f2a-b502-1761124fb052.jpeg",
+        "propertyType": "Phòng riêng tại nhà",
+        "lat": 13.114,
+        "lng": 109.3001,
+        "location_description": "Khu vực gần Tháp Nghinh Phong, cafe Gozo, Thuận Phương, Phương Huyền có phục vụ cafe và ăn sáng. Gần khu vực ăn uống đường Nguyễn Hào Sự về phía Tây của nhà, và khu ăn uống đường Trường Chinh, Độc Lập về phía Nam của nhà."
+      },
+      "room_tour_items": [
+        {
+          "title": "Phòng ngủ",
+          "imageIds": [
+            "1831686922",
+            "1831685343",
+            "1831648049",
+            "1831648061",
+            "1831685345",
+            "1831685346",
+            "1831685352",
+            "1915697675"
+          ]
+        },
+        {
+          "title": "Phòng tắm đầy đủ",
+          "imageIds": [
+            "1831665405",
+            "1830434238",
+            "1831665404"
+          ]
+        },
+        {
+          "title": "Ngoại thất",
+          "imageIds": [
+            "1830158288",
+            "1830157953",
+            "1830158254",
+            "1830158012",
+            "1830442463",
+            "1830442475",
+            "1830874288",
+            "1830874289"
+          ]
+        }
+      ],
+      "ratings": [
+        {
+          "categoryType": "CLEANLINESS",
+          "localizedRating": "4,9",
+          "percentage": 0.986
+        },
+        {
+          "categoryType": "ACCURACY",
+          "localizedRating": "5,0",
+          "percentage": 1.0
+        },
+        {
+          "categoryType": "CHECKIN",
+          "localizedRating": "5,0",
+          "percentage": 1.0
+        },
+        {
+          "categoryType": "COMMUNICATION",
+          "localizedRating": "5,0",
+          "percentage": 1.0
+        },
+        {
+          "categoryType": "LOCATION",
+          "localizedRating": "5,0",
+          "percentage": 1.0
+        },
+        {
+          "categoryType": "VALUE",
+          "localizedRating": "5,0",
+          "percentage": 1.0
+        }
+      ],
+      "policies": {
+        "house_rules": [
+          "Nhận phòng sau 14:00",
+          "Trả phòng trước 12:00",
+          "Tối đa 2 khách",
+          "Không được phép mang theo thú cưng",
+          "Cho phép chụp ảnh vì mục đích thương mại",
+          "Cho phép hút thuốc",
+          "Các nội quy khác"
+        ],
+        "safety_properties": [
+          "Chỗ ở có camera an ninh ngoài nhà",
+          "Không có máy báo khói",
+          "Không cần dùng đến máy phát hiện khí CO"
+        ],
+        "house_rules_subtitle": "Vì nơi bạn ở là nhà riêng của người khác nên hãy cẩn thận và tôn trọng khi sử dụng nhé."
+      },
+      "highlights": [
+        {
+          "title": "Nhóm 5% những ngôi nhà hàng đầu",
+          "subtitle": "Nhà này được xếp hạng cao dựa trên điểm xếp hạng, lượt đánh giá và độ tin cậy.",
+          "type": "SYSTEM_GOLDEN_TROPHY"
+        },
+        {
+          "title": "Trải nghiệm nhận phòng xuất sắc",
+          "subtitle": "Những khách ở gần đây đã xếp hạng 5 sao cho quy trình nhận phòng.",
+          "type": "SYSTEM_KEY"
+        },
+        {
+          "title": "Yên bình và tĩnh lặng",
+          "subtitle": "Nhà này nằm trong một khu vực yên tĩnh.",
+          "type": "SYSTEM_LOCATION"
+        }
+      ],
+      "descriptions": [
+        {
+          "title": null,
+          "htmlText": "Vui vẻ cùng cả gia đình và những người thân yêu tại địa điểm yên bình, tiện nghi và đầy phong cách này, nơi bạn được trải nghiệm không gian trong lành,  rộng rãi, có thể tổ chức tiệc ngoài trời, được thu hoạch rau xanh sạch trong vườn nhà. Thuận tiện đến biển và trung tâm thành phố, chỉ cách 5' đi bộ đến biển và Tháp Nghinh Phong, biểu tượng mới của Tp. Tuy Hòa."
+        }
+      ],
+      "amenities": [
+        {
+          "group_title": "Cảnh quan đẹp",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Hướng nhìn ra vườn",
+              "icon": "SYSTEM_FLOWER"
+            }
+          ]
+        },
+        {
+          "group_title": "Phòng tắm",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Máy sấy tóc",
+              "icon": "SYSTEM_HAIRDRYER"
+            },
+            {
+              "available": true,
+              "title": "Sản phẩm vệ sinh",
+              "icon": "SYSTEM_CLEANING_SUPPLIES"
+            },
+            {
+              "available": true,
+              "title": "Dầu gội đầu",
+              "icon": "SYSTEM_SHAMPOO"
+            },
+            {
+              "available": true,
+              "title": "Xà phòng tắm",
+              "icon": "SYSTEM_SOAP"
+            },
+            {
+              "available": true,
+              "title": "Vòi sen tắm ngoài trời",
+              "icon": "SYSTEM_SHOWER"
+            },
+            {
+              "available": true,
+              "title": "Nước nóng",
+              "icon": "SYSTEM_HOT_WATER"
+            },
+            {
+              "available": true,
+              "title": "Sữa tắm",
+              "icon": "SYSTEM_SOAP"
+            }
+          ]
+        },
+        {
+          "group_title": "Phòng ngủ và giặt ủi",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Máy giặt",
+              "icon": "SYSTEM_WASHER"
+            },
+            {
+              "available": true,
+              "title": "Tiện nghi thiết yếu",
+              "icon": "SYSTEM_TOILETRIES"
+            },
+            {
+              "available": true,
+              "title": "Móc treo quần áo",
+              "icon": "SYSTEM_HANGERS"
+            },
+            {
+              "available": true,
+              "title": "Bộ chăn ga gối",
+              "icon": "SYSTEM_BLANKETS"
+            },
+            {
+              "available": true,
+              "title": "Thêm chăn gối",
+              "icon": "SYSTEM_PILLOW"
+            },
+            {
+              "available": true,
+              "title": "Mành chắn sáng cho phòng",
+              "icon": "SYSTEM_BLACKOUT_SHADES"
+            },
+            {
+              "available": true,
+              "title": "Nơi để quần áo",
+              "icon": "SYSTEM_WARDROBE"
+            }
+          ]
+        },
+        {
+          "group_title": "Giải trí",
+          "amenities": [
+            {
+              "available": true,
+              "title": "TV",
+              "icon": "SYSTEM_TV"
+            }
+          ]
+        },
+        {
+          "group_title": "Hệ thống sưởi và làm mát",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Điều hòa nhiệt độ",
+              "icon": "SYSTEM_SNOWFLAKE"
+            }
+          ]
+        },
+        {
+          "group_title": "An toàn nhà ở",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Chỗ ở có camera an ninh ngoài nhà",
+              "icon": "SYSTEM_SURVEILLANCE"
+            }
+          ]
+        },
+        {
+          "group_title": "Internet và văn phòng",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Wi-fi",
+              "icon": "SYSTEM_WI_FI"
+            },
+            {
+              "available": true,
+              "title": "Không gian riêng để làm việc",
+              "icon": "SYSTEM_WORKSPACE"
+            }
+          ]
+        },
+        {
+          "group_title": "Đồ dùng nấu bếp và ăn uống",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Bếp",
+              "icon": "SYSTEM_COOKING_BASICS"
+            }
+          ]
+        },
+        {
+          "group_title": "Các đặc điểm về vị trí",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Lối ra bãi biển – Hướng biển",
+              "icon": "SYSTEM_BEACH"
+            }
+          ]
+        },
+        {
+          "group_title": "Ngoài trời",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Khu vực ăn uống ngoài trời",
+              "icon": "SYSTEM_ROOFTOP_DECK"
+            },
+            {
+              "available": true,
+              "title": "Lò nướng BBQ",
+              "icon": "SYSTEM_GRILL"
+            }
+          ]
+        },
+        {
+          "group_title": "Chỗ đỗ xe và cơ sở vật chất",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Chỗ đỗ xe miễn phí tại nơi ở",
+              "icon": "SYSTEM_MAPS_CAR_RENTAL"
+            }
+          ]
+        },
+        {
+          "group_title": "Dịch vụ",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Cho phép hút thuốc",
+              "icon": "SYSTEM_SMOKING_ALLOWED"
+            }
+          ]
+        },
+        {
+          "group_title": "Không bao gồm",
+          "amenities": [
+            {
+              "available": false,
+              "title": "Máy sấy quần áo",
+              "icon": "SYSTEM_NO_DRYER"
+            },
+            {
+              "available": false,
+              "title": "Máy báo khói",
+              "icon": "SYSTEM_NO_DETECTOR_SMOKE"
+            },
+            {
+              "available": false,
+              "title": "Máy phát hiện khí CO",
+              "icon": "SYSTEM_NO_DETECTOR_CO2"
+            },
+            {
+              "available": false,
+              "title": "Hệ thống sưởi",
+              "icon": "SYSTEM_NO_HEATER"
+            }
+          ]
+        }
+      ],
+      "price": {
+        "night_price": 550000,
+        "currency": "VND"
+      }
+    },
+    "fetch_date": "2025-08-21T05:51:44.409376"
+  },
+  {
+    "listing_id": "851316054970812704",
+    "data": {
+      "images": [
+        {
+          "id": "2056530594",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Phòng khách 1",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/843f927f-03f7-4b2a-8b41-88dc166e00fe.jpeg"
+        },
+        {
+          "id": "2056530675",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Phòng khách 2",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/dcbb3105-d38e-44cf-9e92-b9c40edb17ac.jpeg"
+        },
+        {
+          "id": "2056530677",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Phòng khách 3",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/6abd0799-f602-4b69-b2a7-4139e5a8e51f.jpeg"
+        },
+        {
+          "id": "2056530678",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Phòng khách 4",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/42a561fd-676a-4dee-8fa7-73511a798fb8.jpeg"
+        },
+        {
+          "id": "2056530686",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Phòng khách 5",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/563b1d3c-02c7-4329-99a3-7c8aef964210.jpeg"
+        },
+        {
+          "id": "2056530822",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Phòng khách 6",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/a8dca4f2-0812-4c6f-8d1a-ba6a6cd5b967.jpeg"
+        },
+        {
+          "id": "2056531470",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Phòng khách 7",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/4ecf3f02-59f2-4f22-b7f2-5691a75266c2.jpeg"
+        },
+        {
+          "id": "2056531020",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Phòng khách 8",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/b38b3065-65d4-4793-b333-8bbe27c5d7f0.jpeg"
+        },
+        {
+          "id": "2056531147",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Phòng khách 9",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/8b69d51a-b8b6-4a69-85a1-8ee225ad958a.jpeg"
+        },
+        {
+          "id": "2056531160",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Phòng khách 10",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/f62c997d-1f0c-4d52-83cf-1adbe1d31515.jpeg"
+        },
+        {
+          "id": "2056535583",
+          "orientation": "LANDSCAPE",
+          "accessibilityLabel": "Hình ảnh Bếp đầy đủ tiện nghi 1",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/725956da-f9e7-4e55-896d-83371a037aac.jpeg"
+        },
+        {
+          "id": "2056535580",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Bếp đầy đủ tiện nghi 2",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/63bf85b2-922a-457c-8213-bbab8e9de718.jpeg"
+        },
+        {
+          "id": "2056535582",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Bếp đầy đủ tiện nghi 3",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/764c0ac6-ae46-4536-afff-b93e6efbbba8.jpeg"
+        },
+        {
+          "id": "2056531259",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Bếp đầy đủ tiện nghi 4",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/ec0b250c-3cec-47fd-a2fe-15fcbb648bd6.jpeg"
+        },
+        {
+          "id": "2056531366",
+          "orientation": "LANDSCAPE",
+          "accessibilityLabel": "Hình ảnh Khu vực ăn uống 1",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/f8e09966-5ead-4300-b625-555b5e77323f.jpeg"
+        },
+        {
+          "id": "2056531140",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Phòng ngủ 1 1",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/e4576ead-655f-489d-83ff-aecb96276fb9.jpeg"
+        },
+        {
+          "id": "2056531201",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Phòng ngủ 1 2",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/7b3448fb-666f-40b5-94e9-c9c181c76e5e.jpeg"
+        },
+        {
+          "id": "2056531257",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Phòng ngủ 1 3",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/11bb1873-6fab-4898-bc34-d3fd09afa6e2.jpeg"
+        },
+        {
+          "id": "2056531473",
+          "orientation": "LANDSCAPE",
+          "accessibilityLabel": "Hình ảnh Phòng ngủ 1 4",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/5566b7e3-f4f1-4521-adad-f4109d87c4be.jpeg"
+        },
+        {
+          "id": "2056531285",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Phòng ngủ 1 5",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/ecef2d93-6110-4dc5-a700-05a2073cf1a6.jpeg"
+        },
+        {
+          "id": "2056531441",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Phòng ngủ 1 6",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/956c4d4f-a8e9-433c-9999-8aa8e5f35a29.jpeg"
+        },
+        {
+          "id": "2056531467",
+          "orientation": "LANDSCAPE",
+          "accessibilityLabel": "Hình ảnh Phòng ngủ 1 7",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/badc9096-8d31-425d-a9fc-f59585633f29.jpeg"
+        },
+        {
+          "id": "2056538599",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Phòng ngủ 2 1",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/4bbce320-4e10-4d08-b6b2-6f9e4a3ca26d.jpeg"
+        },
+        {
+          "id": "2056531303",
+          "orientation": "LANDSCAPE",
+          "accessibilityLabel": "Hình ảnh Phòng tắm đầy đủ 1 1",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/6deabe3c-97da-46ca-a8a6-7829c94748f7.jpeg"
+        },
+        {
+          "id": "2056531239",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Phòng tắm đầy đủ 1 2",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/f269d26d-45fb-4023-afe2-3f23868d66c4.jpeg"
+        },
+        {
+          "id": "2056530750",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Phòng tắm đầy đủ 2 1",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/6c36a1fa-c782-42a9-bfbf-c1252b70058f.jpeg"
+        },
+        {
+          "id": "2056531376",
+          "orientation": "LANDSCAPE",
+          "accessibilityLabel": "Hình ảnh Phòng tắm đầy đủ 2 2",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/0041679a-837c-4fc8-857a-09f6b0b7125f.jpeg"
+        },
+        {
+          "id": "2056531417",
+          "orientation": "LANDSCAPE",
+          "accessibilityLabel": "Hình ảnh Phòng tắm đầy đủ 2 3",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/b4b02ff2-b9f3-46a7-bdca-434cfc2cb65b.jpeg"
+        },
+        {
+          "id": "2056530585",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Ngoại thất 1",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/bd985eea-6491-42a1-83e9-0fc9055d72e8.jpeg"
+        },
+        {
+          "id": "2056530592",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Ngoại thất 2",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/764a074e-f646-461f-a343-2e0c0fdd6d0d.jpeg"
+        },
+        {
+          "id": "2056530593",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Ngoại thất 3",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/fc80e14f-5a1e-4444-bf1d-ae623058e977.jpeg"
+        },
+        {
+          "id": "2056530599",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Ngoại thất 4",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/f41e01e5-04f6-4846-b653-5379b665fc87.jpeg"
+        },
+        {
+          "id": "2056530767",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Ngoại thất 5",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/74e3cfb7-3a22-462a-8991-7338b3e0b7bf.jpeg"
+        },
+        {
+          "id": "2056530770",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Ngoại thất 6",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/d1b86503-5b87-4fe9-b542-bff8a645fa98.jpeg"
+        },
+        {
+          "id": "2056530773",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Ngoại thất 7",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/a24d4c17-6124-4457-bec6-9e645e561c2d.jpeg"
+        },
+        {
+          "id": "2056530836",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Ngoại thất 8",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/718c6e71-273e-4afb-8fb6-e91efc6b86a5.jpeg"
+        },
+        {
+          "id": "2056530851",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Ngoại thất 9",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/107c7c93-0d33-4ed0-a70c-ab526ea24da7.jpeg"
+        },
+        {
+          "id": "2056530879",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Ngoại thất 10",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/29e1de26-6d5b-475b-8bdf-27e108f6627a.jpeg"
+        },
+        {
+          "id": "2056531007",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Ngoại thất 11",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/cfa84538-a70e-4895-ab65-c09154d253ca.jpeg"
+        },
+        {
+          "id": "2056530754",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Ngoại thất 12",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/8d6c4d51-ba18-4e6e-94ca-9d203563d1dc.jpeg"
+        },
+        {
+          "id": "2056530934",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Ngoại thất 13",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/0d10003b-92b4-4778-a692-dffa607b6862.jpeg"
+        },
+        {
+          "id": "2056531322",
+          "orientation": "LANDSCAPE",
+          "accessibilityLabel": "Hình ảnh Ngoại thất 14",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/54571d07-302a-4a1a-b992-ec286f0242cc.jpeg"
+        },
+        {
+          "id": "2056531336",
+          "orientation": "LANDSCAPE",
+          "accessibilityLabel": "Hình ảnh Ngoại thất 15",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/d701c51d-5baf-4712-8ff4-61d5e4521b5d.jpeg"
+        },
+        {
+          "id": "2056530681",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Ảnh bổ sung 1",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/e8486118-71c0-456c-99f7-e2b7f2199d46.jpeg"
+        },
+        {
+          "id": "2056530854",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Ảnh bổ sung 2",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/08b62f13-765d-4769-9f01-a24fdfb09495.jpeg"
+        },
+        {
+          "id": "2056530995",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Ảnh bổ sung 3",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/26b5c3da-f950-42ca-8bc1-abe9b3a512c3.jpeg"
+        },
+        {
+          "id": "2056531025",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Ảnh bổ sung 4",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/1c8f458e-eb24-4981-a6d0-4c4ddab1cc4a.jpeg"
+        },
+        {
+          "id": "2056531042",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Ảnh bổ sung 5",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/ea501265-a6e7-4691-96ed-79abef1b2e5f.jpeg"
+        },
+        {
+          "id": "2056531053",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Ảnh bổ sung 6",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/ccd0a166-fc09-4c9e-abd7-511304c952a9.jpeg"
+        },
+        {
+          "id": "2056531080",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Ảnh bổ sung 7",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/4e169a5f-1f7c-442f-9807-c01d4c2fffaf.jpeg"
+        },
+        {
+          "id": "2056531096",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Ảnh bổ sung 8",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/5309465a-61d5-44ba-97f8-c0b41c59333f.jpeg"
+        },
+        {
+          "id": "2056531218",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Ảnh bổ sung 9",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/4492cb08-dffa-492e-92f8-9bfe473c9a20.jpeg"
+        },
+        {
+          "id": "2056531275",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Ảnh bổ sung 10",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/878fde22-85d8-4fcc-a4e7-db33fcc27044.jpeg"
+        },
+        {
+          "id": "2056531364",
+          "orientation": "LANDSCAPE",
+          "accessibilityLabel": "Hình ảnh Ảnh bổ sung 11",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/7f3d3ff4-5302-4d5e-833d-d1edd4aebf26.jpeg"
+        }
+      ],
+      "apartment_info": {
+        "sharing_location": "Thành phố Tuy Hòa",
+        "id": "851316054970812704",
+        "name": "July Homestay - Nguyên căn 3 phòng ngủ",
+        "personCapacity": 10,
+        "pictureUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODUxMzE2MDU0OTcwODEyNzA0/original/bd985eea-6491-42a1-83e9-0fc9055d72e8.jpeg",
+        "propertyType": "Toàn bộ nhà phố",
+        "lat": 13.0877,
+        "lng": 109.3105,
+        "location_description": "Ngay trong trung tâm to Tuy Hoà, <br />Cạnh Quảng trường 1/4<br />Cách biển Tuy Hòa: 300m<br />Cách Thap Nghinh Phong 2km<br />Cách sân bay: 5km; <br />Cách Ga tàu: 3km."
+      },
+      "room_tour_items": [
+        {
+          "title": "Phòng khách",
+          "imageIds": [
+            "2056530594",
+            "2056530675",
+            "2056530677",
+            "2056530678",
+            "2056530686",
+            "2056530822",
+            "2056531470",
+            "2056531020",
+            "2056531147",
+            "2056531160"
+          ]
+        },
+        {
+          "title": "Bếp đầy đủ tiện nghi",
+          "imageIds": [
+            "2056535583",
+            "2056535580",
+            "2056535582",
+            "2056531259"
+          ]
+        },
+        {
+          "title": "Khu vực ăn uống",
+          "imageIds": [
+            "2056531366"
+          ]
+        },
+        {
+          "title": "Phòng ngủ 1",
+          "imageIds": [
+            "2056531140",
+            "2056531201",
+            "2056531257",
+            "2056531473",
+            "2056531285",
+            "2056531441",
+            "2056531467"
+          ]
+        },
+        {
+          "title": "Phòng ngủ 2",
+          "imageIds": [
+            "2056538599"
+          ]
+        },
+        {
+          "title": "Phòng tắm đầy đủ 1",
+          "imageIds": [
+            "2056531303",
+            "2056531239"
+          ]
+        },
+        {
+          "title": "Phòng tắm đầy đủ 2",
+          "imageIds": [
+            "2056530750",
+            "2056531376",
+            "2056531417"
+          ]
+        },
+        {
+          "title": "Ngoại thất",
+          "imageIds": [
+            "2056530585",
+            "2056530592",
+            "2056530593",
+            "2056530599",
+            "2056530767",
+            "2056530770",
+            "2056530773",
+            "2056530836",
+            "2056530851",
+            "2056530879",
+            "2056531007",
+            "2056530754",
+            "2056530934",
+            "2056531322",
+            "2056531336"
+          ]
+        },
+        {
+          "title": "Ảnh bổ sung",
+          "imageIds": [
+            "2056530681",
+            "2056530854",
+            "2056530995",
+            "2056531025",
+            "2056531042",
+            "2056531053",
+            "2056531080",
+            "2056531096",
+            "2056531218",
+            "2056531275",
+            "2056531364"
+          ]
+        }
+      ],
+      "ratings": [],
+      "policies": {
+        "house_rules": [
+          "Nhận phòng sau 14:00",
+          "Trả phòng trước 11:00",
+          "Tối đa 10 khách",
+          "Được phép mang theo thú cưng",
+          "Khung giờ cần giữ yên lặng",
+          "Cho phép chụp ảnh vì mục đích thương mại",
+          "Cho phép hút thuốc"
+        ],
+        "safety_properties": [
+          "Vị trí trên cao không có lan can hoặc cấu trúc bảo vệ",
+          "Hồ, sông, nguồn nước khác gần đó",
+          "Chỗ ở có camera an ninh ngoài nhà",
+          "Đã lắp máy phát hiện khí CO",
+          "Đã lắp máy báo khói"
+        ],
+        "house_rules_subtitle": "Vì nơi bạn ở là nhà riêng của người khác nên hãy cẩn thận và tôn trọng khi sử dụng nhé."
+      },
+      "highlights": [
+        {
+          "title": "Nhiều điều để trải nghiệm gần đó",
+          "subtitle": "Khu vực này có rất nhiều điều để khám phá.",
+          "type": "SYSTEM_LOCATION"
+        },
+        {
+          "title": "Lặn ngụp",
+          "subtitle": "Đây là một trong số ít chỗ ở có bể bơi tại khu vực này.",
+          "type": "SYSTEM_POOL"
+        }
+      ],
+      "descriptions": [
+        {
+          "title": null,
+          "htmlText": "Homestay ở trung tâm thành phố Tuy Hòa yên bình, cạnh 1/4 quảng trường, cách bãi biển Tuy Hòa hơn 100 m, gần tháp Nghinh Phong<br />🖍️ Cách sân bay 7 km<br />🖍️ ~ 3 km từ nhà ga và bến xe buýt<br />Thuận tiện đến các điểm tham quan du lịch<br />Toàn bộ nhà 3 phòng ngủ - sức chứa 10 người bao gồm ( 02 phòng đơn;  01 phòng gia đình) <br />- 4 nhà vệ sinh, bếp và máy giặt để sử dụng miễn phí<br />- Bãi đỗ xe 16 chỗ trước nhà hoặc 2 ô tô<br />Địa chỉ: 4/275 Lê Duẩn, Phường 7, Tuy Hòa, Phú Yên"
+        },
+        {
+          "title": "Chỗ ở",
+          "htmlText": "Được thiết kế với không gian thoáng mát từ phòng cá nhân đế khuôn viên phòng khách, đọc sách đến tận nhà bếp... tạo nên sự dễ chịu nhất khi bạn khách ở home"
+        },
+        {
+          "title": "Tiện nghi khách có quyền sử dụng",
+          "htmlText": "Tất cả khuôn viên nhà là không gian riêng tự để bạn cùng nghỉ ngơi trong những ngày ở Phú Yên"
+        }
+      ],
+      "amenities": [
+        {
+          "group_title": "Giải trí",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Thiết bị tập thể dục",
+              "icon": "SYSTEM_GYM"
+            }
+          ]
+        },
+        {
+          "group_title": "Hệ thống sưởi và làm mát",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Điều hòa nhiệt độ",
+              "icon": "SYSTEM_SNOWFLAKE"
+            }
+          ]
+        },
+        {
+          "group_title": "An toàn nhà ở",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Chỗ ở có camera an ninh ngoài nhà",
+              "icon": "SYSTEM_SURVEILLANCE"
+            },
+            {
+              "available": true,
+              "title": "Máy báo khói",
+              "icon": "SYSTEM_DETECTOR_SMOKE"
+            },
+            {
+              "available": true,
+              "title": "Máy phát hiện khí CO",
+              "icon": "SYSTEM_DETECTOR_CO"
+            },
+            {
+              "available": true,
+              "title": "Bình chữa cháy",
+              "icon": "SYSTEM_FIRE_EXTINGUISHER"
+            }
+          ]
+        },
+        {
+          "group_title": "Internet và văn phòng",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Wi-fi",
+              "icon": "SYSTEM_WI_FI"
+            },
+            {
+              "available": true,
+              "title": "Không gian riêng để làm việc",
+              "icon": "SYSTEM_WORKSPACE"
+            }
+          ]
+        },
+        {
+          "group_title": "Đồ dùng nấu bếp và ăn uống",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Bếp",
+              "icon": "SYSTEM_COOKING_BASICS"
+            },
+            {
+              "available": true,
+              "title": "Bát đĩa và đồ bạc",
+              "icon": "SYSTEM_DISHES_AND_SILVERWARE"
+            }
+          ]
+        },
+        {
+          "group_title": "Chỗ đỗ xe và cơ sở vật chất",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Bể bơi",
+              "icon": "SYSTEM_POOL"
+            },
+            {
+              "available": true,
+              "title": "Thiết bị sạc xe điện",
+              "icon": "SYSTEM_EV_CHARGER"
+            },
+            {
+              "available": true,
+              "title": "Chỗ đỗ xe có thu phí trong khuôn viên",
+              "icon": "SYSTEM_MAPS_CAR_RENTAL"
+            }
+          ]
+        },
+        {
+          "group_title": "Dịch vụ",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Cho phép thú cưng",
+              "icon": "SYSTEM_PETS"
+            },
+            {
+              "available": true,
+              "title": "Cho phép hút thuốc",
+              "icon": "SYSTEM_SMOKING_ALLOWED"
+            },
+            {
+              "available": true,
+              "title": "Chủ nhà chào đón bạn",
+              "icon": "SYSTEM_HOST_OWNERS"
+            }
+          ]
+        },
+        {
+          "group_title": "Không bao gồm",
+          "amenities": [
+            {
+              "available": false,
+              "title": "TV",
+              "icon": "SYSTEM_NO_TV"
+            },
+            {
+              "available": false,
+              "title": "Máy giặt",
+              "icon": "SYSTEM_NO_WASHER"
+            },
+            {
+              "available": false,
+              "title": "Máy sấy quần áo",
+              "icon": "SYSTEM_NO_DRYER"
+            },
+            {
+              "available": false,
+              "title": "Tiện nghi thiết yếu",
+              "icon": "SYSTEM_NO_ESSENTIALS"
+            },
+            {
+              "available": false,
+              "title": "Hệ thống sưởi",
+              "icon": "SYSTEM_NO_HEATER"
+            },
+            {
+              "available": false,
+              "title": "Nước nóng",
+              "icon": "SYSTEM_NO_HOT_WATER"
+            }
+          ]
+        }
+      ],
+      "price": {
+        "night_price": 2400000,
+        "currency": "VND"
+      }
+    },
+    "fetch_date": "2025-08-21T05:51:46.181436"
+  },
+  {
+    "listing_id": "42452043",
+    "data": {
+      "images": [
+        {
+          "id": "972775638",
+          "orientation": "LANDSCAPE",
+          "accessibilityLabel": "Hình ảnh Phòng khách chung 1",
+          "baseUrl": "https://a0.muscache.com/im/pictures/36f68316-0801-4992-bd9b-33d55410e06e.jpg"
+        },
+        {
+          "id": "2109267122",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Phòng khách chung 2",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-42452043/original/dea761e9-275e-48b8-b634-03370a222b35.jpeg"
+        },
+        {
+          "id": "2109268278",
+          "orientation": "LANDSCAPE",
+          "accessibilityLabel": "Hình ảnh Bếp đầy đủ, chung 1",
+          "baseUrl": "https://a0.muscache.com/im/pictures/hosting/Hosting-42452043/original/a1f85e4b-3993-4efe-80fd-3cdf3ceab1b8.jpeg"
+        },
+        {
+          "id": "974175714",
+          "orientation": "LANDSCAPE",
+          "accessibilityLabel": "Hình ảnh Bếp đầy đủ, chung 2",
+          "baseUrl": "https://a0.muscache.com/im/pictures/d9ed3828-0b9f-4038-ad77-8355a6ffe2fc.jpg"
+        },
+        {
+          "id": "972775639",
+          "orientation": "LANDSCAPE",
+          "accessibilityLabel": "Hình ảnh Khu vực ăn uống chung 1",
+          "baseUrl": "https://a0.muscache.com/im/pictures/05cb13e6-399b-47a8-94a2-a792b9e7a6c6.jpg"
+        },
+        {
+          "id": "974175982",
+          "orientation": "LANDSCAPE",
+          "accessibilityLabel": "Hình ảnh Phòng ngủ 1",
+          "baseUrl": "https://a0.muscache.com/im/pictures/4b0c6a83-35ca-4e33-8cec-3c69e3425160.jpg"
+        },
+        {
+          "id": "974140315",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Phòng ngủ 2",
+          "baseUrl": "https://a0.muscache.com/im/pictures/9e3a53d7-2330-4cac-a048-f0ff48fc9dd4.jpg"
+        },
+        {
+          "id": "974175852",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Phòng ngủ 3",
+          "baseUrl": "https://a0.muscache.com/im/pictures/cef6ee47-6721-40e4-bac2-31dcae40f60e.jpg"
+        },
+        {
+          "id": "972775649",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Phòng tắm đầy đủ 1",
+          "baseUrl": "https://a0.muscache.com/im/pictures/e5c0c931-892c-483b-8e54-ffb36d0731d2.jpg"
+        },
+        {
+          "id": "972775657",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Phòng tắm đầy đủ 2",
+          "baseUrl": "https://a0.muscache.com/im/pictures/5bf339ff-00ea-4c71-b855-83ad701ae59f.jpg"
+        },
+        {
+          "id": "972775643",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Sân sau chung 1",
+          "baseUrl": "https://a0.muscache.com/im/pictures/d43d8645-a3f7-4f0f-b4ec-1603366c95f7.jpg"
+        },
+        {
+          "id": "972973106",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Sân chung 1",
+          "baseUrl": "https://a0.muscache.com/im/pictures/a70f986d-d908-488c-88b0-b208d848802e.jpg"
+        },
+        {
+          "id": "972775650",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Sân chung 2",
+          "baseUrl": "https://a0.muscache.com/im/pictures/71dfeb4b-4c1a-4d53-b480-f1ee5da0764e.jpg"
+        },
+        {
+          "id": "972775635",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Ngoại thất chung 1",
+          "baseUrl": "https://a0.muscache.com/im/pictures/125d7713-1635-420f-90f3-aa6840d46491.jpg"
+        },
+        {
+          "id": "972775637",
+          "orientation": "LANDSCAPE",
+          "accessibilityLabel": "Hình ảnh Ảnh bổ sung 1",
+          "baseUrl": "https://a0.muscache.com/im/pictures/d183e8d5-c629-4296-91d9-8cc5b91cdcdb.jpg"
+        },
+        {
+          "id": "972775634",
+          "orientation": "LANDSCAPE",
+          "accessibilityLabel": "Hình ảnh Ảnh bổ sung 2",
+          "baseUrl": "https://a0.muscache.com/im/pictures/441ceec0-d079-4983-99a0-213b2860b3da.jpg"
+        },
+        {
+          "id": "972775642",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Ảnh bổ sung 3",
+          "baseUrl": "https://a0.muscache.com/im/pictures/85ae3f8f-b85c-4f6d-ac35-0641ffdd6abf.jpg"
+        },
+        {
+          "id": "972775644",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Ảnh bổ sung 4",
+          "baseUrl": "https://a0.muscache.com/im/pictures/92714582-058f-41db-9c5e-1698d5d58b3f.jpg"
+        },
+        {
+          "id": "972775646",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Ảnh bổ sung 5",
+          "baseUrl": "https://a0.muscache.com/im/pictures/66b907bd-5530-4605-8d6c-e11687b44f0b.jpg"
+        },
+        {
+          "id": "972775648",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Ảnh bổ sung 6",
+          "baseUrl": "https://a0.muscache.com/im/pictures/22b0c751-1ad7-4b12-97ee-d2f790eeb7e3.jpg"
+        },
+        {
+          "id": "972775651",
+          "orientation": "PORTRAIT",
+          "accessibilityLabel": "Hình ảnh Ảnh bổ sung 7",
+          "baseUrl": "https://a0.muscache.com/im/pictures/a05e0472-7e57-4ff7-83cb-3e08ad036984.jpg"
+        }
+      ],
+      "apartment_info": {
+        "sharing_location": "Thành phố Tuy Hòa",
+        "lat": 13.10264,
+        "lng": 109.31577,
+        "location_description": "Sáng thức dậy sớm để hít thở làn gió trong lành từ biển, nghe tiếng sóng vỗ rì rào và chỉ cần tản bộ 5p bạn sẽ được vùi chân vào bãi cát trắng.<br />Khi đêm xuống, quảng trường thật vui và náo nhiệt với nhạc nước cùng các trò chơi xe điện, xe thăng bằng. Hay chợ đêm, các quán cafe địa phương xinh xắn.<br /><br />Từ YOURS bạn có thể :<br />- Đến biển với 5p đi bộ.<br />- Đến quảng trường thành phố 8p đi bộ.<br />- Đến chợ đêm, TTTM Vincom 5p đi bộ.<br />- Đến Bãi Xép ( cảnh quay trong bộ phim Hoa Vàng Cỏ Xanh ), Gành Đá Dĩa, Gành Đèn, nhà thờ Mằng Lăng, Đầm Ô Loan khoảng 30p đi xe máy.",
+        "id": "42452043",
+        "name": "Homestay CỦA BẠN - Phòng đơn",
+        "personCapacity": 2,
+        "pictureUrl": "https://a0.muscache.com/im/pictures/9e3a53d7-2330-4cac-a048-f0ff48fc9dd4.jpg",
+        "propertyType": "Phòng riêng tại nhà"
+      },
+      "room_tour_items": [
+        {
+          "title": "Phòng khách chung",
+          "imageIds": [
+            "972775638",
+            "2109267122"
+          ]
+        },
+        {
+          "title": "Bếp đầy đủ, chung",
+          "imageIds": [
+            "2109268278",
+            "974175714"
+          ]
+        },
+        {
+          "title": "Khu vực ăn uống chung",
+          "imageIds": [
+            "972775639"
+          ]
+        },
+        {
+          "title": "Phòng ngủ",
+          "imageIds": [
+            "974175982",
+            "974140315",
+            "974175852"
+          ]
+        },
+        {
+          "title": "Phòng tắm đầy đủ",
+          "imageIds": [
+            "972775649",
+            "972775657"
+          ]
+        },
+        {
+          "title": "Sân sau chung",
+          "imageIds": [
+            "972775643"
+          ]
+        },
+        {
+          "title": "Sân chung",
+          "imageIds": [
+            "972973106",
+            "972775650"
+          ]
+        },
+        {
+          "title": "Ngoại thất chung",
+          "imageIds": [
+            "972775635"
+          ]
+        },
+        {
+          "title": "Ảnh bổ sung",
+          "imageIds": [
+            "972775637",
+            "972775634",
+            "972775642",
+            "972775644",
+            "972775646",
+            "972775648",
+            "972775651"
+          ]
+        }
+      ],
+      "ratings": [
+        {
+          "categoryType": "CLEANLINESS",
+          "localizedRating": "5,0",
+          "percentage": 1.0
+        },
+        {
+          "categoryType": "ACCURACY",
+          "localizedRating": "5,0",
+          "percentage": 1.0
+        },
+        {
+          "categoryType": "CHECKIN",
+          "localizedRating": "5,0",
+          "percentage": 1.0
+        },
+        {
+          "categoryType": "COMMUNICATION",
+          "localizedRating": "5,0",
+          "percentage": 1.0
+        },
+        {
+          "categoryType": "LOCATION",
+          "localizedRating": "5,0",
+          "percentage": 1.0
+        },
+        {
+          "categoryType": "VALUE",
+          "localizedRating": "5,0",
+          "percentage": 1.0
+        }
+      ],
+      "policies": {
+        "house_rules": [
+          "Nhận phòng sau 14:00",
+          "Trả phòng trước 12:00",
+          "Tối đa 2 khách",
+          "Không được phép mang theo thú cưng",
+          "Không hút thuốc",
+          "Các nội quy khác"
+        ],
+        "safety_properties": [
+          "Vị trí trên cao không có lan can hoặc cấu trúc bảo vệ",
+          "Chỗ ở có camera an ninh ngoài nhà",
+          "Không có máy phát hiện khí CO",
+          "Không có máy báo khói",
+          "Một số không gian được sử dụng chung",
+          "Phải leo cầu thang"
+        ],
+        "house_rules_subtitle": "Vì nơi bạn ở là nhà riêng của người khác nên hãy cẩn thận và tôn trọng khi sử dụng nhé."
+      },
+      "highlights": [
+        {
+          "title": "Đỗ xe miễn phí",
+          "subtitle": "Đây là một trong số ít địa điểm có chỗ đỗ xe miễn phí tại khu vực.",
+          "type": "SYSTEM_PARKING"
+        },
+        {
+          "title": "Chủ nhà giao tiếp xuất sắc",
+          "subtitle": "Những khách ở gần đây đã xếp hạng 5 sao cho cách giao tiếp của Chủ nhà Hưng.",
+          "type": "SYSTEM_MESSAGE_READ"
+        },
+        {
+          "title": "Phòng trong nhà",
+          "subtitle": "Bạn sẽ có phòng riêng trong một ngôi nhà và được sử dụng những khu vực chung.",
+          "type": "SYSTEM_PRIVATE_BEDROOM"
+        }
+      ],
+      "descriptions": [
+        {
+          "title": null,
+          "htmlText": "YOURS Homes là nơi bạn sẽ cảm thấy thoải mái và gần gũi, tự nhiên và thoáng đãng vì homestay được thiết kế đơn giản kết hợp với vật liệu tự nhiên tại địa phương. YOURS chỉ cách biển 5p đi bộ và 8p vào trung tâm bằng xe máy, nằm ngay trục đường biển nối với các địa điểm tham quan tại Phú Yên nên rất thuận tiện để bạn di chuyển"
+        },
+        {
+          "title": "Chỗ ở",
+          "htmlText": "Hãy tận hưởng kỳ nghỉ của bạn một cách thoải mái nhất vì YOURS chính là ngôi nhà của bạn. Tất cả các không gian sinh hoạt chung bạn đều được sử dụng khi cần.<br />Phòng khách - cùng quây quần tán gẫu và xem tivi.<br />Phòng bếp - cùng nấu những món ăn với nguyên liệu địa phương tươi rói.<br />Giếng trời - tắm nắng, uống trà hay đọc một cuốn sách.<br /><br />Home nằm trên đường Nguyễn Thị Minh Khai có 2 làn đường nên có chỗ đậu xe ô tô 2 chiều thuận tiện. Xung quanh khu vực bạn dễ dàng đi đến: <br />- Chợ Phường 7 ( 450m)<br />- Hiệu thuốc (500m)<br />- Cửa hàng tiện lợi (200m)<br />- Quán cà phê và hàng quán bán đồ ăn ( 300m - 600m)<br />- Vincom ( 600m)"
+        },
+        {
+          "title": "Tiện nghi khách có quyền sử dụng",
+          "htmlText": "* PHÒNG<br />Phòng có nước lọc, bàn chải đánh răng, sữa tắm+dầu gội, khăn mặt, khăn tắm, máy sấy tóc, tivi kết nối internet, riêng bàn ủi home cung cấp khi khách yêu cầu.<br /><br />* BẾP<br />Home có bếp và đồ dùng cơ bản để bạn nấu nướng. Home còn trang bị bàn ăn và ghế ngồi cho bạn. Home có dịch vụ dọn dẹp bếp sau ăn với mức phí từ 200.000 đến 500.000. Tất nhiên, nếu bạn tự dọn dẹp home sẽ không tính phí này nhé.  <br /><br />* GIẶT SẤY<br />Home có dịch vụ giặt sấy với mức giá 100.000/lần giặt. Một lần giặt tối đa 1 giỏ 10kg quần áo.<br /><br />* THUÊ XE MÁY<br />Giá thuê xe ga: 150.000/ngày<br />Giá thuê xe số: 120.000/ngày<br /> <br />* CÓ CHỖ ĐẬU XE Ô TÔ MIỄN PHÍ"
+        },
+        {
+          "title": "Trong thời gian ở",
+          "htmlText": "YOURS luôn đợi bạn đến thăm nhà. Hãy liên lạc cho YOURS khi bạn đang có kế hoạch đến Phú Yên xinh đẹp nhé."
+        },
+        {
+          "title": "Những điều cần lưu ý khác",
+          "htmlText": "- Theo luật Việt Nam, quý khách phải cung cấp ảnh hộ chiếu/ Căn cước công dân cho chúng tôi để đăng ký lưu trú với cơ quan có thẩm quyền. Nếu không, chúng tôi phải từ chối yêu cầu đặt phòng của bạn.<br />- Hút Thuốc: Chỉ được phép hút bên ngoài home hoặc trên ban công.\r<br />- Thú cưng: Không được phép.\r<br />- Tiệc tùng: Quý khách tổ chức tiệc ở bếp, trước ban công/sân nhà, giếng trời. Vui lòng không tổ chức tiệc trong phòng.<br />- Vui lòng dọn dẹp sạch sẽ gọn gàng khu vực chung sau khi sử dụng cho người dùng sau.\r<br />- Không gây ồn ào sau 11pm (23:00)\r<br />- Để phòng chống cháy nổ vui lòng tắt tất cả thiết bị điện sau khi ra khỏi phòng.<br />- Nghiêm cấm ma tuý, các chất kích thích, bóng cười, gái mại dâm, vũ khí, cần sa và người lạ chưa đăng ký với lễ tân.<br /> <br />SỮA CHỮA THIỆT HẠI<br />Quý khách sẽ phải bồi thường nếu gây ra tổn thất, thiệt hại, mất mát tài sản và thiệt bị của Homestay. Số tiền bồi thường sẽ được tính GẤP ĐÔI giá thị trường của sản phẩm mới cùng loại. <br /><br />Nếu vi phạm nội quy Homestay chúng tôi sẽ yêu cầu đóng phạt một khoản tiền một khoản tiền tương ứng lỗi vi phạm."
+        }
+      ],
+      "amenities": [
+        {
+          "group_title": "Phòng tắm",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Máy sấy tóc",
+              "icon": "SYSTEM_HAIRDRYER"
+            },
+            {
+              "available": true,
+              "title": "Sản phẩm vệ sinh",
+              "icon": "SYSTEM_CLEANING_SUPPLIES"
+            },
+            {
+              "available": true,
+              "title": "Dầu gội đầu",
+              "icon": "SYSTEM_SHAMPOO"
+            },
+            {
+              "available": true,
+              "title": "Nước nóng",
+              "icon": "SYSTEM_HOT_WATER"
+            },
+            {
+              "available": true,
+              "title": "Sữa tắm",
+              "icon": "SYSTEM_SOAP"
+            }
+          ]
+        },
+        {
+          "group_title": "Phòng ngủ và giặt ủi",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Máy giặt",
+              "icon": "SYSTEM_WASHER"
+            },
+            {
+              "available": true,
+              "title": "Máy sấy quần áo",
+              "icon": "SYSTEM_DRYER"
+            },
+            {
+              "available": true,
+              "title": "Tiện nghi thiết yếu",
+              "icon": "SYSTEM_TOILETRIES"
+            },
+            {
+              "available": true,
+              "title": "Móc treo quần áo",
+              "icon": "SYSTEM_HANGERS"
+            },
+            {
+              "available": true,
+              "title": "Bộ chăn ga gối",
+              "icon": "SYSTEM_BLANKETS"
+            },
+            {
+              "available": true,
+              "title": "Thêm chăn gối",
+              "icon": "SYSTEM_PILLOW"
+            },
+            {
+              "available": true,
+              "title": "Bàn là",
+              "icon": "SYSTEM_IRON"
+            },
+            {
+              "available": true,
+              "title": "Nơi để quần áo",
+              "icon": "SYSTEM_WARDROBE"
+            }
+          ]
+        },
+        {
+          "group_title": "Giải trí",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Kết nối Ethernet",
+              "icon": "SYSTEM_CABLE"
+            },
+            {
+              "available": true,
+              "title": "TV",
+              "icon": "SYSTEM_TV"
+            }
+          ]
+        },
+        {
+          "group_title": "Gia đình",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Sách và đồ chơi trẻ em",
+              "icon": "SYSTEM_TOYS"
+            },
+            {
+              "available": true,
+              "title": "Đồ bịt ổ điện",
+              "icon": "SYSTEM_OUTLET_COVER"
+            }
+          ]
+        },
+        {
+          "group_title": "Hệ thống sưởi và làm mát",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Điều hòa nhiệt độ",
+              "icon": "SYSTEM_SNOWFLAKE"
+            }
+          ]
+        },
+        {
+          "group_title": "Quyền riêng tư và an toàn",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Khóa ở cửa phòng ngủ",
+              "icon": "SYSTEM_LOCK_ON_DOOR"
+            },
+            {
+              "available": true,
+              "title": "Chỗ ở có camera an ninh ngoài nhà",
+              "icon": "SYSTEM_SURVEILLANCE"
+            },
+            {
+              "available": true,
+              "title": "Bình chữa cháy",
+              "icon": "SYSTEM_FIRE_EXTINGUISHER"
+            },
+            {
+              "available": true,
+              "title": "Bộ sơ cứu",
+              "icon": "SYSTEM_FIRST_AID_KIT"
+            }
+          ]
+        },
+        {
+          "group_title": "Internet và văn phòng",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Wi-fi",
+              "icon": "SYSTEM_WI_FI"
+            }
+          ]
+        },
+        {
+          "group_title": "Đồ dùng nấu bếp và ăn uống",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Bếp",
+              "icon": "SYSTEM_COOKING_BASICS"
+            },
+            {
+              "available": true,
+              "title": "Tủ lạnh",
+              "icon": "SYSTEM_REFRIGERATOR"
+            },
+            {
+              "available": true,
+              "title": "Đồ nấu ăn cơ bản",
+              "icon": "SYSTEM_COOKING_BASICS"
+            },
+            {
+              "available": true,
+              "title": "Bát đĩa và đồ bạc",
+              "icon": "SYSTEM_DISHES_AND_SILVERWARE"
+            },
+            {
+              "available": true,
+              "title": "Bếp",
+              "icon": "SYSTEM_STOVE"
+            },
+            {
+              "available": true,
+              "title": "Ấm đun nước nóng",
+              "icon": "SYSTEM_WATER_KETTLE"
+            }
+          ]
+        },
+        {
+          "group_title": "Ngoài trời",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Sân hoặc ban công",
+              "icon": "SYSTEM_PATIO_BALCONY"
+            },
+            {
+              "available": true,
+              "title": "Sân sau",
+              "icon": "SYSTEM_FLOWER"
+            }
+          ]
+        },
+        {
+          "group_title": "Chỗ đỗ xe và cơ sở vật chất",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Chỗ đỗ xe miễn phí tại nơi ở",
+              "icon": "SYSTEM_MAPS_CAR_RENTAL"
+            }
+          ]
+        },
+        {
+          "group_title": "Dịch vụ",
+          "amenities": [
+            {
+              "available": true,
+              "title": "Cho phép gửi hành lý",
+              "icon": "SYSTEM_LUGGAGE_DROP"
+            }
+          ]
+        },
+        {
+          "group_title": "Không bao gồm",
+          "amenities": [
+            {
+              "available": false,
+              "title": "Máy báo khói",
+              "icon": "SYSTEM_NO_DETECTOR_SMOKE"
+            },
+            {
+              "available": false,
+              "title": "Máy phát hiện khí CO",
+              "icon": "SYSTEM_NO_DETECTOR_CO2"
+            },
+            {
+              "available": false,
+              "title": "Hệ thống sưởi",
+              "icon": "SYSTEM_NO_HEATER"
+            }
+          ]
+        }
+      ],
+      "price": {
+        "night_price": 381000,
+        "currency": "VND"
+      }
+    },
+    "fetch_date": "2025-08-21T05:51:48.272301"
+  }
+]
