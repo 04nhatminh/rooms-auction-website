@@ -8,17 +8,18 @@ class LocationAPI {
   }
 
   // Lấy top locations phổ biến để preload
-  static async getPopularLocations(limit = 20) {
+  static async getPopularLocations(limit = 20, signal = null) {
     const res = await fetch(`${API_BASE_URL}/api/locations/popular?limit=${limit}`, {
       method: 'GET',
-      headers: this.getHeaders()
+      headers: this.getHeaders(),
+      signal
     });
     if (!res.ok) throw new Error((await res.json()).message || 'Failed to fetch popular locations');
     return res.json();
   }
 
   // Search locations (provinces + districts)
-  static async searchLocations(searchTerm, limit = 20) {
+  static async searchLocations(searchTerm, limit = 20, signal = null) {
     if (!searchTerm || searchTerm.trim().length < 2) {
       return {
         success: true,
@@ -36,47 +37,52 @@ class LocationAPI {
 
     const res = await fetch(`${API_BASE_URL}/api/locations/search?${params}`, {
       method: 'GET',
-      headers: this.getHeaders()
+      headers: this.getHeaders(),
+      signal
     });
     if (!res.ok) throw new Error((await res.json()).message || 'Failed to search locations');
     return res.json();
   }
 
   // Lấy tất cả provinces
-  static async getAllProvinces() {
+  static async getAllProvinces(signal = null) {
     const res = await fetch(`${API_BASE_URL}/api/locations/provinces`, {
       method: 'GET',
-      headers: this.getHeaders()
+      headers: this.getHeaders(),
+      signal
     });
     if (!res.ok) throw new Error((await res.json()).message || 'Failed to fetch all provinces');
     return res.json();
   }
 
   // Lấy tất cả districts
-  static async getAllDistricts() {
+  static async getAllDistricts(signal = null) {
     const res = await fetch(`${API_BASE_URL}/api/locations/districts`, {
       method: 'GET',
-      headers: this.getHeaders()
+      headers: this.getHeaders(),
+      signal
     });
     if (!res.ok) throw new Error((await res.json()).message || 'Failed to fetch all districts');
     return res.json();
   }
 
   // Lấy chi tiết province theo code
-  static async getProvinceDetails(provinceCode) {
+  static async getProvinceDetails(provinceCode, signal = null) {
     const res = await fetch(`${API_BASE_URL}/api/locations/provinces/${provinceCode}`, {
       method: 'GET',
-      headers: this.getHeaders()
+      headers: this.getHeaders(),
+      signal
     });
     if (!res.ok) throw new Error((await res.json()).message || 'Failed to fetch province details');
     return res.json();
   }
 
   // Lấy chi tiết district theo code
-  static async getDistrictDetails(districtCode) {
+  static async getDistrictDetails(districtCode, signal = null) {
     const res = await fetch(`${API_BASE_URL}/api/locations/districts/${districtCode}`, {
       method: 'GET',
-      headers: this.getHeaders()
+      headers: this.getHeaders(),
+      signal
     });
     if (!res.ok) throw new Error((await res.json()).message || 'Failed to fetch district details');
     return res.json();

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import LocationAPI from '../api/locationApi';
 
 const LocationContext = createContext();
@@ -62,22 +62,42 @@ export const LocationProvider = ({ children }) => {
   const [hasInitialized, setHasInitialized] = useState(false);
   const [hasLoadedAllData, setHasLoadedAllData] = useState(false);
 
+  // AbortController refs để quản lý việc cancel requests
+  const popularLocationsAbortRef = useRef(null);
+  const allLocationsAbortRef = useRef(null);
+  const searchAbortRef = useRef(null);
+
   // Function để load tất cả provinces và districts
   const loadAllLocationsData = useCallback(async () => {
     if (hasLoadedAllData || isLoadingAll) {
       return;
     }
 
+    // Cancel previous request nếu có
+    if (allLocationsAbortRef.current) {
+      allLocationsAbortRef.current.abort();
+    }
+
+    // Tạo AbortController mới
+    allLocationsAbortRef.current = new AbortController();
+    const signal = allLocationsAbortRef.current.signal;
+
     try {
       console.log('Loading all provinces and districts...');
       setIsLoadingAll(true);
       setError(null);
 
-      // Gọi API song song để lấy provinces và districts
+      // Gọi API để lấy provinces và districts với abort signal
       const [provincesResponse, districtsResponse] = await Promise.all([
-        LocationAPI.getAllProvinces(),
-        LocationAPI.getAllDistricts()
+        LocationAPI.getAllProvinces(signal),
+        LocationAPI.getAllDistricts(signal)
       ]);
+
+      // Kiểm tra nếu request bị abort
+      if (signal.aborted) {
+        console.log('Load all locations request was aborted');
+        return;
+      }
 
       if (provincesResponse.success && districtsResponse.success) {
         const provincesRaw = provincesResponse.data || [];
@@ -85,53 +105,32 @@ export const LocationProvider = ({ children }) => {
         const provinces = provincesRaw.map(normalizeProvince);
         const districts = districtsRaw.map(normalizeDistrict);
 
-        console.log('🔍 DEBUG - Raw API responses:', {
-          provincesResponse,
-          districtsResponse,
-          provincesSample: provinces.slice(0, 3), // Show first 3 items
-          districtsSample: districts.slice(0, 3)
-        });
-
         setAllProvinces(provinces);
         setAllDistricts(districts);
 
         // Tạo mảng tổng hợp để search
         const combinedLocations = [...provinces, ...districts];
 
-        console.log('🔍 DEBUG - Combined locations sample:', {
-          sampleProvinces: combinedLocations.filter(l => l.type === 'province').slice(0, 3),
-          sampleDistricts: combinedLocations.filter(l => l.type === 'district').slice(0, 3),
-          totalCombined: combinedLocations.length
-        });
-
         setAllLocations(combinedLocations);
         setHasLoadedAllData(true);
-        
-        console.log('Successfully loaded all locations:', {
-          provinces: provinces.length,
-          districts: districts.length,
-          total: combinedLocations.length
-        });
       }
     } catch (err) {
+      if (err.name === 'AbortError') {
+        console.log('Load all locations request was cancelled');
+        return;
+      }
       console.error('Error loading all locations:', err);
       setError(err.message);
     } finally {
       setIsLoadingAll(false);
+      allLocationsAbortRef.current = null;
     }
   }, [hasLoadedAllData, isLoadingAll]);
 
+  
   // Function để search trong mảng local
   const searchInLocalData = useCallback((searchTerm, limit = 10) => {
-    console.log('🔍 DEBUG - searchInLocalData called:', {
-      searchTerm,
-      limit,
-      allLocationsLength: allLocations.length,
-      allLocationsSample: allLocations.slice(0, 2)
-    });
-
     if (!searchTerm || searchTerm.trim().length < 1) {
-      console.log('🔍 DEBUG - Search term too short or empty');
       return [];
     }
 
@@ -143,12 +142,6 @@ export const LocationProvider = ({ children }) => {
       (location.Name && location.Name.toLowerCase().includes(term)) ||
       (location.displayText && location.displayText.toLowerCase().includes(term))
     );
-
-    console.log('🔍 DEBUG - Filtered results:', {
-      term,
-      filteredCount: filtered.length,
-      filteredSample: filtered.slice(0, 3)
-    });
 
     // Sắp xếp theo độ ưu tiên: exact match trước, sau đó theo độ dài tên
     const sorted = filtered.sort((a, b) => {
@@ -168,14 +161,9 @@ export const LocationProvider = ({ children }) => {
     });
 
     const result = sorted.slice(0, limit);
-    console.log('🔍 DEBUG - Final sorted results:', {
-      sortedCount: sorted.length,
-      finalResultCount: result.length,
-      finalResults: result
-    });
-
     return result;
   }, [allLocations]);
+
 
   // Function để search locations với fallback đến popular locations
   const searchLocations = async (searchTerm, limit = 10) => {
@@ -198,8 +186,24 @@ export const LocationProvider = ({ children }) => {
         };
       }
 
+      // Cancel previous search request nếu có
+      if (searchAbortRef.current) {
+        searchAbortRef.current.abort();
+      }
+
+      // Tạo AbortController mới cho search
+      searchAbortRef.current = new AbortController();
+      const signal = searchAbortRef.current.signal;
+
       // Nếu chưa có data local, gọi API
-      const response = await LocationAPI.searchLocations(searchTerm, limit);
+      const response = await LocationAPI.searchLocations(searchTerm, limit, signal);
+      
+      // Kiểm tra nếu request bị abort
+      if (signal.aborted) {
+        console.log('Search locations request was aborted');
+        return { success: false, data: { suggestions: [] } };
+      }
+
       if (response?.success) {
         // Convert API search response format to suggestions format
         const results = response.data?.results || {};
@@ -217,6 +221,10 @@ export const LocationProvider = ({ children }) => {
       }
       return response;
     } catch (error) {
+      if (error.name === 'AbortError') {
+        console.log('Search locations request was cancelled');
+        return { success: false, data: { suggestions: [] } };
+      }
       console.error('Error searching locations:', error);
       
       // Fallback: filter popular locations nếu API fail
@@ -231,8 +239,11 @@ export const LocationProvider = ({ children }) => {
           suggestions: filteredPopular
         }
       };
+    } finally {
+      searchAbortRef.current = null;
     }
   };
+
 
   // Function để lấy location suggestions theo từ khóa
   const getLocationSuggestions = async (searchTerm, limit = 10) => {
@@ -255,8 +266,24 @@ export const LocationProvider = ({ children }) => {
         };
       }
 
+      // Cancel previous search request nếu có
+      if (searchAbortRef.current) {
+        searchAbortRef.current.abort();
+      }
+
+      // Tạo AbortController mới cho search
+      searchAbortRef.current = new AbortController();
+      const signal = searchAbortRef.current.signal;
+
       // Nếu chưa có data local, gọi API
-      const response = await LocationAPI.searchLocations(searchTerm, limit);
+      const response = await LocationAPI.searchLocations(searchTerm, limit, signal);
+      
+      // Kiểm tra nếu request bị abort
+      if (signal.aborted) {
+        console.log('Get location suggestions request was aborted');
+        return { success: false, data: { suggestions: [] } };
+      }
+
       if (response?.success) {
         // Convert API search response format to suggestions format
         const results = response.data?.results || {};
@@ -274,6 +301,10 @@ export const LocationProvider = ({ children }) => {
       }
       return response;
     } catch (error) {
+      if (error.name === 'AbortError') {
+        console.log('Get location suggestions request was cancelled');
+        return { success: false, data: { suggestions: [] } };
+      }
       console.error('Error getting location suggestions:', error);
       
       // Fallback: filter popular locations nếu API fail
@@ -288,8 +319,11 @@ export const LocationProvider = ({ children }) => {
           suggestions: filteredPopular
         }
       };
+    } finally {
+      searchAbortRef.current = null;
     }
   };
+
 
   // Function để lấy popular locations (với cache)
   const getPopularLocations = useCallback(async (limit = 5) => {
@@ -322,13 +356,28 @@ export const LocationProvider = ({ children }) => {
       });
     }
 
+    // Cancel previous request nếu có
+    if (popularLocationsAbortRef.current) {
+      popularLocationsAbortRef.current.abort();
+    }
+
+    // Tạo AbortController mới
+    popularLocationsAbortRef.current = new AbortController();
+    const signal = popularLocationsAbortRef.current.signal;
+
     // Nếu chưa có data hoặc không đủ, gọi API
     try {
       console.log('Fetching popular locations from API...');
       setIsLoading(true);
       setError(null);
       
-      const response = await LocationAPI.getPopularLocations(limit);
+      const response = await LocationAPI.getPopularLocations(limit, signal);
+      
+      // Kiểm tra nếu request bị abort
+      if (signal.aborted) {
+        console.log('Popular locations request was aborted');
+        return { success: false, data: { suggestions: [] } };
+      }
       
       if (response.success) {
         const normalized = (response.data?.suggestions ?? []).map(normalizeGeneric);
@@ -340,6 +389,10 @@ export const LocationProvider = ({ children }) => {
       
       return response;
     } catch (err) {
+      if (err.name === 'AbortError') {
+        console.log('Popular locations request was cancelled');
+        return { success: false, data: { suggestions: [] } };
+      }
       console.error('Error fetching popular locations:', err);
       setError(err.message);
       return {
@@ -349,6 +402,7 @@ export const LocationProvider = ({ children }) => {
       };
     } finally {
       setIsLoading(false);
+      popularLocationsAbortRef.current = null;
     }
   }, [popularLocations, isLoading, hasInitialized]);
 
@@ -357,6 +411,22 @@ export const LocationProvider = ({ children }) => {
     loadAllLocationsData();
   }, [loadAllLocationsData]);
 
+  // Cleanup function để cancel các pending requests khi component unmount
+  useEffect(() => {
+    return () => {
+      if (popularLocationsAbortRef.current) {
+        popularLocationsAbortRef.current.abort();
+      }
+      if (allLocationsAbortRef.current) {
+        allLocationsAbortRef.current.abort();
+      }
+      if (searchAbortRef.current) {
+        searchAbortRef.current.abort();
+      }
+    };
+  }, []);
+
+  
   // Debug effect để theo dõi allLocations
   useEffect(() => {
     console.log('🔍 DEBUG - allLocations changed:', {
