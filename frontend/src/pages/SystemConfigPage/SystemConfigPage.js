@@ -12,7 +12,6 @@ export default function SystemConfigPage() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
-  // Mock data - replace with actual API call
   useEffect(() => {
     fetchSystemParameters();
   }, []);
@@ -34,10 +33,10 @@ export default function SystemConfigPage() {
     }
   };
 
-  const handleValueChange = (paramId, newValue) => {
+  const handleValueChange = (paramName, newValue) => {
     setSystemParams(prev => 
       prev.map(param => 
-        param.ParamID === paramId 
+        param.ParamName === paramName 
           ? { ...param, ParamValue: newValue }
           : param
       )
@@ -50,61 +49,24 @@ export default function SystemConfigPage() {
       setError('');
       setSuccess('');
 
-      // TODO: Replace with actual API call
-      // const response = await fetch(`/api/admin/system-parameters/${param.ParamID}`, {
-      //   method: 'PUT',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     'Authorization': `Bearer ${localStorage.getItem('token')}`
-      //   },
-      //   body: JSON.stringify({ ParamValue: param.ParamValue })
-      // });
+      console.log(`Saving parameter: ${param.ParamName} with value: ${param.ParamValue}`);
 
-      // if (!response.ok) {
-      //   throw new Error('Không thể cập nhật tham số');
-      // }
-
-      setSuccess(`Đã cập nhật thành công: ${param.ParamName}`);
+      // Gọi API để cập nhật thông số hệ thống
+      const response = await systemParametersApi.updateParameter(param.ParamName, param.ParamValue);
+      
+      if (response.success) {
+        setSuccess(`Đã cập nhật thành công: ${param.ParamName}`);
+        // Reload lại dữ liệu để đảm bảo đồng bộ
+        await fetchSystemParameters();
+      } else {
+        throw new Error(response.message || 'Không thể cập nhật tham số');
+      }
+      
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       setError(`Lỗi khi cập nhật ${param.ParamName}: ${err.message}`);
     } finally {
       setSaving(false);
-    }
-  };
-
-  const renderInput = (param) => {
-    switch (param.DataType) {
-      case 'boolean':
-        return (
-          <select
-            value={param.ParamValue}
-            onChange={(e) => handleValueChange(param.ParamID, e.target.value)}
-            className={styles.input}
-          >
-            <option value="true">Bật</option>
-            <option value="false">Tắt</option>
-          </select>
-        );
-      case 'number':
-        return (
-          <input
-            type="number"
-            value={param.ParamValue}
-            onChange={(e) => handleValueChange(param.ParamID, e.target.value)}
-            className={styles.input}
-            step="any"
-          />
-        );
-      default:
-        return (
-          <input
-            type="text"
-            value={param.ParamValue}
-            onChange={(e) => handleValueChange(param.ParamID, e.target.value)}
-            className={styles.input}
-          />
-        );
     }
   };
 
@@ -128,15 +90,20 @@ export default function SystemConfigPage() {
 
       <div className={styles.paramsList}>
         {systemParams.map(param => (
-          <div key={param.ParamID} className={styles.paramCard}>
+          <div key={param.ParamName} className={styles.paramCard}>
             <div className={styles.paramInfo}>
               <h3 className={styles.paramName}>{param.ParamName}</h3>
-              <p className={styles.paramDescription}>{param.Description}</p>
+              {/* <p className={styles.paramDescription}>{param.Description}</p> */}
             </div>
             <div className={styles.paramControls}>
               <div className={styles.inputGroup}>
-                <label>Giá trị:</label>
-                {renderInput(param)}
+                <label>Giá trị:</label> 
+                <input
+                  type="text"
+                  value={param.ParamValue}
+                  onChange={(e) => handleValueChange(param.ParamName, e.target.value)}
+                  className={styles.input}
+                />
               </div>
               <button
                 onClick={() => handleSave(param)}

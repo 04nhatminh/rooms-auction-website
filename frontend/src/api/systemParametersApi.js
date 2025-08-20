@@ -33,6 +33,41 @@ export const systemParametersApi = {
             console.error('Error fetching system parameters:', error);
             throw error;
         }
+    },
+
+    // Cập nhật thông số hệ thống
+    updateParameter: async (paramName, paramValue, abortSignal = null) => {
+        try {
+            const fetchOptions = {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ ParamValue: paramValue })
+            };
+
+            // Thêm AbortSignal nếu được cung cấp
+            if (abortSignal) {
+                fetchOptions.signal = abortSignal;
+            }
+
+            const response = await fetch(`${API_BASE_URL}/api/system-parameters/update-parameter/${paramName}`, fetchOptions);
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                console.log('Update Parameter API request was aborted');
+                throw error;
+            }
+            console.error('Error updating system parameter:', error);
+            throw error;
+        }
     }
 };
 

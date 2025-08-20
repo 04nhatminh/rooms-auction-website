@@ -5,4 +5,7 @@ const SystemParametersController = require('../controllers/systemParametersContr
 // GET /api/system-parameters/get-parameters
 router.get('/get-parameters', SystemParametersController.getAllParameters);
 
+// PUT /api/system-parameters/update-parameter/:paramName
+router.put('/update-parameter/:paramName', SystemParametersController.updateParameter);
+
 module.exports = router;
