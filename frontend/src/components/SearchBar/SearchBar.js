@@ -54,22 +54,23 @@ const SearchBar = ({
   const guestDropdownRef = useRef(null);
 
   // Helpers định dạng 'YYYY-MM-DD'
-  const fmt = (d) => {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
+  const formatDate = (date) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
     return `${y}-${m}-${day}`;
   };
+
   const addDaysStr = (yyyyMMdd, days) => {
     const [y, m, d] = yyyyMMdd.split('-').map(Number);
     const dt = new Date(Date.UTC(y, m - 1, d));
     dt.setUTCDate(dt.getUTCDate() + days);
     // Trả về string theo local (không UTC) để hợp với input[type=date]
-    return fmt(new Date(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate()));
+    return formatDate(new Date(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate()));
   };
 
   // Hôm nay (local)
-  const [todayStr] = useState(() => fmt(new Date()));
+  const [todayStr] = useState(() => formatDate(new Date()));
 
   // Hàm xử lý thay đổi input
   const handleInputChange = (field, value) => {
@@ -139,9 +140,6 @@ const SearchBar = ({
       return;
     }
 
-    // Bỏ logic ẩn suggestions khi < 1 ký tự vì điều kiện trên đã xử lý
-    // Bây giờ sẽ search ngay cả với 1 ký tự để cập nhật suggestions khi xóa text
-
     // Debounce search để tránh gọi API liên tục
     searchTimeoutRef.current = setTimeout(async () => {
       try {
@@ -187,7 +185,7 @@ const SearchBar = ({
       } finally {
         setIsLoadingSuggestions(false);
       }
-    }, 200); // Giảm delay xuống 200ms cho UX tốt hơn
+    }, 200); // Giảm delay xuống 200ms
   };
 
   // Nếu popularLocations vừa load xong trong lúc input trống -> cập nhật dropdown
@@ -199,9 +197,7 @@ const SearchBar = ({
   }, [popularLocations]);
 
   // Hàm chọn suggestion
-  const handleSuggestionClick = (suggestion) => {
-    console.log('🔍 Suggestion clicked:', suggestion);
-    
+  const handleSuggestionClick = (suggestion) => {    
     const newSearchData = {
       ...searchData,
       location: suggestion.displayText
@@ -213,12 +209,6 @@ const SearchBar = ({
     setShowSuggestions(false);
     setSuggestions([]);
     setSelectedSuggestionIndex(-1);
-    
-    console.log('🔍 Updated location info:', {
-      locationId: suggestion.id,
-      type: suggestion.type,
-      displayText: suggestion.displayText
-    });
     
     // Notify parent of changes
     if (onSearchDataUpdate) {
@@ -282,10 +272,12 @@ const SearchBar = ({
     }
   };
 
+
   // Hàm xử lý focus vào guest input
   const handleGuestFocus = () => {
     setShowGuestDropdown(true);
   };
+
 
   // Xử lý keyboard navigation
   const handleKeyDown = (e) => {
@@ -321,6 +313,7 @@ const SearchBar = ({
     }
   };
 
+
   // Xử lý click outside để đóng suggestions và guest dropdown
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -344,10 +337,12 @@ const SearchBar = ({
     };
   }, []);
 
+
   // Khởi tạo guest display text ban đầu
   useEffect(() => {
     updateGuestDisplayText(guestCounts);
   }, []); // Only run once on mount
+
 
   // Hiển thị popular locations khi focus vào input trống
   const handleLocationFocus = () => {
@@ -359,6 +354,7 @@ const SearchBar = ({
     }
   };
 
+  // Hàm xử lý submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -381,21 +377,21 @@ const SearchBar = ({
     // Nếu chưa có locationId (user gõ tự do mà không chọn từ dropdown)
     // thì thử tìm kiếm để lấy locationId
     if (!selectedLocationId || selectedLocationId === 'None') {
-      console.log('🔍 No locationId selected, trying to find matching location...');
+      console.log('No locationId selected, trying to find matching location...');
       try {
         const response = await getLocationSuggestions(searchData.location.trim(), 1);
         if (response.success && response.data.suggestions.length > 0) {
           const firstMatch = response.data.suggestions[0];
           finalLocationId = firstMatch.id;
           finalType = firstMatch.type;
-          console.log('🔍 Found matching location:', firstMatch);
+          console.log('Found matching location:', firstMatch);
         }
       } catch (error) {
-        console.error('🔍 Error finding location:', error);
+        console.error('Error finding location:', error);
       }
     }
 
-    console.log('🔍 Submit search with data:', {
+    console.log('Submit search with data:', {
       location: searchData.location,
       selectedLocationId,
       selectedType,
@@ -419,7 +415,7 @@ const SearchBar = ({
       numInfants: guestCounts.infants || 0
     });
 
-    console.log('🔍 Search URL params:', searchParams.toString());
+    console.log('Search URL params:', searchParams.toString());
 
     // Navigate đến trang SearchResult với parameters
     navigate(`/search?${searchParams.toString()}`);
@@ -442,7 +438,6 @@ const SearchBar = ({
             required
           />
           
-          {/* Location Suggestions Dropdown - New Component */}
           <LocationSuggestionDropdown
             ref={suggestionsRef}
             suggestions={suggestions}
@@ -490,7 +485,6 @@ const SearchBar = ({
             style={{ cursor: 'pointer' }}
           />
           
-          {/* Guest Counter Dropdown */}
           <GuestCounterDropdown
             ref={guestDropdownRef}
             showDropdown={showGuestDropdown}

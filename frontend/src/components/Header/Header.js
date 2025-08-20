@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useUser } from '../../contexts/UserContext';
-import './Header.css';
 import logo from '../../assets/logo.png';
-import SearchBarMini from './SearchBarMini';
+import SearchBarMini from '../SearchBarMini/SearchBarMini';
 import HeaderUserMenu from '../HeaderUserMenu/HeaderUserMenu';
 import SignInUpAction from '../SignInUpAction/SignInUpAction';
 import LocationAPI from '../../api/locationApi';
+import './Header.css';
 
 const Header = () => {
   const location = useLocation();

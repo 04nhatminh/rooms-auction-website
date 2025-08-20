@@ -14,8 +14,7 @@ const HeaderUserMenu = () => {
   };
 
   return (
-    <div className="dropdown user-info" 
-      style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+    <div className="dropdown-user-info" >
       <button className="circle-btn user-btn">U</button>
       <button
         className="circle-btn menu-btn btn"

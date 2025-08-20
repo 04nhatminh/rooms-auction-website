@@ -1,6 +1,5 @@
-// src/components/SearchBarMini.js
 import React from 'react';
-import './Header.css';
+import './SearchBarMini.css';
 import searchIcon from '../../assets/search.png';
 
 const SearchBarMini = ({ searchData = {} }) => {
