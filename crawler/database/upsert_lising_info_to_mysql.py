@@ -381,6 +381,10 @@ def upsert_product_from_listing_data(listing_data, price_data=None):
         cursor.execute("SELECT ProductID FROM Products WHERE ExternalID = %s", [listing_id])
         product_result = cursor.fetchone()
         
+        if product_result:
+            product_id = product_result[0]
+            cursor.execute("CALL AddCalendarForRoom(%s, %s, %s)", [MYSQL_CONFIG['database'], product_id, 12])
+
         if product_result and amenity_ids:
             product_id = product_result[0]
             

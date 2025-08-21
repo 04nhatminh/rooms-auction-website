@@ -16,7 +16,7 @@ class ProductModel {
     static async getProductDetails(productUID) 
     {
         try {
-            const query = 'SELECT * FROM products WHERE UID = ?';
+            const query = 'SELECT * FROM Products WHERE UID = ?';
             const [products] = await pool.execute(query, [productUID]);
             console.log(`Fetched product details for ProductID ${productUID}:`, products);
             return products[0]; // Trả về sản phẩm đầu tiên
