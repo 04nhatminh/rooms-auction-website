@@ -295,6 +295,14 @@ class ProductModel {
             throw error;
         }
     }
+
+    static async findProductIdByUID(uid) {
+        const [rows] = await pool.query(
+        `SELECT ProductID FROM Products WHERE UID = ? LIMIT 1`,
+        [uid]
+        );
+        return rows[0]?.ProductID || null;
+    }
 }
 
 // Initialize MongoDB connection when module is loaded

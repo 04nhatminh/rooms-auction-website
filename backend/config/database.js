@@ -282,6 +282,12 @@ async function createProductsTable() {
     } catch (error) {
         if (error.code !== 'ER_DUP_KEYNAME') throw error;
     }
+
+    try {
+        await pool.execute(`CREATE UNIQUE INDEX idx_Products_UID ON Products(UID)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
 }
 
 async function createFavoritesTable() {
