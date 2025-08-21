@@ -149,37 +149,34 @@ export const searchApi = {
             }
         }
 
-        // Property types mapping từ tên tiếng Việt sang ID
+        // Room types mapping từ ID sang tên
         if (filters.accommodationTypes && filters.accommodationTypes.length > 0) {
-            const propertyTypeMapping = {
-                'Căn hộ': '1',
-                'Nhà riêng': '2', 
-                'Khách sạn': '3',
-                'Homestay': '4',
-                'Villa': '5'
-            };
-            
-            const typeIds = filters.accommodationTypes
-                .map(type => propertyTypeMapping[type])
-                .filter(id => id !== undefined);
-            
-            if (typeIds.length > 0) {
-                params.property_types = typeIds;
-            }
+            // filters.accommodationTypes đã chứa ID (1,2,3,4,5,6,7)
+            // nên chỉ cần truyền trực tiếp
+            params.room_types = filters.accommodationTypes;
         }
 
         if (filters.rating) {
             params.rating = filters.rating;
         }
 
-        // Sort handling từ sortBy array
-        if (filters.sortBy && filters.sortBy.length > 0) {
-            // Lấy sort option đầu tiên trong array
-            const sortOption = filters.sortBy[0];
-            switch (sortOption) {
+        // Popularity handling
+        if (filters.popularity) {
+            switch (filters.popularity) {
                 case 'popular':
                     params.popular = true;
                     break;
+                case 'newest':
+                    params.popular = false;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        // Sort handling từ sortBy
+        if (filters.sortBy) {
+            switch (filters.sortBy) {
                 case 'priceAsc':
                     params.sort = 'price_asc';
                     break;
@@ -234,14 +231,27 @@ export const searchApi = {
         }
 
         // Auction types từ filters
-        if (filters.auctionTypes && filters.auctionTypes.length > 0) {
+        if (filters.auctionTypes) {
             params.auction_types = filters.auctionTypes;
         }
 
-        // Sort handling từ sortBy array
-        if (filters.sortBy && filters.sortBy.length > 0) {
-            const sortOption = filters.sortBy[0];
-            switch (sortOption) {
+        // Popularity handling cho auctions
+        if (filters.popularity) {
+            switch (filters.popularity) {
+                case 'popular':
+                    params.popular = true;
+                    break;
+                case 'newest':
+                    params.popular = false;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        // Sort handling từ sortBy
+        if (filters.sortBy) {
+            switch (filters.sortBy) {
                 case 'priceAsc':
                     params.sort = 'price_asc';
                     break;

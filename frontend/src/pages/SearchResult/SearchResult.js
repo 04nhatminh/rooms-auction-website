@@ -1,4 +1,3 @@
-// src/pages/SearchResult/SearchResult.js
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { SearchCacheProvider, useSearchCache } from '../../contexts/SearchCacheContext';
@@ -15,6 +14,8 @@ import './SearchResult.css';
 const LIMIT = 20;
 
 const SearchResultContent = () => {
+  window.scrollTo(0, 0);
+
   const location = useLocation();
   const navigate = useNavigate();
   const [topRatedProducts, setTopRatedProducts] = useState([]);
@@ -138,10 +139,24 @@ const SearchResultContent = () => {
     clearCache();
     // Reset về trang 1 khi search mới
     setCurrentPage(1);
-    // Reset filters
-    setFilters({});
-    // Fetch dữ liệu mới
-    fetchSearchResults(searchParams, 1, {});
+    // Reset filters về giá trị mặc định
+    setFilters({
+      popularity: 'popular',
+      sortBy: '',
+      priceRange: { min: 0, max: 10000000 },
+      accommodationTypes: [],
+      rating: '',
+      auctionTypes: ''
+    });
+    // Fetch dữ liệu mới với filters mặc định
+    fetchSearchResults(searchParams, 1, {
+      popularity: 'popular',
+      sortBy: '',
+      priceRange: { min: 0, max: 10000000 },
+      accommodationTypes: [],
+      rating: '',
+      auctionTypes: ''
+    });
   };
 
   // Handler cho việc thay đổi trang
@@ -159,11 +174,19 @@ const SearchResultContent = () => {
     clearCache();
     // Reset về trang 1 khi có search params mới
     setCurrentPage(1);
-    // Reset filters khi có search params mới
-    setFilters({});
+    // Reset filters khi có search params mới về giá trị mặc định
+    const defaultFilters = {
+      popularity: 'popular',
+      sortBy: '',
+      priceRange: { min: 0, max: 10000000 },
+      accommodationTypes: [],
+      rating: '',
+      auctionTypes: ''
+    };
+    setFilters(defaultFilters);
     
     const urlParams = new URLSearchParams(location.search);
-    fetchSearchResults(urlParams, 1, {});
+    fetchSearchResults(urlParams, 1, defaultFilters);
 
     // Cleanup: hủy request khi unmount / đổi query
     return () => {

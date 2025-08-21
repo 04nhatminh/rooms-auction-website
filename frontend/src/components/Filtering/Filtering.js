@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Filtering.css';
 
 const Filtering = ({ type = 'room', onFiltersChange }) => {
@@ -10,6 +10,11 @@ const Filtering = ({ type = 'room', onFiltersChange }) => {
     rating: '',
     auctionTypes: ''
   });
+
+  // Gọi onFiltersChange với giá trị mặc định khi component mount
+  useEffect(() => {
+    onFiltersChange?.(filters);
+  }, []);
 
   const handlePopularityChange = (value) => {
     const newFilters = { ...filters, popularity: value };

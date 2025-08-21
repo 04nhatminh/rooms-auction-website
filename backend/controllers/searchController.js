@@ -12,10 +12,10 @@ exports.searchRooms = async (req, res) => {
       sort,
       price_min,
       price_max,
-      property_types,
+      room_types,
       rating,
       page = 1,
-      limit = 20,
+      limit = 20
     } = req.query;
 
     const offset = (page - 1) * limit;
@@ -33,10 +33,10 @@ exports.searchRooms = async (req, res) => {
       sort,
       price_min,
       price_max,
-      property_types,
+      room_types,
       rating,
       limit: numericLimit,
-      offset,
+      offset
     });
 
     // Đếm tổng số records để tính pagination
@@ -50,8 +50,8 @@ exports.searchRooms = async (req, res) => {
       sort,
       price_min,
       price_max,
-      property_types,
-      rating,
+      room_types,
+      rating
     });
 
     // Tính pagination
@@ -67,7 +67,7 @@ exports.searchRooms = async (req, res) => {
       success: true,
       data: {
         products,
-        pagination,
+        pagination
       },
     });
   } catch (err) {
@@ -89,9 +89,12 @@ exports.searchAuctions = async (req, res) => {
       sort,
       price_min,
       price_max,
+      room_types,
       auction_types,
+      rating,
+      popular,
       page = 1,
-      limit = 20,
+      limit = 20
     } = req.query;
 
     const offset = (page - 1) * limit;
@@ -106,9 +109,12 @@ exports.searchAuctions = async (req, res) => {
       sort,
       price_min,
       price_max,
+      room_types,
       auction_types,
+      rating,
+      popular,
       limit: numericLimit,
-      offset,
+      offset
     });
 
     // Đếm tổng số records để tính pagination
@@ -116,10 +122,11 @@ exports.searchAuctions = async (req, res) => {
       province,
       district,
       status,
-      sort,
       price_min,
       price_max,
-      auction_types,
+      room_types,
+      rating,
+      auction_types
     });
 
     // Tính pagination
@@ -135,7 +142,7 @@ exports.searchAuctions = async (req, res) => {
       success: true,
       data: {
         auctions,
-        pagination,
+        pagination
       },
     });
   } catch (err) {

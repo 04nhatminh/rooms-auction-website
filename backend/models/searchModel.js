@@ -9,10 +9,10 @@ exports.searchRooms = async (params) => {
         sort,
         price_min,
         price_max,
-        property_types,
+        room_types,
         rating,
         limit,
-        offset,
+        offset
     } = params;
 
     let sql = `
@@ -25,7 +25,7 @@ exports.searchRooms = async (params) => {
                 dist.Name AS DistrictName,
                 p.ProvinceCode,
                 p.DistrictCode,
-                prop.PropertyName,
+                rt.RoomTypeName,
                 p.Price,
                 p.Currency,
                 p.CleanlinessPoint,
@@ -41,11 +41,11 @@ exports.searchRooms = async (params) => {
                         COALESCE(p.ValuePoint, 0) + 
                         COALESCE(p.CommunicationPoint, 0) + 
                         COALESCE(p.ConveniencePoint, 0)
-                    ) / 6, 2) AS avgRating
+                    ) / 6, 2) AS AverageRating
         FROM Products p
         LEFT JOIN Provinces prov ON p.ProvinceCode = prov.ProvinceCode
         LEFT JOIN Districts dist ON p.DistrictCode = dist.DistrictCode
-        LEFT JOIN Properties prop ON p.PropertyType = prop.PropertyID
+        LEFT JOIN RoomTypes rt ON p.RoomType = rt.RoomTypeID
         WHERE 1=1
     `;
     const values = [];
@@ -76,10 +76,10 @@ exports.searchRooms = async (params) => {
         values.push(price_max);
     }
 
-    // Property type filter
-    if (property_types) {
-        const types = property_types.split(","); // ví dụ "1,2,3"
-        sql += ` AND p.PropertyType IN (${types.map(() => "?").join(",")}) `;
+    // Room type filter
+    if (room_types) {
+        const types = room_types.split(","); // ví dụ "1,2,3"
+        sql += ` AND p.RoomType IN (${types.map(() => "?").join(",")}) `;
         values.push(...types);
     }
 
@@ -89,26 +89,22 @@ exports.searchRooms = async (params) => {
 
     // Rating filter
     if (rating) {
-        havingClause = " HAVING avgRating >= ? ";
+        havingClause = " HAVING AverageRating >= ? ";
         values.push(rating);
     }
 
     // Sort clause
     if (popular) {
         if (sort === "price_asc") {
-            orderByClause = " ORDER BY p.Price ASC, avgRating DESC ";
+            orderByClause = " ORDER BY p.Price ASC, AverageRating DESC ";
         } else if (sort === "price_desc") {
-            orderByClause = " ORDER BY p.Price DESC, avgRating DESC ";
-        } else {
-            orderByClause = " ORDER BY avgRating DESC, p.Price ASC ";
+            orderByClause = " ORDER BY p.Price DESC, AverageRating DESC ";
         }
-    } else {
+    } else { // newest
         if (sort === "price_asc") {
-            orderByClause = " ORDER BY p.Price ASC ";
+            orderByClause = " ORDER BY p.Price ASC, AverageRating ASC ";
         } else if (sort === "price_desc") {
-            orderByClause = " ORDER BY p.Price DESC ";
-        } else {
-            orderByClause = " ORDER BY p.ProductID DESC "; // Default sort
+            orderByClause = " ORDER BY p.Price DESC, AverageRating ASC ";
         }
     }
 
@@ -127,22 +123,30 @@ exports.countSearchRooms = async (params) => {
         province,
         district,
         guests,
-        popular,
-        sort,
         price_min,
         price_max,
-        property_types,
-        rating,
+        room_types,
+        rating
     } = params;
 
     let sql = `
-        SELECT COUNT(*) as total
-        FROM Products p
-        LEFT JOIN Provinces prov ON p.ProvinceCode = prov.ProvinceCode
-        LEFT JOIN Districts dist ON p.DistrictCode = dist.DistrictCode
-        LEFT JOIN Properties prop ON p.PropertyType = prop.PropertyID
-        WHERE 1=1
+        SELECT COUNT(*) as total FROM (
+            SELECT p.ProductID,
+                ROUND((
+                    COALESCE(p.CleanlinessPoint, 0) + 
+                    COALESCE(p.LocationPoint, 0) + 
+                    COALESCE(p.ServicePoint, 0) + 
+                    COALESCE(p.ValuePoint, 0) + 
+                    COALESCE(p.CommunicationPoint, 0) + 
+                    COALESCE(p.ConveniencePoint, 0)
+                ) / 6, 2) AS AverageRating
+            FROM Products p
+            LEFT JOIN Provinces prov ON p.ProvinceCode = prov.ProvinceCode
+            LEFT JOIN Districts dist ON p.DistrictCode = dist.DistrictCode
+            LEFT JOIN RoomTypes rt ON p.RoomType = rt.RoomTypeID
+            WHERE 1=1
     `;
+
     const values = [];
 
     // Location filter
@@ -171,61 +175,25 @@ exports.countSearchRooms = async (params) => {
         values.push(price_max);
     }
 
-    // Property type filter
-    if (property_types) {
-        const types = property_types.split(",");
-        sql += ` AND p.PropertyType IN (${types.map(() => "?").join(",")}) `;
+    // Room type filter
+    if (room_types) {
+        const types = room_types.split(",");
+        sql += ` AND p.RoomType IN (${types.map(() => "?").join(",")}) `;
         values.push(...types);
     }
 
-    // Rating filter - cần subquery cho count với HAVING
+    sql += " ) as sub ";
+
+    // Rating filter
     if (rating) {
-        sql = `
-            SELECT COUNT(*) as total FROM (
-                SELECT p.ProductID,
-                        ROUND((
-                            COALESCE(p.CleanlinessPoint, 0) + 
-                            COALESCE(p.LocationPoint, 0) + 
-                            COALESCE(p.ServicePoint, 0) + 
-                            COALESCE(p.ValuePoint, 0) + 
-                            COALESCE(p.CommunicationPoint, 0) + 
-                            COALESCE(p.ConveniencePoint, 0)
-                        ) / 6, 2) AS avgRating
-                FROM Products p
-                LEFT JOIN Provinces prov ON p.ProvinceCode = prov.ProvinceCode
-                LEFT JOIN Districts dist ON p.DistrictCode = dist.DistrictCode
-                LEFT JOIN Properties prop ON p.PropertyType = prop.PropertyID
-                WHERE 1=1
-        `;
-        
-        // Thêm lại các filters
-        if (province) {
-            sql += " AND p.ProvinceCode = ? ";
-        }
-        if (district) {
-            sql += " AND p.DistrictCode = ? ";
-        }
-        if (guests) {
-            sql += " AND p.MaxGuests >= ? ";
-        }
-        if (price_min) {
-            sql += " AND p.Price >= ? ";
-        }
-        if (price_max) {
-            sql += " AND p.Price <= ? ";
-        }
-        if (property_types) {
-            const types = property_types.split(",");
-            sql += ` AND p.PropertyType IN (${types.map(() => "?").join(",")}) `;
-        }
-        
-        sql += " HAVING avgRating >= ? ) as filtered_results";
+        sql += " WHERE sub.AverageRating >= ? ";
         values.push(rating);
     }
-    
+
     const [rows] = await pool.execute(sql, values);
     return rows[0].total;
 };
+
 
 
 exports.searchAuctions = async (params) => {
@@ -236,9 +204,12 @@ exports.searchAuctions = async (params) => {
         sort,
         price_min,
         price_max,
+        room_types,
         auction_types,
+        rating,
+        popular,
         limit,
-        offset,
+        offset
     } = params;
 
     let sql = `
@@ -252,6 +223,7 @@ exports.searchAuctions = async (params) => {
                 a.EndTime,
                 a.Status,
                 p.Name as ProductName,
+                rt.RoomTypeName,
                 p.Address,
                 p.ProvinceCode,
                 p.DistrictCode,
@@ -269,6 +241,7 @@ exports.searchAuctions = async (params) => {
         JOIN Products p ON a.ProductID = p.ProductID
         LEFT JOIN Provinces prov ON p.ProvinceCode = prov.ProvinceCode
         LEFT JOIN Districts dist ON p.DistrictCode = dist.DistrictCode
+        LEFT JOIN RoomTypes rt ON p.RoomType = rt.RoomTypeID
         WHERE 1=1
     `;
     const values = [];
@@ -299,6 +272,24 @@ exports.searchAuctions = async (params) => {
         values.push(price_max);
     }
 
+    // Room type filter
+    if (room_types) {
+        const types = room_types.split(","); // ví dụ "1,2,3"
+        sql += ` AND p.RoomType IN (${types.map(() => "?").join(",")}) `;
+        values.push(...types);
+    }
+
+    // Sort and popular, but handle HAVING clause properly
+    let havingClause = "";
+
+    // Rating filter
+    if (rating) {
+        havingClause = " HAVING AverageRating >= ? ";
+        values.push(rating);
+    }
+
+    sql += havingClause;
+
     // Auction types filter (endingSoon, featured, newest)
     if (auction_types) {
         const types = auction_types.split(",");
@@ -311,14 +302,26 @@ exports.searchAuctions = async (params) => {
     }
 
     // Sort
-    if (sort === "price_asc") {
-        sql += " ORDER BY COALESCE(a.CurrentPrice, a.StartPrice) ASC ";
-    } else if (sort === "price_desc") {
-        sql += " ORDER BY COALESCE(a.CurrentPrice, a.StartPrice) DESC ";
-    } else if (auction_types && auction_types.includes('endingSoon')) {
-        sql += " ORDER BY a.EndTime ASC ";
-    } else {
-        sql += " ORDER BY a.StartTime DESC "; // Default: newest first
+    if (popular) {
+        if (sort === "price_asc") {
+            sql += " ORDER BY COALESCE(a.CurrentPrice, a.StartPrice) ASC, AverageRating DESC ";
+        } else if (sort === "price_desc") {
+            sql += " ORDER BY COALESCE(a.CurrentPrice, a.StartPrice) DESC, AverageRating DESC ";
+        } else if (auction_types && auction_types.includes('endingSoon')) {
+            sql += " ORDER BY a.EndTime ASC, AverageRating DESC ";
+        } else {
+            sql += " ORDER BY a.StartTime DESC, AverageRating DESC ";
+        }
+    } else { // newest
+        if (sort === "price_asc") {
+            sql += " ORDER BY COALESCE(a.CurrentPrice, a.StartPrice) ASC, AverageRating ASC ";
+        } else if (sort === "price_desc") {
+            sql += " ORDER BY COALESCE(a.CurrentPrice, a.StartPrice) DESC, AverageRating ASC ";
+        } else if (auction_types && auction_types.includes('endingSoon')) {
+            sql += " ORDER BY a.EndTime ASC, AverageRating ASC ";
+        } else {
+            sql += " ORDER BY a.StartTime DESC, AverageRating ASC ";
+        }
     }
 
     // Pagination
@@ -333,20 +336,32 @@ exports.countSearchAuctions = async (params) => {
         province,
         district,
         status,
-        sort,
         price_min,
         price_max,
-        auction_types,
+        room_types,
+        rating,
+        auction_types
     } = params;
 
     let sql = `
-        SELECT COUNT(*) as total
-        FROM Auction a
-        JOIN Products p ON a.ProductID = p.ProductID
-        LEFT JOIN Provinces prov ON p.ProvinceCode = prov.ProvinceCode
-        LEFT JOIN Districts dist ON p.DistrictCode = dist.DistrictCode
-        WHERE 1=1
+        SELECT COUNT(*) as total FROM (
+            SELECT a.AuctionUID,
+                ROUND((
+                    COALESCE(p.CleanlinessPoint, 0) + 
+                    COALESCE(p.LocationPoint, 0) + 
+                    COALESCE(p.ServicePoint, 0) + 
+                    COALESCE(p.ValuePoint, 0) + 
+                    COALESCE(p.CommunicationPoint, 0) + 
+                    COALESCE(p.ConveniencePoint, 0)
+                ) / 6, 2) AS AverageRating
+            FROM Auction a
+            JOIN Products p ON a.ProductID = p.ProductID
+            LEFT JOIN Provinces prov ON p.ProvinceCode = prov.ProvinceCode
+            LEFT JOIN Districts dist ON p.DistrictCode = dist.DistrictCode
+            LEFT JOIN RoomTypes rt ON p.RoomType = rt.RoomTypeID
+            WHERE 1=1
     `;
+
     const values = [];
 
     // Location filter
@@ -375,15 +390,29 @@ exports.countSearchAuctions = async (params) => {
         values.push(price_max);
     }
 
+    // Room type filter
+    if (room_types) {
+        const types = room_types.split(",");
+        sql += ` AND p.RoomType IN (${types.map(() => "?").join(",")}) `;
+        values.push(...types);
+    }
+
     // Auction types filter
     if (auction_types) {
         const types = auction_types.split(",");
-        
         if (types.includes('endingSoon')) {
             sql += " AND a.EndTime <= DATE_ADD(NOW(), INTERVAL 24 HOUR) ";
         }
     }
-    
+
+    sql += " ) as sub ";
+
+    // Rating filter
+    if (rating) {
+        sql += " WHERE sub.AverageRating >= ? ";
+        values.push(rating);
+    }
+
     const [rows] = await pool.execute(sql, values);
     return rows[0].total;
 };
