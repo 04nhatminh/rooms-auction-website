@@ -19,6 +19,31 @@
 }
 
 
+.radio-button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.radio-button-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: Montserrat;
+    font-size: 13px;
+    font-weight: 450;
+    color: #000;
+    cursor: pointer;
+}
+
+.radio-button-label input[type="radio"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #278C9F;
+}
+
+
 .checkbox-group {
     display: flex;
     flex-direction: column;
@@ -37,42 +62,11 @@
 }
 
 .checkbox-label input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
     cursor: pointer;
-
-    /* bỏ style mặc định */
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-
-    /* tạo hình tròn */
-    border: 2px solid #333;
-    border-radius: 50%;
-    background-color: white;
-    display: inline-block;
-    position: relative;
-    transition: all 0.2s ease;
+    accent-color: #278C9F;
 }
-
-.checkbox-label input[type="checkbox"]:checked {
-    background-color: #278C9F;
-    border-color: #278C9F;
-}
-
-/* thêm dấu chấm ở giữa khi checked */
-.checkbox-label input[type="checkbox"]:checked::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 6px;
-    height: 6px;
-    background: white;
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-}
-
 
 .price-range {
     display: flex;
@@ -272,7 +266,7 @@
     padding: 6px 10px;
   }
   
-  .checkbox-label {
+  .radio-button-label {
     font-size: 13px;
   }
   

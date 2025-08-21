@@ -3,30 +3,22 @@ import './Filtering.css';
 
 const Filtering = ({ type = 'room', onFiltersChange }) => {
   const [filters, setFilters] = useState({
-    popularity: [],
-    sortBy: [],
+    popularity: 'popular',
+    sortBy: '',
     priceRange: { min: 0, max: 10000000 },
     accommodationTypes: [],
     rating: '',
-    auctionTypes: []
+    auctionTypes: ''
   });
 
-  const handlePopularityChange = (value, checked) => {
-    const newPopularity = checked
-      ? [...filters.popularity, value]
-      : filters.popularity.filter(pop => pop !== value);
-
-    const newFilters = { ...filters, popularity: newPopularity };
+  const handlePopularityChange = (value) => {
+    const newFilters = { ...filters, popularity: value };
     setFilters(newFilters);
     onFiltersChange?.(newFilters);
   };
 
-  const handleSortChange = (value, checked) => {
-    const newSortBy = checked
-      ? [...filters.sortBy, value]
-      : filters.sortBy.filter(sort => sort !== value);
-    
-    const newFilters = { ...filters, sortBy: newSortBy };
+  const handleSortChange = (value) => {
+    const newFilters = { ...filters, sortBy: value };
     setFilters(newFilters);
     onFiltersChange?.(newFilters);
   };
@@ -85,12 +77,8 @@ const Filtering = ({ type = 'room', onFiltersChange }) => {
     onFiltersChange?.(newFilters);
   };
 
-  const handleAuctionTypeChange = (value, checked) => {
-    const newTypes = checked
-      ? [...filters.auctionTypes, value]
-      : filters.auctionTypes.filter(type => type !== value);
-    
-    const newFilters = { ...filters, auctionTypes: newTypes };
+  const handleAuctionTypeChange = (value) => {
+    const newFilters = { ...filters, auctionTypes: value };
     setFilters(newFilters);
     onFiltersChange?.(newFilters);
   };
@@ -100,16 +88,17 @@ const Filtering = ({ type = 'room', onFiltersChange }) => {
       {/* Độ phổ biến */}
       <div className="filter-section">
         <h3>Độ phổ biến</h3>
-        <div className="checkbox-group">
+        <div className="radio-button-group">
           {[
             { value: 'popular', label: 'Phổ biến nhất' },
             { value: 'newest', label: 'Mới nhất' },
           ].map(({ value, label }) => (
-            <label key={value} className="checkbox-label">
+            <label key={value} className="radio-button-label">
               <input
-                type="checkbox"
-                checked={filters.popularity.includes(value)}
-                onChange={(e) => handlePopularityChange(value, e.target.checked)}
+                type="radio"
+                name="popularity"
+                checked={filters.popularity === value}
+                onChange={() => handlePopularityChange(value)}
               />
               {label}
             </label>
@@ -120,16 +109,17 @@ const Filtering = ({ type = 'room', onFiltersChange }) => {
       {/* Sắp xếp */}
       <div className="filter-section">
         <h3>Sắp xếp</h3>
-        <div className="checkbox-group">
+        <div className="radio-button-group">
           {[
             { value: 'priceAsc', label: 'Giá tăng dần' },
             { value: 'priceDesc', label: 'Giá giảm dần' }
           ].map(({ value, label }) => (
-            <label key={value} className="checkbox-label">
+            <label key={value} className="radio-button-label">
               <input
-                type="checkbox"
-                checked={filters.sortBy.includes(value)}
-                onChange={(e) => handleSortChange(value, e.target.checked)}
+                type="radio"
+                name="sortBy"
+                checked={filters.sortBy === value}
+                onChange={() => handleSortChange(value)}
               />
               {label}
             </label>
@@ -174,17 +164,18 @@ const Filtering = ({ type = 'room', onFiltersChange }) => {
       {type === 'auction' && (
         <div className="filter-section">
           <h3>Loại đấu giá</h3>
-          <div className="checkbox-group">
+          <div className="radio-button-group">
             {[
               { value: 'endingSoon', label: 'Sắp kết thúc' },
               { value: 'featured', label: 'Nổi bật nhất' },
               { value: 'newest', label: 'Mới nhất' }
             ].map(({ value, label }) => (
-              <label key={value} className="checkbox-label">
+              <label key={value} className="radio-button-label">
                 <input
-                  type="checkbox"
-                  checked={filters.auctionTypes.includes(value)}
-                  onChange={(e) => handleAuctionTypeChange(value, e.target.checked)}
+                  type="radio"
+                  name="auctionTypes"
+                  checked={filters.auctionTypes === value}
+                  onChange={() => handleAuctionTypeChange(value)}
                 />
                 {label}
               </label>
@@ -197,14 +188,22 @@ const Filtering = ({ type = 'room', onFiltersChange }) => {
       <div className="filter-section">
         <h3>Loại chỗ ở</h3>
         <div className="checkbox-group">
-          {['Căn hộ', 'Nhà riêng', 'Khách sạn', 'Homestay', 'Villa'].map(type => (
-            <label key={type} className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={filters.accommodationTypes.includes(type)}
-                onChange={(e) => handleAccommodationTypeChange(type, e.target.checked)}
-              />
-              {type}
+          {[              
+            { value: '1', label: 'Khách sạn' },
+            { value: '2', label: 'Căn hộ' },
+            { value: '3', label: 'Homestay' },
+            { value: '4', label: 'Resort' },
+            { value: '5', label: 'Biệt thự' },
+            { value: '6', label: 'Studio' },
+            { value: '7', label: 'Nhà nghỉ' }
+            ].map(({ value, label }) => (
+              <label key={value} className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={filters.accommodationTypes.includes(value)}
+                  onChange={(e) => handleAccommodationTypeChange(value, e.target.checked)}
+                />
+              {label}
             </label>
           ))}
         </div>

@@ -60,9 +60,7 @@ exports.searchRooms = async (req, res) => {
       currentPage: numericPage,
       totalPages,
       totalItems: totalProducts,
-      itemsPerPage: numericLimit,
-      hasNextPage: numericPage < totalPages,
-      hasPrevPage: numericPage > 1,
+      itemsPerPage: numericLimit
     };
 
     res.json({
@@ -130,9 +128,7 @@ exports.searchAuctions = async (req, res) => {
       currentPage: numericPage,
       totalPages,
       totalItems: totalAuctions,
-      itemsPerPage: numericLimit,
-      hasNextPage: numericPage < totalPages,
-      hasPrevPage: numericPage > 1,
+      itemsPerPage: numericLimit
     };
 
     res.json({

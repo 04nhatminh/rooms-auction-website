@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './Pagination.css';
 
 const Pagination = ({ pagination, onPageChange }) => {
@@ -6,12 +6,15 @@ const Pagination = ({ pagination, onPageChange }) => {
     return null;
   }
 
-  const { currentPage, totalPages, hasNextPage, hasPreviousPage } = pagination;
+  const { currentPage, totalPages } = pagination;
+  const hasPreviousPage = currentPage > 1;
+  const hasNextPage = currentPage < totalPages;
+
 
   // Tạo array các số trang để hiển thị
   const getPageNumbers = () => {
     const pages = [];
-    const maxVisiblePages = 5; // Số trang tối đa hiển thị
+    const maxVisiblePages = 5;
     
     let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
     let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
@@ -55,7 +58,6 @@ const Pagination = ({ pagination, onPageChange }) => {
 
   return (
     <div className="pagination-container">
-      <div className="pagination">
         {/* Nút Previous */}
         <button
           className={`pagination-btn ${!hasPreviousPage ? 'disabled' : ''}`}
@@ -87,12 +89,6 @@ const Pagination = ({ pagination, onPageChange }) => {
         >
           Sau ›
         </button>
-      </div>
-
-      {/* Thông tin trang */}
-      <div className="pagination-info">
-        Trang {currentPage} / {totalPages} ({pagination.totalItems} kết quả)
-      </div>
     </div>
   );
 };
