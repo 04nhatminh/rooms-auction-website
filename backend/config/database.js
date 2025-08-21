@@ -576,6 +576,75 @@ async function createRatingTable() {
 }
 
 // Procedure
+async function dropUpdateRoomTypesProcedureIfExists() {
+    await pool.query(`
+        DROP PROCEDURE IF EXISTS UpdateRoomTypes;
+    `);
+}
+
+async function createUpdateRoomTypesProcedure() {
+    await pool.query(`
+        CREATE PROCEDURE UpdateRoomTypes()
+        BEGIN
+            DECLARE done INT DEFAULT FALSE;
+            DECLARE p_id INT;
+            DECLARE p_name VARCHAR(255);
+            DECLARE new_type INT;
+
+            -- Cursor để duyệt qua tất cả product
+            DECLARE cur CURSOR FOR
+                SELECT ProductID, Name FROM Products WHERE RoomType IS NULL;
+
+            DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+            OPEN cur;
+
+            read_loop: LOOP
+                FETCH cur INTO p_id, p_name;
+                IF done THEN
+                    LEAVE read_loop;
+                END IF;
+
+                SET new_type = 2; -- mặc định Căn hộ
+
+                -- chuẩn hóa tên (lowercase)
+                SET p_name = LOWER(p_name);
+
+                -- check các keyword
+                IF p_name LIKE '%resort%' THEN
+                    SET new_type = 4; -- Resort
+                ELSEIF p_name LIKE '%studio%' THEN
+                    SET new_type = 6; -- Studio
+                ELSEIF p_name LIKE '%khách sạn%' OR p_name LIKE '%khach san%' OR p_name LIKE '%hotel%' THEN
+                    SET new_type = 1; -- Khách sạn
+                ELSEIF p_name LIKE '%biệt thự%' OR p_name LIKE '%biet thu%' OR p_name LIKE '%villa%' THEN
+                    SET new_type = 5; -- Biệt thự
+                ELSEIF p_name LIKE '%căn hộ%' OR p_name LIKE '%can ho%' OR p_name LIKE '%apartment%' THEN
+                    SET new_type = 2; -- Căn hộ
+                ELSEIF p_name LIKE '%nhà nghỉ%' OR p_name LIKE '%nha nghi%' OR p_name LIKE '%motel%' THEN
+                    SET new_type = 7; -- Nhà nghỉ
+                ELSEIF p_name LIKE '%nhà%' OR p_name LIKE '%nha%' OR p_name LIKE '%homestay%' THEN
+                    SET new_type = 3; -- Homestay
+                END IF;
+
+                -- update lại RoomType
+                UPDATE Products
+                SET RoomType = new_type
+                WHERE ProductID = p_id;
+
+            END LOOP;
+
+            CLOSE cur;
+        END;
+    `);
+
+    try {
+        await pool.execute(`CALL UpdateRoomTypes();`);
+    } catch (error) {
+        console.error('Error calling UpdateRoomTypes:', error);
+    }
+}
+
 async function dropUpsertPropertyProcedureIfExists() {
     await pool.query(`
         DROP PROCEDURE IF EXISTS UpsertProperty;
@@ -1434,6 +1503,10 @@ async function initSchema() {
         console.log('✅ Rating table ready');
 
         console.log('\n📋 Creating procedures...');
+
+        await dropUpdateRoomTypesProcedureIfExists();
+        await createUpdateRoomTypesProcedure();
+        console.log('✅ UpdateRoomTypes procedure ready');
 
         await dropUpsertPropertyProcedureIfExists();
         await createUpsertPropertyProcedure();
