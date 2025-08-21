@@ -18,6 +18,9 @@ exports.searchRooms = async (req, res) => {
       limit = 20
     } = req.query;
 
+    // Convert popular from string to boolean
+    const isPopular = popular === 'true' || popular === true;
+
     const offset = (page - 1) * limit;
     const numericLimit = parseInt(limit);
     const numericPage = parseInt(page);
@@ -29,7 +32,7 @@ exports.searchRooms = async (req, res) => {
       checkin,
       checkout,
       guests,
-      popular,
+      popular: isPopular,
       sort,
       price_min,
       price_max,
@@ -46,7 +49,7 @@ exports.searchRooms = async (req, res) => {
       checkin,
       checkout,
       guests,
-      popular,
+      popular: isPopular,
       sort,
       price_min,
       price_max,
@@ -97,6 +100,9 @@ exports.searchAuctions = async (req, res) => {
       limit = 20
     } = req.query;
 
+    // Convert popular from string to boolean
+    const isPopular = popular === 'true' || popular === true;
+
     const offset = (page - 1) * limit;
     const numericLimit = parseInt(limit);
     const numericPage = parseInt(page);
@@ -112,7 +118,7 @@ exports.searchAuctions = async (req, res) => {
       room_types,
       auction_types,
       rating,
-      popular,
+      popular: isPopular,
       limit: numericLimit,
       offset
     });

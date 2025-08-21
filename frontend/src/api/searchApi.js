@@ -164,10 +164,10 @@ export const searchApi = {
         if (filters.popularity) {
             switch (filters.popularity) {
                 case 'popular':
-                    params.popular = true;
+                    params.popular = 'true';
                     break;
                 case 'newest':
-                    params.popular = false;
+                    params.popular = 'false';
                     break;
                 default:
                     break;
@@ -239,10 +239,10 @@ export const searchApi = {
         if (filters.popularity) {
             switch (filters.popularity) {
                 case 'popular':
-                    params.popular = true;
+                    params.popular = 'true';
                     break;
                 case 'newest':
-                    params.popular = false;
+                    params.popular = 'false';
                     break;
                 default:
                     break;
