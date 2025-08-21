@@ -141,8 +141,7 @@ const SearchResultContent = () => {
     setCurrentPage(1);
     // Reset filters về giá trị mặc định
     const defaultFilters = {
-      popularity: 'popular',
-      sortBy: '',
+      sort: 'popular',
       priceRange: { min: 0, max: 10000000 },
       accommodationTypes: [],
       rating: '',
@@ -171,8 +170,7 @@ const SearchResultContent = () => {
     setCurrentPage(1);
     // Reset filters khi có search params mới về giá trị mặc định
     const defaultFilters = {
-      popularity: 'popular',
-      sortBy: '',
+      sort: 'popular',
       priceRange: { min: 0, max: 10000000 },
       accommodationTypes: [],
       rating: '',

@@ -5,7 +5,6 @@ exports.searchRooms = async (params) => {
         province,
         district,
         guests,
-        popular,
         sort,
         price_min,
         price_max,
@@ -93,27 +92,22 @@ exports.searchRooms = async (params) => {
         values.push(rating);
     }
 
-    // Sort clause
-    if (popular) {
-        // Popular: rating cao trước
-        if (sort === "price_asc") {
-            orderByClause = " ORDER BY p.Price ASC, AverageRating DESC ";
-        } else if (sort === "price_desc") {
-            orderByClause = " ORDER BY p.Price DESC, AverageRating DESC ";
-        } else {
-            // Mặc định sort theo rating cao nhất khi popular
-            orderByClause = " ORDER BY AverageRating DESC, p.ProductID ASC ";
-        }
-    } else { // newest
-        // Newest: sản phẩm mới nhất trước (theo ProductID hoặc ngày tạo)
-        if (sort === "price_asc") {
-            orderByClause = " ORDER BY p.Price ASC, p.ProductID DESC ";
-        } else if (sort === "price_desc") {
-            orderByClause = " ORDER BY p.Price DESC, p.ProductID DESC ";
-        } else {
-            // Mặc định sort theo ProductID giảm dần (mới nhất trước)
-            orderByClause = " ORDER BY p.ProductID DESC ";
-        }
+    // Sort clause - gộp popular và sort thành một
+    if (sort === "popular") {
+        // Phổ biến nhất: sort theo rating cao nhất
+        orderByClause = " ORDER BY AverageRating DESC, p.ProductID ASC ";
+    } else if (sort === "newest") {
+        // Mới nhất: sort theo ProductID giảm dần (mới nhất trước)
+        orderByClause = " ORDER BY p.ProductID DESC ";
+    } else if (sort === "price_asc") {
+        // Giá tăng dần
+        orderByClause = " ORDER BY p.Price ASC, p.ProductID ASC ";
+    } else if (sort === "price_desc") {
+        // Giá giảm dần
+        orderByClause = " ORDER BY p.Price DESC, p.ProductID ASC ";
+    } else {
+        // Mặc định: mới nhất
+        orderByClause = " ORDER BY p.ProductID DESC ";
     }
 
     // Add HAVING and ORDER BY clauses
@@ -215,7 +209,6 @@ exports.searchAuctions = async (params) => {
         room_types,
         auction_types,
         rating,
-        popular,
         limit,
         offset
     } = params;
@@ -310,54 +303,33 @@ exports.searchAuctions = async (params) => {
     if (auction_types) {
         if (auction_types === 'endingSoon') {
             // Sắp kết thúc: sort theo EndTime ASC (sắp kết thúc trước)
-            if (sort === "price_asc") {
-                orderClause = " ORDER BY a.EndTime ASC, a.CurrentPrice ASC ";
-            } else if (sort === "price_desc") {
-                orderClause = " ORDER BY a.EndTime ASC, a.CurrentPrice DESC ";
-            } else {
-                orderClause = " ORDER BY a.EndTime ASC, a.AuctionUID DESC ";
-            }
+            orderClause = " ORDER BY a.EndTime ASC";
         } else if (auction_types === 'featured') {
             // Nổi bật nhất: sort theo số lượt bid DESC (bid nhiều nhất trước)
-            if (sort === "price_asc") {
-                orderClause = " ORDER BY BidCount DESC, a.CurrentPrice ASC ";
-            } else if (sort === "price_desc") {
-                orderClause = " ORDER BY BidCount DESC, a.CurrentPrice DESC ";
-            } else {
-                orderClause = " ORDER BY BidCount DESC, a.AuctionUID DESC ";
-            }
+            orderClause = " ORDER BY BidCount DESC";
         } else if (auction_types === 'newest') {
             // Mới nhất: sort theo thời gian tạo mới nhất (StartTime DESC)
-            if (sort === "price_asc") {
-                orderClause = " ORDER BY a.StartTime DESC, a.CurrentPrice ASC ";
-            } else if (sort === "price_desc") {
-                orderClause = " ORDER BY a.StartTime DESC, a.CurrentPrice DESC ";
-            } else {
-                orderClause = " ORDER BY a.StartTime DESC ";
-            }
+            orderClause = " ORDER BY a.StartTime DESC ";
         }
     }
 
     // Default sorting if no auction_types specified
     if (!orderClause) {
-        if (popular) {
-            // Popular: rating cao trước
-            if (sort === "price_asc") {
-                orderClause = " ORDER BY AverageRating DESC, a.CurrentPrice ASC ";
-            } else if (sort === "price_desc") {
-                orderClause = " ORDER BY AverageRating DESC, a.CurrentPrice DESC ";
-            } else {
-                orderClause = " ORDER BY AverageRating DESC, a.AuctionUID DESC ";
-            }
+        if (sort === "popular") {
+            // Phổ biến nhất: sort theo rating cao nhất
+            orderClause = " ORDER BY AverageRating DESC ";
+        } else if (sort === "newest") {
+            // Mới nhất: sort theo thời gian tạo mới nhất (StartTime DESC)
+            orderClause = " ORDER BY a.StartTime DESC ";
+        } else if (sort === "price_asc") {
+            // Giá tăng dần
+            orderClause = " ORDER BY a.CurrentPrice ASC ";
+        } else if (sort === "price_desc") {
+            // Giá giảm dần
+            orderClause = " ORDER BY a.CurrentPrice DESC";
         } else {
-            // Default: mới nhất trước
-            if (sort === "price_asc") {
-                orderClause = " ORDER BY a.AuctionUID DESC, a.CurrentPrice ASC ";
-            } else if (sort === "price_desc") {
-                orderClause = " ORDER BY a.AuctionUID DESC, a.CurrentPrice DESC ";
-            } else {
-                orderClause = " ORDER BY a.AuctionUID DESC ";
-            }
+            // Mặc định: popular
+            orderClause = " ORDER BY AverageRating DESC ";
         }
     }
 

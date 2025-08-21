@@ -160,32 +160,9 @@ export const searchApi = {
             params.rating = filters.rating;
         }
 
-        // Popularity handling
-        if (filters.popularity) {
-            switch (filters.popularity) {
-                case 'popular':
-                    params.popular = 'true';
-                    break;
-                case 'newest':
-                    params.popular = 'false';
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        // Sort handling từ sortBy
-        if (filters.sortBy) {
-            switch (filters.sortBy) {
-                case 'priceAsc':
-                    params.sort = 'price_asc';
-                    break;
-                case 'priceDesc':
-                    params.sort = 'price_desc';
-                    break;
-                default:
-                    break;
-            }
+        // Sort handling từ sort mới (gộp popularity và price sort)
+        if (filters.sort) {
+            params.sort = filters.sort;
         }
 
         // Thêm pagination
@@ -246,32 +223,9 @@ export const searchApi = {
             params.auction_types = filters.auctionTypes;
         }
 
-        // Popularity handling cho auctions
-        if (filters.popularity) {
-            switch (filters.popularity) {
-                case 'popular':
-                    params.popular = 'true';
-                    break;
-                case 'newest':
-                    params.popular = 'false';
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        // Sort handling từ sortBy
-        if (filters.sortBy) {
-            switch (filters.sortBy) {
-                case 'priceAsc':
-                    params.sort = 'price_asc';
-                    break;
-                case 'priceDesc':
-                    params.sort = 'price_desc';
-                    break;
-                default:
-                    break;
-            }
+        // Sort handling từ sort mới (gộp popularity và price sort)
+        if (filters.sort) {
+            params.sort = filters.sort;
         }
 
         // Thêm pagination

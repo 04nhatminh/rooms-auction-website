@@ -3,8 +3,7 @@ import './Filtering.css';
 
 const Filtering = ({ type = 'room', onFiltersChange }) => {
   const [filters, setFilters] = useState({
-    popularity: 'popular',
-    sortBy: '',
+    sort: 'popular',
     priceRange: { min: 0, max: 10000000 },
     accommodationTypes: [],
     rating: '',
@@ -16,14 +15,8 @@ const Filtering = ({ type = 'room', onFiltersChange }) => {
     onFiltersChange?.(filters);
   }, []);
 
-  const handlePopularityChange = (value) => {
-    const newFilters = { ...filters, popularity: value };
-    setFilters(newFilters);
-    onFiltersChange?.(newFilters);
-  };
-
   const handleSortChange = (value) => {
-    const newFilters = { ...filters, sortBy: value };
+    const newFilters = { ...filters, sort: value };
     setFilters(newFilters);
     onFiltersChange?.(newFilters);
   };
@@ -90,40 +83,21 @@ const Filtering = ({ type = 'room', onFiltersChange }) => {
 
   return (
     <div className="filtering-container">
-      {/* Độ phổ biến */}
-      <div className="filter-section">
-        <h3>Độ phổ biến</h3>
-        <div className="radio-button-group">
-          {[
-            { value: 'popular', label: 'Phổ biến nhất' },
-            { value: 'newest', label: 'Mới nhất' },
-          ].map(({ value, label }) => (
-            <label key={value} className="radio-button-label">
-              <input
-                type="radio"
-                name="popularity"
-                checked={filters.popularity === value}
-                onChange={() => handlePopularityChange(value)}
-              />
-              {label}
-            </label>
-          ))}
-        </div>
-      </div>
-
       {/* Sắp xếp */}
       <div className="filter-section">
         <h3>Sắp xếp</h3>
         <div className="radio-button-group">
           {[
-            { value: 'priceAsc', label: 'Giá tăng dần' },
-            { value: 'priceDesc', label: 'Giá giảm dần' }
+            { value: 'popular', label: 'Phổ biến nhất' },
+            { value: 'newest', label: 'Mới nhất' },
+            { value: 'price_asc', label: 'Giá tăng dần' },
+            { value: 'price_desc', label: 'Giá giảm dần' }
           ].map(({ value, label }) => (
             <label key={value} className="radio-button-label">
               <input
                 type="radio"
-                name="sortBy"
-                checked={filters.sortBy === value}
+                name="sort"
+                checked={filters.sort === value}
                 onChange={() => handleSortChange(value)}
               />
               {label}
