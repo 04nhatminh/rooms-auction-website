@@ -5,7 +5,7 @@ import { reviewApi } from '../../api/reviewApi';
 import RoomCard from '../RoomCard/RoomCard';
 import './SearchRes_RoomSection.css';
 
-const SearchRes_RoomSection = ({ topRatedProducts, durationDays }) => {
+const SearchRes_RoomSection = ({ topRatedProducts, durationDays, currentFilters = {} }) => {
   const currentRequestRef = useRef(null);
   const [error, setError] = useState(null);
   const [products, setProducts] = useState([]);
@@ -26,7 +26,7 @@ const SearchRes_RoomSection = ({ topRatedProducts, durationDays }) => {
           return;
         }
 
-        const cacheKey = generateRoomCacheKey(topRatedProducts);
+        const cacheKey = generateRoomCacheKey(topRatedProducts, currentFilters);
         
         // Kiểm tra cache trước
         if (cacheKey && hasCachedData(cacheKey)) {
@@ -123,7 +123,7 @@ const SearchRes_RoomSection = ({ topRatedProducts, durationDays }) => {
           currentRequestRef.current.abort();
         }
       };
-    }, [topRatedProducts]);
+    }, [topRatedProducts, currentFilters]);
   
     if (loading) {
       return (

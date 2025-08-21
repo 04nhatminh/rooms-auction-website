@@ -214,7 +214,7 @@ const SearchResultContent = () => {
       case 'room':
         return (
           <>
-            <SearchRes_RoomSection topRatedProducts={topRatedProducts} durationDays={durationDays} />
+            <SearchRes_RoomSection topRatedProducts={topRatedProducts} durationDays={durationDays} currentFilters={filters} />
             <Pagination 
               pagination={productsPagination} 
               onPageChange={handlePageChange} 
@@ -224,7 +224,7 @@ const SearchResultContent = () => {
       case 'auction':
         return (
           <>
-            <SearchRes_AuctionSection activeAuctions={activeAuctions} />
+            <SearchRes_AuctionSection activeAuctions={activeAuctions} currentFilters={filters} />
             <Pagination 
               pagination={auctionsPagination} 
               onPageChange={handlePageChange} 

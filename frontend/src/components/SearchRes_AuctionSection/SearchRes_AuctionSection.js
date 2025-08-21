@@ -5,7 +5,7 @@ import { reviewApi } from '../../api/reviewApi';
 import AuctionCard from '../AuctionCard/AuctionCard';
 import './SearchRes_AuctionSection.css';
 
-const SearchRes_AuctionSection = ({ activeAuctions }) => {
+const SearchRes_AuctionSection = ({ activeAuctions, currentFilters = {} }) => {
   const currentRequestRef = useRef(null);
   const [auctions, setAuctions] = useState([]);
   const [error, setError] = useState(null);
@@ -26,7 +26,7 @@ const SearchRes_AuctionSection = ({ activeAuctions }) => {
           return;
         }
 
-        const cacheKey = generateAuctionCacheKey(activeAuctions);
+        const cacheKey = generateAuctionCacheKey(activeAuctions, currentFilters);
 
         // Kiểm tra cache trước
         if (cacheKey && hasCachedData(cacheKey)) {
@@ -123,7 +123,7 @@ const SearchRes_AuctionSection = ({ activeAuctions }) => {
           currentRequestRef.current.abort();
         }
       };
-    }, [activeAuctions]);
+    }, [activeAuctions, currentFilters]);
 
     if (loading) {
       return (

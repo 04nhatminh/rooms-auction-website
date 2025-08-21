@@ -41,16 +41,24 @@ export const SearchCacheProvider = ({ children }) => {
   };
 
   // Generate cache key cho room section
-  const generateRoomCacheKey = (topRatedProducts) => {
+  const generateRoomCacheKey = (topRatedProducts, filters = {}) => {
     if (!topRatedProducts || topRatedProducts.length === 0) return null;
-    const key = `room_${topRatedProducts.map(p => p.ProductID).sort().join('_')}`;
+    
+    // Tạo key bao gồm cả product IDs và filters
+    const productIds = topRatedProducts.map(p => p.ProductID).sort().join('_');
+    const filtersStr = JSON.stringify(filters);
+    const key = `room_${productIds}_${btoa(filtersStr).slice(0, 10)}`;
     return key;
   };
 
   // Generate cache key cho auction section
-  const generateAuctionCacheKey = (activeAuctions) => {
+  const generateAuctionCacheKey = (activeAuctions, filters = {}) => {
     if (!activeAuctions || activeAuctions.length === 0) return null;
-    const key = `auction_${activeAuctions.map(a => a.AuctionUID).sort().join('_')}`;
+    
+    // Tạo key bao gồm cả auction UIDs (theo thứ tự hiện tại, không sort) và filters
+    const auctionIds = activeAuctions.map(a => a.AuctionUID).join('_');
+    const filtersStr = JSON.stringify(filters);
+    const key = `auction_${auctionIds}_${btoa(filtersStr).slice(0, 10)}`;
     return key;
   };
 

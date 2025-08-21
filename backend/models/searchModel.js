@@ -308,9 +308,7 @@ exports.searchAuctions = async (params) => {
     let orderClause = "";
     
     if (auction_types) {
-        const types = auction_types.split(",");
-        
-        if (types.includes('endingSoon')) {
+        if (auction_types === 'endingSoon') {
             // Sắp kết thúc: sort theo EndTime ASC (sắp kết thúc trước)
             if (sort === "price_asc") {
                 orderClause = " ORDER BY a.EndTime ASC, COALESCE(a.CurrentPrice, a.StartPrice) ASC ";
@@ -319,7 +317,7 @@ exports.searchAuctions = async (params) => {
             } else {
                 orderClause = " ORDER BY a.EndTime ASC, a.AuctionUID DESC ";
             }
-        } else if (types.includes('featured')) {
+        } else if (auction_types === 'featured') {
             // Nổi bật nhất: sort theo số lượt bid DESC (bid nhiều nhất trước)
             if (sort === "price_asc") {
                 orderClause = " ORDER BY BidCount DESC, COALESCE(a.CurrentPrice, a.StartPrice) ASC ";
@@ -328,7 +326,7 @@ exports.searchAuctions = async (params) => {
             } else {
                 orderClause = " ORDER BY BidCount DESC, a.AuctionUID DESC ";
             }
-        } else if (types.includes('newest')) {
+        } else if (auction_types === 'newest') {
             // Mới nhất: sort theo thời gian tạo mới nhất (StartTime DESC)
             if (sort === "price_asc") {
                 orderClause = " ORDER BY a.StartTime DESC, COALESCE(a.CurrentPrice, a.StartPrice) ASC ";
