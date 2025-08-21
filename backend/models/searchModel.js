@@ -244,12 +244,18 @@ exports.searchAuctions = async (params) => {
                     COALESCE(p.ValuePoint, 0) + 
                     COALESCE(p.CommunicationPoint, 0) + 
                     COALESCE(p.ConveniencePoint, 0)
-                ) / 6, 2) AS AverageRating
+                ) / 6, 2) AS AverageRating,
+                COALESCE(bid_count.BidCount, 0) AS BidCount
         FROM Auction a
         JOIN Products p ON a.ProductID = p.ProductID
         LEFT JOIN Provinces prov ON p.ProvinceCode = prov.ProvinceCode
         LEFT JOIN Districts dist ON p.DistrictCode = dist.DistrictCode
         LEFT JOIN RoomTypes rt ON p.RoomType = rt.RoomTypeID
+        LEFT JOIN (
+            SELECT AuctionID, COUNT(*) AS BidCount
+            FROM Bids
+            GROUP BY AuctionID
+        ) bid_count ON a.AuctionID = bid_count.AuctionID
         WHERE 1=1
     `;
     const values = [];
@@ -298,42 +304,66 @@ exports.searchAuctions = async (params) => {
 
     sql += havingClause;
 
-    // Auction types filter (endingSoon, featured, newest)
+    // Sort logic based on auction_types (sort only, not filter)
+    let orderClause = "";
+    
     if (auction_types) {
         const types = auction_types.split(",");
         
         if (types.includes('endingSoon')) {
-            sql += " AND a.EndTime <= DATE_ADD(NOW(), INTERVAL 24 HOUR) ";
+            // Sắp kết thúc: sort theo EndTime ASC (sắp kết thúc trước)
+            if (sort === "price_asc") {
+                orderClause = " ORDER BY a.EndTime ASC, COALESCE(a.CurrentPrice, a.StartPrice) ASC ";
+            } else if (sort === "price_desc") {
+                orderClause = " ORDER BY a.EndTime ASC, COALESCE(a.CurrentPrice, a.StartPrice) DESC ";
+            } else {
+                orderClause = " ORDER BY a.EndTime ASC, a.AuctionUID DESC ";
+            }
+        } else if (types.includes('featured')) {
+            // Nổi bật nhất: sort theo số lượt bid DESC (bid nhiều nhất trước)
+            if (sort === "price_asc") {
+                orderClause = " ORDER BY BidCount DESC, COALESCE(a.CurrentPrice, a.StartPrice) ASC ";
+            } else if (sort === "price_desc") {
+                orderClause = " ORDER BY BidCount DESC, COALESCE(a.CurrentPrice, a.StartPrice) DESC ";
+            } else {
+                orderClause = " ORDER BY BidCount DESC, a.AuctionUID DESC ";
+            }
+        } else if (types.includes('newest')) {
+            // Mới nhất: sort theo thời gian tạo mới nhất (StartTime DESC)
+            if (sort === "price_asc") {
+                orderClause = " ORDER BY a.StartTime DESC, COALESCE(a.CurrentPrice, a.StartPrice) ASC ";
+            } else if (sort === "price_desc") {
+                orderClause = " ORDER BY a.StartTime DESC, COALESCE(a.CurrentPrice, a.StartPrice) DESC ";
+            } else {
+                orderClause = " ORDER BY a.StartTime DESC ";
+            }
         }
-        // Note: 'featured' and 'newest' would need additional columns in database
-        // For now, we'll sort by EndTime for endingSoon
     }
 
-    // Sort
-    if (popular) {
-        // Popular: rating cao trước
-        if (sort === "price_asc") {
-            sql += " ORDER BY COALESCE(a.CurrentPrice, a.StartPrice) ASC, AverageRating DESC ";
-        } else if (sort === "price_desc") {
-            sql += " ORDER BY COALESCE(a.CurrentPrice, a.StartPrice) DESC, AverageRating DESC ";
-        } else if (auction_types && auction_types.includes('endingSoon')) {
-            sql += " ORDER BY a.EndTime ASC, AverageRating DESC ";
+    // Default sorting if no auction_types specified
+    if (!orderClause) {
+        if (popular) {
+            // Popular: rating cao trước
+            if (sort === "price_asc") {
+                orderClause = " ORDER BY AverageRating DESC, COALESCE(a.CurrentPrice, a.StartPrice) ASC ";
+            } else if (sort === "price_desc") {
+                orderClause = " ORDER BY AverageRating DESC, COALESCE(a.CurrentPrice, a.StartPrice) DESC ";
+            } else {
+                orderClause = " ORDER BY AverageRating DESC, a.AuctionUID DESC ";
+            }
         } else {
-            sql += " ORDER BY AverageRating DESC, a.AuctionUID DESC ";
-        }
-    } else { // newest
-        // Newest: auction mới nhất trước
-        if (sort === "price_asc") {
-            sql += " ORDER BY COALESCE(a.CurrentPrice, a.StartPrice) ASC, a.AuctionUID DESC ";
-        } else if (sort === "price_desc") {
-            sql += " ORDER BY COALESCE(a.CurrentPrice, a.StartPrice) DESC, a.AuctionUID DESC ";
-        } else if (auction_types && auction_types.includes('endingSoon')) {
-            sql += " ORDER BY a.EndTime ASC, a.AuctionUID DESC ";
-        } else {
-            // Mặc định sort theo thời gian tạo auction mới nhất (AuctionUID DESC)
-            sql += " ORDER BY a.AuctionUID DESC ";
+            // Default: mới nhất trước
+            if (sort === "price_asc") {
+                orderClause = " ORDER BY a.AuctionUID DESC, COALESCE(a.CurrentPrice, a.StartPrice) ASC ";
+            } else if (sort === "price_desc") {
+                orderClause = " ORDER BY a.AuctionUID DESC, COALESCE(a.CurrentPrice, a.StartPrice) DESC ";
+            } else {
+                orderClause = " ORDER BY a.AuctionUID DESC ";
+            }
         }
     }
+
+    sql += orderClause;
 
     // Pagination
     sql += ` LIMIT ${limit} OFFSET ${offset} `;
@@ -350,8 +380,7 @@ exports.countSearchAuctions = async (params) => {
         price_min,
         price_max,
         room_types,
-        rating,
-        auction_types
+        rating
     } = params;
 
     let sql = `
@@ -406,14 +435,6 @@ exports.countSearchAuctions = async (params) => {
         const types = room_types.split(",");
         sql += ` AND p.RoomType IN (${types.map(() => "?").join(",")}) `;
         values.push(...types);
-    }
-
-    // Auction types filter
-    if (auction_types) {
-        const types = auction_types.split(",");
-        if (types.includes('endingSoon')) {
-            sql += " AND a.EndTime <= DATE_ADD(NOW(), INTERVAL 24 HOUR) ";
-        }
     }
 
     sql += " ) as sub ";

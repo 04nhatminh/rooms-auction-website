@@ -131,8 +131,7 @@ exports.searchAuctions = async (req, res) => {
       price_min,
       price_max,
       room_types,
-      rating,
-      auction_types
+      rating
     });
 
     // Tính pagination
