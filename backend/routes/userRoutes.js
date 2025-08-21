@@ -5,6 +5,7 @@ const { verifyToken } = require('../middleware/authMiddleware');
 
 router.post('/register', userController.register);
 router.post('/login', userController.login);
+router.post('/logout', userController.logout);
 router.get('/verify', userController.verifyEmail);
 router.post('/resend-verification', userController.resendVerification);
 

@@ -20,7 +20,8 @@ import VungTauImg from '../../assets/vung_tau.jpg';
 import DaLatImg from '../../assets/da_lat.jpg';
 import NhaTrangImg from '../../assets/nha_trang.jpg';
 
-
+const API_BASE_URL =
+  (process.env.REACT_APP_API_BASE_URL?.replace(/\/$/, '')) || 'http://localhost:3000';
 
 const HomePage = () => {
   const { popularLocations, isLoading: isLoadingLocations, error: locationError, getPopularLocations } = useLocation();
@@ -63,17 +64,30 @@ const HomePage = () => {
 
   React.useEffect(() => {
     try {
-      const stored = localStorage.getItem('userData');
+      const stored = sessionStorage.getItem('userData');
       if (stored) setUser(JSON.parse(stored));
     } catch (_) {}
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem('userData');
-    localStorage.removeItem('token');
-    setUser(null);
-    navigate('/login');
-  };
+  const handleLogout = async () => {
+    try {
+      // gọi BE để xóa cookie bidstay_token
+      await fetch(`${API_BASE_URL}/user/logout`, {
+        method: 'POST',
+        credentials: 'include',     // gửi kèm cookie
+      });
+    } catch (e) {
+      // không cần chặn UI nếu request fail
+      console.warn('Logout call failed:', e);
+    } finally {
+      // dọn cache UI
+      sessionStorage.removeItem('userData');
+      sessionStorage.removeItem('token');
+      localStorage.removeItem('userData');
+      localStorage.removeItem('token');
+      navigate('/login');
+    }
+  }
 
   return (
     <>

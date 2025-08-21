@@ -15,35 +15,45 @@ const UsersManagementPage = () => {
   useEffect(() => { loadUsers(); }, []);
 
   const loadUsers = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      alert('Vui lòng đăng nhập lại.');
-      navigate('/login');
-      return;
-    }
+    setLoading(true);
 
     try {
-      const data = await UserAPI.getUsers(token, 1, 10);
-      const list = Array.isArray(data) ? data : (data.items || []);
+      // Cookie-mode: UserAPI.getUsers đã gọi fetch(..., { credentials: 'include' })
+      const data = await UserAPI.getUsers(1, 10);
+
+      const list =
+        Array.isArray(data) ? data :
+        data.items || data.users || [];
+
       setUsers(list);
     } catch (err) {
-      setError(err.message);
+      const msg = err?.message || 'Không thể lấy danh sách người dùng.';
+      setError(msg);
+
+      // Nếu backend trả 401/không có quyền -> quay về login
+      if (/401|không.*xác thực|unauthor/i.test(msg)) {
+        // dọn cache UI nếu có
+        sessionStorage.removeItem('userData');
+        localStorage.removeItem('userData');
+        localStorage.removeItem('token');
+        navigate('/login');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteUser = async (id) => {
-    const token = localStorage.getItem('token');
-    if (!token) { alert('Vui lòng đăng nhập lại.'); navigate('/login'); return; }
     if (!window.confirm('Bạn có chắc muốn xóa người dùng này?')) return;
-
     try {
-      await UserAPI.deleteUser(token, id);
+      await UserAPI.deleteUser(id);                        // ← KHÔNG truyền token
       setUsers(prev => prev.filter(u => (u.id ?? u._id) !== id));
       alert('Xóa người dùng thành công!');
     } catch (err) {
-      alert(err.message);
+      if (err.status === 401 || /xác thực|401/i.test(err.message)) {
+        navigate('/login'); return;
+      }
+      alert(err.message || 'Xóa thất bại.');
     }
   };
 
