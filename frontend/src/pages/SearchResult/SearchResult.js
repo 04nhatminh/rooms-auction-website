@@ -201,6 +201,8 @@ const SearchResultContent = () => {
   const handleFiltersChange = (newFilters) => {
     setFilters(newFilters);
     console.log('Filters changed:', newFilters);
+    // Clear cache khi filters thay đổi để đảm bảo UI cập nhật với kết quả mới
+    clearCache();
     // Reset về trang 1 khi apply filters
     setCurrentPage(1);
     // Fetch lại dữ liệu với filters mới

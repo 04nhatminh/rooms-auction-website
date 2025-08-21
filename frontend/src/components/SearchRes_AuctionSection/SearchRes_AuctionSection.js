@@ -27,14 +27,19 @@ const SearchRes_AuctionSection = ({ activeAuctions, currentFilters = {} }) => {
         }
 
         const cacheKey = generateAuctionCacheKey(activeAuctions, currentFilters);
+        console.log('SearchRes_AuctionSection - Cache key:', cacheKey);
+        console.log('SearchRes_AuctionSection - Current filters:', currentFilters);
 
         // Kiểm tra cache trước
         if (cacheKey && hasCachedData(cacheKey)) {
           const cachedData = getCachedData(cacheKey);
+          console.log('SearchRes_AuctionSection - Using cached data for:', cacheKey);
           setAuctions(cachedData);
           setLoading(false);
           return;
         }
+
+        console.log('SearchRes_AuctionSection - No cached data, fetching new data...');
   
         // Hủy request trước đó nếu có
         if (currentRequestRef.current) {
@@ -89,6 +94,7 @@ const SearchRes_AuctionSection = ({ activeAuctions, currentFilters = {} }) => {
   
             // Lưu vào cache
             if (cacheKey) {
+              console.log('SearchRes_AuctionSection - Caching new data for:', cacheKey);
               setCachedData(cacheKey, auctionsWithImagesAndReviews);
             }
             setAuctions(auctionsWithImagesAndReviews);
@@ -97,6 +103,7 @@ const SearchRes_AuctionSection = ({ activeAuctions, currentFilters = {} }) => {
             setAuctions(activeAuctions);
             // Lưu vào cache
             if (cacheKey) {
+              console.log('SearchRes_AuctionSection - Caching auction data (no UIDs) for:', cacheKey);
               setCachedData(cacheKey, activeAuctions);
             }
           }

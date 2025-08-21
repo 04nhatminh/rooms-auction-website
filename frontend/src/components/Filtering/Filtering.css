@@ -10,6 +10,10 @@
     margin-bottom: 20px;
 }
 
+.filter-section:last-child {
+    margin-bottom: 0;
+}
+
 .filter-section h3 {
     font-family: Montserrat;
     font-size: 15px;
