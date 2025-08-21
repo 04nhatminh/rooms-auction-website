@@ -1,15 +1,25 @@
-// src/components/Filtering/Filtering.js
 import React, { useState } from 'react';
 import './Filtering.css';
 
 const Filtering = ({ type = 'room', onFiltersChange }) => {
   const [filters, setFilters] = useState({
-    sortBy: [], // array of selected sort options
-    priceRange: { min: 0, max: 10000000 }, // giá trị mặc định cho slider
+    popularity: [],
+    sortBy: [],
+    priceRange: { min: 0, max: 10000000 },
     accommodationTypes: [],
     rating: '',
-    auctionTypes: [] // endingSoon, featured, newest
+    auctionTypes: []
   });
+
+  const handlePopularityChange = (value, checked) => {
+    const newPopularity = checked
+      ? [...filters.popularity, value]
+      : filters.popularity.filter(pop => pop !== value);
+
+    const newFilters = { ...filters, popularity: newPopularity };
+    setFilters(newFilters);
+    onFiltersChange?.(newFilters);
+  };
 
   const handleSortChange = (value, checked) => {
     const newSortBy = checked
@@ -87,12 +97,31 @@ const Filtering = ({ type = 'room', onFiltersChange }) => {
 
   return (
     <div className="filtering-container">
+      {/* Độ phổ biến */}
+      <div className="filter-section">
+        <h3>Độ phổ biến</h3>
+        <div className="checkbox-group">
+          {[
+            { value: 'popular', label: 'Phổ biến nhất' },
+            { value: 'newest', label: 'Mới nhất' },
+          ].map(({ value, label }) => (
+            <label key={value} className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={filters.popularity.includes(value)}
+                onChange={(e) => handlePopularityChange(value, e.target.checked)}
+              />
+              {label}
+            </label>
+          ))}
+        </div>
+      </div>
+
       {/* Sắp xếp */}
       <div className="filter-section">
         <h3>Sắp xếp</h3>
         <div className="checkbox-group">
           {[
-            { value: 'popular', label: 'Phổ biến nhất' },
             { value: 'priceAsc', label: 'Giá tăng dần' },
             { value: 'priceDesc', label: 'Giá giảm dần' }
           ].map(({ value, label }) => (
@@ -138,12 +167,31 @@ const Filtering = ({ type = 'room', onFiltersChange }) => {
               className="slider slider-max"
             />
           </div>
-          <div className="price-labels">
-            <span>0đ</span>
-            <span>10,000,000đ</span>
-          </div>
         </div>
       </div>
+
+      {/* Loại đấu giá (chỉ hiện khi type === 'auction') */}
+      {type === 'auction' && (
+        <div className="filter-section">
+          <h3>Loại đấu giá</h3>
+          <div className="checkbox-group">
+            {[
+              { value: 'endingSoon', label: 'Sắp kết thúc' },
+              { value: 'featured', label: 'Nổi bật nhất' },
+              { value: 'newest', label: 'Mới nhất' }
+            ].map(({ value, label }) => (
+              <label key={value} className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={filters.auctionTypes.includes(value)}
+                  onChange={(e) => handleAuctionTypeChange(value, e.target.checked)}
+                />
+                {label}
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Loại chỗ ở */}
       <div className="filter-section">
@@ -185,28 +233,6 @@ const Filtering = ({ type = 'room', onFiltersChange }) => {
         </div>
       </div>
 
-      {/* Loại đấu giá (chỉ hiện khi type === 'auction') */}
-      {type === 'auction' && (
-        <div className="filter-section">
-          <h3>Loại đấu giá</h3>
-          <div className="checkbox-group">
-            {[
-              { value: 'endingSoon', label: 'Sắp kết thúc' },
-              { value: 'featured', label: 'Nổi bật nhất' },
-              { value: 'newest', label: 'Mới nhất' }
-            ].map(({ value, label }) => (
-              <label key={value} className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={filters.auctionTypes.includes(value)}
-                  onChange={(e) => handleAuctionTypeChange(value, e.target.checked)}
-                />
-                {label}
-              </label>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 };

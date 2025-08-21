@@ -1,4 +1,3 @@
-/* src/components/Pagination/Pagination.css */
 .pagination-container {
   display: flex;
   flex-direction: column;
@@ -43,14 +42,14 @@
 }
 
 .pagination-btn.active {
-  background: #3b82f6;
+  background: #278C9F;
   color: white;
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 2px 8px rgba(18, 157, 157, 0.3);
 }
 
 .pagination-btn.active:hover {
-  background: #2563eb;
+  background: #278C9F;
   transform: translateY(-1px);
 }
 
@@ -87,7 +86,6 @@
   border: 1px solid #e5e7eb;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .pagination-container {
     margin: 20px 0;
@@ -126,7 +124,6 @@
   }
 }
 
-/* Animation for page transitions */
 .pagination-btn {
   position: relative;
   overflow: hidden;
