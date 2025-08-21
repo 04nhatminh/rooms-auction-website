@@ -48,6 +48,17 @@ const Filtering = ({ type = 'room', onFiltersChange }) => {
     }).format(price);
   };
 
+  // Tính toán vị trí và độ rộng của vùng được chọn
+  const getSelectedRangeStyle = () => {
+    const minPercent = (filters.priceRange.min / 10000000) * 100;
+    const maxPercent = (filters.priceRange.max / 10000000) * 100;
+    
+    return {
+      left: `${minPercent}%`,
+      width: `${maxPercent - minPercent}%`
+    };
+  };
+
   const handleAccommodationTypeChange = (value, checked) => {
     const newTypes = checked
       ? [...filters.accommodationTypes, value]
@@ -107,6 +118,7 @@ const Filtering = ({ type = 'room', onFiltersChange }) => {
             <span>{formatPrice(filters.priceRange.max)}</span>
           </div>
           <div className="slider-container">
+            <div className="selected-range" style={getSelectedRangeStyle()}></div>
             <input
               type="range"
               min="0"
