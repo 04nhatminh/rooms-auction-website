@@ -336,6 +336,7 @@ const SearchBarMini = ({
     } else {
       // Nếu ở trang khác, navigate đến search-result page
       navigate(`/search?${searchParams.toString()}`);
+      window.scrollTo(0, 0);
     }
   };
 

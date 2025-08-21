@@ -316,6 +316,7 @@ const SearchBar = ({
 
     // Navigate đến trang SearchResult với parameters
     navigate(`/search?${searchParams.toString()}`);
+    window.scrollTo(0, 0);
   };
 
 

@@ -168,17 +168,23 @@ const SearchResultContent = () => {
     clearCache();
     // Reset về trang 1 khi có search params mới
     setCurrentPage(1);
-    // Reset filters khi có search params mới về giá trị mặc định
+    
+    const urlParams = new URLSearchParams(location.search);
+    
+    // Xử lý accommodationTypes từ URL
+    const accommodationTypesParam = urlParams.get('accommodationTypes');
+    const accommodationTypesArray = accommodationTypesParam ? accommodationTypesParam.split(',') : [];
+    
+    // Reset filters khi có search params mới về giá trị mặc định và merge với URL params
     const defaultFilters = {
       sort: 'popular',
       priceRange: { min: 0, max: 10000000 },
-      accommodationTypes: [],
+      accommodationTypes: accommodationTypesArray,
       rating: '',
       auctionTypes: ''
     };
     setFilters(defaultFilters);
     
-    const urlParams = new URLSearchParams(location.search);
     fetchSearchResults(urlParams, 1, defaultFilters);
 
     // Cleanup: hủy request khi unmount / đổi query
