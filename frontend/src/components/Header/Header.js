@@ -9,7 +9,7 @@ import SignInUpAction from '../SignInUpAction/SignInUpAction';
 import LocationAPI from '../../api/locationApi';
 import './Header.css';
 
-const Header = () => {
+const Header = ({ searchData: propSearchData, onSearchSubmit }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useUser();
@@ -30,6 +30,28 @@ const Header = () => {
 
   const [selectedLocationId, setSelectedLocationId] = useState(null);
   const [selectedType, setSelectedType] = useState(null);
+
+  // Update search data from props
+  useEffect(() => {
+    if (propSearchData) {
+      setSearchData(prev => ({
+        ...prev,
+        ...propSearchData
+      }));
+      
+      if (propSearchData.locationId) {
+        setSelectedLocationId(propSearchData.locationId);
+      }
+      
+      if (propSearchData.locationType) {
+        setSelectedType(propSearchData.locationType);
+      }
+      
+      if (propSearchData.guestCounts) {
+        setGuestCounts(propSearchData.guestCounts);
+      }
+    }
+  }, [propSearchData]);
 
   // Update guest display text when guest counts change
   const updateGuestDisplayText = (counts) => {
@@ -154,6 +176,7 @@ const Header = () => {
             onSearchDataUpdate={handleSearchDataUpdate}
             onGuestCountsUpdate={handleGuestCountsUpdate}
             onLocationUpdate={handleLocationUpdate}
+            onSearchSubmit={onSearchSubmit}
           />
         </div>
 

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate, useLocation as useRouterLocation } from 'react-router-dom';
 import { useLocation } from '../../contexts/LocationContext';
 import LocationSuggestionDropdown from '../LocationSuggestionDropdown/LocationSuggestionDropdown';
 import GuestCounterDropdown from '../GuestCounterDropdown/GuestCounterDropdown';
@@ -12,8 +13,11 @@ const SearchBarMini = ({
   initialLocationType = null,
   onSearchDataUpdate,
   onGuestCountsUpdate,
-  onLocationUpdate
+  onLocationUpdate,
+  onSearchSubmit
 }) => {
+  const navigate = useNavigate();
+  const routerLocation = useRouterLocation();
   const { popularLocations, getLocationSuggestions } = useLocation();
 
   // State lưu thông tin search: địa điểm, ngày checkin, checkout, và text hiển thị số khách
@@ -287,9 +291,6 @@ const SearchBarMini = ({
     setShowSuggestions(false);
     setShowGuestDropdown(false);
 
-    // Tạo guest string từ guest counts
-    const totalGuests = guestCounts.adults + guestCounts.children;
-
     let finalLocationId = selectedLocationId;
     let finalType = selectedLocationType;
 
@@ -310,20 +311,10 @@ const SearchBarMini = ({
       }
     }
 
-    console.log('Submit search with data:', {
-      location: searchData.location,
-      selectedLocationId,
-      selectedLocationType,
-      finalLocationId,
-      finalType,
-      searchData,
-      guestCounts
-    });
-
     // Lấy thông tin từ các input, nếu trống thì là 'None'
     const searchParams = new URLSearchParams({
       location: searchData.location.trim()
-                  .replace(/\s+/g, '-') || 'None'
+                  .replace(/\s+/g, '_') || 'None'
                   .toLowerCase(),
       locationId: finalLocationId || 'None',
       type: finalType || 'None',
@@ -336,7 +327,16 @@ const SearchBarMini = ({
 
     console.log('Search URL params:', searchParams.toString());
 
-    // Gọi api cho search result
+    // Kiểm tra xem hiện tại có đang ở trang search-result không
+    const isOnSearchPage = routerLocation.pathname === '/search';
+
+    if (isOnSearchPage && onSearchSubmit) {
+      // Nếu đang ở search-result page và có callback onSearchSubmit, gọi callback để update data
+      onSearchSubmit(searchParams);
+    } else {
+      // Nếu ở trang khác, navigate đến search-result page
+      navigate(`/search?${searchParams.toString()}`);
+    }
   };
 
 

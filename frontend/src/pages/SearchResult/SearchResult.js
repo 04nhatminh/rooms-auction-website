@@ -21,18 +21,31 @@ const SearchResultContent = () => {
   const [durationDays, setDurationDays] = useState(1);
   const [activeTab, setActiveTab] = useState('room');
   const [filters, setFilters] = useState({});
+  const [searchData, setSearchData] = useState({});
   const abortRef = useRef(null);
   const { clearCache } = useSearchCache();
 
-  useEffect(() => {
-    // Clear cache khi search params thay đổi (chuyển trang search mới)
-    clearCache();
-    
-    const urlParams = new URLSearchParams(location.search);
-    const locationId = urlParams.get('locationId');
-    const type = (urlParams.get('type') || '').toLowerCase();
-    const checkinStr = urlParams.get('checkinDate');
-    const checkoutStr = urlParams.get('checkoutDate');
+  // Hàm để fetch dữ liệu search results
+  const fetchSearchResults = async (searchParams) => {
+    const locationId = searchParams.get('locationId');
+    const type = (searchParams.get('type') || '').toLowerCase();
+    const checkinStr = searchParams.get('checkinDate');
+    const checkoutStr = searchParams.get('checkoutDate');
+
+    // Cập nhật search data cho SearchBarMini
+    setSearchData({
+      location: searchParams.get('location')?.replace(/_/g, ' ') || '',
+      checkinDate: checkinStr !== 'None' ? checkinStr : '',
+      checkoutDate: checkoutStr !== 'None' ? checkoutStr : '',
+      guests: `${parseInt(searchParams.get('numAdults') || 0) + parseInt(searchParams.get('numChildren') || 0)} khách`,
+      locationId: locationId,
+      locationType: type,
+      guestCounts: {
+        adults: parseInt(searchParams.get('numAdults') || 1),
+        children: parseInt(searchParams.get('numChildren') || 0),
+        infants: parseInt(searchParams.get('numInfants') || 0)
+      }
+    });
 
     if (checkinStr && checkoutStr) {
       const checkin = new Date(checkinStr);
@@ -58,6 +71,7 @@ const SearchResultContent = () => {
     // Không có locationId hoặc locationId === 'None' => clear danh sách
     if (!locationId || locationId === 'None') {
       setTopRatedProducts([]);
+      setActiveAuctions([]);
       return;
     }
 
@@ -68,43 +82,60 @@ const SearchResultContent = () => {
     const controller = new AbortController();
     abortRef.current = controller;
 
-    (async () => {
-      try {
-        let resp_room;
-        let resp_auction;
-        if (type === 'district') {
-          console.log('\nnFetching products by district:', locationId);
-          resp_room = await productApi.getTopRatedProductsByDistrict(locationId, LIMIT, controller.signal);
-          console.log('Fetching auctions by district:', locationId);
-          resp_auction = await auctionApi.getAuctionsByDistrictStatus(locationId, 'active', LIMIT, controller.signal);
-        } else {
-          // Mặc định coi là province
-          console.log('\nFetching products by province:', locationId);
-          resp_room = await productApi.getTopRatedProducts(locationId, LIMIT, controller.signal);
-          console.log('Fetching auctions by province:', locationId);
-          resp_auction = await auctionApi.getAuctionsByProvinceStatus(locationId, 'active', LIMIT, controller.signal);
-        }
-
-        const products = resp_room?.data?.products;
-        console.log('\nAPI Response:', { resp_room, products });
-        setTopRatedProducts(Array.isArray(products) ? products : []);
-
-        const auctions = resp_auction?.data?.auctions;
-        console.log('API Response:', { resp_auction, auctions });
-        setActiveAuctions(Array.isArray(auctions) ? auctions : []);
-      } catch (err) {
-        if (err?.name !== 'AbortError') {
-          console.error('Fetch search results failed:', err);
-          setTopRatedProducts([]);
-          setActiveAuctions([]);
-        }
+    try {
+      let resp_room;
+      let resp_auction;
+      if (type === 'district') {
+        console.log('\nFetching products by district:', locationId);
+        resp_room = await productApi.getTopRatedProductsByDistrict(locationId, LIMIT, controller.signal);
+        console.log('Fetching auctions by district:', locationId);
+        resp_auction = await auctionApi.getAuctionsByDistrictStatus(locationId, 'active', LIMIT, controller.signal);
+      } else {
+        // Mặc định coi là province
+        console.log('\nFetching products by province:', locationId);
+        resp_room = await productApi.getTopRatedProducts(locationId, LIMIT, controller.signal);
+        console.log('Fetching auctions by province:', locationId);
+        resp_auction = await auctionApi.getAuctionsByProvinceStatus(locationId, 'active', LIMIT, controller.signal);
       }
-    })();
+
+      const products = resp_room?.data?.products;
+      console.log('\nAPI Response:', { resp_room, products });
+      setTopRatedProducts(Array.isArray(products) ? products : []);
+
+      const auctions = resp_auction?.data?.auctions;
+      console.log('API Response:', { resp_auction, auctions });
+      setActiveAuctions(Array.isArray(auctions) ? auctions : []);
+    } catch (err) {
+      if (err?.name !== 'AbortError') {
+        console.error('Fetch search results failed:', err);
+        setTopRatedProducts([]);
+        setActiveAuctions([]);
+      }
+    }
+  };
+
+  // Handler cho việc search submit từ SearchBarMini
+  const handleSearchSubmit = (searchParams) => {
+    // Clear cache khi có search mới
+    clearCache();
+    // Fetch dữ liệu mới
+    fetchSearchResults(searchParams);
+  };
+
+  useEffect(() => {
+    // Clear cache khi search params thay đổi (chuyển trang search mới)
+    clearCache();
+    
+    const urlParams = new URLSearchParams(location.search);
+    fetchSearchResults(urlParams);
 
     // Cleanup: hủy request khi unmount / đổi query
-    return () => controller.abort();
+    return () => {
+      if (abortRef.current) {
+        abortRef.current.abort();
+      }
+    };
   }, [location.search]);
-
   // Handler cho việc thay đổi tab
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
@@ -129,7 +160,10 @@ const SearchResultContent = () => {
 
   return (
     <>
-      <Header />
+      <Header 
+        searchData={searchData}
+        onSearchSubmit={handleSearchSubmit}
+      />
       <TabLayout activeTab={activeTab} onTabChange={handleTabChange} />
       <div className="display-result">
         <div className="filtering-section">

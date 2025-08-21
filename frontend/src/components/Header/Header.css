@@ -2,7 +2,7 @@
   --header-top-h: 72px;
   position: relative;
   border-bottom: 1px solid #DDDDDD;
-  padding: 0px 48px 2px;
+  padding: 2px 48px 4px;
   height: auto; 
   overflow: visible;
   z-index: 999;

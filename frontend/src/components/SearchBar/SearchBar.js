@@ -278,9 +278,6 @@ const SearchBar = ({
     setShowSuggestions(false);
     setShowGuestDropdown(false);
 
-    // Tạo guest string từ guest counts
-    const totalGuests = guestCounts.adults + guestCounts.children;
-
     let finalLocationId = selectedLocationId;
     let finalType = selectedLocationType;
 
@@ -300,16 +297,6 @@ const SearchBar = ({
         console.error('Error finding location:', error);
       }
     }
-
-    console.log('Submit search with data:', {
-      location: searchData.location,
-      selectedLocationId,
-      selectedLocationType,
-      finalLocationId,
-      finalType,
-      searchData,
-      guestCounts
-    });
 
     // Lấy thông tin từ các input, nếu trống thì là 'None'
     const searchParams = new URLSearchParams({
