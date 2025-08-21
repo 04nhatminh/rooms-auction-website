@@ -1,6 +1,6 @@
 // src/pages/SearchResult/SearchResult.js
 import React, { useEffect, useRef, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { SearchCacheProvider, useSearchCache } from '../../contexts/SearchCacheContext';
 import { productApi } from '../../api/productApi';
 import { auctionApi } from '../../api/auctionApi';
@@ -10,23 +10,28 @@ import TabLayout from '../../components/TabLayout/TabLayout';
 import Filtering from '../../components/Filtering/Filtering';
 import SearchRes_RoomSection from '../../components/SearchRes_RoomSection/SearchRes_RoomSection';
 import SearchRes_AuctionSection from '../../components/SearchRes_AuctionSection/SearchRes_AuctionSection';
+import Pagination from '../../components/Pagination/Pagination';
 import './SearchResult.css';
 
 const LIMIT = 20;
 
 const SearchResultContent = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [topRatedProducts, setTopRatedProducts] = useState([]);
   const [activeAuctions, setActiveAuctions] = useState(null);
   const [durationDays, setDurationDays] = useState(1);
   const [activeTab, setActiveTab] = useState('room');
   const [filters, setFilters] = useState({});
   const [searchData, setSearchData] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const [productsPagination, setProductsPagination] = useState(null);
+  const [auctionsPagination, setAuctionsPagination] = useState(null);
   const abortRef = useRef(null);
   const { clearCache } = useSearchCache();
 
   // Hàm để fetch dữ liệu search results
-  const fetchSearchResults = async (searchParams) => {
+  const fetchSearchResults = async (searchParams, page = 1) => {
     const locationId = searchParams.get('locationId');
     const type = (searchParams.get('type') || '').toLowerCase();
     const checkinStr = searchParams.get('checkinDate');
@@ -72,6 +77,8 @@ const SearchResultContent = () => {
     if (!locationId || locationId === 'None') {
       setTopRatedProducts([]);
       setActiveAuctions([]);
+      setProductsPagination(null);
+      setAuctionsPagination(null);
       return;
     }
 
@@ -86,30 +93,36 @@ const SearchResultContent = () => {
       let resp_room;
       let resp_auction;
       if (type === 'district') {
-        console.log('\nFetching products by district:', locationId);
+        console.log('\nFetching products by district:', locationId, 'page:', page);
         resp_room = await productApi.getTopRatedProductsByDistrict(locationId, LIMIT, controller.signal);
-        console.log('Fetching auctions by district:', locationId);
+        console.log('Fetching auctions by district:', locationId, 'page:', page);
         resp_auction = await auctionApi.getAuctionsByDistrictStatus(locationId, 'active', LIMIT, controller.signal);
       } else {
         // Mặc định coi là province
-        console.log('\nFetching products by province:', locationId);
+        console.log('\nFetching products by province:', locationId, 'page:', page);
         resp_room = await productApi.getTopRatedProducts(locationId, LIMIT, controller.signal);
-        console.log('Fetching auctions by province:', locationId);
+        console.log('Fetching auctions by province:', locationId, 'page:', page);
         resp_auction = await auctionApi.getAuctionsByProvinceStatus(locationId, 'active', LIMIT, controller.signal);
       }
 
       const products = resp_room?.data?.products;
-      console.log('\nAPI Response:', { resp_room, products });
+      const pagination = resp_room?.data?.pagination;
+      console.log('\nAPI Response:', { resp_room, products, pagination });
       setTopRatedProducts(Array.isArray(products) ? products : []);
+      setProductsPagination(pagination);
 
       const auctions = resp_auction?.data?.auctions;
-      console.log('API Response:', { resp_auction, auctions });
+      const auctionPagination = resp_auction?.data?.pagination;
+      console.log('API Response:', { resp_auction, auctions, auctionPagination });
       setActiveAuctions(Array.isArray(auctions) ? auctions : []);
+      setAuctionsPagination(auctionPagination);
     } catch (err) {
       if (err?.name !== 'AbortError') {
         console.error('Fetch search results failed:', err);
         setTopRatedProducts([]);
         setActiveAuctions([]);
+        setProductsPagination(null);
+        setAuctionsPagination(null);
       }
     }
   };
@@ -118,16 +131,30 @@ const SearchResultContent = () => {
   const handleSearchSubmit = (searchParams) => {
     // Clear cache khi có search mới
     clearCache();
+    // Reset về trang 1 khi search mới
+    setCurrentPage(1);
     // Fetch dữ liệu mới
-    fetchSearchResults(searchParams);
+    fetchSearchResults(searchParams, 1);
+  };
+
+  // Handler cho việc thay đổi trang
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    const urlParams = new URLSearchParams(location.search);
+    fetchSearchResults(urlParams, page);
+    
+    // Scroll to top when page changes
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   useEffect(() => {
     // Clear cache khi search params thay đổi (chuyển trang search mới)
     clearCache();
+    // Reset về trang 1 khi có search params mới
+    setCurrentPage(1);
     
     const urlParams = new URLSearchParams(location.search);
-    fetchSearchResults(urlParams);
+    fetchSearchResults(urlParams, 1);
 
     // Cleanup: hủy request khi unmount / đổi query
     return () => {
@@ -139,12 +166,16 @@ const SearchResultContent = () => {
   // Handler cho việc thay đổi tab
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
+    // Reset về trang 1 khi chuyển tab
+    setCurrentPage(1);
   };
 
   // Handler cho việc thay đổi filters
   const handleFiltersChange = (newFilters) => {
     setFilters(newFilters);
     console.log('Filters changed:', newFilters);
+    // Reset về trang 1 khi apply filters
+    setCurrentPage(1);
     // TODO: Implement filtering logic here
   };
 
@@ -152,9 +183,27 @@ const SearchResultContent = () => {
   const renderDisplayResult = () => {
     switch (activeTab) {
       case 'room':
-        return <SearchRes_RoomSection topRatedProducts={topRatedProducts} durationDays={durationDays} />;
+        return (
+          <>
+            <SearchRes_RoomSection topRatedProducts={topRatedProducts} durationDays={durationDays} />
+            <Pagination 
+              pagination={productsPagination} 
+              onPageChange={handlePageChange} 
+            />
+          </>
+        );
       case 'auction':
-        return <SearchRes_AuctionSection activeAuctions={activeAuctions} />;
+        return (
+          <>
+            <SearchRes_AuctionSection activeAuctions={activeAuctions} />
+            <Pagination 
+              pagination={auctionsPagination} 
+              onPageChange={handlePageChange} 
+            />
+          </>
+        );
+      default:
+        return null;
     }
   };
 

@@ -9,9 +9,6 @@ router.get('/top-rated/province', ProductController.getTopRatedProductsByProvinc
 // GET /api/room/district/top-rated - Lấy top products theo district code
 router.get('/top-rated/district', ProductController.getTopRatedProductsByDistrict);
 
-// GET /api/room/search - Tìm kiếm products theo nhiều tiêu chí
-router.get('/search', ProductController.searchProducts);
-
 // Admin routes - Cần authentication
 router.get('/admin/list', verifyToken, ProductController.getAllProductsForAdmin);
 router.post('/admin/create', verifyToken, ProductController.createProduct);
