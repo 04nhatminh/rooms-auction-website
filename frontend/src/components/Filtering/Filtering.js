@@ -70,7 +70,9 @@ const Filtering = ({ type = 'room', onFiltersChange }) => {
   };
 
   const handleRatingChange = (value) => {
-    const newFilters = { ...filters, rating: value };
+    // Nếu click vào rating đang được chọn thì bỏ chọn (reset về rỗng)
+    const newRating = filters.rating === value ? '' : value;
+    const newFilters = { ...filters, rating: newRating };
     setFilters(newFilters);
     onFiltersChange?.(newFilters);
   };
