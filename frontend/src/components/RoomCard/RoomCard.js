@@ -88,7 +88,7 @@ const RoomCard = ({ product, durationDays = 1 }) => {
         <div className="room-rating">
           <img src={StarOutlineIcon} alt="Star Rating" />
           <span className="rating-text">
-            {product?.AverageRating?.toFixed(1)} - {product.totalReviews} đánh giá
+            {(product?.avgRating || product?.AverageRating)?.toFixed(1)} - {product.totalReviews} đánh giá
           </span>
         </div>
 

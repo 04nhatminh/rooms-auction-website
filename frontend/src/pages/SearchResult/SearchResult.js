@@ -2,8 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { SearchCacheProvider, useSearchCache } from '../../contexts/SearchCacheContext';
-import { productApi } from '../../api/productApi';
-import { auctionApi } from '../../api/auctionApi';
+import { searchApi } from '../../api/searchApi';
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
 import TabLayout from '../../components/TabLayout/TabLayout';
@@ -31,7 +30,7 @@ const SearchResultContent = () => {
   const { clearCache } = useSearchCache();
 
   // Hàm để fetch dữ liệu search results
-  const fetchSearchResults = async (searchParams, page = 1) => {
+  const fetchSearchResults = async (searchParams, page = 1, currentFilters = {}) => {
     const locationId = searchParams.get('locationId');
     const type = (searchParams.get('type') || '').toLowerCase();
     const checkinStr = searchParams.get('checkinDate');
@@ -90,30 +89,36 @@ const SearchResultContent = () => {
     abortRef.current = controller;
 
     try {
-      let resp_room;
-      let resp_auction;
-      if (type === 'district') {
-        console.log('\nFetching products by district:', locationId, 'page:', page);
-        resp_room = await productApi.getTopRatedProductsByDistrict(locationId, LIMIT, controller.signal);
-        console.log('Fetching auctions by district:', locationId, 'page:', page);
-        resp_auction = await auctionApi.getAuctionsByDistrictStatus(locationId, 'active', LIMIT, controller.signal);
-      } else {
-        // Mặc định coi là province
-        console.log('\nFetching products by province:', locationId, 'page:', page);
-        resp_room = await productApi.getTopRatedProducts(locationId, LIMIT, controller.signal);
-        console.log('Fetching auctions by province:', locationId, 'page:', page);
-        resp_auction = await auctionApi.getAuctionsByProvinceStatus(locationId, 'active', LIMIT, controller.signal);
-      }
+      // Sử dụng searchApi mới cho rooms
+      const searchParamsObj = searchApi.buildSearchParams(
+        searchParams, 
+        currentFilters, 
+        { page, limit: LIMIT }
+      );
+      
+      console.log('\nFetching rooms with search API:', searchParamsObj);
+      const resp_room = await searchApi.searchRooms(searchParamsObj, controller.signal);
 
-      const products = resp_room?.data?.products;
-      const pagination = resp_room?.data?.pagination;
-      console.log('\nAPI Response:', { resp_room, products, pagination });
+      // Sử dụng searchApi mới cho auctions
+      const auctionSearchParamsObj = searchApi.buildAuctionSearchParams(
+        searchParams,
+        currentFilters,
+        { page, limit: LIMIT }
+      );
+      
+      console.log('Fetching auctions with search API:', auctionSearchParamsObj);
+      const resp_auction = await searchApi.searchAuctions(auctionSearchParamsObj, controller.signal);
+
+      // Xử lý response từ search API
+      const products = resp_room?.data?.products || resp_room?.products;
+      const pagination = resp_room?.data?.pagination || resp_room?.pagination;
+      console.log('\nSearch API Response:', { resp_room, products, pagination });
       setTopRatedProducts(Array.isArray(products) ? products : []);
       setProductsPagination(pagination);
 
-      const auctions = resp_auction?.data?.auctions;
-      const auctionPagination = resp_auction?.data?.pagination;
-      console.log('API Response:', { resp_auction, auctions, auctionPagination });
+      const auctions = resp_auction?.data?.auctions || resp_auction?.auctions;
+      const auctionPagination = resp_auction?.data?.pagination || resp_auction?.pagination;
+      console.log('Auction Search API Response:', { resp_auction, auctions, auctionPagination });
       setActiveAuctions(Array.isArray(auctions) ? auctions : []);
       setAuctionsPagination(auctionPagination);
     } catch (err) {
@@ -133,15 +138,17 @@ const SearchResultContent = () => {
     clearCache();
     // Reset về trang 1 khi search mới
     setCurrentPage(1);
+    // Reset filters
+    setFilters({});
     // Fetch dữ liệu mới
-    fetchSearchResults(searchParams, 1);
+    fetchSearchResults(searchParams, 1, {});
   };
 
   // Handler cho việc thay đổi trang
   const handlePageChange = (page) => {
     setCurrentPage(page);
     const urlParams = new URLSearchParams(location.search);
-    fetchSearchResults(urlParams, page);
+    fetchSearchResults(urlParams, page, filters);
     
     // Scroll to top when page changes
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -152,9 +159,11 @@ const SearchResultContent = () => {
     clearCache();
     // Reset về trang 1 khi có search params mới
     setCurrentPage(1);
+    // Reset filters khi có search params mới
+    setFilters({});
     
     const urlParams = new URLSearchParams(location.search);
-    fetchSearchResults(urlParams, 1);
+    fetchSearchResults(urlParams, 1, {});
 
     // Cleanup: hủy request khi unmount / đổi query
     return () => {
@@ -176,7 +185,9 @@ const SearchResultContent = () => {
     console.log('Filters changed:', newFilters);
     // Reset về trang 1 khi apply filters
     setCurrentPage(1);
-    // TODO: Implement filtering logic here
+    // Fetch lại dữ liệu với filters mới
+    const urlParams = new URLSearchParams(location.search);
+    fetchSearchResults(urlParams, 1, newFilters);
   };
 
   // Render nội dung dựa trên tab được chọn
