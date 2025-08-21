@@ -55,6 +55,25 @@
   justify-content: center;
 }
 
+.header-filter {
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+}
+
+.header-filter-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.header-filter-text {
+  margin-left: 8px;
+  font-family: Montserrat;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
 
 @media screen and (max-width: 1200px) {
   .header {

@@ -1,10 +1,31 @@
 .display-result {
   min-height: 400px;
+  display: flex;
+  gap: 20px;
+}
+
+.filtering-section {
+  flex: 0 0 20%;
+  min-width: 250px;
+}
+
+.content-section {
+  flex: 1;
 }
 
 /* Responsive design */
 @media (max-width: 768px) {
   .display-result {
     min-height: 300px;
+    flex-direction: column;
+  }
+  
+  .filtering-section {
+    flex: none;
+    min-width: auto;
+  }
+  
+  .content-section {
+    flex: none;
   }
 }

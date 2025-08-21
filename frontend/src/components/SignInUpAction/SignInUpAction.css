@@ -69,13 +69,11 @@
 
 .others-login-signup .others-login-button {
     display: flex;
-    padding: 10px 20px;
-    /* border: 2px solid #000; */
+    padding: 8px 16px;
     border-radius: 8px;
     height: 48px;
     min-width: fit-content;
     flex-direction: row;
-    /* background: transparent; */
     background-color: #000;
     justify-content: center;
     align-items: center;
@@ -85,7 +83,7 @@
 
     color: #FFF;
     font-family: Montserrat;
-    font-size: 13px;
+    font-size: 12px;
     font-style: normal;
     font-weight: 600;
     line-height: normal;
@@ -98,7 +96,7 @@
 
 .others-login-signup .others-signup-button {
     display: flex;
-    padding: 10px 24px;
+    padding: 8px 24px;
     border: None;
     border-radius: 8px;
     height: 48px;
@@ -113,7 +111,7 @@
     color: #FFF;
     text-align: center;
     font-family: Montserrat;
-    font-size: 13px;
+    font-size: 12px;
     font-style: normal;
     font-weight: 600;
     line-height: normal;

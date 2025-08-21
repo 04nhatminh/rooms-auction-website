@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useUser } from '../../contexts/UserContext';
 import logo from '../../assets/logo.png';
+import filterIcon from '../../assets/filter.png';
 import SearchBarMini from '../SearchBarMini/SearchBarMini';
 import HeaderUserMenu from '../HeaderUserMenu/HeaderUserMenu';
 import SignInUpAction from '../SignInUpAction/SignInUpAction';
@@ -155,6 +156,13 @@ const Header = () => {
             onLocationUpdate={handleLocationUpdate}
           />
         </div>
+
+        {/* {type === 'search-result' && (
+          <div className="header-filter">
+            <img src={filterIcon} alt="Filter" className="header-filter-icon" />
+            <span className="header-filter-text">Bộ lọc</span>
+          </div>
+        )} */}
 
         <div className="header-user-actions">
           {isAuthenticated() ? (
