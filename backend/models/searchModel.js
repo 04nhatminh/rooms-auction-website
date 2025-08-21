@@ -278,11 +278,11 @@ exports.searchAuctions = async (params) => {
 
     // Price range filter (based on current bid or start price)
     if (price_min) {
-        sql += " AND COALESCE(a.CurrentPrice, a.StartPrice) >= ? ";
+        sql += " AND a.CurrentPrice >= ? ";
         values.push(price_min);
     }
     if (price_max) {
-        sql += " AND COALESCE(a.CurrentPrice, a.StartPrice) <= ? ";
+        sql += " AND a.CurrentPrice <= ? ";
         values.push(price_max);
     }
 
@@ -311,27 +311,27 @@ exports.searchAuctions = async (params) => {
         if (auction_types === 'endingSoon') {
             // Sắp kết thúc: sort theo EndTime ASC (sắp kết thúc trước)
             if (sort === "price_asc") {
-                orderClause = " ORDER BY a.EndTime ASC, COALESCE(a.CurrentPrice, a.StartPrice) ASC ";
+                orderClause = " ORDER BY a.EndTime ASC, a.CurrentPrice ASC ";
             } else if (sort === "price_desc") {
-                orderClause = " ORDER BY a.EndTime ASC, COALESCE(a.CurrentPrice, a.StartPrice) DESC ";
+                orderClause = " ORDER BY a.EndTime ASC, a.CurrentPrice DESC ";
             } else {
                 orderClause = " ORDER BY a.EndTime ASC, a.AuctionUID DESC ";
             }
         } else if (auction_types === 'featured') {
             // Nổi bật nhất: sort theo số lượt bid DESC (bid nhiều nhất trước)
             if (sort === "price_asc") {
-                orderClause = " ORDER BY BidCount DESC, COALESCE(a.CurrentPrice, a.StartPrice) ASC ";
+                orderClause = " ORDER BY BidCount DESC, a.CurrentPrice ASC ";
             } else if (sort === "price_desc") {
-                orderClause = " ORDER BY BidCount DESC, COALESCE(a.CurrentPrice, a.StartPrice) DESC ";
+                orderClause = " ORDER BY BidCount DESC, a.CurrentPrice DESC ";
             } else {
                 orderClause = " ORDER BY BidCount DESC, a.AuctionUID DESC ";
             }
         } else if (auction_types === 'newest') {
             // Mới nhất: sort theo thời gian tạo mới nhất (StartTime DESC)
             if (sort === "price_asc") {
-                orderClause = " ORDER BY a.StartTime DESC, COALESCE(a.CurrentPrice, a.StartPrice) ASC ";
+                orderClause = " ORDER BY a.StartTime DESC, a.CurrentPrice ASC ";
             } else if (sort === "price_desc") {
-                orderClause = " ORDER BY a.StartTime DESC, COALESCE(a.CurrentPrice, a.StartPrice) DESC ";
+                orderClause = " ORDER BY a.StartTime DESC, a.CurrentPrice DESC ";
             } else {
                 orderClause = " ORDER BY a.StartTime DESC ";
             }
@@ -343,18 +343,18 @@ exports.searchAuctions = async (params) => {
         if (popular) {
             // Popular: rating cao trước
             if (sort === "price_asc") {
-                orderClause = " ORDER BY AverageRating DESC, COALESCE(a.CurrentPrice, a.StartPrice) ASC ";
+                orderClause = " ORDER BY AverageRating DESC, a.CurrentPrice ASC ";
             } else if (sort === "price_desc") {
-                orderClause = " ORDER BY AverageRating DESC, COALESCE(a.CurrentPrice, a.StartPrice) DESC ";
+                orderClause = " ORDER BY AverageRating DESC, a.CurrentPrice DESC ";
             } else {
                 orderClause = " ORDER BY AverageRating DESC, a.AuctionUID DESC ";
             }
         } else {
             // Default: mới nhất trước
             if (sort === "price_asc") {
-                orderClause = " ORDER BY a.AuctionUID DESC, COALESCE(a.CurrentPrice, a.StartPrice) ASC ";
+                orderClause = " ORDER BY a.AuctionUID DESC, a.CurrentPrice ASC ";
             } else if (sort === "price_desc") {
-                orderClause = " ORDER BY a.AuctionUID DESC, COALESCE(a.CurrentPrice, a.StartPrice) DESC ";
+                orderClause = " ORDER BY a.AuctionUID DESC, a.CurrentPrice DESC ";
             } else {
                 orderClause = " ORDER BY a.AuctionUID DESC ";
             }
@@ -420,11 +420,11 @@ exports.countSearchAuctions = async (params) => {
 
     // Price range filter
     if (price_min) {
-        sql += " AND COALESCE(a.CurrentPrice, a.StartPrice) >= ? ";
+        sql += " AND a.CurrentPrice >= ? ";
         values.push(price_min);
     }
     if (price_max) {
-        sql += " AND COALESCE(a.CurrentPrice, a.StartPrice) <= ? ";
+        sql += " AND a.CurrentPrice <= ? ";
         values.push(price_max);
     }
 
