@@ -243,7 +243,7 @@ exports.searchAuctions = async (params) => {
 
     let sql = `
         SELECT a.AuctionUID,
-                a.ProductID,
+                p.UID as ProductUID,
                 a.StartPrice,
                 a.CurrentPrice,
                 a.StayPeriodStart,
@@ -256,7 +256,15 @@ exports.searchAuctions = async (params) => {
                 p.ProvinceCode,
                 p.DistrictCode,
                 prov.Name AS ProvinceName,
-                dist.Name AS DistrictName
+                dist.Name AS DistrictName,
+                ROUND((
+                    COALESCE(p.CleanlinessPoint, 0) + 
+                    COALESCE(p.LocationPoint, 0) + 
+                    COALESCE(p.ServicePoint, 0) + 
+                    COALESCE(p.ValuePoint, 0) + 
+                    COALESCE(p.CommunicationPoint, 0) + 
+                    COALESCE(p.ConveniencePoint, 0)
+                ) / 6, 2) AS AverageRating
         FROM Auction a
         JOIN Products p ON a.ProductID = p.ProductID
         LEFT JOIN Provinces prov ON p.ProvinceCode = prov.ProvinceCode
