@@ -14,7 +14,7 @@ import './SearchResult.css';
 const LIMIT = 20;
 
 const SearchResultContent = () => {
-  window.scrollTo(0, 0);
+  // window.scrollTo(0, 0);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -140,23 +140,18 @@ const SearchResultContent = () => {
     // Reset về trang 1 khi search mới
     setCurrentPage(1);
     // Reset filters về giá trị mặc định
-    setFilters({
+    const defaultFilters = {
       popularity: 'popular',
       sortBy: '',
       priceRange: { min: 0, max: 10000000 },
       accommodationTypes: [],
       rating: '',
       auctionTypes: ''
-    });
-    // Fetch dữ liệu mới với filters mặc định
-    fetchSearchResults(searchParams, 1, {
-      popularity: 'popular',
-      sortBy: '',
-      priceRange: { min: 0, max: 10000000 },
-      accommodationTypes: [],
-      rating: '',
-      auctionTypes: ''
-    });
+    };
+    setFilters(defaultFilters);
+    
+    // Cập nhật URL với search params mới
+    navigate(`/search?${searchParams.toString()}`, { replace: true });
   };
 
   // Handler cho việc thay đổi trang

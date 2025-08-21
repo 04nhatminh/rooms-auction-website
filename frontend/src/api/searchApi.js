@@ -230,6 +230,17 @@ export const searchApi = {
             }
         }
 
+        // Room types mapping từ ID sang tên (tương tự như rooms)
+        if (filters.accommodationTypes && filters.accommodationTypes.length > 0) {
+            // filters.accommodationTypes đã chứa ID (1,2,3,4,5,6,7)
+            // nên chỉ cần truyền trực tiếp
+            params.room_types = filters.accommodationTypes;
+        }
+
+        if (filters.rating) {
+            params.rating = filters.rating;
+        }
+
         // Auction types từ filters
         if (filters.auctionTypes) {
             params.auction_types = filters.auctionTypes;
