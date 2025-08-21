@@ -12,7 +12,7 @@ const LocationSuggestionDropdown = forwardRef(({
   className = ''
 }, ref) => {
   
-  if (!showSuggestions) return null;
+  if (!showSuggestions || (!isLoading && suggestions.length === 0)) return null;
 
   return (
     <div 
@@ -25,7 +25,7 @@ const LocationSuggestionDropdown = forwardRef(({
             <div className="loading-spinner"></div>
             <span>Đang tìm kiếm...</span>
           </div>
-        ) : suggestions.length > 0 ? (
+        ) : (
           suggestions.map((suggestion, index) => (
             <div 
               key={`${suggestion.type}-${suggestion.id}`}
@@ -57,11 +57,6 @@ const LocationSuggestionDropdown = forwardRef(({
               </div>
             </div>
           ))
-        ) : (
-          <div className="suggestion-item no-results">
-            <div className="no-results-icon">🔍</div>
-            <span>Không tìm thấy kết quả</span>
-          </div>
         )}
       </div>
     </div>
