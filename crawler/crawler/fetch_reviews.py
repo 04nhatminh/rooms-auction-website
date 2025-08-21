@@ -8,6 +8,7 @@ def fetch_reviews(listing_id, hash_val, encoded_id, domain):
     url = f"{domain}/api/v3/StaysPdpReviewsQuery/{hash_val}"
     variables = {
         "id": encoded_id,
+        "useContextualUser": False,
         "pdpReviewsRequest": {
             "fieldSelector": "for_p3_translation_only",
             "forPreview": False,

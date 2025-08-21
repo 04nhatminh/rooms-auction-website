@@ -30,7 +30,6 @@
 
 .header-guest-input-wrapper {
   position: relative;
-  width: 8vw;
 }
 
 .header-search-input label {
@@ -129,11 +128,7 @@
   }
 
   .header-search-input {
-    width: 100%;
-  }
-
-  .header-search-input {
-    width: 11vw;
+    width: 12vw;
   }
 
   .header-location-input-wrapper,

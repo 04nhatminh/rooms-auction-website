@@ -7,6 +7,7 @@ def fetch_listing_info(listing_id, hash_val, encoded_id, domain):
     url = f"{domain}/api/v3/StaysPdpSections/{hash_val}"
     variables = {
         "id": encoded_id,
+        "useContextualUser": False,
         "wishlistTenantIntegrationEnabled": True,
         "pdpSectionsRequest": {
             "adults": "1",

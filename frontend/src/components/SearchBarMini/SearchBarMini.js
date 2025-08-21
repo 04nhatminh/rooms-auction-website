@@ -57,7 +57,7 @@ const SearchBarMini = ({
       const locationName = searchData.location.replace(/_/g, ' ');
       return `${locationName}`;
     }
-    return 'Địa điểm bất kỳ';
+    return '';
   };
 
 
