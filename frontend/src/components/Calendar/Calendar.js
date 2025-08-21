@@ -9,45 +9,58 @@ import chevronRightBlackIcon from '../../assets/chevron_right_black.png';
 const Calendar = () => {
   const { checkinDate, checkoutDate, setRange } = useDateRange();
 
-  // zeroed "today"
   const today = new Date();
-  today.setHours(0,0,0,0);
+  today.setHours(0, 0, 0, 0);
+
+  // ==== Mốc tháng hiện tại (đầu tháng) ====
+  const THIS_YEAR = today.getFullYear();
+  const CUR_MONTH = today.getMonth(); // 0..11
+  const CURRENT_MONTH_START = new Date(THIS_YEAR, CUR_MONTH, 1);
 
   // base month (left panel)
-  const [base, setBase] = useState(new Date());
+  const [base, setBase] = useState(new Date(THIS_YEAR, CUR_MONTH, 1));
   const left  = new Date(base.getFullYear(), base.getMonth(), 1);
   const right = new Date(base.getFullYear(), base.getMonth() + 1, 1);
+
+
+  // Chỉ chặn lùi nếu base đã là tháng hiện tại (không được lùi thêm về trước)
+  const allowPrev = left.getTime() > CURRENT_MONTH_START.getTime();
+  const allowNext = true; // luôn cho đi tới (có thể sang năm sau)
 
   const daysIn = (y, m) => new Date(y, m + 1, 0).getDate();
   const startOffset = (y, m) => (new Date(y, m, 1).getDay() + 6) % 7; // Mon-first
 
-  const goPrev = () => setBase(new Date(base.getFullYear(), base.getMonth() - 1, 1));
-  const goNext = () => setBase(new Date(base.getFullYear(), base.getMonth() + 1, 1));
+  const goPrev = () => {
+    if (!allowPrev) return;
+    setBase(new Date(base.getFullYear(), base.getMonth() - 1, 1));
+  };
+
+  const goNext = () => {
+    setBase(new Date(base.getFullYear(), base.getMonth() + 1, 1));
+  };
 
   const isSelected = (dateObj) => {
-    const d = dateObj.toISOString().slice(0,10);
+    const d = dateObj.toISOString().slice(0, 10);
     return d === checkinDate || d === checkoutDate;
   };
 
   const inRange = (dateObj) => {
     if (!checkinDate || !checkoutDate) return false;
-    const t   = new Date(dateObj).setHours(0,0,0,0);
-    const inT  = new Date(checkinDate).setHours(0,0,0,0);
-    const outT = new Date(checkoutDate).setHours(0,0,0,0);
+    const t    = new Date(dateObj).setHours(0, 0, 0, 0);
+    const inT  = new Date(checkinDate).setHours(0, 0, 0, 0);
+    const outT = new Date(checkoutDate).setHours(0, 0, 0, 0);
     return t > inT && t <= outT;
   };
 
   const selectDate = (dateObj) => {
-    const d = dateObj.toISOString().slice(0,10); // 'YYYY-MM-DD'
+    const d = dateObj.toISOString().slice(0, 10);
     if (!checkinDate || (checkinDate && checkoutDate)) {
-      // start a new range
       setRange({ checkin: d, checkout: '' });
     } else {
-      // finish the range — must be AFTER check-in
       const inD  = new Date(checkinDate);
       const outD = new Date(d);
       if (outD > inD) setRange({ checkout: d });
-      else            setRange({ checkin: d, checkout: '' }); // reset if invalid
+      else            setRange({ checkin: d, checkout: '' });
     }
   };
 
@@ -60,25 +73,39 @@ const Calendar = () => {
       <div className="calendar-month">
         <div className="month-header">
           {showPrevBtn ? (
-            <button className="nav-button" onClick={goPrev}>
-              <img src={chevronLeftBlackIcon} alt="" className="chevron-icon"/>
+            <button className="nav-button" onClick={goPrev} disabled={!allowPrev}>
+              <img
+                src={allowPrev ? chevronLeftBlackIcon : chevronLeftGrayIcon}
+                alt=""
+                className="chevron-icon"
+              />
             </button>
           ) : (
-            <button className="nav-button" disabled>
-              <img src={chevronLeftGrayIcon} alt="" className="chevron-icon"/>
-            </button>
+            <button
+              className="nav-button"
+              style={{ visibility: 'hidden' }}
+              aria-hidden="true"
+              tabIndex={-1}
+            />
           )}
 
           <h4>Tháng {m + 1} năm {y}</h4>
 
           {showNextBtn ? (
-            <button className="nav-button" onClick={goNext}>
-              <img src={chevronRightBlackIcon} alt="" className="chevron-icon"/>
+            <button className="nav-button" onClick={goNext} disabled={!allowNext}>
+              <img
+                src={allowNext ? chevronRightBlackIcon : chevronRightGrayIcon}
+                alt=""
+                className="chevron-icon"
+              />
             </button>
           ) : (
-            <button className="nav-button" disabled>
-              <img src={chevronRightGrayIcon} alt="" className="chevron-icon"/>
-            </button>
+            <button
+              className="nav-button"
+              style={{ visibility: 'hidden' }}
+              aria-hidden="true"
+              tabIndex={-1}
+            />
           )}
         </div>
 
@@ -87,13 +114,13 @@ const Calendar = () => {
             <div key={dn} className="day-name">{dn}</div>
           ))}
 
-          {Array.from({length: offset}).map((_, i) => (
+          {Array.from({ length: offset }).map((_, i) => (
             <div key={`e${i}`} className="calendar-day empty" />
           ))}
 
-          {Array.from({length: totalDays}).map((_, i) => {
+          {Array.from({ length: totalDays }).map((_, i) => {
             const dateObj = new Date(y, m, i + 1);
-            dateObj.setHours(0,0,0,0);
+            dateObj.setHours(0, 0, 0, 0);
             const isPast = dateObj < today;
 
             return (
@@ -109,7 +136,7 @@ const Calendar = () => {
                 role="button"
                 aria-disabled={isPast}
               >
-                {i}
+                {i + 1}
               </div>
             );
           })}
@@ -126,7 +153,9 @@ const Calendar = () => {
     <div className="calendar-section">
       <h3>{title}</h3>
       <div className="calendar-container">
+        {/* Pane trái luôn hiển thị */}
         {renderMonth(left, true, false)}
+        {/* Pane phải luôn hiển thị (không giới hạn tới tháng 12) */}
         {renderMonth(right, false, true)}
       </div>
       <div className="calendar-footer">

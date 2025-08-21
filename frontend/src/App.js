@@ -22,6 +22,8 @@ import FavoritePage from './pages/FavoritePage/FavoritePage';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import '@fortawesome/fontawesome-free/css/all.min.css';
+import CheckoutPage from './pages/CheckoutPage/CheckoutPage';
+import CheckoutReturnPage from './pages/CheckoutPage/CheckoutReturnPage';
 
 function App() {
   return (
@@ -38,6 +40,8 @@ function App() {
             <Route path="/search" element={<SearchResult />} />
             <Route path="/profile" element={<UserProfilePage />} />
             <Route path="/favorite" element={<FavoritePage />} />
+            <Route path="/checkout/:bookingId" element={<CheckoutPage />} />
+            <Route path="/checkout/paypal/return" element={<CheckoutReturnPage />} />
             <Route path="/admin" element={<AdminLayout />}>
               <Route path="users-management" element={<UsersManagementPage />} />
               <Route path="users-management/:id" element={<UsersManagementDetailPage />} />

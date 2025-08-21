@@ -7,8 +7,8 @@ const { create } = require('domain');
 const dbConfig = {
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
-    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3306,
-    password: process.env.DB_PASSWORD || '', 
+    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3308,
+    password: process.env.DB_PASSWORD || '22127007', 
     database: process.env.DB_NAME || 'a2airbnb',
     waitForConnections: true,
     connectionLimit: 10,
