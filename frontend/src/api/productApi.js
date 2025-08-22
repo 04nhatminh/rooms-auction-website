@@ -113,6 +113,29 @@ export const productApi = {
         }
     },
 
+    // Tìm kiếm sản phẩm theo UID (Admin)
+    searchProductsByUID: async (uid, page = 1, limit = 10, token) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/room/admin/search?uid=${uid}&page=${page}&limit=${limit}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error searching products by UID:', error);
+            throw error;
+        }
+    },
+
     // Cập nhật sản phẩm (Admin)
     updateProduct: async (productId, productData, token) => {
         try {

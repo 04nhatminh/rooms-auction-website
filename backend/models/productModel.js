@@ -339,6 +339,54 @@ class ProductModel {
         return result.affectedRows;
     }
 
+    // Tìm kiếm sản phẩm theo UID cho admin
+    static async searchProductsByUID(uid, limit, offset) {
+        try {
+            const safeLimit = Number.parseInt(limit, 10) || 20;
+            const safeOffset = Number.parseInt(offset, 10) || 0;
+
+            // Search for products with UID containing the search term
+            const searchQuery = `
+                SELECT 
+                    p.ProductID,
+                    p.UID,
+                    p.Name as productName,
+                    ppt.PropertyName as propertyTypeName,
+                    d.Name as districtName,
+                    pr.Name as provinceName,
+                    p.Price,
+                    p.Source
+                FROM Products p
+                JOIN Properties ppt ON p.PropertyType = ppt.PropertyID
+                JOIN Districts d ON p.DistrictCode = d.DistrictCode
+                JOIN Provinces pr ON p.ProvinceCode = pr.ProvinceCode
+                WHERE p.is_deleted = 0 AND p.UID LIKE ?
+                ORDER BY p.ProductID ASC
+                LIMIT ${safeLimit} OFFSET ${safeOffset}
+            `;
+            
+            const countQuery = `
+                SELECT COUNT(*) as total
+                FROM Products p
+                WHERE p.is_deleted = 0 AND p.UID LIKE ?
+            `;
+            
+            const searchTerm = `%${uid}%`;
+            
+            // Get both results and count
+            const [products] = await pool.execute(searchQuery, [searchTerm]);
+            const [countResult] = await pool.execute(countQuery, [searchTerm]);
+            
+            return {
+                products,
+                total: countResult[0].total
+            };
+        } catch (error) {
+            console.error('Error searching products by UID:', error);
+            throw error;
+        }
+    }
+
     // Lấy danh sách property types từ bảng Properties
     static async getAllPropertyTypes() {
         try {

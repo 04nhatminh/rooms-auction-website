@@ -268,6 +268,49 @@ class ProductController {
         }
     }
 
+    // GET /api/room/admin/search - Tìm kiếm sản phẩm theo UID cho admin
+    static async searchProductsByUID(req, res) {
+        try {
+            const { uid, page = 1, limit = 10 } = req.query;
+            
+            if (!uid || uid.trim() === '') {
+                return res.status(400).json({
+                    success: false,
+                    message: 'UID tìm kiếm không được để trống'
+                });
+            }
+            
+            const offset = (parseInt(page) - 1) * parseInt(limit);
+            
+            console.log(`\nsearchProductsByUID - uid: ${uid}, page: ${page}, limit: ${limit}, offset: ${offset}`);
+            
+            const result = await ProductModel.searchProductsByUID(uid, parseInt(limit), offset);
+            const { products, total } = result;
+            
+            console.log(`Found ${products.length} products matching UID: ${uid}`);
+            
+            const totalPages = Math.ceil(total / parseInt(limit));
+            
+            return res.status(200).json({
+                success: true,
+                data: {
+                    items: products,
+                    totalPages,
+                    currentPage: parseInt(page),
+                    totalItems: total
+                }
+            });
+            
+        } catch (error) {
+            console.error('Error in searchProductsByUID:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Internal server error',
+                error: error.message
+            });
+        }
+    }
+
     // DELETE /api/room/admin/:id - Xóa sản phẩm
     static async deleteProduct(req, res) {
         try {

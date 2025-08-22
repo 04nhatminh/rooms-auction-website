@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/PageHeader/PageHeader';
+import Pagination from '../../components/Pagination/Pagination';
 import styles from './AdminProductsManagementPage.module.css';
-import SearchIcon from '../../assets/search_black.png';
 import ViewIcon from '../../assets/view.png';
 import EditIcon from '../../assets/edit.png';
 import DeleteIcon from '../../assets/delete.png';
@@ -11,32 +11,20 @@ import productApi from '../../api/productApi';
 const AdminProductsManagementPage = () => {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchUID, setSearchUID] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [pagination, setPagination] = useState(null);
 
   useEffect(() => {
-    loadProducts();
-  }, [currentPage]);
-
-  useEffect(() => {
-    // Filter products by UID search
-    if (searchUID.trim() === '') {
-      setFilteredProducts(products);
-    } else {
-      const filtered = products.filter(product => 
-        product.UID?.toLowerCase().includes(searchUID.toLowerCase())
-      );
-      setFilteredProducts(filtered);
+    if (!isSearching) {
+      loadProducts();
     }
-  }, [products, searchUID]);
-
-  useEffect(() => {
-    loadProducts();
-  }, [currentPage]);
+  }, [currentPage, isSearching]);
 
   const loadProducts = async () => {
     const token = localStorage.getItem('token');
@@ -54,11 +42,23 @@ const AdminProductsManagementPage = () => {
       if (response.success) {
         setProducts(response.data?.items || response.data || []);
         setTotalPages(response.data?.totalPages || 1);
+        setPagination({
+          currentPage: response.data?.currentPage || currentPage,
+          totalPages: response.data?.totalPages || 1,
+          totalItems: response.data?.totalItems || 0,
+          itemsPerPage: 10
+        });
       } else {
         // Fallback for direct array response
         const list = Array.isArray(response) ? response : [];
         setProducts(list);
         setTotalPages(Math.ceil(list.length / 10));
+        setPagination({
+          currentPage: currentPage,
+          totalPages: Math.ceil(list.length / 10),
+          totalItems: list.length,
+          itemsPerPage: 10
+        });
       }
     } catch (err) {
       setError(err.message);
@@ -66,6 +66,85 @@ const AdminProductsManagementPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const searchProductsByUID = async (uid, page = 1) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Vui lòng đăng nhập lại.');
+      navigate('/login');
+      return;
+    }
+
+    if (!uid || uid.trim() === '') {
+      // If UID is empty, return to normal list
+      setIsSearching(false);
+      setSearchResults([]);
+      setCurrentPage(1);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await productApi.searchProductsByUID(uid, page, 10, token);
+      
+      if (response.success) {
+        setSearchResults(response.data?.items || []);
+        setPagination({
+          currentPage: response.data?.currentPage || page,
+          totalPages: response.data?.totalPages || 1,
+          totalItems: response.data?.totalItems || 0,
+          itemsPerPage: 10
+        });
+        setIsSearching(true);
+      } else {
+        setSearchResults([]);
+        setPagination(null);
+      }
+    } catch (err) {
+      console.error('Error searching products by UID:', err);
+      alert('Có lỗi xảy ra khi tìm kiếm: ' + err.message);
+      setSearchResults([]);
+      setPagination(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearchInputChange = (e) => {
+    const value = e.target.value;
+    setSearchUID(value);
+  };
+
+  const handleSearch = () => {
+    if (searchUID.trim() !== '') {
+      setCurrentPage(1);
+      searchProductsByUID(searchUID, 1);
+    }
+  };
+
+  const handleSearchKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
+  const handleReset = () => {
+    setSearchUID('');
+    setIsSearching(false);
+    setSearchResults([]);
+    setCurrentPage(1);
+    // loadProducts will be called by useEffect when isSearching changes to false
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    
+    if (isSearching && searchUID.trim() !== '') {
+      // If we're searching, search with the new page
+      searchProductsByUID(searchUID, page);
+    }
+    // Otherwise, useEffect will handle loading normal products
   };
 
   const handleDeleteProduct = async (productId) => {
@@ -80,7 +159,14 @@ const AdminProductsManagementPage = () => {
 
     try {
       await productApi.deleteProduct(productId, token);
-      await loadProducts(); // Reset lại danh sách sản phẩm sau khi xóa
+      
+      // Reload the appropriate list
+      if (isSearching && searchUID.trim() !== '') {
+        await searchProductsByUID(searchUID, currentPage);
+      } else {
+        await loadProducts();
+      }
+      
       alert('Xóa sản phẩm thành công!');
     } catch (err) {
       alert('Có lỗi xảy ra khi xóa sản phẩm: ' + err.message);
@@ -105,26 +191,8 @@ const AdminProductsManagementPage = () => {
     }).format(price);
   };
 
-  const formatPropertyType = (type) => {
-    const types = {
-      'apartment': 'Căn hộ',
-      'house': 'Nhà riêng',
-      'villa': 'Biệt thự',
-      'studio': 'Studio',
-      'dormitory': 'Ký túc xá',
-      'homestay': 'Homestay'
-    };
-    return types[type] || type;
-  };
-
-  const formatRegion = (region) => {
-    const regions = {
-      'north': 'Miền Bắc',
-      'central': 'Miền Trung',
-      'south': 'Miền Nam'
-    };
-    return regions[region] || region;
-  };
+  // Get the products to display (either search results or normal products)
+  const displayProducts = isSearching ? searchResults : products;
 
   if (loading) {
     return (
@@ -168,21 +236,27 @@ const AdminProductsManagementPage = () => {
             type="text"
             placeholder="Tìm kiếm theo UID..."
             value={searchUID}
-            onChange={(e) => setSearchUID(e.target.value)}
+            onChange={handleSearchInputChange}
+            onKeyPress={handleSearchKeyPress}
             className={styles.searchInput}
           />
-          <img src={SearchIcon} alt="Tìm kiếm" className={styles.searchIcon} />
+          <button onClick={handleSearch} className={styles.searchBtn}>
+            Tìm kiếm
+          </button>
+          {isSearching && (
+            <button onClick={handleReset} className={styles.resetBtn}>
+              Reset
+            </button>
+          )}
         </div>
 
         <button onClick={handleAddProduct} className={styles.addBtn}>
           + Thêm sản phẩm mới
         </button>
-
       </div>
 
       <div className={styles.layout}>
         <main className={styles.main}>
-
           <div className={styles.tableContainer}>
             <table className={styles.table}>
               <thead>
@@ -200,7 +274,7 @@ const AdminProductsManagementPage = () => {
               </thead>
 
               <tbody>
-                {filteredProducts.map((product) => {
+                {displayProducts.map((product) => {
                   const productId = product.ProductID;
                   return (
                     <tr key={productId} className={styles.row}>
@@ -266,16 +340,25 @@ const AdminProductsManagementPage = () => {
                           </button>
                         </div>
                       </td>
-
                     </tr>
                   );
                 })}
 
-                {filteredProducts.length === 0 && searchUID.trim() === '' && (
+                {displayProducts.length === 0 && !isSearching && (
                   <tr>
-                    <td colSpan={8} className={styles.empty}>
+                    <td colSpan={9} className={styles.empty}>
                       <div className={styles.emptyText}>
                         Chưa có sản phẩm nào
+                      </div>
+                    </td>
+                  </tr>
+                )}
+
+                {displayProducts.length === 0 && isSearching && (
+                  <tr>
+                    <td colSpan={9} className={styles.empty}>
+                      <div className={styles.emptyText}>
+                        Không tìm thấy sản phẩm nào với UID "{searchUID}"
                       </div>
                     </td>
                   </tr>
@@ -284,29 +367,11 @@ const AdminProductsManagementPage = () => {
             </table>
           </div>
 
-          {/* Paging */}
-          {totalPages > 1 && (
-            <div className={styles.pagination}>
-              <button
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                className={styles.pageBtn}
-              >
-                « Trước
-              </button>
-              
-              <span className={styles.pageInfo}>
-                Trang {currentPage} / {totalPages}
-              </span>
-              
-              <button
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages}
-                className={styles.pageBtn}
-              >
-                Sau »
-              </button>
-            </div>
+          {pagination && pagination.totalPages > 1 && (
+            <Pagination 
+              pagination={pagination} 
+              onPageChange={handlePageChange} 
+            />
           )}
         </main>
       </div>
