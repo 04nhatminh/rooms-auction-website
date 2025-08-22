@@ -332,11 +332,23 @@ class ProductModel {
     }
 
     // Xóa sản phẩm (xóa mềm)
-    static async deleteProduct(id) {
-        const pool = require('../config/database');
-        const softDeleteQuery = `UPDATE Products SET is_deleted = 1 WHERE ProductID = ?`;
-        const [result] = await pool.execute(softDeleteQuery, [id]);
-        return result.affectedRows;
+    static async softDeleteProduct(productId) {
+        if (!productId) {
+            throw new Error('Thiếu ProductID khi xóa sản phẩm');
+        }
+        // Kiểm tra phòng có nằm trong auction đang active không
+        const [activeAuctions] = await pool.execute(
+            `SELECT AuctionID FROM Auction WHERE ProductID = ? AND Status = 'active'`,
+            [productId]
+        );
+        if (activeAuctions.length > 0) {
+            return { success: false, message: 'Phòng đang nằm trong phiên đấu giá đang hoạt động, không thể xóa.' };
+        }
+        await pool.execute(
+            `UPDATE Products SET is_deleted = 1 WHERE ProductID = ?`,
+            [productId]
+        );
+        return { success: true, message: 'Xóa phòng thành công (soft delete).' };
     }
 
     // Tìm kiếm sản phẩm theo UID cho admin

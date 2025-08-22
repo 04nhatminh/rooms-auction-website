@@ -5,6 +5,7 @@ import { useUser } from '../../contexts/UserContext';
 import './LoginPage.css';
 import logo from '../../assets/logo.png';
 import hiddenIcon from '../../assets/hidden.png';
+import viewIcon from '../../assets/view.png';
 import facebookLogo from '../../assets/facebook.png';
 import googleLogo from '../../assets/google.png';
 import backgroundImage from '../../assets/login_bg.jpg';
@@ -191,8 +192,8 @@ const Login = () => {
                     onChange={(e) => setPassword(e.target.value)}
                   />
                   <img
-                    src={hiddenIcon}
-                    alt="Hiện/ẩn mật khẩu"
+                    src={showPassword ? viewIcon : hiddenIcon}
+                    alt={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                     className="toggle-visibility"
                     onClick={togglePasswordVisibility}
                     style={{ cursor: 'pointer' }}

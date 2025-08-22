@@ -313,26 +313,15 @@ class ProductController {
 
     // DELETE /api/room/admin/:id - Xóa sản phẩm
     static async deleteProduct(req, res) {
+    const { id } = req.params;
         try {
-            const { id } = req.params;
-            const affectedRows = await ProductModel.deleteProduct(id);
-            if (affectedRows === 0) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Không tìm thấy sản phẩm'
-                });
+            const result = await ProductModel.softDeleteProduct(id);
+            if (!result.success) {
+                return res.status(400).json(result);
             }
-            return res.status(200).json({
-                success: true,
-                message: 'Xóa sản phẩm thành công'
-            });
+            res.json(result);
         } catch (error) {
-            console.error('Error in deleteProduct:', error);
-            return res.status(500).json({
-                success: false,
-                message: 'Internal server error',
-                error: error.message
-            });
+            res.status(500).json({ success: false, message: 'Lỗi server', error: error.message });
         }
     }
 }

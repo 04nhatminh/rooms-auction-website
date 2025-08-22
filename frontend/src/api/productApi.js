@@ -71,9 +71,9 @@ export const productApi = {
         try {
             const response = await fetch(`${API_BASE_URL}/api/room/admin/create`, {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(productData)
             });
@@ -91,13 +91,13 @@ export const productApi = {
     },
 
     // Lấy danh sách sản phẩm (Admin)
-    getProducts: async (page = 1, limit = 10, token) => {
+    getProducts: async (page = 1, limit = 10) => {
         try {
             const response = await fetch(`${API_BASE_URL}/api/room/admin/list?page=${page}&limit=${limit}`, {
                 method: 'GET',
+                credentials: 'include', // Gửi cookie lên backend
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Content-Type': 'application/json'
                 }
             });
 
@@ -118,9 +118,9 @@ export const productApi = {
         try {
             const response = await fetch(`${API_BASE_URL}/api/room/admin/search?uid=${uid}&page=${page}&limit=${limit}`, {
                 method: 'GET',
+                credentials: 'include',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Content-Type': 'application/json'
                 }
             });
 
@@ -141,9 +141,9 @@ export const productApi = {
         try {
             const response = await fetch(`${API_BASE_URL}/api/room/admin/${productId}`, {
                 method: 'PUT',
+                credentials: 'include',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(productData)
             });
@@ -161,13 +161,13 @@ export const productApi = {
     },
 
     // Xóa sản phẩm (Admin)
-    deleteProduct: async (productId, token) => {
+    deleteProduct: async (productId) => {
         try {
             const response = await fetch(`${API_BASE_URL}/api/room/admin/${productId}`, {
                 method: 'DELETE',
+                credentials: 'include', // gửi cookie xác thực
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Content-Type': 'application/json'
                 }
             });
 

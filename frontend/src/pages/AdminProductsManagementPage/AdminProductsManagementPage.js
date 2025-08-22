@@ -27,45 +27,38 @@ const AdminProductsManagementPage = () => {
   }, [currentPage, isSearching]);
 
   const loadProducts = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      alert('Vui lòng đăng nhập lại.');
-      navigate('/login');
-      return;
-    }
-
     try {
-      setLoading(true);
-      const response = await productApi.getProducts(currentPage, 10, token);
-      
-      // Handle different response formats
-      if (response.success) {
-        setProducts(response.data?.items || response.data || []);
-        setTotalPages(response.data?.totalPages || 1);
-        setPagination({
-          currentPage: response.data?.currentPage || currentPage,
-          totalPages: response.data?.totalPages || 1,
-          totalItems: response.data?.totalItems || 0,
-          itemsPerPage: 10
-        });
-      } else {
-        // Fallback for direct array response
-        const list = Array.isArray(response) ? response : [];
-        setProducts(list);
-        setTotalPages(Math.ceil(list.length / 10));
-        setPagination({
-          currentPage: currentPage,
-          totalPages: Math.ceil(list.length / 10),
-          totalItems: list.length,
-          itemsPerPage: 10
-        });
+        setLoading(true);
+        const response = await productApi.getProducts(currentPage, 10);
+        
+        // Handle different response formats
+        if (response.success) {
+          setProducts(response.data?.items || response.data || []);
+          setTotalPages(response.data?.totalPages || 1);
+          setPagination({
+            currentPage: response.data?.currentPage || currentPage,
+            totalPages: response.data?.totalPages || 1,
+            totalItems: response.data?.totalItems || 0,
+            itemsPerPage: 10
+          });
+        } else {
+          // Fallback for direct array response
+          const list = Array.isArray(response) ? response : [];
+          setProducts(list);
+          setTotalPages(Math.ceil(list.length / 10));
+          setPagination({
+            currentPage: currentPage,
+            totalPages: Math.ceil(list.length / 10),
+            totalItems: list.length,
+            itemsPerPage: 10
+          });
+        }
+      } catch (err) {
+        setError(err.message);
+        console.error('Error loading products:', err);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      setError(err.message);
-      console.error('Error loading products:', err);
-    } finally {
-      setLoading(false);
-    }
   };
 
   const searchProductsByUID = async (uid, page = 1) => {
@@ -148,28 +141,27 @@ const AdminProductsManagementPage = () => {
   };
 
   const handleDeleteProduct = async (productId) => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      alert('Vui lòng đăng nhập lại.');
-      navigate('/login');
-      return;
-    }
+    // Bỏ kiểm tra token ở đây
+    // const token = localStorage.getItem('token');
+    // if (!token) {
+    //   alert('Vui lòng đăng nhập lại.');
+    //   navigate('/login');
+    //   return;
+    // }
 
     if (!window.confirm('Bạn có chắc muốn xóa sản phẩm này?')) return;
 
     try {
-      await productApi.deleteProduct(productId, token);
-      
+      await productApi.deleteProduct(productId); // KHÔNG truyền token
       // Reload the appropriate list
       if (isSearching && searchUID.trim() !== '') {
         await searchProductsByUID(searchUID, currentPage);
       } else {
         await loadProducts();
       }
-      
       alert('Xóa sản phẩm thành công!');
     } catch (err) {
-      alert('Có lỗi xảy ra khi xóa sản phẩm: ' + err.message);
+      alert(err.message || 'Xóa sản phẩm thất bại.');
     }
   };
 
