@@ -6,7 +6,7 @@ import './LoginPage.css';
 import logo from '../../assets/logo.png';
 import hiddenIcon from '../../assets/hidden.png';
 import viewIcon from '../../assets/view.png';
-import facebookLogo from '../../assets/facebook.png';
+// ...existing code...
 import googleLogo from '../../assets/google.png';
 import backgroundImage from '../../assets/login_bg.jpg';
 
@@ -237,9 +237,6 @@ const Login = () => {
             </div>
 
             <div className="social-login">
-              <button className="social-button" type="button">
-                <img src={facebookLogo} alt="Facebook" />
-              </button>
               <button className="social-button" type="button" onClick={handleGoogleLogin}>
                 <img src={googleLogo} alt="Google" />
               </button>

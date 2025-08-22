@@ -277,18 +277,6 @@ const SignUp = () => {
               </div>
             </div>
 
-            <div className="options">
-              <div className="terms-checkbox">
-                <input 
-                  type="checkbox" 
-                  id="terms" 
-                  checked={agreeTerms}
-                  onChange={(e) => setAgreeTerms(e.target.checked)}
-                />
-                <label htmlFor="terms">Tôi đồng ý với các Điều khoản & Chính sách</label>
-              </div>
-            </div>
-
             <button type="submit" className="signup-login-button" disabled={isLoading}>
               {isLoading ? (
                 <span>
