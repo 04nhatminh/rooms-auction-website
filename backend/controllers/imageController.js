@@ -3,8 +3,9 @@ const pool = require('../config/database');
 
 class ImageController {
     static async getProductIdByUID(uid) {
-        // Kết quả CALL trong mysql2/promise thường là: [ [rows], otherMeta ]
-        const [spResult] = await pool.query('CALL a2airbnb.SearchProductIDFromUID(?)', [uid]);
+    // Kết quả CALL trong mysql2/promise thường là: [ [rows], otherMeta ]
+    const dbName = process.env.DB_NAME || 'a2airbnb';
+    const [spResult] = await pool.query(`CALL ${dbName}.SearchProductIDFromUID(?)`, [uid]);
 
         // Một số MySQL driver trả [ [rows], [fields], ... ]; lấy mảng rows đầu
         const rowsLevel1 = Array.isArray(spResult) ? spResult[0] : spResult;
