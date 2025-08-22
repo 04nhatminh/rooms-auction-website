@@ -214,7 +214,6 @@ class ProductModel {
             // MySQL stored procedure trả về array of arrays, lấy result set đầu tiên
             const products = Array.isArray(rows[0]) ? rows[0] : rows;
             
-            console.log('Stored procedure result count:', products.length);
             return products;
             
         } catch (error) {

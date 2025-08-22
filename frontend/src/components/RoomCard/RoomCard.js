@@ -72,16 +72,19 @@ const RoomCard = ({ product, durationDays = 1, isFavorite: initialIsFavorite = f
   const handleToggleFavorite = async (e) => {
     e.stopPropagation();
     if (loadingFavorite) return;
+    if (!product?.UID) {
+      alert('Không xác định được phòng để yêu thích!');
+      setLoadingFavorite(false);
+      return;
+    }
     setLoadingFavorite(true);
     try {
       if (isFavorite) {
-        await FavoritesApi.removeFavorite(product.ProductID);
+        await FavoritesApi.removeFavorite(product.UID);
         setIsFavorite(false);
-        alert('Đã bỏ khỏi danh sách yêu thích!');
       } else {
-        await FavoritesApi.addFavorite(product.ProductID);
+        await FavoritesApi.addFavorite(product.UID);
         setIsFavorite(true);
-        alert('Đã thêm vào danh sách yêu thích!');
       }
     } catch (err) {
       alert('Có lỗi khi cập nhật yêu thích: ' + (err.message || ''));

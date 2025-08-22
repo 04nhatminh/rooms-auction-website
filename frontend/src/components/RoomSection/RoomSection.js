@@ -165,7 +165,7 @@ const RoomSection = memo(({ title, provinceCode = '01', limit = 15 }) => {
   useEffect(() => {
     // Chỉ gọi 1 lần khi mount
     FavoritesApi.getUserFavorites().then(data => {
-      setFavoriteIds((data.favorites || []).map(f => f.ProductID));
+      setFavoriteIds((data.favorites || []).map(f => f.UID));
     });
   }, []);
 
@@ -214,9 +214,9 @@ const RoomSection = memo(({ title, provinceCode = '01', limit = 15 }) => {
         >
           {getCurrentViewProducts().map((product) => (
             <RoomCard
-              key={product.ProductID}
+              key={product.UID}
               product={product}
-              isFavorite={favoriteIds.includes(product.ProductID)}
+              isFavorite={favoriteIds.includes(product.UID)}
             />
           ))}
         </div>

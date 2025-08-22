@@ -21,16 +21,17 @@ const RoomTitle = ({ onSave, wishlistChanged }) => {
     async function fetchFavorite() {
       try {
         setLoadingFavorite(true);
-        const token = localStorage.getItem('token');
-        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000'}/favorite` , {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token || ''}`
+        const res = await fetch(
+          `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000'}/favorite`,
+          {
+            method: 'GET',
+            credentials: 'include', // gửi cookie lên backend
+            headers: { 'Content-Type': 'application/json' }
           }
-        });
+        );
         const dataRes = await res.json();
         if (res.ok && dataRes.favorites) {
-          setIsFavorite(dataRes.favorites.some(f => f.ProductID === ProductID));
+          setIsFavorite(dataRes.favorites.some(f => f.UID === UID));
         }
       } catch (e) {
         setIsFavorite(false);
@@ -67,24 +68,18 @@ const RoomTitle = ({ onSave, wishlistChanged }) => {
 
   // Xử lý toggle yêu thích
   const handleToggleFavorite = async () => {
-  if (!ProductID) return;
+    if (!UID) return;
     setLoadingFavorite(true);
     try {
       if (isFavorite) {
-        // Bỏ yêu thích
-        const res = await import('../../api/favoritesApi');
-        await res.default.removeFavorite(ProductID);
+        await import('../../api/favoritesApi').then(api => api.default.removeFavorite(UID));
         setIsFavorite(false);
-        alert('Đã bỏ khỏi yêu thích');
       } else {
-        // Thêm vào yêu thích
-        const res = await import('../../api/favoritesApi');
-        await res.default.addFavorite(ProductID);
+        await import('../../api/favoritesApi').then(api => api.default.addFavorite(UID));
         setIsFavorite(true);
-        alert('Đã thêm vào yêu thích');
       }
     } catch (e) {
-      alert('Lỗi thao tác yêu thích: ' + (e.message || '')); 
+      alert('Lỗi thao tác yêu thích: ' + (e.message || ''));
     } finally {
       setLoadingFavorite(false);
     }

@@ -3,10 +3,9 @@ const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:300
 const FavoritesApi = {
     // Lấy danh sách yêu thích
     async getUserFavorites() {
-        const token = localStorage.getItem('token');
         const response = await fetch(`${API_BASE_URL}/favorite`, {
             method: 'GET',
-            credentials: 'include', 
+            credentials: 'include', // gửi cookie lên backend
             headers: { 'Accept': 'application/json' },
         });
 
@@ -18,14 +17,11 @@ const FavoritesApi = {
     },
 
     // Xóa khỏi yêu thích
-    async removeFavorite(productId) {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`${API_BASE_URL}/favorite/${productId}`, {
+    async removeFavorite(uid) {
+        const response = await fetch(`${API_BASE_URL}/favorite/${uid}`, {
             method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token || ''}`
-            }
+            credentials: 'include', // gửi cookie lên backend
+            headers: { 'Content-Type': 'application/json' },
         });
 
         const data = await response.json();
@@ -36,14 +32,11 @@ const FavoritesApi = {
     },
 
     // Thêm vào yêu thích
-    async addFavorite(productId) {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`${API_BASE_URL}/favorite/${productId}`, {
+    async addFavorite(uid) {
+        const response = await fetch(`${API_BASE_URL}/favorite/${uid}`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token || ''}`
-            }
+            credentials: 'include', // gửi cookie lên backend
+            headers: { 'Content-Type': 'application/json' },
         });
 
         const data = await response.json();
