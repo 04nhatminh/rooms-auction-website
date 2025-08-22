@@ -2,12 +2,10 @@ const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:300
 
 const WishlistApi = {
     async getUserWishlist() {
-        const token = localStorage.getItem('token');
         const response = await fetch(`${API_BASE_URL}/wishlist`, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token || ''}`
-            }
+            method: 'GET',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' }
         });
         const data = await response.json();
         if (!response.ok) {
@@ -15,14 +13,11 @@ const WishlistApi = {
         }
         return data;
     },
-    async addWishlist(productId) {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`${API_BASE_URL}/wishlist/${productId}`, {
+    async addWishlist(uid) {
+        const response = await fetch(`${API_BASE_URL}/wishlist/${uid}`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token || ''}`
-            }
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' }
         });
         const data = await response.json();
         if (!response.ok) {
@@ -30,14 +25,11 @@ const WishlistApi = {
         }
         return data;
     },
-    async removeWishlist(productId) {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`${API_BASE_URL}/wishlist/${productId}`, {
+    async removeWishlist(uid) {
+        const response = await fetch(`${API_BASE_URL}/wishlist/${uid}`, {
             method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token || ''}`
-            }
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' }
         });
         const data = await response.json();
         if (!response.ok) {

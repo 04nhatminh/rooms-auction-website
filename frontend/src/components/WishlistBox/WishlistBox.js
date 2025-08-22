@@ -9,7 +9,7 @@ const WishlistBox = ({ newWishlistItem, onRemove }) => {
     if (!window.confirm('Bạn có chắc muốn xóa tất cả phòng khỏi Xem Sau?')) return;
     try {
       for (const item of wishlist) {
-        await WishlistApi.removeWishlist(item.ProductID);
+        await WishlistApi.removeWishlist(item.UID);
       }
       await fetchWishlist();
       if (onRemove) onRemove();
@@ -38,12 +38,12 @@ const WishlistBox = ({ newWishlistItem, onRemove }) => {
   // Thêm phòng mới vào wishlist khi có newWishlistItem
   useEffect(() => {
     async function addToWishlist() {
-      if (newWishlistItem && newWishlistItem.ProductID) {
+      if (newWishlistItem && newWishlistItem.UID) {
         try {
-          await WishlistApi.addWishlist(newWishlistItem.ProductID);
+          await WishlistApi.addWishlist(newWishlistItem.UID);
           await fetchWishlist();
         } catch (e) {
-          alert('Lỗi thêm vào xem sau');
+          // Lỗi thêm vào xem sau, có thể xử lý log hoặc toast nếu cần
         }
       }
     }
@@ -51,9 +51,9 @@ const WishlistBox = ({ newWishlistItem, onRemove }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newWishlistItem]);
 
-  const handleRemove = async (productId) => {
+  const handleRemove = async (uid) => {
     try {
-      await WishlistApi.removeWishlist(productId);
+      await WishlistApi.removeWishlist(uid);
       await fetchWishlist();
       if (onRemove) onRemove();
     } catch (e) {
@@ -80,11 +80,10 @@ const WishlistBox = ({ newWishlistItem, onRemove }) => {
             <ul className="wishlist-list">
               {wishlist.map(item => (
                 <li
-                  key={item.ProductID}
+                  key={item.UID}
                   className="wishlist-item"
                   style={{ cursor: 'pointer' }}
                   onClick={e => {
-                    // Chỉ navigate khi không bấm nút Xóa
                     if (e.target.className !== 'wishlist-remove') {
                       navigate(`/room/${item.UID}`);
                     }
@@ -93,7 +92,7 @@ const WishlistBox = ({ newWishlistItem, onRemove }) => {
                   <span className="wishlist-name">{item.ProductName || 'Không có tên'}</span>
                   <span className="wishlist-location">{item.ProvinceName || 'Không có địa điểm'}</span>
                   <span className="wishlist-price">{item.Price ? Number(item.Price).toLocaleString('vi-VN') + ' đ' : '—'}</span>
-                  <button className="wishlist-remove" onClick={e => { e.stopPropagation(); handleRemove(item.ProductID); }}>Xóa</button>
+                  <button className="wishlist-remove" onClick={e => { e.stopPropagation(); handleRemove(item.UID); }}>Xóa</button>
                 </li>
               ))}
             </ul>

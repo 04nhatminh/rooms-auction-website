@@ -5,6 +5,7 @@ import shareIcon from '../../assets/share.png';
 import favoriteIcon from '../../assets/favorite.png';
 import favoriteFilledIcon from '../../assets/favorite_filled.png';
 import saveIcon from '../../assets/save.png';
+import WishlistApi from '../../api/wishlistApi';
 
 const RoomTitle = ({ onSave, wishlistChanged }) => {
   const { data } = useProduct();
@@ -12,6 +13,7 @@ const RoomTitle = ({ onSave, wishlistChanged }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [loadingFavorite, setLoadingFavorite] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [loadingWishlist, setLoadingWishlist] = useState(false);
   const shareRef = useRef(null);
   const shareLink = window.location.href;
   const UID = data?.details?.UID;
@@ -46,25 +48,14 @@ const RoomTitle = ({ onSave, wishlistChanged }) => {
   useEffect(() => {
     async function fetchWishlist() {
       try {
-        const token = localStorage.getItem('token');
-        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000'}/wishlist`, {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token || ''}`
-          }
-        });
-        const dataRes = await res.json();
-        if (res.ok && dataRes.wishlist) {
-          setIsWishlisted(dataRes.wishlist.some(w => w.ProductID === ProductID));
-        } else {
-          setIsWishlisted(false);
-        }
+        const res = await WishlistApi.getUserWishlist();
+        setIsWishlisted(res.wishlist.some(w => w.UID === UID));
       } catch (e) {
         setIsWishlisted(false);
       }
     }
-    if (ProductID) fetchWishlist();
-  }, [ProductID, wishlistChanged]);
+    if (UID) fetchWishlist();
+  }, [UID, wishlistChanged]);
 
   // Xử lý toggle yêu thích
   const handleToggleFavorite = async () => {
@@ -82,6 +73,24 @@ const RoomTitle = ({ onSave, wishlistChanged }) => {
       alert('Lỗi thao tác yêu thích: ' + (e.message || ''));
     } finally {
       setLoadingFavorite(false);
+    }
+  };
+
+  const handleToggleWishlist = async () => {
+    if (!UID) return;
+    setLoadingWishlist(true);
+    try {
+      if (isWishlisted) {
+        await WishlistApi.removeWishlist(UID);
+        setIsWishlisted(false);
+      } else {
+        await WishlistApi.addWishlist(UID);
+        setIsWishlisted(true);
+      }
+    } catch (e) {
+      alert('Lỗi thao tác xem sau: ' + (e.message || ''));
+    } finally {
+      setLoadingWishlist(false);
     }
   };
 
@@ -131,7 +140,7 @@ const RoomTitle = ({ onSave, wishlistChanged }) => {
             if (!isWishlisted) {
               try {
                 const res = await import('../../api/wishlistApi');
-                await res.default.addWishlist(ProductID);
+                await res.default.addWishlist(UID);
                 setIsWishlisted(true);
                 if (onSave) onSave();
                 alert('Đã thêm vào Xem sau');
