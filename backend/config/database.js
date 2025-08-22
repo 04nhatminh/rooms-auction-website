@@ -432,6 +432,7 @@ async function createBookingTable() {
             EndDate DATE,
             BookingStatus ENUM('pending','confirmed','cancelled','completed','expired') DEFAULT 'pending',
             WinningPrice DECIMAL(10, 2),
+            ServiceFee DECIMAL(10, 2) DEFAULT 0.0,
             PaymentMethodID INT,
             PaidAt TIMESTAMP,
             CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -442,6 +443,49 @@ async function createBookingTable() {
             FOREIGN KEY (PaymentMethodID) REFERENCES PaymentMethods(MethodID)
         )
     `);
+
+    // const dbname = dbConfig.database;
+    // const triggerNames = ['bi_Booking_validate', 'bu_Booking_validate'];
+
+    // const [trgRows] = await pool.query(
+    //     `SELECT TRIGGER_NAME 
+    //     FROM INFORMATION_SCHEMA.TRIGGERS 
+    //     WHERE TRIGGER_SCHEMA = ? 
+    //         AND TRIGGER_NAME IN (?, ?)`,
+    //     [dbname, ...triggerNames]
+    // );
+
+    // for (const r of trgRows) {
+    //     // schema-qualified DROP
+    //     await pool.query(`DROP TRIGGER IF EXISTS \`${dbname}\`.\`${r.TRIGGER_NAME}\``);
+    // }
+
+    // const validateBody = `
+    //     BEGIN
+    //     END
+    // `;
+
+    // try {
+    //     await pool.query(`
+    //         CREATE TRIGGER \`${dbname}\`.\`bi_Booking_validate\`
+    //         BEFORE INSERT ON \`${dbname}\`.\`Booking\`
+    //         FOR EACH ROW
+    //         ${validateBody}
+    //     `);
+    // } catch (error) {
+    //     if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    // }
+
+    // try {
+    //     await pool.query(`
+    //         CREATE TRIGGER \`${dbname}\`.\`bu_Booking_validate\`
+    //         BEFORE UPDATE ON \`${dbname}\`.\`Booking\`
+    //         FOR EACH ROW
+    //         ${validateBody}
+    //     `);
+    // } catch (error) {
+    //     if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    // }
     
     try {
         await pool.execute(`CREATE INDEX idx_Booking_UserID ON Booking(UserID)`);
@@ -1826,9 +1870,9 @@ async function createSpPlaceBookingDraft() {
             WHERE c.ProductID=p_ProductID AND c.Day>=p_Start AND c.Day<p_End;
 
             -- 4) Payment initiated
-            INSERT INTO Payments(BookingID, UserID, Amount, Currency, Provider, Status, CreatedAt, UpdatedAt)
+            /*INSERT INTO Payments(BookingID, UserID, Amount, Currency, Provider, Status, CreatedAt, UpdatedAt)
             VALUES(p_BookingID, p_UserID, v_amount, p_Currency, p_Provider, 'initiated', v_now, v_now);
-            SET p_PaymentID = LAST_INSERT_ID();
+            SET p_PaymentID = LAST_INSERT_ID();*/
 
             COMMIT; DO RELEASE_LOCK(CONCAT('calprod:', p_ProductID));
         END

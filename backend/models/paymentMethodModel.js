@@ -27,8 +27,8 @@ class PaymentMethodModel {
             const nextId = maxRow[0]?.nextId || 1;
 
             await pool.query(
-                `INSERT INTO PaymentMethods (MethodID, AccountIdentifier, Token, Provider, IsDefault, UserID, CreatedAt, UpdatedAt)
-                VALUES (?, ?, ?, ?, 0, ?, NOW(), NULL);`,
+                `INSERT INTO PaymentMethods (MethodID, AccountIdentifier, Token, Provider, IsDefault, UserID, CreatedAt)
+                VALUES (?, ?, ?, ?, 0, ?, NOW());`,
                 [nextId, identifier, token, provider, userId]
             );
             console.log(`Upserted successfully for payment method ${nextId}`);
@@ -69,8 +69,8 @@ class PaymentMethodModel {
 
     await pool.query(
         `INSERT INTO PaymentMethods
-        (MethodID, AccountIdentifier, Token, Provider, IsDefault, UserID, CreatedAt, UpdatedAt)
-        VALUES (?, ?, ?, ?, 0, ?, NOW(), NULL);`,
+        (MethodID, AccountIdentifier, Token, Provider, IsDefault, UserID, CreatedAt)
+        VALUES (?, ?, ?, ?, 0, ?, NOW());`,
         [nextId, identifier, token, provider, userId]
     );
 

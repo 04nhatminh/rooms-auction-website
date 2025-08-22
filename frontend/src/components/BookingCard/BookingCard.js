@@ -153,7 +153,7 @@ const BookingCard = () => {
       setShowConfirm(false);
       // Điều hướng tới trang thanh toán/booking detail kèm holdExpiresAt để đếm ngược
       const params = buildQuery();
-      navigate(`/booking/${UID}?${params}`, {
+      navigate(`/checkout/${r.bookingId}`, {
         state: { guests, totalGuests, bookingId: r.bookingId, paymentId: r.paymentId, holdExpiresAt: r.holdExpiresAt }
       });
     } catch (e) {

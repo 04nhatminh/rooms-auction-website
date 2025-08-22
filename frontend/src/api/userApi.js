@@ -1,4 +1,5 @@
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000';
+const ADMIN_PREFIX = '/admin';
 
 class UserApi {
   static getHeaders() {
@@ -113,4 +114,4 @@ class UserApi {
   };
 }
 
-export default UserAPI;
+export default UserApi;
