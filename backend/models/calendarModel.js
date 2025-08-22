@@ -59,34 +59,34 @@ class CalendarModel {
     }) {
         const conn = await db.getConnection();
         try {
-        await conn.beginTransaction();
+            await conn.beginTransaction();
 
-        const days = [];
-        for (let d = new Date(startDate); d < new Date(endDate); d.setDate(d.getDate() + 1)) {
-            days.push(new Date(d).toISOString().slice(0, 10));
-        }
+            const days = [];
+            for (let d = new Date(startDate); d < new Date(endDate); d.setDate(d.getDate() + 1)) {
+                days.push(new Date(d).toISOString().slice(0, 10));
+            }
 
-        for (const day of days) {
-            await conn.query(
-            `INSERT INTO Calendar (ProductID, Day, Status, LockReason, BookingID, AuctionID, HoldExpiresAt)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE
-                Status = VALUES(Status),
-                LockReason = VALUES(LockReason),
-                BookingID = VALUES(BookingID),
-                AuctionID = VALUES(AuctionID),
-                HoldExpiresAt = VALUES(HoldExpiresAt)`,
-            [productId, day, status, lockReason, bookingId, auctionId, holdExpiresAt]
-            );
-        }
+            for (const day of days) {
+                await conn.query(
+                `INSERT INTO Calendar (ProductID, Day, Status, LockReason, BookingID, AuctionID, HoldExpiresAt)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE
+                    Status = VALUES(Status),
+                    LockReason = VALUES(LockReason),
+                    BookingID = VALUES(BookingID),
+                    AuctionID = VALUES(AuctionID),
+                    HoldExpiresAt = VALUES(HoldExpiresAt)`,
+                [productId, day, status, lockReason, bookingId, auctionId, holdExpiresAt]
+                );
+            }
 
-        await conn.commit();
-        return true;
+            await conn.commit();
+            return true;
         } catch (e) {
-        await conn.rollback();
-        throw e;
+            await conn.rollback();
+            throw e;
         } finally {
-        conn.release();
+            conn.release();
         }
     }
 

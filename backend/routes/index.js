@@ -11,6 +11,7 @@ const reviewRoutes = require('./reviewRoutes');
 const locationRoutes = require('./locationRoutes');
 const favoriteRoutes = require('./favoriteRoutes');
 const calendarRoutes = require('./calendarRoutes');
+const bookingRoutes = require('./bookingRoutes');
 
 
 // Demo routes - điều hướng đến /demo
@@ -24,6 +25,7 @@ router.use('/user', userRoutes);
 router.use('/admin', adminRoutes);
 router.use('/favorite', favoriteRoutes);
 router.use('/calendar', calendarRoutes);
+router.use('/booking', bookingRoutes);
 
 router.get('/', (req, res) => {
     res.status(200).json({

@@ -28,6 +28,11 @@ console.log('🔍 Database config:', {
 
 const pool = mysql.createPool(dbConfig);
 
+pool.on('connection', (conn) => {
+  conn.query("SET time_zone = '+07:00'");
+  conn.query("SET SESSION sql_mode = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION,ONLY_FULL_GROUP_BY'");
+});
+
 async function testConnection() {
     try {
         const connection = await pool.getConnection();
@@ -36,14 +41,6 @@ async function testConnection() {
     } catch (error) {
         console.error('❌ Lỗi kết nối MySQL:', error.message);
     }
-}
-
-async function configureSession() {
-  await pool.query(`SET SESSION time_zone = '+00:00'`);
-  await pool.query(`
-    SET SESSION sql_mode =
-    'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION,ONLY_FULL_GROUP_BY'
-  `);
 }
 
 async function createAdministrativeRegionsTable() {
@@ -1755,11 +1752,95 @@ async function createAddCalendarForRoomProcedure() {
     `);
 }
 
+async function dropSpPlaceBookingDraftIfExists() {
+    await pool.query(`DROP PROCEDURE IF EXISTS sp_place_booking_draft;`);
+}
+
+async function createSpPlaceBookingDraft() {
+    await pool.query(`
+        CREATE PROCEDURE sp_place_booking_draft (
+            IN  p_UserID INT, IN  p_ProductID INT,
+            IN  p_Start DATE, IN  p_End DATE,          -- [start, end)
+            IN  p_Nights INT, IN  p_UnitPrice DECIMAL(10,2),
+            IN  p_Currency VARCHAR(10), IN  p_Provider VARCHAR(50),
+            IN  p_HoldMinutes INT,
+            OUT p_BookingID INT UNSIGNED, OUT p_PaymentID BIGINT, OUT p_HoldExpiresAt DATETIME
+        )
+        proc:BEGIN
+            DECLARE v_lock_ok INT DEFAULT 0; DECLARE v_now DATETIME;
+            DECLARE v_amount DECIMAL(10,2); DECLARE v_conflicts INT DEFAULT 0;
+
+            IF p_End <= p_Start THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='End>Start required'; END IF;
+            SET v_now = NOW(); IF p_HoldMinutes IS NULL OR p_HoldMinutes<=0 THEN SET p_HoldMinutes=30; END IF;
+            IF p_Nights IS NULL OR p_Nights<=0 THEN SET p_Nights = DATEDIFF(p_End, p_Start); END IF;
+            SET v_amount = p_Nights * p_UnitPrice; SET p_HoldExpiresAt = v_now + INTERVAL p_HoldMinutes MINUTE;
+
+            SELECT GET_LOCK(CONCAT('calprod:', p_ProductID), 10) INTO v_lock_ok;
+            IF v_lock_ok <> 1 THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Cannot obtain product lock'; END IF;
+
+            START TRANSACTION;
+
+            -- 0) Dọn reserved hết hạn
+            UPDATE Calendar
+            SET Status='available', LockReason=NULL, BookingID=NULL, AuctionID=NULL, HoldExpiresAt=NULL
+            WHERE Status='reserved' AND HoldExpiresAt IS NOT NULL AND HoldExpiresAt < v_now;
+
+            -- 1) Booking pending
+            INSERT INTO Booking(UserID, ProductID, StartDate, EndDate, BookingStatus, WinningPrice, CreatedAt, UpdatedAt)
+            VALUES(p_UserID, p_ProductID, p_Start, p_End, 'pending', v_amount, v_now, v_now);
+            SET p_BookingID = LAST_INSERT_ID();
+
+            -- 2) Kiểm tra xung đột
+            SELECT COUNT(*) INTO v_conflicts
+            FROM Calendar
+            WHERE ProductID=p_ProductID AND Day>=p_Start AND Day<p_End
+            AND ( Status IN ('booked','blocked')
+                OR (Status='reserved' AND (HoldExpiresAt IS NULL OR HoldExpiresAt >= v_now)) );
+            IF v_conflicts>0 THEN
+                ROLLBACK; DO RELEASE_LOCK(CONCAT('calprod:', p_ProductID));
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Date range not available';
+            END IF;
+
+            -- 3a) Bơm dòng thiếu (CTE đứng trước INSERT)
+            INSERT IGNORE INTO Calendar(ProductID, Day, Status)
+            WITH RECURSIVE d AS (
+                SELECT p_Start AS Day
+                UNION ALL
+                SELECT Day + INTERVAL 1 DAY FROM d WHERE Day + INTERVAL 1 DAY < p_End
+            )
+            SELECT p_ProductID, Day, 'available' FROM d;
+
+            -- 3b) Reserve dải ngày (CTE đứng trước UPDATE, rồi JOIN trực tiếp d2)
+            WITH RECURSIVE d2 AS (
+                SELECT p_Start AS Day
+                UNION ALL
+                SELECT Day + INTERVAL 1 DAY FROM d2 WHERE Day + INTERVAL 1 DAY < p_End
+            )
+            UPDATE Calendar c
+            JOIN d2 x ON x.Day = c.Day
+            SET c.Status='reserved',
+                c.LockReason='booking_hold',
+                c.BookingID=p_BookingID,
+                c.AuctionID=NULL,
+                c.HoldExpiresAt=p_HoldExpiresAt
+            WHERE c.ProductID=p_ProductID AND c.Day>=p_Start AND c.Day<p_End;
+
+            -- 4) Payment initiated
+            INSERT INTO Payments(BookingID, UserID, Amount, Currency, Provider, Status, CreatedAt, UpdatedAt)
+            VALUES(p_BookingID, p_UserID, v_amount, p_Currency, p_Provider, 'initiated', v_now, v_now);
+            SET p_PaymentID = LAST_INSERT_ID();
+
+            COMMIT; DO RELEASE_LOCK(CONCAT('calprod:', p_ProductID));
+        END
+    `);
+}
+
+
+
 
 async function initSchema() {
     try {
         await testConnection();
-        await configureSession();
         console.log('✅ Database connection established successfully!');
         
         console.log('\n📋 Creating tables...');
@@ -1918,6 +1999,10 @@ async function initSchema() {
         await dropAddCalendarForRoomProcedureIfExists();
         await createAddCalendarForRoomProcedure();
         console.log('✅ AddCalendarForRoom procedure ready');
+
+        await dropSpPlaceBookingDraftIfExists();
+        await createSpPlaceBookingDraft();
+        console.log('✅ sp_place_booking_draft procedure ready');
 
         console.log('\n🎉 Database schema initialization completed successfully!');
         

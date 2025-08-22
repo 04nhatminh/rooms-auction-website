@@ -255,3 +255,36 @@
   font-size: 12px;
 }
 
+.availability-banner {
+  background: #d6fbdf;
+  padding: 10px 10px;
+  margin: 0 0 16px;
+  border-radius: 8px;
+  border: 1px solid #bcfacb;
+}
+
+.availability-banner.status-available {
+  background:#e8fff0;
+  border-color:#b8f3c8;
+  color:#165b31;
+}
+
+.availability-banner.status-auction {
+  background:#eef6ff;
+  border-color:#cfe5ff;
+  color:#0b3f87;
+}
+
+.availability-banner.status-soldout {
+  background:#fff1f0;
+  border-color:#ffcdc7;
+  color:#a8071a;
+}
+
+.availability-banner.status-reserved  {
+  background:#fffbe6;
+  border-color:#ffe58f;
+  color:#614700;
+}
+
+

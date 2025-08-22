@@ -6,7 +6,19 @@ import upIcon from '../../assets/up.png';
 import downIcon from '../../assets/down.png';
 import { useDateRange } from '../../contexts/DateRangeContext';
 import { ProductContext } from '../../contexts/ProductContext';
-import productApi from '../../api/productApi';
+import calendarApi from '../../api/calendarApi';
+import bookingApi from '../../api/bookingApi';
+import ConfirmBookingPopup from '../ConfirmBookingPopup/ConfirmBookingPopup';
+// const db = require('../config/database');
+
+const useCurrentUserId = () => useMemo(() => {
+    try {
+      const raw = sessionStorage.getItem('userData');
+      if (!raw) return null;
+      const obj = JSON.parse(raw);
+      return obj?.id ?? obj?.userId ?? null; // phòng trường hợp key là userId
+    } catch { return null; }
+}, []);
 
 const BookingCard = () => {
   const navigate = useNavigate();
@@ -38,6 +50,10 @@ const BookingCard = () => {
 
   const [checking, setChecking] = useState(false);
   const [status, setStatus] = useState(null); // { level: 'ok'|'warn'|'error', message: string }
+  const [showConfirm, setShowConfirm] = useState(false);
+  const unitPrice = Number(data?.details?.Price || 0);
+  const nights = checkinDate && checkoutDate ? Math.max(1, Math.floor((new Date(checkoutDate) - new Date(checkinDate)) / 86400000)) : 0;
+   const totalAmount = unitPrice * nights;
 
   const buildQuery = () =>
     new URLSearchParams({ checkin: checkinDate, checkout: checkoutDate }).toString();
@@ -62,6 +78,8 @@ const BookingCard = () => {
     });
   };
 
+  const currentUserId = useCurrentUserId();
+
   const onCheckAvailability = async () => {
     if (!checkinDate) return alert('Vui lòng chọn ngày nhận phòng');
     if (!checkoutDate) return alert('Vui lòng chọn ngày trả phòng');
@@ -73,58 +91,74 @@ const BookingCard = () => {
       setChecking(true);
       setStatus(null);
 
-      const data = await productApi.checkAvailability(UID, {
+      const data = await calendarApi.checkAvailability(UID, {
         checkin: checkinDate,
         checkout: checkoutDate,
+        userId: currentUserId,
       });
-  
-      let level = 'warn';
-      let message = 'Không xác định được tình trạng phòng.';
 
-      if (typeof data.available === 'boolean') {
-        if (data.available) {
-          level = 'ok';
-          message = 'Phòng TRỐNG toàn bộ khoảng thời gian đã chọn.';
+      let tag = 'available';
+      let level = 'ok';
+      let message = 'Đang trống.';
+
+      // BE sẽ trả: { available:boolean, reason:'booked'|'blocked'|'reserved'|null, reservedBySelf?:boolean, hasAuction?:boolean, days:[...] }
+      if (!data.available) {
+        if (data.reason === 'reserved') {
+          if (data.reservedBySelf) {
+            tag = 'reserved'; level = 'warn'; message = 'Đang giữ chỗ tạm thời (của bạn).';
+          } else {
+            tag = 'soldout'; level = 'error'; message = 'Đã hết chỗ ở khoảng thời gian này.';
+          }
+        } else if (data.reason === 'booked' || data.reason === 'blocked') {
+          tag = 'soldout'; level = 'error'; message = data.reason === 'booked'
+            ? 'Khoảng thời gian đã được đặt trước.'
+            : 'Khoảng thời gian này đang bị chặn.';
         } else {
-          level = (data.reason === 'booked' || data.reason === 'blocked') ? 'error' : 'warn';
-          message =
-            data.reason === 'booked' ? 'Khoảng thời gian đã được đặt trước.'
-          : data.reason === 'blocked' ? 'Khoảng thời gian này đang bị chặn.'
-          : data.reason === 'reserved' ? 'Đang giữ chỗ tạm thời.'
-          : 'Hiện không khả dụng cho toàn bộ khoảng thời gian.';
+          tag = 'soldout'; level = 'error'; message = 'Không khả dụng cho toàn bộ khoảng thời gian.';
         }
-      } else if (Array.isArray(data.days)) {
-        const counts = data.days.reduce((acc, d) => {
-          acc[d.status] = (acc[d.status] || 0) + 1;
-          return acc;
-        }, {});
-        if (counts.booked || counts.blocked) {
-          level = 'error';
-          message = 'Có ngày đã “booked/blocked” trong khoảng chọn — không thể thuê.';
-        } else if (counts.reserved && !counts.available) {
-          level = 'warn';
-          message = 'Toàn bộ ngày đang ở trạng thái giữ chỗ (reserved).';
-        } else if (counts.reserved && counts.available) {
-          level = 'warn';
-          message = 'Một phần ngày đang giữ chỗ. Vui lòng chọn khoảng khác.';
-        } else {
-          level = 'ok';
-          message = 'Phòng TRỐNG toàn bộ khoảng thời gian đã chọn.';
-        }
+      } else {
+        tag = data.hasAuction ? 'auction' : 'available';
+        level = 'ok';
+        message = data.hasAuction ? 'Đang có đấu giá cho các ngày đã chọn.' : 'Đang trống toàn bộ khoảng thời gian.';
       }
 
-      setStatus({ level, message });
+      setStatus({ tag, level, message });
     } catch (err) {
       console.error(err);
-      setStatus({ level: 'error', message: 'Lỗi khi kiểm tra lịch. Vui lòng thử lại.' });
+      setStatus({ tag: 'soldout', level: 'error', message: 'Lỗi khi kiểm tra lịch. Vui lòng thử lại.' });
     } finally {
       setChecking(false);
     }
   };
 
   const onRentNow = () => {
-    const params = buildQuery();
-    navigate(`/booking/${UID}?${params}`, { state: { guests, totalGuests } });
+    if (!checkinDate || !checkoutDate) return alert('Vui lòng chọn ngày nhận phòng và trả phòng');
+    setShowConfirm(true);
+  };
+
+  const onConfirmPlace = async () => {
+    try {
+      const payload = {
+        uid: UID,
+        userId: 1,                    // TODO: thay bằng user hiện tại (auth)
+        checkin: checkinDate,
+        checkout: checkoutDate,
+        nights,
+        unitPrice,
+        currency: data?.details?.Currency || 'VND',
+        provider: 'cash',
+        holdMinutes: 30,
+      };
+      const r = await bookingApi.place(payload);
+      setShowConfirm(false);
+      // Điều hướng tới trang thanh toán/booking detail kèm holdExpiresAt để đếm ngược
+      const params = buildQuery();
+      navigate(`/booking/${UID}?${params}`, {
+        state: { guests, totalGuests, bookingId: r.bookingId, paymentId: r.paymentId, holdExpiresAt: r.holdExpiresAt }
+      });
+    } catch (e) {
+      alert(e.message || 'Khoảng thời gian không còn trống, vui lòng chọn lại.');
+    }
   };
 
   const onGoAuction = () => {
@@ -136,9 +170,6 @@ const BookingCard = () => {
     <div className="booking-card">
       <div className="booking-card-content">
         <h3>Đặt phòng</h3>
-
-        {/* Banner trạng thái */}
-        {status && <div className={`availability-banner ${status.level}`}>{status.message}</div>}
 
         <div className="date-inputs">
           <div className="date-input-group">
@@ -259,6 +290,9 @@ const BookingCard = () => {
           )}
         </div>
 
+        {/* Banner trạng thái */}
+        {status && <div className={`availability-banner status-${status.tag}`}>{status.message}</div>}
+
         <button
           className="check-calendar-button"
           type="button"
@@ -278,6 +312,22 @@ const BookingCard = () => {
             </button>
           </div>
         )}
+
+        <ConfirmBookingPopup
+          open={showConfirm}
+          onClose={() => setShowConfirm(false)}
+          onConfirm={onConfirmPlace}
+          unitPrice={unitPrice}
+          nights={nights}
+          currency={data?.details?.Currency || 'VND'}
+          checkin={checkinDate}
+          checkout={checkoutDate}
+          guests={{
+            adults: guests?.adults ?? totalGuests ?? 1,   // tuỳ state bạn đang dùng
+            children: guests?.children ?? 0,
+            infants: guests?.infants ?? 0,
+          }}
+        />
       </div>
     </div>
   );
