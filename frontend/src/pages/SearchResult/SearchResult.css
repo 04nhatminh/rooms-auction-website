@@ -2,6 +2,8 @@
   min-height: 400px;
   display: flex;
   gap: 20px;
+  bottom: 32px;
+  margin-bottom: 32px;
 }
 
 .filtering-section {

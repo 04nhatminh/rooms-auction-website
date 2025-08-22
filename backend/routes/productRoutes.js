@@ -11,6 +11,7 @@ router.get('/top-rated/district', ProductController.getTopRatedProductsByDistric
 
 // Admin routes - Cần authentication
 router.get('/admin/list', verifyToken, ProductController.getAllProductsForAdmin);
+router.get('/admin/search', verifyToken, ProductController.searchProductsByUID);
 router.post('/admin/create', verifyToken, ProductController.createProduct);
 router.put('/admin/:id', verifyToken, ProductController.updateProduct);
 router.delete('/admin/:id', verifyToken, ProductController.deleteProduct);

@@ -1,5 +1,4 @@
 .page {
-  height: 100%;
   font-family: 'Montserrat';
   color: #000000;
 }
@@ -42,11 +41,14 @@
 .searchContainer {
   position: relative;
   min-width: 50vh;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .searchInput {
-  width: 100%;
-  padding: 0.5rem 2.5rem 0.5rem 1rem;
+  flex: 1;
+  padding: 0.5rem 1rem;
   border: 1px solid #d1d5db;
   border-radius: 6px;
   font-size: 0.875rem;
@@ -59,15 +61,41 @@
   box-shadow: 0 0 0 2px rgba(0, 132, 137, 0.1);
 }
 
-.searchIcon {
-  width: 1rem;
-  height: 1rem;
-  position: absolute;
-  right: 0.75rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #6b7280;
-  font-size: 1rem;
+.searchBtn {
+  background-color: #008489;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-family: Montserrat;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+}
+
+.searchBtn:hover {
+  background-color: #006b6f;
+}
+
+.resetBtn {
+  background-color: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-family: Montserrat;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.resetBtn:hover {
+  background-color: #e5e7eb;
+  border-color: #9ca3af;
 }
 
 .tableContainer {
@@ -209,7 +237,8 @@
 }
 
 .emptyText {
-  font-size: 1.125rem;
+  font-family: Montserrat;
+  font-size: 14px;
   color: #6b7280;
   font-weight: 500;
 }
