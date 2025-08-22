@@ -192,9 +192,9 @@ def main(province=None):
         print(f"[OUTPUT] File created: {output_filename}")
         
         # 6. Upsert dữ liệu vào mysql/mongodb
-        print("\n=== UPSERTING LISTING INFO ===")
-        from database.upsert_room_info import main as upsert_listing_info
-        upsert_listing_info(output_filename)
+        # print("\n=== UPSERTING LISTING INFO ===")
+        # from database.upsert_room_info import main as upsert_listing_info
+        # upsert_listing_info(output_filename)
         
         print("\n=== COMPLETED UPSERT LISTING INFO ===")
 

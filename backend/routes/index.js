@@ -10,6 +10,8 @@ const imageRoutes = require('./imageRoutes');
 const reviewRoutes = require('./reviewRoutes');
 const locationRoutes = require('./locationRoutes');
 const favoriteRoutes = require('./favoriteRoutes');
+const calendarRoutes = require('./calendarRoutes');
+const bookingRoutes = require('./bookingRoutes');
 const checkoutRoutes = require('./checkoutRoutes');
 
 
@@ -23,6 +25,8 @@ router.use('/', authRoutes);
 router.use('/user', userRoutes);
 router.use('/admin', adminRoutes);
 router.use('/favorite', favoriteRoutes);
+router.use('/calendar', calendarRoutes);
+router.use('/booking', bookingRoutes);
 router.use('/api/checkout', checkoutRoutes);
 
 router.get('/', (req, res) => {

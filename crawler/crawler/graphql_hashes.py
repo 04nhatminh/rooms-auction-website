@@ -8,7 +8,7 @@ def extract_sha256_hashes(listing_id):
         "StaysPdpSections": None,
         "StaysPdpReviewsQuery": None,
         "PdpAvailabilityCalendar": None,
-        "stayCheckout": "2ed04d2fd7f8e9cd983bfd47d1057e9280b1f5e34380b8dd7354f67da54178cb"
+        "stayCheckout": "d6dd83d6f35f9ffd05a1d1ad28defc4afd4c9e1c16d4531a9a0a727b93395bc9"
     }
 
     def on_request(req):
