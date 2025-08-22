@@ -11,6 +11,7 @@ const imageRoutes = require('./imageRoutes');
 const reviewRoutes = require('./reviewRoutes');
 const locationRoutes = require('./locationRoutes');
 const favoriteRoutes = require('./favoriteRoutes');
+const wishlistRoutes = require('./wishlistRoutes');
 const searchRoutes = require('./searchRoutes');
 const systemParametersRoutes = require('./systemParametersRoutes');
 
@@ -26,6 +27,7 @@ router.use('/', authRoutes);
 router.use('/user', userRoutes);
 router.use('/admin', adminRoutes);
 router.use('/favorite', favoriteRoutes);
+router.use('/wishlist', wishlistRoutes);
 router.use('/api/search', searchRoutes);
 router.use('/api/system-parameters', systemParametersRoutes);
 

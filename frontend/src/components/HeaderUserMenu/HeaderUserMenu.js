@@ -28,22 +28,22 @@ const HeaderUserMenu = () => {
 
       <ul className="dropdown-menu dropdown-menu-end custom-dropdown">
         <li>
-          <button className="dropdown-item" type="button">
+          <button className="dropdown-item" type="button" onClick={() => navigate('/favorite')}>
             <i className="fa-regular fa-heart me-2"></i>Danh sách yêu thích
           </button>
         </li>
         <li>
-          <button className="dropdown-item" type="button">
+          <button className="dropdown-item" type="button" onClick={() => navigate('/auction-history')}>
             <i className="fa-solid fa-gavel me-2"></i>Lịch sử đấu giá
           </button>
         </li>
         <li>
-          <button className="dropdown-item" type="button">
+          <button className="dropdown-item" type="button" onClick={() => navigate('/transaction-history')}>
             <i className="fa-solid fa-clock-rotate-left me-2"></i>Lịch sử mua hàng
           </button>
         </li>
         <li>
-          <button className="dropdown-item" type="button">
+          <button className="dropdown-item" type="button" onClick={() => navigate('/profile')}>
             <i className="fa-solid fa-user me-2"></i>Hồ sơ
           </button>
         </li>

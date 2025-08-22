@@ -9,6 +9,10 @@ const Description = () => {
 
   const sections = useMemo(() => {
     const raw = data?.description || [];
+    // Đảm bảo raw là array trước khi gọi map
+    if (!Array.isArray(raw)) {
+      return [];
+    }
     return raw.map((item) => {
       let title = null;
       let htmlText = '';

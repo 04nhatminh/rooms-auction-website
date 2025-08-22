@@ -311,6 +311,13 @@ class UserController {
             const userId = req.user.id;
             const { fullName, phoneNumber, avatarURL, dateOfBirth, gender, address } = req.body;
 
+            // Kiểm tra độ dài của avatarURL
+            if (avatarURL && typeof avatarURL === 'string' && avatarURL.length > 65000) {
+                return res.status(400).json({ 
+                    message: 'Ảnh đại diện quá lớn. Vui lòng chọn ảnh nhỏ hơn.' 
+                });
+            }
+
             const payload = {};
             if (fullName !== undefined) payload.fullName = fullName;
             if (phoneNumber !== undefined) payload.phoneNumber = phoneNumber;
