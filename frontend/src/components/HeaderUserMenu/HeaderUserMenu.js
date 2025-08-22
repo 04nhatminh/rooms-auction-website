@@ -3,14 +3,30 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../contexts/UserContext';
 import menuIcon from '../../assets/menu.png';
 import './HeaderUserMenu.css';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000';
 
 const HeaderUserMenu = () => {
   const navigate = useNavigate();
   const { user, logout } = useUser();
 
-  const handleLogout = () => {
-    logout();
-    // navigate('/login');
+  const handleLogout = async () => {
+    try {
+      // gọi BE để xóa cookie bidstay_token
+      await fetch(`${API_BASE_URL}/user/logout`, {
+        method: 'POST',
+        credentials: 'include',     // gửi kèm cookie
+      });
+    } catch (e) {
+      // không cần chặn UI nếu request fail
+      console.warn('Logout call failed:', e);
+    } finally {
+      // dọn cache UI
+      sessionStorage.removeItem('userData');
+      sessionStorage.removeItem('token');
+      localStorage.removeItem('userData');
+      localStorage.removeItem('token');
+      navigate('/login');
+    }
   };
 
   return (

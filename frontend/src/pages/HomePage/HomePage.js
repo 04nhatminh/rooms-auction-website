@@ -130,7 +130,7 @@ const HomePage = () => {
             <span className="home-logo-text">bidstay</span>
           </div>
 
-          {isAuthenticated() ? (
+          {user ? (
             <HeaderUserMenu />
           ) : (
             <SignInUpAction type="home" />

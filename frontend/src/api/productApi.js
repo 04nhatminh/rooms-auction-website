@@ -205,16 +205,16 @@ export const productApi = {
     },
 
     getRoomByUID: async (uid, abortSignal = null) => {
-    const opts = { method: 'GET', headers: { 'Content-Type': 'application/json' } };
-    if (abortSignal) opts.signal = abortSignal;
+        const opts = { method: 'GET', headers: { 'Content-Type': 'application/json' } };
+        if (abortSignal) opts.signal = abortSignal;
 
-    const res = await fetch(`${API_BASE_URL}/api/room/${uid}`, opts);
-    if (!res.ok) {
-      let errText = 'Request failed';
-      try { const e = await res.json(); errText = e.message || errText; } catch {}
-      throw new Error(errText);
-    }
-    return res.json(); // giả sử backend trả { data: {...} }
+        const res = await fetch(`${API_BASE_URL}/api/room/${uid}`, opts);
+            if (!res.ok) {
+            let errText = 'Request failed';
+            try { const e = await res.json(); errText = e.message || errText; } catch {}
+            throw new Error(errText);
+        }
+        return res.json(); // giả sử backend trả { data: {...} }
     },
 };
 

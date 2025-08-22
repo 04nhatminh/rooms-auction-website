@@ -5,10 +5,9 @@ const FavoritesApi = {
     async getUserFavorites() {
         const token = localStorage.getItem('token');
         const response = await fetch(`${API_BASE_URL}/favorite`, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token || ''}`
-            }
+            method: 'GET',
+            credentials: 'include', 
+            headers: { 'Accept': 'application/json' },
         });
 
         const data = await response.json();

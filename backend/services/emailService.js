@@ -21,13 +21,13 @@ class EmailService {
             const verificationUrl = `${baseUrl}/user/verify?token=${verificationToken}`;
             
             const mailOptions = {
-                from: `"${process.env.FROM_NAME || 'A2BnB Platform'}" <${process.env.FROM_EMAIL}>`,
+                from: `"${process.env.FROM_NAME || 'BidStay Platform'}" <${process.env.FROM_EMAIL}>`,
                 to: to,
-                subject: '🔐 Xác thực tài khoản A2BnB',
+                subject: '🔐 Xác thực tài khoản BidStay',
                 html: `
                     <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif;">
                         <div style="background: linear-gradient(135deg, #008489, #00b4d8); padding: 30px; text-align: center; color: white;">
-                            <h1 style="margin: 0;">🏠 A2BnB</h1>
+                            <h1 style="margin: 0;">🏠 BidStay</h1>
                             <p style="margin: 10px 0 0 0;">Chào mừng bạn đến với nền tảng đấu giá thuê nhà!</p>
                         </div>
                         
