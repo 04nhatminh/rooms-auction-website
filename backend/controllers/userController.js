@@ -147,51 +147,54 @@ class UserController {
         try {
             const { email, password } = req.body;
 
-            // Tìm user theo email
             const user = await userModel.findOne({ email });
-            if (!user) {
-            return res.status(400).json({ message: 'Email hoặc mật khẩu không đúng.' });
-            }
+            if (!user) return res.status(400).json({ message: 'Email hoặc mật khẩu không đúng.' });
 
-            // Kiểm tra xác thực email
             if (!user.isVerified) {
-            return res.status(400).json({ 
+            return res.status(400).json({
                 message: 'Tài khoản chưa được xác thực. Vui lòng kiểm tra email và xác thực tài khoản.',
                 needsVerification: true,
-                email: email
+                email
             });
             }
 
-            // Kiểm tra password
             const isMatch = await bcrypt.compare(password, user.hashPassword);
-            if (!isMatch) {
-            return res.status(400).json({ message: 'Email hoặc mật khẩu không đúng.' });
-            }
+            if (!isMatch) return res.status(400).json({ message: 'Email hoặc mật khẩu không đúng.' });
 
-            // Tạo JWT token
             const token = jwt.sign(
-                {
-                    id: user.id,
-                    email: user.email,
-                    role: user.role || 'guest'  // Nếu bạn lưu role trong DB
-                },
-                process.env.JWT_SECRET || 'your-secret-key',
-                { expiresIn: '1d' }
+            { id: user.id, email: user.email, role: user.role || 'guest' },
+            process.env.JWT_SECRET || 'your-secret-key',
+            { expiresIn: '1d' }
             );
 
-            // Trả về dữ liệu
-            const { hashPassword, verificationToken, verificationTokenExpires, ...safeUser } = user;
+            // Set cookie HttpOnly
+            const isProd = process.env.NODE_ENV === 'production';
+            res.cookie('bidstay_token', token, {
+            httpOnly: true,
+            secure: isProd,                 // production: true (HTTPS)
+            sameSite: isProd ? 'none' : 'lax',
+            maxAge: 24 * 60 * 60 * 1000,    // 1 ngày
+            path: '/',
+            });
 
+            // Trả thông tin user (không trả token nữa)
+            const { hashPassword, verificationToken, verificationTokenExpires, ...safeUser } = user;
             return res.status(200).json({
             message: 'Đăng nhập thành công.',
-            user: safeUser,
-            token
+            user: safeUser
             });
         } catch (error) {
             console.error('Error in login:', error);
             return res.status(500).json({ message: 'Lỗi server.', error: error.message });
         }
     }
+
+    async logout(req, res) {
+        const isProd = process.env.NODE_ENV === 'production';
+        res.clearCookie('bidstay_token', { path: '/', sameSite: isProd ? 'none' : 'lax', secure: isProd });
+        return res.json({ ok: true });
+    }
+
 
     // Lấy thông tin user theo ID
     async getUserById(req, res) {

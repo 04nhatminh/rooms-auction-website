@@ -16,7 +16,7 @@ class ProductModel {
     static async getProductDetails(productUID) 
     {
         try {
-            const query = 'SELECT * FROM products WHERE UID = ?';
+            const query = 'SELECT * FROM Products WHERE UID = ?';
             const [products] = await pool.execute(query, [productUID]);
             console.log(`Fetched product details for ProductID ${productUID}:`, products);
             return products[0]; // Trả về sản phẩm đầu tiên
@@ -397,6 +397,14 @@ class ProductModel {
             console.error('Error fetching property types:', error);
             throw error;
         }
+    }
+
+    static async findProductIdByUID(uid) {
+        const [rows] = await pool.query(
+        `SELECT ProductID FROM Products WHERE UID = ? LIMIT 1`,
+        [uid]
+        );
+        return rows[0]?.ProductID || null;
     }
 }
 

@@ -1,7 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from '../../contexts/LocationContext';
-import { useUser } from '../../contexts/UserContext';
 import SearchBar from '../../components/SearchBar/SearchBar';
 import CardSection from '../../components/CardSection/CardSection';
 import RoomSection from '../../components/RoomSection/RoomSection';
@@ -24,10 +23,11 @@ import WishlistBox from '../../components/WishlistBox/WishlistBox';
 import './HomePage.css';
 
 
+const API_BASE_URL =
+  (process.env.REACT_APP_API_BASE_URL?.replace(/\/$/, '')) || 'http://localhost:3000';
+
 const HomePage = () => {
   const { popularLocations, isLoading: isLoadingLocations, error: locationError, getPopularLocations } = useLocation();
-  const { user, isAuthenticated } = useUser();
-  const navigate = useNavigate();
   
   // Load popular locations khi component mount (chỉ khi chưa có data)
   useEffect(() => {
@@ -87,6 +87,36 @@ const HomePage = () => {
     { title: "Chỗ ở còn phòng tại Đà Lạt", provinceCode: "68", limit: 15 },
     { title: "Khám phá nơi lưu trú tại Đà Nẵng", provinceCode: "48", limit: 15 }
   ], []);
+
+  const [user, setUser] = React.useState(null);
+  const navigate = useNavigate();
+
+  React.useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem('userData');
+      if (stored) setUser(JSON.parse(stored));
+    } catch (_) {}
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      // gọi BE để xóa cookie bidstay_token
+      await fetch(`${API_BASE_URL}/user/logout`, {
+        method: 'POST',
+        credentials: 'include',     // gửi kèm cookie
+      });
+    } catch (e) {
+      // không cần chặn UI nếu request fail
+      console.warn('Logout call failed:', e);
+    } finally {
+      // dọn cache UI
+      sessionStorage.removeItem('userData');
+      sessionStorage.removeItem('token');
+      localStorage.removeItem('userData');
+      localStorage.removeItem('token');
+      navigate('/login');
+    }
+  }
 
   return (
     <div className="homepage-wrapper">

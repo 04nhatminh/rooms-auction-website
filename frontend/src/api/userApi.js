@@ -1,5 +1,4 @@
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000';
-// const API_BASE_URL = process.env.REACT_APP_API_BASE_URL?.replace(/\/$/, '') || 'http://localhost:3000';
 const ADMIN_PREFIX = '/admin';
 
 class UserApi {
@@ -39,31 +38,17 @@ class UserApi {
     return res.json();
   }
 
-  static async getUsers(token, page = 1, limit = 10) {
-    const res = await fetch(`${API_BASE_URL}${ADMIN_PREFIX}/users?page=${page}&limit=${limit}`, {
-      method: 'GET',
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+  static async handle(res, fallbackMsg) {
+    const msg = await this.safeMessage(res);
     if (!res.ok) {
-      const msg = await UserApi.Message(res);
-      throw new Error(msg || 'Không thể lấy danh sách người dùng.');
+      const err = new Error(msg || fallbackMsg || `HTTP ${res.status}`);
+      err.status = res.status;
+      throw err;
     }
-    return res.json();
-  };
+    // nếu backend trả rỗng thì trả {} cho an toàn
+    try { return JSON.parse(msg); } catch { return {}; }
+  }
 
-  static async deleteUser(token, id) {
-    const res = await fetch(`${API_BASE_URL}${ADMIN_PREFIX}/users/${id}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (!res.ok) {
-      const msg = await UserApi.safeMessage(res);
-      throw new Error(msg || 'Không thể xóa người dùng.');
-    }
-    return res.json();
-  };
-
-  // helper để đọc message lỗi nếu backend trả JSON/text
   static async safeMessage(res) {
     try {
       const text = await res.text();
@@ -71,28 +56,61 @@ class UserApi {
     } catch { return null; }
   }
 
-  static async getUserById(token, id) {
+  static async getUsers(page = 1, limit = 10) {
+    const qs = new URLSearchParams({ page: String(page), limit: String(limit) }).toString();
+
+    // timeout nhẹ để tránh treo
+    const ac = new AbortController();
+    const timer = setTimeout(() => ac.abort(), 12000);
+
+    try {
+      const res = await fetch(`${API_BASE_URL}${ADMIN_PREFIX}/users?${qs}`, {
+        method: 'GET',
+        credentials: 'include',                // 👈 bắt buộc khi dùng cookie HttpOnly
+        headers: { 'Accept': 'application/json' },
+        signal: ac.signal,
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.message || `HTTP ${res.status}`);
+      return data;
+    } catch (err) {
+      if (err.name === 'AbortError') throw new Error('Máy chủ phản hồi quá lâu.');
+      throw err;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  static async deleteUser(id) {
     const res = await fetch(`${API_BASE_URL}${ADMIN_PREFIX}/users/${id}`, {
-      headers: { 'Authorization': `Bearer ${token}` }
+      method: 'DELETE',
+      credentials: 'include',                     // 👈 gửi cookie
+      headers: { Accept: 'application/json' },
     });
-    if (!res.ok) throw new Error(await res.text() || 'Không thể lấy thông tin người dùng.');
-    return res.json();
+    return this.handle(res, 'Không thể xóa người dùng.');
   };
 
-  static async updateUserStatus(token, id, { status, suspendedUntil }) {
+  static async getUserById(id) {
+    const res = await fetch(`${API_BASE_URL}${ADMIN_PREFIX}/users/${id}`, {
+      method: 'GET',
+      credentials: 'include',                     // 👈 gửi cookie
+      headers: { Accept: 'application/json' },
+    });
+    return this.handle(res, 'Không thể lấy thông tin người dùng.');
+  };
+
+  static async updateUserStatus(id, { status, suspendedUntil }) {
     const res = await fetch(`${API_BASE_URL}${ADMIN_PREFIX}/users/${id}/status`, {
       method: 'PATCH',
+      credentials: 'include',                     // 👈 gửi cookie
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
       },
-      body: JSON.stringify({ status, suspendedUntil })
+      body: JSON.stringify({ status, suspendedUntil }),
     });
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(text || 'Không thể cập nhật trạng thái người dùng.');
-    }
-    return res.json(); // backend trả về user đã update
+    return this.handle(res, 'Không thể cập nhật trạng thái người dùng.');
   };
 }
 

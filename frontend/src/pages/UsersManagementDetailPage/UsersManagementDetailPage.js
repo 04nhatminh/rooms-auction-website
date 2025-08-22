@@ -28,16 +28,17 @@ export default function UsersManagementDetailPage() {
   const [msg, setMsg] = useState('');
 
   const load = useCallback(async () => {
-    const token = localStorage.getItem('token');
-    if (!token) { alert('Vui lòng đăng nhập lại.'); navigate('/login'); return; }
     setLoading(true);
     setError('');
     try {
-      const data = await UserAPI.getUserById(token, id);
+      const data = await UserAPI.getUserById(id);          // ← KHÔNG truyền token
       setUser(data);
       setStatus(data.status || 'active');
-      setSuspendedUntil(toLocalDatetimeValue(data.suspendedUntil));
+      setSuspendedUntil(toLocalDatetimeValue(data?.suspendedUntil));
     } catch (e) {
+      if (e.status === 401 || /xác thực|401/i.test(e.message)) {
+        navigate('/login'); return;
+      }
       setError(e.message || 'Không thể tải dữ liệu.');
     } finally {
       setLoading(false);
@@ -47,9 +48,6 @@ export default function UsersManagementDetailPage() {
   useEffect(() => { load(); }, [load]);
 
   const onSaveStatus = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) { alert('Vui lòng đăng nhập lại.'); navigate('/login'); return; }
-
     setMsg('');
     setError('');
 
@@ -61,17 +59,20 @@ export default function UsersManagementDetailPage() {
     }
 
     setSaving(true);
-    setError('');
-    setMsg('');
     try {
       const payload = {
         status,
-        suspendedUntil: status === 'suspended' ? fromLocalDatetimeValue(suspendedUntil) : null
+        suspendedUntil: status === 'suspended'
+          ? fromLocalDatetimeValue(suspendedUntil)
+          : null
       };
-      const updated = await UserAPI.updateUserStatus(token, id, payload);
+      const updated = await UserAPI.updateUserStatus(id, payload); // ← KHÔNG truyền token
       setUser(updated);
       setMsg('Cập nhật trạng thái thành công.');
     } catch (e) {
+      if (e.status === 401 || /xác thực|401/i.test(e.message)) {
+        navigate('/login'); return;
+      }
       setError(e.message || 'Cập nhật thất bại.');
     } finally {
       setSaving(false);

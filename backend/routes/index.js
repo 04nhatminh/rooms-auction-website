@@ -14,6 +14,9 @@ const favoriteRoutes = require('./favoriteRoutes');
 const wishlistRoutes = require('./wishlistRoutes');
 const searchRoutes = require('./searchRoutes');
 const systemParametersRoutes = require('./systemParametersRoutes');
+const calendarRoutes = require('./calendarRoutes');
+const bookingRoutes = require('./bookingRoutes');
+const checkoutRoutes = require('./checkoutRoutes');
 
 
 // Demo routes - điều hướng đến /demo
@@ -30,6 +33,9 @@ router.use('/favorite', favoriteRoutes);
 router.use('/wishlist', wishlistRoutes);
 router.use('/api/search', searchRoutes);
 router.use('/api/system-parameters', systemParametersRoutes);
+router.use('/calendar', calendarRoutes);
+router.use('/booking', bookingRoutes);
+router.use('/api/checkout', checkoutRoutes);
 
 router.get('/', (req, res) => {
     res.status(200).json({

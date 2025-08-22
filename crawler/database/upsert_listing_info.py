@@ -654,6 +654,10 @@ def upsert_product_from_listing_data(listing_data, mongodb_db=None, reviews_dict
             raise Exception(f"Could not retrieve ProductID for listing {listing_id} after upsert")
         product_id = product_row[0]
         print(f"[INFO] Retrieved ProductID: {product_id} for listing {listing_id}")
+        
+        # Add calendar for the room
+        cursor.execute("CALL AddCalendarForRoom(%s, %s, %s)", [MYSQL_CONFIG['database'], product_id, 12])
+
 
         # Amenities sync
         amenities = data.get('amenities', [])
