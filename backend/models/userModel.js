@@ -249,7 +249,7 @@ class UserModel {
                 isVerified: user.IsVerified,
                 role: user.Role,
                 rating: user.Rating,
-                status: user.status,
+                status: user.Status,
                 suspendedUntil: user.SuspendedUntil,
                 unpaidStrikeCount: user.UnpaidStrikeCount,
                 createdAt: user.CreatedAt,
