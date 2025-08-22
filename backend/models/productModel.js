@@ -272,6 +272,7 @@ class ProductModel {
                 JOIN Properties ppt ON p.PropertyType = ppt.PropertyID
                 JOIN Districts d ON p.DistrictCode = d.DistrictCode
                 JOIN Provinces pr ON p.ProvinceCode = pr.ProvinceCode
+                WHERE p.is_deleted = 0
                 ORDER BY p.ProductID ASC
                 LIMIT ${limit} OFFSET ${offset}
             `;
@@ -279,6 +280,73 @@ class ProductModel {
             return products;
         } catch (error) {
             console.error('Error fetching all products for admin:', error);
+            throw error;
+        }
+    }
+
+    // Tạo sản phẩm mới
+    static async createProduct(data) {
+        const {
+            name, roomNumber, bedrooms, bathrooms, description,
+            region, provinceCode, districtCode, propertyType, amenities, images, price, currency
+        } = data;
+        const pool = require('../config/database');
+        const uid = parseInt(Date.now().toString() + Math.floor(Math.random() * 1000).toString().padStart(3, '0'));
+        const insertQuery = `
+            INSERT INTO Products (
+                UID, 
+                Name, 
+                Address, 
+                ProvinceCode, 
+                DistrictCode,
+                NumBedrooms, 
+                NumBathrooms, 
+                PropertyType, 
+                Price,
+                Currency,
+                CreatedAt
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+        `;
+        const [result] = await pool.execute(insertQuery, [
+            uid, 
+            name, 
+            roomNumber || '', 
+            provinceCode, 
+            districtCode || null,
+            bedrooms || 1, 
+            bathrooms || 1, 
+            propertyType || 1,
+            price || 0,
+            currency || 'VND'
+        ]);
+        return { id: result.insertId, uid };
+    }
+
+    // Cập nhật sản phẩm
+    static async updateProduct(id, updateData) {
+        // Ví dụ chỉ update tên, có thể mở rộng thêm các trường khác
+        const pool = require('../config/database');
+        const updateQuery = 'UPDATE Products SET Name = ? WHERE ProductID = ?';
+        await pool.execute(updateQuery, [updateData.name, id]);
+        return { id };
+    }
+
+    // Xóa sản phẩm (xóa mềm)
+    static async deleteProduct(id) {
+        const pool = require('../config/database');
+        const softDeleteQuery = `UPDATE Products SET is_deleted = 1 WHERE ProductID = ?`;
+        const [result] = await pool.execute(softDeleteQuery, [id]);
+        return result.affectedRows;
+    }
+
+    // Lấy danh sách property types từ bảng Properties
+    static async getAllPropertyTypes() {
+        try {
+            const query = 'SELECT PropertyID, PropertyName FROM Properties ORDER BY PropertyID ASC';
+            const [rows] = await pool.execute(query);
+            return rows;
+        } catch (error) {
+            console.error('Error fetching property types:', error);
             throw error;
         }
     }

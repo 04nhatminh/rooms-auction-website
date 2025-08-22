@@ -80,9 +80,7 @@ const AdminProductsManagementPage = () => {
 
     try {
       await productApi.deleteProduct(productId, token);
-      setProducts(prev => prev.filter(product => 
-        (product.id ?? product._id) !== productId
-      ));
+      await loadProducts(); // Reset lại danh sách sản phẩm sau khi xóa
       alert('Xóa sản phẩm thành công!');
     } catch (err) {
       alert('Có lỗi xảy ra khi xóa sản phẩm: ' + err.message);

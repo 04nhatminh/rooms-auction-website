@@ -289,6 +289,7 @@ async function createProductsTable() {
             ValuePoint FLOAT,
             CommunicationPoint FLOAT,
             ConveniencePoint FLOAT,
+            is_deleted TINYINT(1) UNSIGNED NOT NULL DEFAULT 0,
             CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             LastSyncedAt TIMESTAMP NULL DEFAULT NULL,
             FOREIGN KEY (ProvinceCode) REFERENCES Provinces(ProvinceCode),
@@ -1424,7 +1425,8 @@ async function createGetAllDistrictsProcedure() {
                 DistrictCode AS code,
                 Name,
                 NameEn,
-                'district' AS type
+                'district' AS type,
+                ProvinceCode AS provinceCode
             FROM Districts;
         END;
     `);

@@ -21,7 +21,8 @@ const AdminAddProductPage = () => {
     districtCode: '',
     propertyType: '',
     amenities: [],
-    images: []
+    images: [],
+    price: '' // Thêm thuộc tính Price
   });
 
   // Data for dropdowns
@@ -33,16 +34,7 @@ const AdminAddProductPage = () => {
   const [loading, setLoading] = useState(false);
   const [loadingProvinces, setLoadingProvinces] = useState(true);
   const [loadingDistricts, setLoadingDistricts] = useState(true);
-
-  // Property types
-  const propertyTypes = [
-    { value: 'apartment', label: 'Căn hộ' },
-    { value: 'house', label: 'Nhà riêng' },
-    { value: 'villa', label: 'Biệt thự' },
-    { value: 'studio', label: 'Studio' },
-    { value: 'dormitory', label: 'Ký túc xá' },
-    { value: 'homestay', label: 'Homestay' }
-  ];
+  const [loadingPropertyTypes, setLoadingPropertyTypes] = useState(true);
 
   // Regions
   const regions = [
@@ -125,6 +117,25 @@ const AdminAddProductPage = () => {
     }
   };
 
+  // Property types (dùng API thay vì mảng cứng)
+  const [propertyTypes, setPropertyTypes] = useState([]);
+
+  useEffect(() => {
+    const fetchPropertyTypes = async () => {
+      try {
+        const response = await productApi.getPropertyTypes();
+        if (response.success) {
+          setPropertyTypes(response.data || []);
+        }
+      } catch (error) {
+        console.error('Error loading property types:', error);
+      } finally {
+        setLoadingPropertyTypes(false);
+      }
+    };
+    fetchPropertyTypes();
+  }, []);
+
   const handleInputChange = (e) => {
     const { name, value, type } = e.target;
     setFormData(prev => ({
@@ -163,7 +174,7 @@ const AdminAddProductPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validation
     if (!formData.name.trim()) {
       alert('Vui lòng nhập tên sản phẩm');
@@ -189,6 +200,14 @@ const AdminAddProductPage = () => {
       alert('Vui lòng chọn loại hình bất động sản');
       return;
     }
+    // --- Thêm kiểm tra tổng số phòng ngủ + phòng tắm ---
+    const totalRooms = parseInt(formData.roomNumber) || 0;
+    const totalBedsBaths = (parseInt(formData.bedrooms) || 0) + (parseInt(formData.bathrooms) || 0);
+    if (totalRooms > 0 && totalBedsBaths > totalRooms) {
+      alert('Tổng số phòng ngủ và phòng tắm không được vượt quá tổng số phòng!');
+      return;
+    }
+    // --- Kết thúc kiểm tra ---
 
     const token = localStorage.getItem('token');
     if (!token) {
@@ -211,7 +230,8 @@ const AdminAddProductPage = () => {
         districtCode: formData.districtCode,
         propertyType: formData.propertyType,
         amenities: formData.amenities,
-        images: formData.images
+        images: formData.images,
+        price: formData.price
       };
 
       await productApi.createProduct(productDataToSubmit, token);
@@ -324,6 +344,22 @@ const AdminAddProductPage = () => {
                     required
                   />
                 </div>
+
+                <div className={styles.formGroup}>
+                  <label className={styles.label} style={{ marginTop: '16px' }}>
+                    Giá phòng (VND)<span className={styles.required}>*</span>
+                  </label>
+                  <input
+                    type="number"
+                    name="price"
+                    value={formData.price}
+                    onChange={handleInputChange}
+                    className={styles.input}
+                    placeholder="Nhập giá phòng"
+                    required
+                    style={{ marginTop: '4px' }}
+                  />
+                </div>
               </div>
 
               {/* Location Information */}
@@ -364,8 +400,8 @@ const AdminAddProductPage = () => {
                     >
                       <option value="">Chọn loại hình</option>
                       {propertyTypes.map(type => (
-                        <option key={type.value} value={type.value}>
-                          {type.label}
+                        <option key={type.PropertyID} value={type.PropertyID}>
+                          {type.PropertyName}
                         </option>
                       ))}
                     </select>
@@ -390,7 +426,7 @@ const AdminAddProductPage = () => {
                       </option>
                       {provinces.map(province => (
                         <option key={province.code} value={province.code}>
-                          {province.name}
+                          {province.Name}
                         </option>
                       ))}
                     </select>
@@ -418,7 +454,7 @@ const AdminAddProductPage = () => {
                       </option>
                       {filteredDistricts.map(district => (
                         <option key={district.code} value={district.code}>
-                          {district.name}
+                          {district.Name}
                         </option>
                       ))}
                     </select>
@@ -483,7 +519,7 @@ const AdminAddProductPage = () => {
                 )}
               </div>
 
-              {/* Action Buttons */}
+              {/* Submit Buttons */}
               <div className={styles.actionButtons}>
                 <button
                   type="button"

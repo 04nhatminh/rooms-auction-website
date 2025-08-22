@@ -160,6 +160,24 @@ class ProductController {
         }
     }
 
+    // GET /api/properties/types - Lấy danh sách property types
+    static async getAllPropertyTypes(req, res) {
+        try {
+            const types = await ProductModel.getAllPropertyTypes();
+            return res.status(200).json({
+                success: true,
+                data: types
+            });
+        } catch (error) {
+            console.error('Error in getAllPropertyTypes:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Internal server error',
+                error: error.message
+            });
+        }
+    }
+
     // Admin Methods
     // GET /api/room/admin/list - Lấy danh sách tất cả sản phẩm cho admin
     static async getAllProductsForAdmin(req, res) {
@@ -170,7 +188,7 @@ class ProductController {
             console.log(`\ngetAllProductsForAdmin - page: ${page}, limit: ${limit}, offset: ${offset}`);
 
             const pool = require('../config/database');
-            const countQuery = `SELECT COUNT(*) as total FROM Products`;
+            const countQuery = `SELECT COUNT(*) as total FROM Products WHERE is_deleted = 0`;
 
             console.log('Executing count query...');
             const [countResult] = await pool.execute(countQuery);
@@ -206,65 +224,20 @@ class ProductController {
     // POST /api/room/admin/create - Tạo sản phẩm mới
     static async createProduct(req, res) {
         try {
-            const {
-                name,
-                roomNumber,
-                bedrooms,
-                bathrooms,
-                description,
-                region,
-                province,
-                district,
-                propertyType,
-                amenities,
-                images
-            } = req.body;
-
             // Validation cơ bản
-            if (!name || !region || !province) {
+            const { name, region, provinceCode, price } = req.body;
+            if (!name || !region || !provinceCode || !price) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Tên sản phẩm, vùng miền và tỉnh là bắt buộc'
+                    message: 'Tên sản phẩm, vùng miền, tỉnh và giá là bắt buộc'
                 });
             }
-
-            const pool = require('../config/database');
-            
-            // Tạo UID unique
-            const uid = `ROOM_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-            // Insert vào bảng Products
-            const insertQuery = `
-                INSERT INTO Products (
-                    UID, Name, Address, ProvinceCode, DistrictCode,
-                    NumBedrooms, NumBathrooms, PropertyType, CreatedAt
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
-            `;
-
-            const [result] = await pool.execute(insertQuery, [
-                uid,
-                name,
-                roomNumber || '',
-                province,
-                district,
-                bedrooms || 1,
-                bathrooms || 1,
-                propertyType || 1
-            ]);
-
-            const productId = result.insertId;
-
-            // TODO: Insert description, amenities, images vào các bảng liên quan
-
+            const result = await ProductModel.createProduct(req.body);
             return res.status(201).json({
                 success: true,
                 message: 'Tạo sản phẩm thành công',
-                data: {
-                    id: productId,
-                    uid: uid
-                }
+                data: result
             });
-
         } catch (error) {
             console.error('Error in createProduct:', error);
             return res.status(500).json({
@@ -279,16 +252,12 @@ class ProductController {
     static async updateProduct(req, res) {
         try {
             const { id } = req.params;
-            const updateData = req.body;
-
-            // TODO: Implement update logic
-            
+            await ProductModel.updateProduct(id, req.body);
             return res.status(200).json({
                 success: true,
                 message: 'Cập nhật sản phẩm thành công',
                 data: { id }
             });
-
         } catch (error) {
             console.error('Error in updateProduct:', error);
             return res.status(500).json({
@@ -303,24 +272,17 @@ class ProductController {
     static async deleteProduct(req, res) {
         try {
             const { id } = req.params;
-
-            const pool = require('../config/database');
-            const deleteQuery = `DELETE FROM Products WHERE ProductID = ?`;
-            
-            const [result] = await pool.execute(deleteQuery, [id]);
-
-            if (result.affectedRows === 0) {
+            const affectedRows = await ProductModel.deleteProduct(id);
+            if (affectedRows === 0) {
                 return res.status(404).json({
                     success: false,
                     message: 'Không tìm thấy sản phẩm'
                 });
             }
-
             return res.status(200).json({
                 success: true,
                 message: 'Xóa sản phẩm thành công'
             });
-
         } catch (error) {
             console.error('Error in deleteProduct:', error);
             return res.status(500).json({

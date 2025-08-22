@@ -18,4 +18,7 @@ router.delete('/admin/:id', verifyToken, ProductController.deleteProduct);
 // GET /room/id - Lấy chi tiết sản phẩm theo Product ID
 router.get('/:UID', ProductController.getFullProductDataByProductId);
 
+// GET /api/properties/types - Lấy danh sách property types
+router.get('/properties/types', ProductController.getAllPropertyTypes);
+
 module.exports = router;
