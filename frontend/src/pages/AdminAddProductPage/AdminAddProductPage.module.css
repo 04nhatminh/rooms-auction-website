@@ -47,7 +47,7 @@
   color: #111827;
   margin-bottom: 1.5rem;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid #008489;
+  border-bottom: 2px solid #278C9F;
 }
 
 /* --- Form Layout --- */
@@ -55,42 +55,99 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
-  margin-bottom: 1.5rem;
 }
 
 .formGroup {
   display: flex;
   flex-direction: column;
+  margin-bottom: 1.5rem;
 }
 
 .label {
   font-weight: 500;
   color: #374151;
+  margin-top: 0 !important;
   margin-bottom: 0.5rem;
   font-size: 0.875rem;
+  margin-right: 4px;
 }
 
 .required {
   color: #ef4444;
 }
 
+
+/* Container bọc mỗi ô policy để đặt nút x bên trong */
+.policyItem {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+/* Input dành riêng cho policy để không ảnh hưởng các input khác */
+.policyInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 40px 10px 12px;   /* chừa 40px bên phải cho nút x */
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-size: 14px;
+}
+
+.policyInput:focus {
+  border-color: #278C9F;
+  box-shadow: 0 0 0 3px rgba(39,140,159,0.12);
+}
+
+/* Nút x nằm bên phải, chồng lên trong ô */
+.policyClearBtn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+/* Vẽ ký tự × bằng pseudo-element để không bị trùng chữ */
+.policyClearBtn::before {
+  content: '×';
+  display: block;
+  text-align: center;
+  font-size: 18px;
+  color: #777;
+}
+
+.policyClearBtn:hover::before {
+  color: #d32f2f;
+}
+
+
 /* --- Form Controls --- */
 .input,
 .select,
 .textarea {
+  width: 100%;
   padding: 0.75rem;
   border: 1px solid #d1d5db;
   border-radius: 6px;
   font-size: 0.875rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   background-color: #fff;
+  margin-bottom: 4px;
 }
 
 .input:focus,
 .select:focus,
 .textarea:focus {
   outline: none;
-  border-color: #008489;
+  border-color: #278C9F;
   box-shadow: 0 0 0 3px rgba(0, 132, 137, 0.1);
 }
 
@@ -104,6 +161,41 @@
 .textarea {
   resize: vertical;
   min-height: 100px;
+}
+
+.descriptionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.descriptionHeader button{
+  margin-left: auto;
+  width: 24px;
+  height: 24px;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.addDescBtn, .addPolicyBtn {
+  font-family: Montserrat;
+  font-size: 14px;
+  font-weight: 500;
+  margin-left: auto;
+}
+
+.removePolicyBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  justify-content: flex-end;
 }
 
 /* --- Amenities Grid --- */
@@ -131,7 +223,7 @@
   margin-right: 0.5rem;
   width: 16px;
   height: 16px;
-  accent-color: #008489;
+  accent-color: #278C9F;
 }
 
 .checkboxText {
@@ -150,7 +242,7 @@
 }
 
 .fileInput:hover {
-  border-color: #008489;
+  border-color: #278C9F;
   background-color: #f0fdfa;
 }
 
@@ -251,12 +343,12 @@
 }
 
 .submitBtn {
-  background-color: #008489;
+  background-color: #278C9F;
   color: #fff;
 }
 
 .submitBtn:hover:not(:disabled) {
-  background-color: #006b6f;
+  background-color: rgb(1, 109, 113);
 }
 
 .cancelBtn:disabled,
@@ -266,9 +358,9 @@
 }
 
 /* --- Responsive Design --- */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .form {
-    padding: 1.5rem;
+    padding: 4rem 2rem 4rem 4rem;
   }
 
   .formRow {
@@ -296,7 +388,7 @@
 
 @media (max-width: 480px) {
   .form {
-    padding: 1rem;
+    padding: 4rem;
   }
 
   .section {

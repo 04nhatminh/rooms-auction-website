@@ -339,52 +339,62 @@ const AdminAddProductPage = () => {
                   />
                 </div>
 
-                <div className={styles.formRow}>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label}>
-                      Loại chỗ ở <span className={styles.required}>*</span>
-                    </label>
-                    <select
-                      name="roomType"
-                      value={formData.roomType}
-                      onChange={handleInputChange}
-                      className={styles.select}
-                      required
-                      disabled={loadingRoomTypes}
-                    >
-                      <option value="">
-                        {loadingRoomTypes ? 'Đang tải...' : 'Chọn loại chỗ ở'}
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>
+                    Loại chỗ ở <span className={styles.required}>*</span>
+                  </label>
+                  <select
+                    name="roomType"
+                    value={formData.roomType}
+                    onChange={handleInputChange}
+                    className={styles.select}
+                    required
+                    disabled={loadingRoomTypes}
+                  >
+                    <option value="">
+                      {loadingRoomTypes ? 'Đang tải...' : 'Chọn loại chỗ ở'}
+                    </option>
+                    {roomTypes.map(type => (
+                      <option key={type.RoomTypeID} value={type.RoomTypeID}>
+                        {type.RoomTypeName}
                       </option>
-                      {roomTypes.map(type => (
-                        <option key={type.RoomTypeID} value={type.RoomTypeID}>
-                          {type.RoomTypeName}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                    ))}
+                  </select>
+                </div>
 
-                  <div className={styles.formGroup}>
-                    <label className={styles.label}>
-                      Hình thức chỗ ở <span className={styles.required}>*</span>
-                    </label>
-                    <select
-                      name="propertyType"
-                      value={formData.propertyType}
-                      onChange={handleInputChange}
-                      className={styles.select}
-                      required
-                      disabled={loadingPropertyTypes}
-                    >
-                      <option value="">
-                        {loadingPropertyTypes ? 'Đang tải...' : 'Chọn loại hình'}
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>
+                    Hình thức chỗ ở <span className={styles.required}>*</span>
+                  </label>
+                  <select
+                    name="propertyType"
+                    value={formData.propertyType}
+                    onChange={handleInputChange}
+                    className={styles.select}
+                    required
+                    disabled={loadingPropertyTypes}
+                  >
+                    <option value="">
+                      {loadingPropertyTypes ? 'Đang tải...' : 'Chọn loại hình'}
+                    </option>
+                    {propertyTypes.map(type => (
+                      <option key={type.PropertyID} value={type.PropertyID}>
+                        {type.PropertyName}
                       </option>
-                      {propertyTypes.map(type => (
-                        <option key={type.PropertyID} value={type.PropertyID}>
-                          {type.PropertyName}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                    ))}
+                  </select>
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Số phòng</label>
+                  <input
+                    type="text"
+                    name="roomNumber"
+                    value={formData.roomNumber}
+                    onChange={handleInputChange}
+                    className={styles.input}
+                    placeholder="Nhập số phòng (ví dụ: 101, A-201)"
+                  />
                 </div>
 
                 <div className={styles.formRow}>
@@ -515,8 +525,7 @@ const AdminAddProductPage = () => {
                   onClick={addDescription}
                   className={styles.addDescBtn}
                 >
-                  <span>+ </span>
-                  <span style={{ textDecoration: 'underline' }}>Thêm mô tả</span>
+                  + Thêm mô tả
                 </button>
               </div>
 
@@ -622,71 +631,67 @@ const AdminAddProductPage = () => {
 
               {/* Policies */}
               <div className={styles.section}>
-                  <h3 className={styles.sectionTitle}>Chính sách</h3>
-                  
-                  <div className={styles.formGroup}>
-                  <div className={styles.policySection}>
-                    <label className={styles.label}>Nội quy nhà</label>
-                    {formData.houseRules.map((rule, index) => (
-                      <div key={index} className={styles.policyItem}>
-                        <input
-                          type="text"
-                          value={rule}
-                          onChange={(e) => handlePolicyChange('houseRules', index, e.target.value)}
-                          className={styles.policyInput}
-                          placeholder="Nhập nội quy nhà..."
-                        />
-                        {formData.houseRules.length > 1 && index !== 0 && (
-                          <button
-                            type="button"
-                            onClick={() => removePolicy('houseRules', index)}
-                            className={styles.policyClearBtn}
-                            aria-label="Xoá nội quy"
-                          />
-                        )}
-                      </div>
-                    ))}
-
-                    <button
-                      type="button"
-                      onClick={() => addPolicy('houseRules')}
-                      className={styles.addPolicyBtn}
-                    >
-                      <span>+ </span>
-                      <span style={{ textDecoration: 'underline' }}>Thêm nội quy nhà</span>
-                    </button>
-                  </div>
+                <h3 className={styles.sectionTitle}>Chính sách</h3>
+                
+                <div className={styles.policySection}>
+                  <h4 className={styles.policyTitle}>Nội quy nhà</h4>
+                  {formData.houseRules.map((rule, index) => (
+                    <div key={index} className={styles.policyItem}>
+                      <input
+                        type="text"
+                        value={rule}
+                        onChange={(e) => handlePolicyChange('houseRules', index, e.target.value)}
+                        className={styles.input}
+                        placeholder="Nhập nội quy nhà..."
+                      />
+                      {formData.houseRules.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removePolicy('houseRules', index)}
+                          className={styles.removePolicyBtn}
+                        >
+                          ×
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => addPolicy('houseRules')}
+                    className={styles.addPolicyBtn}
+                  >
+                    + Thêm nội quy
+                  </button>
                 </div>
 
                 <div className={styles.policySection}>
-                  <label className={styles.label}>An toàn và chỗ ở</label>
+                  <h4 className={styles.policyTitle}>An toàn và chỗ ở</h4>
                   {formData.safetyProperties.map((property, index) => (
                     <div key={index} className={styles.policyItem}>
                       <input
                         type="text"
                         value={property}
                         onChange={(e) => handlePolicyChange('safetyProperties', index, e.target.value)}
-                        className={styles.policyInput}          // đổi class
+                        className={styles.input}
                         placeholder="Nhập chính sách an toàn..."
                       />
-                      {formData.safetyProperties.length > 1 && index !== 0 && (
+                      {formData.safetyProperties.length > 1 && (
                         <button
                           type="button"
                           onClick={() => removePolicy('safetyProperties', index)}
-                          className={styles.policyClearBtn}      // nút “x” trong input
-                          aria-label="Xoá chính sách"
-                        />
+                          className={styles.removePolicyBtn}
+                        >
+                          ×
+                        </button>
                       )}
                     </div>
                   ))}
-
                   <button
                     type="button"
                     onClick={() => addPolicy('safetyProperties')}
                     className={styles.addPolicyBtn}
                   >
-                    <span>+ </span>
-                    <span style={{ textDecoration: 'underline' }}>Thêm chính sách an toàn</span>
+                    + Thêm chính sách an toàn
                   </button>
                 </div>
               </div>
