@@ -9,11 +9,15 @@ import favoriteIcon from '../../assets/favorite.png';
 import favoriteFilledIcon from '../../assets/favorite_filled.png';
 import FavoritesApi from '../../api/favoritesApi';
 
-const RoomCard = ({ product, durationDays = 1 }) => {
+const RoomCard = ({ product, durationDays = 1, isFavorite: initialIsFavorite = false }) => {
   const navigate = useNavigate();
   const defaultImage = PlaceHolderImg;
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(initialIsFavorite);
   const [loadingFavorite, setLoadingFavorite] = useState(false);
+
+  useEffect(() => {
+    setIsFavorite(initialIsFavorite);
+  }, [initialIsFavorite]);
 
   // Format giá tiền
   const formatPrice = (price, currency = 'VND') => {
@@ -63,22 +67,6 @@ const RoomCard = ({ product, durationDays = 1 }) => {
       }
     }
   };
-
-  useEffect(() => {
-    let mounted = true;
-    async function fetchFavoriteStatus() {
-      try {
-        const data = await FavoritesApi.getUserFavorites();
-        if (mounted && data.favorites) {
-          setIsFavorite(data.favorites.some(f => f.ProductID === product.ProductID));
-        }
-      } catch (err) {
-        // Không cần alert khi load trạng thái ban đầu
-      }
-    }
-    fetchFavoriteStatus();
-    return () => { mounted = false; };
-  }, [product.ProductID]);
 
   // Toggle favorite
   const handleToggleFavorite = async (e) => {

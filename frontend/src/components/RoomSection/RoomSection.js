@@ -4,6 +4,7 @@ import './RoomSection.css';
 import { imageApi } from '../../api/imageApi';
 import { reviewApi } from '../../api/reviewApi';
 import { productApi } from '../../api/productApi';
+import FavoritesApi from '../../api/favoritesApi';
 import chevronLeftGrayIcon from '../../assets/chevron_left_gray.png';
 import chevronRightGrayIcon from '../../assets/chevron_right_gray.png';
 import chevronLeftBlackIcon from '../../assets/chevron_left_black.png';
@@ -16,7 +17,8 @@ const RoomSection = memo(({ title, provinceCode = '01', limit = 15 }) => {
   const [currentStartIndex, setCurrentStartIndex] = useState(0);
   const [itemsPerView] = useState(5); // Hiển thị 5 items cùng lúc
   const [scrollStep] = useState(2); // Scroll 2 items mỗi lần
-  
+  const [favoriteIds, setFavoriteIds] = useState([]);
+
   // Thêm refs để quản lý cache và request
   const cacheRef = useRef(new Map());
   const currentRequestRef = useRef(null);
@@ -160,6 +162,13 @@ const RoomSection = memo(({ title, provinceCode = '01', limit = 15 }) => {
     };
   }, [provinceCode, limit]);
 
+  useEffect(() => {
+    // Chỉ gọi 1 lần khi mount
+    FavoritesApi.getUserFavorites().then(data => {
+      setFavoriteIds((data.favorites || []).map(f => f.ProductID));
+    });
+  }, []);
+
   if (loading) {
     return (
       <section className="content-room-section">
@@ -204,7 +213,11 @@ const RoomSection = memo(({ title, provinceCode = '01', limit = 15 }) => {
           }}
         >
           {getCurrentViewProducts().map((product) => (
-            <RoomCard key={product.ProductID} product={product} />
+            <RoomCard
+              key={product.ProductID}
+              product={product}
+              isFavorite={favoriteIds.includes(product.ProductID)}
+            />
           ))}
         </div>
       </div>
