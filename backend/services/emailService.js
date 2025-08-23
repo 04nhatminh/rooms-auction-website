@@ -77,16 +77,17 @@ class EmailService {
     // Gửi email reset password
     async sendPasswordResetEmail(to, fullName, resetToken) {
         try {
-            const resetUrl = `http://localhost:3000/reset-password?token=${resetToken}`;
+            const baseUrl = process.env.CLIENT_ORIGIN|| 'http://localhost:3001';
+            const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
             
             const mailOptions = {
                 from: `"${process.env.FROM_NAME}" <${process.env.FROM_EMAIL}>`,
                 to: to,
-                subject: '🔑 Đặt lại mật khẩu A2BnB',
+                subject: '🔑 Đặt lại mật khẩu BidStay',
                 html: `
                     <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif;">
                         <div style="background: linear-gradient(135deg, #ff6b6b, #ee5a24); padding: 30px; text-align: center; color: white;">
-                            <h1 style="margin: 0;">🏠 A2BnB</h1>
+                            <h1 style="margin: 0;">🏠 BidStay</h1>
                             <p style="margin: 10px 0 0 0;">Yêu cầu đặt lại mật khẩu</p>
                         </div>
                         

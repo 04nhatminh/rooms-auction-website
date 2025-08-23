@@ -74,6 +74,10 @@ class UserModel {
                 conditions.push('VerificationToken = ?');
                 values.push(criteria.verificationToken);
             }
+            if (criteria.resetToken) {
+                conditions.push('ResetToken = ?');
+                values.push(criteria.resetToken);
+            }
 
             if (conditions.length === 0) {
                 throw new Error('Không có điều kiện tìm kiếm');
@@ -97,6 +101,8 @@ class UserModel {
                     address: user.Address,
                     verificationToken: user.VerificationToken,
                     verificationTokenExpires: user.VerificationTokenExpires,
+                    resetToken: user.ResetToken,
+                    resetTokenExpires: user.ResetTokenExpires,
                     role: user.Role,
                     rating: user.Rating,
                     createdAt: user.CreatedAt,
@@ -158,6 +164,8 @@ class UserModel {
                 isVerified: 'IsVerified',
                 verificationToken: 'VerificationToken',
                 verificationTokenExpires: 'VerificationTokenExpires',
+                resetToken: 'ResetToken',
+                resetTokenExpires: 'ResetTokenExpires',
                 rating: 'Rating',
                 dateOfBirth: 'DateOfBirth',
                 gender: 'Gender',

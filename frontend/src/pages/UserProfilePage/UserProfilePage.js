@@ -11,6 +11,15 @@ const isValidAvatarURL = (val) => {
   try { const u = new URL(s); return u.protocol === 'http:' || u.protocol === 'https:'; } catch { return false; }
 };
 
+const passwordRequirements = [
+  "Tối thiểu 8 ký tự",
+  "Có chữ hoa (A-Z)",
+  "Có chữ thường (a-z)",
+  "Có số (0-9)",
+  "Có ký tự đặc biệt (!@#$%^&*)"
+];
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/;
+
 const UserProfilePage = () => {
   const navigate = useNavigate();
   const [tab, setTab] = useState('profile');
@@ -21,6 +30,7 @@ const UserProfilePage = () => {
   const [showAvatarImg, setShowAvatarImg] = useState(false);
   const [pwdForm, setPwdForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '', show: {} });
   const [status, setStatus] = useState({ profile: '', password: '' });
+  const [showPasswordPopup, setShowPasswordPopup] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -151,6 +161,10 @@ const UserProfilePage = () => {
     setStatus(s => ({ ...s, password: '' }));
     if (!newPassword || newPassword !== confirmPassword) {
       setStatus(s => ({ ...s, password: '❌ Mật khẩu xác nhận không khớp.' }));
+      return;
+    }
+    if (!passwordRegex.test(newPassword)) {
+      setStatus(s => ({ ...s, password: '❌ Mật khẩu chưa đủ mạnh. Vui lòng kiểm tra lại các yêu cầu.' }));
       return;
     }
     if (currentPassword === newPassword) {
@@ -369,15 +383,17 @@ const UserProfilePage = () => {
                     </div>
                   </div>
 
-                  <div>
+                  <div className="md:col-span-2">
                     <label className="mb-1 block text-sm font-medium">Mật khẩu mới</label>
                     <div className="relative">
                       <input
                         id="newPassword"
                         type={pwdForm.show.newPassword ? 'text' : 'password'}
                         required
-                        minLength={6}
+                        minLength={8}
                         value={pwdForm.newPassword}
+                        onFocus={() => setShowPasswordPopup(true)}
+                        onBlur={() => setShowPasswordPopup(false)}
                         onChange={e => setPwdForm(f => ({ ...f, newPassword: e.target.value }))}
                         className="w-full rounded-xl border border-slate-300 px-3 py-2 pr-10 text-sm outline-none focus:border-slate-900"
                       />
@@ -389,8 +405,28 @@ const UserProfilePage = () => {
                       >
                         <i className="fa-regular fa-eye" />
                       </button>
+                      {showPasswordPopup && (
+                        <div style={{
+                          position: 'absolute',
+                          top: '110%',
+                          left: 0,
+                          background: '#fff',
+                          border: '1px solid #e5e7eb',
+                          borderRadius: '8px',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                          padding: '16px',
+                          zIndex: 10,
+                          width: '320px',
+                        }}>
+                          <strong>Yêu cầu mật khẩu:</strong>
+                          <ul style={{margin: '8px 0 0 0', padding: 0, listStyle: 'disc inside'}}>
+                            {passwordRequirements.map((req, idx) => (
+                              <li key={idx} style={{fontSize: '14px', color: '#374151'}}>{req}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
-                    <p className="mt-1 text-xs text-slate-500">Tối thiểu 6 ký tự, nên gồm chữ hoa, chữ thường, số.</p>
                   </div>
 
                   <div>

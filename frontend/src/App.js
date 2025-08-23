@@ -31,6 +31,8 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import CheckoutPage from './pages/CheckoutPage/CheckoutPage';
 import CheckoutReturnPage from './pages/CheckoutPage/CheckoutReturnPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage/ResetPasswordPage';
 
 function App() {
   return (
@@ -63,6 +65,8 @@ function App() {
               {/* <Route path="bookings-management" element={<BookingsManagementPage />} /> */}
             </Route>
             <Route path="/auction/:UID" element={<AuctionPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
           </Routes>
         </div>
       </Router>

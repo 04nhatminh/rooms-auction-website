@@ -159,6 +159,8 @@ async function createUsersTable() {
             IsVerified TINYINT(1) DEFAULT FALSE,
             VerificationToken VARCHAR(255),
             VerificationTokenExpires DATETIME,
+            ResetToken VARCHAR(255),
+            ResetTokenExpires DATETIME,
             Status ENUM('active','disabled','suspended','deleted') DEFAULT 'active',
             SuspendedUntil DATETIME NULL,
             UnpaidStrikeCount INT NOT NULL DEFAULT 0,

@@ -387,6 +387,56 @@ class UserController {
             return res.status(500).json({ message: 'Lỗi server.', error: error.message });
         }
     }
+
+    async requestResetPassword(req, res) {
+        try {
+            const { email } = req.body;
+            if (!email) return res.status(400).json({ message: 'Vui lòng nhập email.' });
+
+            const user = await userModel.findOne({ email });
+            if (!user) return res.status(404).json({ message: 'Email không tồn tại.' });
+
+            // Tạo reset token
+            const resetToken = require('crypto').randomBytes(32).toString('hex');
+            const resetTokenExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 giờ
+
+            await userModel.update(user.id, {
+            resetToken,
+            resetTokenExpires
+            });
+
+            // Gửi email
+            await emailService.sendPasswordResetEmail(email, user.fullName, resetToken);
+
+            return res.json({ success: true, message: 'Đã gửi email đặt lại mật khẩu.' });
+        } catch (error) {
+            console.error('Error in requestResetPassword:', error);
+            return res.status(500).json({ message: 'Lỗi server.', error: error.message });
+        }
+    }
+
+    async resetPassword(req, res) {
+        try {
+            const { token, password } = req.body;
+            if (!token || !password) return res.status(400).json({ message: 'Thiếu token hoặc mật khẩu.' });
+
+            const user = await userModel.findOne({ resetToken: token });
+            if (!user) return res.status(400).json({ message: 'Token không hợp lệ.' });
+            if (user.resetTokenExpires < new Date()) return res.status(400).json({ message: 'Token đã hết hạn.' });
+
+            const hashPassword = await require('bcryptjs').hash(password, 10);
+            await userModel.update(user.id, {
+              hashPassword,
+              resetToken: null,
+              resetTokenExpires: null
+            });
+
+            return res.json({ success: true, message: 'Đổi mật khẩu thành công.' });
+        } catch (error) {
+            console.error('Error in resetPassword:', error);
+            return res.status(500).json({ message: 'Lỗi server.', error: error.message });
+        }
+    }
 }
 
 module.exports = new UserController();
