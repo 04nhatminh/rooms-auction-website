@@ -98,7 +98,107 @@ export const auctionApi = {
             console.error('Error fetching auction details:', error);
             throw error;
         }
+    },
+
+    // Lấy các auctions ending soon
+    getEndingSoonAuctions: async (limit, abortSignal = null) => {
+        try {
+            const fetchOptions = {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            };
+
+            // Thêm AbortSignal nếu được cung cấp
+            if (abortSignal) {
+                fetchOptions.signal = abortSignal;
+            }
+
+            const response = await fetch(`${API_BASE_URL}/api/auction/ending-soon?limit=${limit}`, fetchOptions);
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                console.log('Auction API request was aborted');
+                throw error;
+            }
+            console.error('Error fetching ending soon auctions:', error);
+            throw error;
+        }
+    },
+
+    // Lấy các auctions hot (featured)
+    getFeaturedAuctions: async (limit, abortSignal = null) => {
+        try {
+            const fetchOptions = {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            };
+
+            // Thêm AbortSignal nếu được cung cấp
+            if (abortSignal) {
+                fetchOptions.signal = abortSignal;
+            }
+
+            const response = await fetch(`${API_BASE_URL}/api/auction/featured?limit=${limit}`, fetchOptions);
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                console.log('Auction API request was aborted');
+                throw error;
+            }
+            console.error('Error fetching featured auctions:', error);
+            throw error;
+        }
+    },
+
+    // Lấy các auctions mới nhất
+    getNewestAuctions: async (limit, abortSignal = null) => {
+        try {
+            const fetchOptions = {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            };
+
+            // Thêm AbortSignal nếu được cung cấp
+            if (abortSignal) {
+                fetchOptions.signal = abortSignal;
+            }
+
+            const response = await fetch(`${API_BASE_URL}/api/auction/newest?limit=${limit}`, fetchOptions);
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                console.log('Auction API request was aborted');
+                throw error;
+            }
+            console.error('Error fetching newest auctions:', error);
+            throw error;
+        }
     }
+
 };
 
 export default auctionApi;

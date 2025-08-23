@@ -413,7 +413,7 @@ async function createAuctionTable() {
             StayPeriodEnd DATE,
             StartTime TIMESTAMP NULL DEFAULT NULL,
             EndTime TIMESTAMP NULL DEFAULT NULL,
-            InstantPrice DECIMAL(10, 2),
+            MaxBidID INT UNSIGNED,
             StartPrice DECIMAL(10, 2),
             BidIncrement DECIMAL(10, 2),
             CurrentPrice DECIMAL(10, 2),
@@ -449,10 +449,8 @@ async function createBidsTable() {
             UserID INT,
             Amount DECIMAL(9, 2),
             BidTime TIMESTAMP,
-            PaymentMethodID INT,
             FOREIGN KEY (AuctionID) REFERENCES Auction(AuctionID),
-            FOREIGN KEY (UserID) REFERENCES Users(UserID),
-            FOREIGN KEY (PaymentMethodID) REFERENCES PaymentMethods(MethodID)
+            FOREIGN KEY (UserID) REFERENCES Users(UserID)
         )
     `);
     

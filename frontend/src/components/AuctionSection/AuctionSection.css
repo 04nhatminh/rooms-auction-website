@@ -1,0 +1,125 @@
+.content-auction-section {
+  padding: 16px 56px;
+}
+
+.auction-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.auction-section-header h2 {
+  color: #000;
+  font-family: Montserrat;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  margin: 0px;
+}
+
+.auction-section-arrows {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.auction-section-arrows button {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity 0.2s ease;
+}
+
+.auction-section-arrows img {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  aspect-ratio: 1/1;
+}
+
+.auction-section-arrows button.enabled {
+  opacity: 1;
+  background: #ECECEC;;
+  border: none;
+  border-radius: 50px;
+}
+
+.auction-section-arrows button.enabled:hover {
+  transform: scale(1.1);
+}
+
+.auction-section-arrows button.disabled {
+  opacity: 1;
+  cursor: not-allowed;
+  background: transparent;
+  border: 1px solid #e7e7e7;
+  border-radius: 50px;
+}
+
+.auction-card-container {
+  padding-top: 4px;
+  width: 100%;
+  overflow: hidden; /* Ẩn phần content bị overflow */
+  position: relative;
+}
+
+.auction-card-slider {
+  display: flex;
+  gap: 1.5rem;
+  transition: transform 0.5s ease-in-out;
+}
+
+.auction-card-slider .auction-card {
+  flex: 0 0 calc(20% - 1.2rem); /* Mỗi card chiếm 20% width container trừ gap */
+  min-width: 0;
+}
+
+/* Loading States */
+.loading-container {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.5rem;
+  width: 100%;
+}
+
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .auction-card-slider .auction-card {
+    flex: 0 0 calc(25% - 1.2rem); /* 4 cards trên tablet */
+  }
+}
+
+@media (max-width: 768px) {
+  .content-auction-section {
+    padding: 20px 24px;
+  }
+  
+  .auction-card-slider .auction-card {
+    flex: 0 0 calc(33.33% - 1rem); /* 3 cards trên mobile */
+  }
+  
+  .auction-card-slider {
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .content-auction-section {
+    padding: 20px 16px;
+  }
+  
+  .auction-card-slider .auction-card {
+    flex: 0 0 calc(50% - 0.5rem); /* 2 cards trên mobile nhỏ */
+  }
+  
+  .auction-card-slider {
+    gap: 1rem;
+  }
+}

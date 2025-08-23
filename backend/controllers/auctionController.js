@@ -120,6 +120,90 @@ class AuctionController {
             });
         }
     }
+
+    // GET /api/auction/ending-soon
+    static async getEndingSoonAuctions(req, res) {
+        console.log('GET /api/auction/ending-soon');
+        const limit = req.query.limit || 15;
+
+        try {
+            const auctions = await AuctionModel.getEndingSoonAuctions(limit);
+
+            return res.status(200).json({
+                success: true,
+                message: 'Auctions ending soon',
+                data: {
+                    totalAuctions: auctions.length,
+                    auctions
+                }
+            });
+
+        } catch (error) {
+            console.error('Error in getEndingSoonAuctions:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Internal server error',
+                error: error.message,
+                stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+            });
+        }
+    }
+
+    // GET /api/auction/featured
+    static async getFeaturedAuctions(req, res) {
+        console.log('GET /api/auction/featured');
+        const limit = req.query.limit || 15;
+
+        try {
+            const auctions = await AuctionModel.getFeaturedAuctions(limit);
+
+            return res.status(200).json({
+                success: true,
+                message: 'Featured auctions',
+                data: {
+                    totalAuctions: auctions.length,
+                    auctions
+                }
+            });
+
+        } catch (error) {
+            console.error('Error in getFeaturedAuctions:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Internal server error',
+                error: error.message,
+                stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+            });
+        }
+    }
+
+    // GET /api/auction/newest
+    static async getNewestAuctions(req, res) {
+        console.log('GET /api/auction/newest');
+        const limit = req.query.limit || 15;
+
+        try {
+            const auctions = await AuctionModel.getNewestAuctions(limit);
+
+            return res.status(200).json({
+                success: true,
+                message: 'Newest auctions',
+                data: {
+                    totalAuctions: auctions.length,
+                    auctions
+                }
+            });
+
+        } catch (error) {
+            console.error('Error in getNewestAuctions:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Internal server error',
+                error: error.message,
+                stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+            });
+        }
+    }
 }
 
 module.exports = AuctionController;

@@ -2,9 +2,11 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from '../../contexts/LocationContext';
 import { useUser } from '../../contexts/UserContext';
+import auctionApi from '../../api/auctionApi';
 import SearchBar from '../../components/SearchBar/SearchBar';
 import CardSection from '../../components/CardSection/CardSection';
 import RoomSection from '../../components/RoomSection/RoomSection';
+import AuctionSection from '../../components/AuctionSection/AuctionSection';
 import SignInUpAction from '../../components/SignInUpAction/SignInUpAction';
 import HeaderUserMenu from '../../components/HeaderUserMenu/HeaderUserMenu';
 import Footer from '../../components/Footer/Footer';
@@ -65,6 +67,7 @@ const HomePage = () => {
     }
   };
   
+  // Memoize các props để tránh tạo object mới mỗi lần render
   const accommodationTypes = useMemo(() => [
     { image: KhachSanImg, title: 'Khách sạn', roomTypeId: '1' },
     { image: CanHoImg, title: 'Căn hộ', roomTypeId: '2' },
@@ -81,7 +84,12 @@ const HomePage = () => {
     { image: NhaTrangImg, title: 'Nha Trang', provinceCode: '56' },
   ], []);
 
-  // Memoize các props cho RoomSection để tránh tạo object mới mỗi lần render
+  const auctionSectionConfigs = useMemo(() => [
+    { type: "ending-soon", title: "Nhanh tay kẻo lỡ – Đấu giá sắp đóng!", limit: 15 },
+    { type: "featured", title: "Đấu giá đang cháy, tham gia ngay!", limit: 15 },
+    { type: "newest",title: "Vừa cập nhật – Phiên đấu giá mới tinh!", limit: 15 }
+  ], []);
+
   const roomSectionConfigs = useMemo(() => [
     { title: "Nơi lưu trú được ưa chuộng tại Hà Nội", provinceCode: "01", limit: 15 },
     { title: "Chỗ ở còn phòng tại Đà Lạt", provinceCode: "68", limit: 15 },
@@ -126,6 +134,14 @@ const HomePage = () => {
           items={destinations} 
           onItemClick={handleDestinationClick}
         />
+        {auctionSectionConfigs.map((config, index) => (
+          <AuctionSection 
+            key={`${config.type}-${config.limit}`}
+            type={config.type}
+            title={config.title}
+            limit={config.limit}
+          />
+        ))}
         {roomSectionConfigs.map((config, index) => (
           <RoomSection 
             key={`${config.provinceCode}-${config.limit}`}
