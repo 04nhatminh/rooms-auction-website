@@ -225,7 +225,7 @@ export const productApi = {
         }
     },
 
-    // Lấy danh sách amenity groups và amenities
+    // Lấy danh sách amenity groups
     getAmenityGroups: async () => {
         try {
             const response = await fetch(`${API_BASE_URL}/api/room/amenity-groups`, {
@@ -242,6 +242,27 @@ export const productApi = {
             return data;
         } catch (error) {
             console.error('Error fetching amenity groups:', error);
+            throw error;
+        }
+    },
+
+    // Lấy danh sách amenities
+    getAmenities: async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/room/amenities`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error fetching amenities:', error);
             throw error;
         }
     },

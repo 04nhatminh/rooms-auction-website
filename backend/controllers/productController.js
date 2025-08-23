@@ -160,7 +160,7 @@ class ProductController {
         }
     }
 
-    // GET /api/properties/types - Lấy danh sách property types
+    // GET /api/room/properties/types - Lấy danh sách property types
     static async getAllPropertyTypes(req, res) {
         try {
             const types = await ProductModel.getAllPropertyTypes();
@@ -170,6 +170,60 @@ class ProductController {
             });
         } catch (error) {
             console.error('Error in getAllPropertyTypes:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Internal server error',
+                error: error.message
+            });
+        }
+    }
+
+    // GET /api/room/room-types - Lấy danh sách room types
+    static async getAllRoomTypes(req, res) {
+        try {
+            const types = await ProductModel.getAllRoomTypes();
+            return res.status(200).json({
+                success: true,
+                data: types
+            });
+        } catch (error) {
+            console.error('Error in getAllRoomTypes:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Internal server error',
+                error: error.message
+            });
+        }
+    }
+
+    // GET /api/room/amenity-groups - Lấy danh sách amenity groups
+    static async getAllAmenityGroups(req, res) {
+        try {
+            const types = await ProductModel.getAllAmenityGroups();
+            return res.status(200).json({
+                success: true,
+                data: types
+            });
+        } catch (error) {
+            console.error('Error in getAllAmenityGroups:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Internal server error',
+                error: error.message
+            });
+        }
+    }
+
+    // GET /api/room/amenities - Lấy danh sách amenities
+    static async getAllAmenities(req, res) {
+        try {
+            const types = await ProductModel.getAllAmenities();
+            return res.status(200).json({
+                success: true,
+                data: types
+            });
+        } catch (error) {
+            console.error('Error in getAllAmenities:', error);
             return res.status(500).json({
                 success: false,
                 message: 'Internal server error',

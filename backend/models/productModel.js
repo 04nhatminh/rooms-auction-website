@@ -398,6 +398,42 @@ class ProductModel {
             throw error;
         }
     }
+
+    // Lấy danh sách room types từ bảng RoomTypes
+    static async getAllRoomTypes() {
+        try {
+            const query = 'SELECT RoomTypeID, RoomTypeName FROM RoomTypes ORDER BY RoomTypeID ASC';
+            const [rows] = await pool.execute(query);
+            return rows;
+        } catch (error) {
+            console.error('Error fetching room types:', error);
+            throw error;
+        }
+    }
+
+    // Lấy danh sách amenity groups từ bảng AmenityGroups
+    static async getAllAmenityGroups() {
+        try {
+            const query = 'SELECT AmenityGroupID, AmenityGroupName FROM AmenityGroups ORDER BY AmenityGroupID ASC';
+            const [rows] = await pool.execute(query);
+            return rows;
+        } catch (error) {
+            console.error('Error fetching amenity groups:', error);
+            throw error;
+        }
+    }
+
+    // Lấy danh sách amenities từ bảng Amenities
+    static async getAllAmenities() {
+        try {
+            const query = 'SELECT AmenityID, AmenityName, AmenityGroupID FROM Amenities ORDER BY AmenityID ASC';
+            const [rows] = await pool.execute(query);
+            return rows;
+        } catch (error) {
+            console.error('Error fetching amenities:', error);
+            throw error;
+        }
+    }
 }
 
 // Initialize MongoDB connection when module is loaded

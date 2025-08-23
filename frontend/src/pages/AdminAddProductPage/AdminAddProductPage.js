@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import LocationAPI from '../../api/locationApi';
 import productApi from '../../api/productApi';
 import PageHeader from '../../components/PageHeader/PageHeader';
+import ChevronUpIcon from '../../assets/up.png'
+import ChevronDownIcon from '../../assets/down.png'
 
 import styles from './AdminAddProductPage.module.css';
 
@@ -37,6 +39,7 @@ const AdminAddProductPage = () => {
   const [roomTypes, setRoomTypes] = useState([]);
   const [propertyTypes, setPropertyTypes] = useState([]);
   const [amenityGroups, setAmenityGroups] = useState([]);
+  const [amenities, setAmenities] = useState([]);
   
   // Loading states
   const [loading, setLoading] = useState(false);
@@ -44,7 +47,12 @@ const AdminAddProductPage = () => {
   const [loadingDistricts, setLoadingDistricts] = useState(true);
   const [loadingPropertyTypes, setLoadingPropertyTypes] = useState(true);
   const [loadingRoomTypes, setLoadingRoomTypes] = useState(true);
+  const [loadingAmenityGroups, setLoadingAmenityGroups] = useState(true);
   const [loadingAmenities, setLoadingAmenities] = useState(true);
+
+  // Amenity groups collapse state
+  const [collapsedGroups, setCollapsedGroups] = useState({});
+
 
   // Load provinces, districts, and other data on component mount
   useEffect(() => {
@@ -53,7 +61,19 @@ const AdminAddProductPage = () => {
     loadPropertyTypes();
     loadRoomTypes();
     loadAmenityGroups();
+    loadAmenities();
   }, []);
+
+  // Initialize collapsed state for all amenity groups (default to collapsed)
+  useEffect(() => {
+    if (amenityGroups.length > 0) {
+      const initialCollapsedState = {};
+      amenityGroups.forEach(group => {
+        initialCollapsedState[group.AmenityGroupID] = true; // true = collapsed
+      });
+      setCollapsedGroups(initialCollapsedState);
+    }
+  }, [amenityGroups]);
 
   // Filter districts when province changes
   useEffect(() => {
@@ -132,6 +152,19 @@ const AdminAddProductPage = () => {
     } catch (error) {
       console.error('Error loading amenity groups:', error);
     } finally {
+      setLoadingAmenityGroups(false);
+    }
+  };
+
+  const loadAmenities = async () => {
+    try {
+      const response = await productApi.getAmenities();
+      if (response.success) {
+        setAmenities(response.data || []);
+      }
+    } catch (error) {
+      console.error('Error loading amenities:', error);
+    } finally {
       setLoadingAmenities(false);
     }
   };
@@ -192,12 +225,41 @@ const AdminAddProductPage = () => {
     }
   };
 
+  // Map amenities với groups
+  const getAmenitiesByGroup = () => {
+    const groupedAmenities = {};
+    
+    // Khởi tạo các groups
+    amenityGroups.forEach(group => {
+      groupedAmenities[group.AmenityGroupID] = {
+        ...group,
+        amenities: []
+      };
+    });
+    
+    // Map amenities vào groups tương ứng
+    amenities.forEach(amenity => {
+      if (groupedAmenities[amenity.AmenityGroupID]) {
+        groupedAmenities[amenity.AmenityGroupID].amenities.push(amenity);
+      }
+    });
+    
+    return Object.values(groupedAmenities);
+  };
+
   const handleAmenityChange = (amenityId) => {
     setFormData(prev => ({
       ...prev,
       amenities: prev.amenities.includes(amenityId)
         ? prev.amenities.filter(a => a !== amenityId)
         : [...prev.amenities, amenityId]
+    }));
+  };
+
+  const toggleAmenityGroup = (groupId) => {
+    setCollapsedGroups(prev => ({
+      ...prev,
+      [groupId]: !prev[groupId]
     }));
   };
 
@@ -596,26 +658,40 @@ const AdminAddProductPage = () => {
               {/* Amenities */}
               <div className={styles.section}>
                 <h3 className={styles.sectionTitle}>Tiện nghi</h3>
-                {loadingAmenities ? (
+                {loadingAmenityGroups || loadingAmenities ? (
                   <p>Đang tải tiện nghi...</p>
                 ) : (
-                  amenityGroups.map(group => (
-                    <div key={group.AmenityGroupID} className={styles.amenityGroup}>
-                      <h4 className={styles.amenityGroupTitle}>{group.AmenityGroupName}</h4>
-                      <div className={styles.amenitiesGrid}>
-                        {group.Amenities && group.Amenities.map(amenity => (
-                          <label key={amenity.AmenityID} className={styles.checkboxLabel}>
-                            <input
-                              type="checkbox"
-                              checked={formData.amenities.includes(amenity.AmenityID)}
-                              onChange={() => handleAmenityChange(amenity.AmenityID)}
-                              className={styles.checkbox}
-                            />
-                            <span className={styles.checkboxText}>{amenity.AmenityName}</span>
-                          </label>
-                        ))}
+                  getAmenitiesByGroup().map(group => (
+                    group.amenities.length > 0 && (
+                      <div key={group.AmenityGroupID} className={styles.amenityGroup}>
+                        <div 
+                          className={styles.amenityGroupHeader}
+                          onClick={() => toggleAmenityGroup(group.AmenityGroupID)}
+                        >
+                          <label className={styles.label}>{group.AmenityGroupName}</label>
+                          <img
+                            src={collapsedGroups[group.AmenityGroupID] ? ChevronDownIcon : ChevronUpIcon}
+                            alt={collapsedGroups[group.AmenityGroupID] ? 'Expand' : 'Collapse'}
+                            className={styles.chevronIcon}
+                          />
+                        </div>
+                        {!collapsedGroups[group.AmenityGroupID] && (
+                          <div className={styles.amenitiesGrid}>
+                            {group.amenities.map(amenity => (
+                              <label key={amenity.AmenityID} className={styles.checkboxLabel}>
+                                <input
+                                  type="checkbox"
+                                  checked={formData.amenities.includes(amenity.AmenityID)}
+                                  onChange={() => handleAmenityChange(amenity.AmenityID)}
+                                  className={styles.checkbox}
+                                />
+                                <span className={styles.checkboxText}>{amenity.AmenityName}</span>
+                              </label>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                    </div>
+                    )
                   ))
                 )}
               </div>

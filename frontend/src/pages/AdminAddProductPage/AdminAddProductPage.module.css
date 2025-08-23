@@ -67,9 +67,7 @@
   font-weight: 500;
   color: #374151;
   margin-top: 0 !important;
-  margin-bottom: 0.5rem;
   font-size: 0.875rem;
-  margin-right: 4px;
 }
 
 .required {
@@ -140,6 +138,7 @@
   font-size: 0.875rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   background-color: #fff;
+  margin-top: 4px;
   margin-bottom: 4px;
 }
 
@@ -199,16 +198,47 @@
 }
 
 /* --- Amenities Grid --- */
+.amenityGroup {
+  margin-bottom: 1.5rem;
+}
+
+.amenityGroupHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background-color: #f9fafb;
+  transition: background-color 0.2s ease;
+}
+
+.amenityGroupHeader:hover {
+  background-color: #f3f4f6;
+}
+
+.chevronIcon {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.2s ease;
+}
+
 .amenitiesGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 0.75rem;
-  margin-top: 1rem;
+  margin-top: 0.5rem;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  background-color: #fff;
 }
 
 .checkboxLabel {
   display: flex;
-  align-items: center;
+  align-items: start;
   cursor: pointer;
   padding: 0.5rem;
   border-radius: 6px;
@@ -227,8 +257,10 @@
 }
 
 .checkboxText {
-  font-size: 0.875rem;
-  color: #374151;
+  justify-content: center;
+  font-family: Montserrat;
+  font-size: 13px;
+  color: #333;
 }
 
 /* --- File Input --- */

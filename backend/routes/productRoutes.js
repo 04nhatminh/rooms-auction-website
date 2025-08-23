@@ -16,10 +16,19 @@ router.post('/admin/create', verifyToken, ProductController.createProduct);
 router.put('/admin/:id', verifyToken, ProductController.updateProduct);
 router.delete('/admin/:id', verifyToken, ProductController.deleteProduct);
 
-// GET /room/id - Lấy chi tiết sản phẩm theo Product ID
-router.get('/:UID', ProductController.getFullProductDataByProductId);
-
-// GET /api/properties/types - Lấy danh sách property types
+// GET /api/room/properties/types - Lấy danh sách property types
 router.get('/properties/types', ProductController.getAllPropertyTypes);
+
+// GET /api/room/room-types - Lấy danh sách room types
+router.get('/room-types', ProductController.getAllRoomTypes);
+
+// GET /api/room/amenity-groups - Lấy danh sách amenity groups
+router.get('/amenity-groups', ProductController.getAllAmenityGroups);
+
+// GET /api/room/amenities - Lấy danh sách amenities
+router.get('/amenities', ProductController.getAllAmenities);
+
+// GET /api/room/id - Lấy chi tiết sản phẩm theo Product ID
+router.get('/:UID', ProductController.getFullProductDataByProductId);
 
 module.exports = router;
