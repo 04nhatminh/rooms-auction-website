@@ -32,3 +32,21 @@
   margin: 32px 0;
   padding: 0px 64px;
 }
+
+@media screen and (max-width: 1200px) {
+  .room-detail-content {
+    margin: 0 32px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .room-detail-content .room-main-content {
+    grid-template-columns: 1fr;
+  }
+
+  .room-detail-content .left-column,
+  .room-detail-content .right-column {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
