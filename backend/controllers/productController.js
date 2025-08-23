@@ -275,25 +275,17 @@ class ProductController {
         }
     }
 
-    // POST /api/room/admin/create - Tạo sản phẩm mới
-    static async createProduct(req, res) {
+    // POST /api/room/admin/add-product - Tạo sản phẩm mới
+    static async addProduct(req, res) {
         try {
-            // Validation cơ bản
-            const { name, region, provinceCode, price } = req.body;
-            if (!name || !region || !provinceCode || !price) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Tên sản phẩm, vùng miền, tỉnh và giá là bắt buộc'
-                });
-            }
-            const result = await ProductModel.createProduct(req.body);
+            const result = await ProductModel.addProduct(req.body);
             return res.status(201).json({
                 success: true,
                 message: 'Tạo sản phẩm thành công',
                 data: result
             });
         } catch (error) {
-            console.error('Error in createProduct:', error);
+            console.error('Error in addProduct:', error);
             return res.status(500).json({
                 success: false,
                 message: 'Internal server error',

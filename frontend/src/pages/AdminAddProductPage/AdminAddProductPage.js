@@ -15,21 +15,20 @@ const AdminAddProductPage = () => {
   const [formData, setFormData] = useState({
     name: '',
     roomType: '',
-    roomNumber: '',
+    propertyType: '',
     bedrooms: 1,
     beds: 1,
     bathrooms: 1,
     maxGuests: 1,
+    price: '',
     descriptions: [{ title: null, htmlText: '' }],
     provinceCode: '',
     districtCode: '',
     address: '',
-    propertyType: '',
     amenities: [],
     houseRules: [''],
     safetyProperties: [''],
-    images: [],
-    price: ''
+    images: []
   });
 
   // Data for dropdowns
@@ -52,7 +51,6 @@ const AdminAddProductPage = () => {
 
   // Amenity groups collapse state
   const [collapsedGroups, setCollapsedGroups] = useState({});
-
 
   // Load provinces, districts, and other data on component mount
   useEffect(() => {
@@ -290,32 +288,39 @@ const AdminAddProductPage = () => {
       alert('Vui lòng nhập tên sản phẩm');
       return;
     }
+
     if (!formData.roomType) {
       alert('Vui lòng chọn loại chỗ ở');
       return;
     }
+
+    if (!formData.propertyType) {
+      alert('Vui lòng chọn hình thức chỗ ở');
+      return;
+    }
+
+    if (!formData.price) {
+      alert('Vui lòng nhập giá phòng');
+      return;
+    }
+
     if (!formData.descriptions[0].htmlText.trim()) {
       alert('Vui lòng nhập mô tả');
       return;
     }
+
     if (!formData.provinceCode) {
-      alert('Vui lòng chọn tỉnh/thành phố');
+      alert('Vui lòng chọn tỉnh');
       return;
     }
+
     if (!formData.districtCode) {
-      alert('Vui lòng chọn quận/huyện');
+      alert('Vui lòng chọn thành phố/quận/huyện');
       return;
     }
+
     if (!formData.address.trim()) {
       alert('Vui lòng nhập địa chỉ');
-      return;
-    }
-    if (!formData.propertyType) {
-      alert('Vui lòng chọn loại hình bất động sản');
-      return;
-    }
-    if (!formData.price) {
-      alert('Vui lòng nhập giá phòng');
       return;
     }
 
@@ -332,24 +337,25 @@ const AdminAddProductPage = () => {
       const productDataToSubmit = {
         name: formData.name.trim(),
         roomType: formData.roomType,
-        roomNumber: formData.roomNumber.trim(),
+        propertyType: formData.propertyType,
         bedrooms: formData.bedrooms,
         beds: formData.beds,
         bathrooms: formData.bathrooms,
         maxGuests: formData.maxGuests,
+        price: formData.price,
         descriptions: formData.descriptions.filter(desc => desc.htmlText.trim()),
         provinceCode: formData.provinceCode,
         districtCode: formData.districtCode,
         address: formData.address.trim(),
-        propertyType: formData.propertyType,
         amenities: formData.amenities,
         houseRules: formData.houseRules.filter(rule => rule.trim()),
         safetyProperties: formData.safetyProperties.filter(prop => prop.trim()),
-        images: formData.images,
-        price: formData.price
+        images: formData.images
       };
 
-      await productApi.createProduct(productDataToSubmit, token);
+      console.log('Product data to submit:', productDataToSubmit);
+
+      await productApi.addProduct(productDataToSubmit, token);
       alert('Tạo sản phẩm thành công!');
       navigate('/admin/products-management');
     } catch (error) {

@@ -6,7 +6,7 @@ let db = null;
 async function connectToMongoDB() {
     if (!db) {
         try {
-            const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/a2airbnb';
+            const mongoUri = process.env.MONGODB_URI || 'mongodb+srv://11_a2airbnb:anhmanminhnhu@cluster0.cyihew1.mongodb.net/';
             const client = new MongoClient(mongoUri);
             await client.connect();
             db = client.db('a2airbnb');

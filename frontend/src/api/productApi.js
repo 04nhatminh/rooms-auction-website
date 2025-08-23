@@ -67,9 +67,9 @@ export const productApi = {
     },
 
     // Tạo sản phẩm mới (Admin)
-    createProduct: async (productData, token) => {
+    addProduct: async (productData, token) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/room/admin/create`, {
+            const response = await fetch(`${API_BASE_URL}/api/room/admin/add-product`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
