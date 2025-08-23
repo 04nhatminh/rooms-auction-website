@@ -16,10 +16,10 @@ const AdminAddProductPage = () => {
     name: '',
     roomType: '',
     propertyType: '',
-    bedrooms: 1,
-    beds: 1,
-    bathrooms: 1,
-    maxGuests: 1,
+    bedrooms: '',
+    beds: '',
+    bathrooms: '',
+    maxGuests: '',
     price: '',
     descriptions: [{ title: null, htmlText: '' }],
     provinceCode: '',
@@ -171,7 +171,7 @@ const AdminAddProductPage = () => {
     const { name, value, type } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'number' ? parseInt(value) || 0 : value
+      [name]: type === 'number' ? (value === '' ? '' : parseInt(value, 10) || 1) : value
     }));
   };
 
@@ -465,7 +465,8 @@ const AdminAddProductPage = () => {
                       onChange={handleInputChange}
                       className={styles.input}
                       placeholder="Nhập số phòng ngủ"
-                      min="0"
+                      min={1}
+                      required
                     />
                   </div>
 
@@ -478,7 +479,8 @@ const AdminAddProductPage = () => {
                       onChange={handleInputChange}
                       className={styles.input}
                       placeholder="Nhập số giường ngủ"
-                      min="0"
+                      min={1}
+                      required
                     />
                   </div>
                 </div>
@@ -493,7 +495,8 @@ const AdminAddProductPage = () => {
                       onChange={handleInputChange}
                       className={styles.input}
                       placeholder="Nhập số phòng tắm"
-                      min="0"
+                      min={1}
+                      required
                     />
                   </div>
 
@@ -506,7 +509,8 @@ const AdminAddProductPage = () => {
                       onChange={handleInputChange}
                       className={styles.input}
                       placeholder="Nhập số khách tối đa"
-                      min="1"
+                      min={1}
+                      required
                     />
                   </div>
                 </div>
@@ -522,7 +526,7 @@ const AdminAddProductPage = () => {
                     onChange={handleInputChange}
                     className={styles.input}
                     placeholder="Nhập giá phòng"
-                    min="0"
+                    min={0}
                     required
                   />
                 </div>
