@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import FavoritesApi from '../../api/favoritesApi';
-import HeaderSimple from '../../components/HeaderSimple/HeaderSimple';
+import Header from '../../components/Header/Header';
 
 const API_BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:3000';
 
@@ -76,7 +76,7 @@ const FavoritePage = () => {
 
     return React.createElement('div', { className: "min-h-dvh bg-slate-100" },
         // Header
-        React.createElement(HeaderSimple),
+        React.createElement(Header),
 
         // Main Content
         React.createElement('main', { className: "mx-auto max-w-6xl px-4 py-6" },

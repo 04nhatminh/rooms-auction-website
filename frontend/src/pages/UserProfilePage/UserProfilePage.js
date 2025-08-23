@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UserAPI from '../../api/userApi';
-import HeaderSimple from '../../components/HeaderSimple/HeaderSimple';
+import Header from '../../components/Header/Header';
 
 const isValidAvatarURL = (val) => {
   if (!val || typeof val !== 'string') return false;
@@ -173,7 +173,7 @@ const UserProfilePage = () => {
 
   return (
     <div className="min-h-dvh bg-slate-100 text-slate-800">
-      <HeaderSimple />
+      <Header />
 
       <main className="mx-auto max-w-5xl px-4 py-6">
         <h1 className="text-xl font-semibold mb-4">Quản lý Hồ sơ của bạn</h1>

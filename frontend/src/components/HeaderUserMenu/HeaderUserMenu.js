@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../contexts/UserContext';
 import menuIcon from '../../assets/menu.png';
+import UserAvatar from '../UserAvatar/UserAvatar';
 import './HeaderUserMenu.css';
 
 const HeaderUserMenu = () => {
@@ -15,7 +16,7 @@ const HeaderUserMenu = () => {
 
   return (
     <div className="dropdown-user-info" >
-      <button className="circle-btn user-btn">U</button>
+      <UserAvatar size="medium" />
       <button
         className="circle-btn menu-btn btn"
         type="button"

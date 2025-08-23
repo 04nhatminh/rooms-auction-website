@@ -1,6 +1,7 @@
 .header {
   --header-top-h: 72px;
   position: relative;
+  background-color: #fff;
   border-bottom: 1px solid #DDDDDD;
   padding: 2px 48px 4px;
   height: auto; 

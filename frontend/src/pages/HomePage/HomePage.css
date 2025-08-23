@@ -20,7 +20,7 @@
 }
 
 .home-logo-text {
-  background: linear-gradient(180deg, #ffffff 0%, #85e8e6 100%) !important;
+  background: #fff !important;
   background-clip: text !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;

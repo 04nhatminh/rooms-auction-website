@@ -57,7 +57,7 @@
 }
 
 .header-search-button {
-  background-color: #278C9F;
+  background: linear-gradient(135deg, #278C9F, #53B0BC);
   color: white;
   border: none;
   border-radius: 50%;
