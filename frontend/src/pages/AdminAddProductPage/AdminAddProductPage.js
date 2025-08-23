@@ -167,6 +167,10 @@ const AdminAddProductPage = () => {
     }
   };
 
+  const preventNumberScroll = (e) => {
+    e.currentTarget.blur(); // bỏ focus để wheel không tăng/giảm số
+  };
+
   const handleInputChange = (e) => {
     const { name, value, type } = e.target;
     setFormData(prev => ({
@@ -463,6 +467,7 @@ const AdminAddProductPage = () => {
                       name="bedrooms"
                       value={formData.bedrooms}
                       onChange={handleInputChange}
+                      onWheel={preventNumberScroll}
                       className={styles.input}
                       placeholder="Nhập số phòng ngủ"
                       min={1}
@@ -477,6 +482,7 @@ const AdminAddProductPage = () => {
                       name="beds"
                       value={formData.beds}
                       onChange={handleInputChange}
+                      onWheel={preventNumberScroll}
                       className={styles.input}
                       placeholder="Nhập số giường ngủ"
                       min={1}
@@ -493,6 +499,7 @@ const AdminAddProductPage = () => {
                       name="bathrooms"
                       value={formData.bathrooms}
                       onChange={handleInputChange}
+                      onWheel={preventNumberScroll}
                       className={styles.input}
                       placeholder="Nhập số phòng tắm"
                       min={1}
@@ -507,6 +514,7 @@ const AdminAddProductPage = () => {
                       name="maxGuests"
                       value={formData.maxGuests}
                       onChange={handleInputChange}
+                      onWheel={preventNumberScroll}
                       className={styles.input}
                       placeholder="Nhập số khách tối đa"
                       min={1}
@@ -524,6 +532,7 @@ const AdminAddProductPage = () => {
                     name="price"
                     value={formData.price}
                     onChange={handleInputChange}
+                    onWheel={preventNumberScroll}
                     className={styles.input}
                     placeholder="Nhập giá phòng"
                     min={0}
