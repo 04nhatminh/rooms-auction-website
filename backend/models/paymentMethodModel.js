@@ -8,7 +8,7 @@ class PaymentMethodModel {
      * - Token = payerId (chỉ nhận diện)
      * Trả về methodId (tạo mới nếu chưa có; nếu đã có thì trả lại cái cũ).
      */
-    static async upsertDisplayPaypalMethod(userId, payerId, payerEmail )
+    static async upsertDisplayPaypalMethod(userId, payerId, payerEmail)
     {
         try {
             const provider = 'PayPal';
@@ -77,9 +77,42 @@ class PaymentMethodModel {
     console.log(`Upserted PayPal VAULT for user ${userId} -> method ${nextId}`);
     return nextId;
     } catch (err) {
-    console.error('Error upserting PayPal VAULT method:', err);
-    throw err;
+        console.error('Error upserting PayPal VAULT method:', err);
+        throw err;
+        }
     }
+
+    static async upsertZaloPayMethod(userId, accountIdentifier = 'zalopay') {
+        try {
+            const provider = 'ZALOPAY';
+            const token = 'ZALOPAY'; // ZP chưa có "vault token" tái sử dụng; ta dùng hằng để nhận diện
+
+            // Tìm method trùng (UserID, Provider, Token)
+            const [exist] = await pool.query(
+            `SELECT MethodID FROM PaymentMethods
+            WHERE UserID=? AND Provider=? AND Token=? LIMIT 1`,
+            [userId, provider, token]
+            );
+            if (exist.length) return exist[0].MethodID;
+
+            // Tạo MethodID thủ công như các hàm PayPal của bạn
+            const [maxRow] = await pool.query(
+            `SELECT COALESCE(MAX(MethodID),0)+1 AS nextId FROM PaymentMethods`
+            );
+            const nextId = maxRow[0]?.nextId || 1;
+
+            await pool.query(
+            `INSERT INTO PaymentMethods
+            (MethodID, AccountIdentifier, Token, Provider, IsDefault, UserID, CreatedAt)
+            VALUES (?, ?, ?, ?, 0, ?, NOW());`,
+            [nextId, accountIdentifier, token, provider, userId]
+            );
+
+            return nextId;
+        } catch (err) {
+            console.error('Error upserting ZaloPay method:', err);
+            throw err;
+        }
     }
 };
 

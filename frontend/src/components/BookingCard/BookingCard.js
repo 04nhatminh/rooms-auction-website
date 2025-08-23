@@ -20,6 +20,13 @@ const useCurrentUserId = () => useMemo(() => {
     } catch { return null; }
 }, []);
 
+const pad = (n) => String(n).padStart(2, '0');
+const ymdLocal = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const parseYmdLocal = (s) => {
+  const [y, m, dd] = s.split('-').map(Number);
+  return new Date(y, m - 1, dd); // local date
+};
+
 const BookingCard = () => {
   const navigate = useNavigate();
   const { UID } = useParams();

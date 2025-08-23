@@ -80,4 +80,4 @@ class BookingModel {
     }
 }
 
-module.exports = new BookingModel();
+module.exports = BookingModel;
