@@ -498,6 +498,12 @@ async function createAuctionTable() {
             FOREIGN KEY (ProductID) REFERENCES Products(ProductID)
         )
     `);
+
+    try {
+        await pool.execute(`CREATE UNIQUE INDEX idx_Auction_UID ON Auction(UID)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
     
     try {
         await pool.execute(`CREATE INDEX idx_Auction_ProductID ON Auction(ProductID)`);
