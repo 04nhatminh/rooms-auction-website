@@ -207,15 +207,6 @@
   line-height: normal;
 }
 
-.login-button:hover {
-  background-color: #278C9F !important;
-}
-
-.login-button:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(48, 165, 188, 0.3);
-}
-
 .signup-login-link {
   text-align: center;
   color: #4a5568;

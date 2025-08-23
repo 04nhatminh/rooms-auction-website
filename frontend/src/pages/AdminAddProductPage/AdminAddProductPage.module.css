@@ -365,7 +365,7 @@
 
   .formRow {
     grid-template-columns: 1fr;
-    gap: 1rem;
+    gap: 0rem;
   }
 
   .amenitiesGrid {

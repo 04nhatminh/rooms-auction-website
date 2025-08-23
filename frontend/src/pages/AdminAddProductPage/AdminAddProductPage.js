@@ -527,7 +527,7 @@ const AdminAddProductPage = () => {
                 <div className={styles.formRow}>
                   <div className={styles.formGroup}>
                     <label className={styles.label}>
-                      Tỉnh/Thành phố <span className={styles.required}>*</span>
+                      Tỉnh <span className={styles.required}>*</span>
                     </label>
                     <select
                       name="provinceCode"
@@ -550,7 +550,7 @@ const AdminAddProductPage = () => {
 
                   <div className={styles.formGroup}>
                     <label className={styles.label}>
-                      Quận/Huyện <span className={styles.required}>*</span>
+                      Thành phố/Quận/Huyện <span className={styles.required}>*</span>
                     </label>
                     <select
                       name="districtCode"
