@@ -12,7 +12,8 @@ class UserApi {
 
   static async getProfile() {
     const res = await fetch(`${API_BASE_URL}/user/me`, {
-      headers: this.getHeaders()
+      headers: this.getHeaders(),
+      credentials: 'include'
     });
     if (!res.ok) throw new Error((await res.json()).message || 'Failed to load profile');
     return res.json();
@@ -32,7 +33,8 @@ class UserApi {
     const res = await fetch(`${API_BASE_URL}/user/me/password`, {
       method: 'PUT',
       headers: this.getHeaders(),
-      body: JSON.stringify({ currentPassword, newPassword })
+      body: JSON.stringify({ currentPassword, newPassword }),
+      credentials: 'include'
     });
     if (!res.ok) throw new Error((await res.json()).message || 'Failed to change password');
     return res.json();

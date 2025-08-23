@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UserAPI from '../../api/userApi';
 import HeaderSimple from '../../components/HeaderSimple/HeaderSimple';
+import viewIcon from '../../assets/view.png';
+import hiddenIcon from '../../assets/hidden.png';
 
 const isValidAvatarURL = (val) => {
   if (!val || typeof val !== 'string') return false;
@@ -367,7 +369,6 @@ const UserProfilePage = () => {
                         id="currentPassword"
                         type={pwdForm.show.currentPassword ? 'text' : 'password'}
                         required
-                        minLength={6}
                         value={pwdForm.currentPassword}
                         onChange={e => setPwdForm(f => ({ ...f, currentPassword: e.target.value }))}
                         className="w-full rounded-xl border border-slate-300 px-3 py-2 pr-10 text-sm outline-none focus:border-slate-900"
@@ -378,7 +379,11 @@ const UserProfilePage = () => {
                         onClick={() => togglePwdVisible('currentPassword')}
                         aria-label="Hiện/ẩn mật khẩu"
                       >
-                        <i className="fa-regular fa-eye" />
+                        <img
+                          src={pwdForm.show.currentPassword ? viewIcon : hiddenIcon}
+                          alt={pwdForm.show.currentPassword ? 'Hiện mật khẩu' : 'Ẩn mật khẩu'}
+                          style={{ width: 22, height: 22 }}
+                        />
                       </button>
                     </div>
                   </div>
@@ -390,7 +395,6 @@ const UserProfilePage = () => {
                         id="newPassword"
                         type={pwdForm.show.newPassword ? 'text' : 'password'}
                         required
-                        minLength={8}
                         value={pwdForm.newPassword}
                         onFocus={() => setShowPasswordPopup(true)}
                         onBlur={() => setShowPasswordPopup(false)}
@@ -403,7 +407,11 @@ const UserProfilePage = () => {
                         onClick={() => togglePwdVisible('newPassword')}
                         aria-label="Hiện/ẩn mật khẩu"
                       >
-                        <i className="fa-regular fa-eye" />
+                        <img
+                          src={pwdForm.show.newPassword ? viewIcon : hiddenIcon}
+                          alt={pwdForm.show.newPassword ? 'Hiện mật khẩu' : 'Ẩn mật khẩu'}
+                          style={{ width: 22, height: 22 }}
+                        />
                       </button>
                       {showPasswordPopup && (
                         <div style={{
@@ -429,14 +437,13 @@ const UserProfilePage = () => {
                     </div>
                   </div>
 
-                  <div>
+                  <div className="md:col-span-2">
                     <label className="mb-1 block text-sm font-medium">Xác nhận mật khẩu mới</label>
                     <div className="relative">
                       <input
                         id="confirmPassword"
                         type={pwdForm.show.confirmPassword ? 'text' : 'password'}
-                        required
-                        minLength={6}
+                        required            
                         value={pwdForm.confirmPassword}
                         onChange={e => setPwdForm(f => ({ ...f, confirmPassword: e.target.value }))}
                         className="w-full rounded-xl border border-slate-300 px-3 py-2 pr-10 text-sm outline-none focus:border-slate-900"
@@ -447,7 +454,11 @@ const UserProfilePage = () => {
                         onClick={() => togglePwdVisible('confirmPassword')}
                         aria-label="Hiện/ẩn mật khẩu"
                       >
-                        <i className="fa-regular fa-eye" />
+                        <img
+                          src={pwdForm.show.confirmPassword ? viewIcon : hiddenIcon}
+                          alt={pwdForm.show.confirmPassword ? 'Hiện mật khẩu' : 'Ẩn mật khẩu'}
+                          style={{ width: 22, height: 22 }}
+                        />
                       </button>
                     </div>
                   </div>

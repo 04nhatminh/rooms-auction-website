@@ -126,6 +126,7 @@ class UserModel {
                     id: user.UserID,
                     fullName: user.FullName,
                     email: user.Email,
+                    hashPassword: user.HashPassword,
                     phoneNumber: user.PhoneNumber,
                     dateOfBirth: user.DateOfBirth,
                     gender: user.Gender,
