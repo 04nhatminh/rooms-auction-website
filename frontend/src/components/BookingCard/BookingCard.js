@@ -9,7 +9,7 @@ import { ProductContext } from '../../contexts/ProductContext';
 import calendarApi from '../../api/calendarApi';
 import bookingApi from '../../api/bookingApi';
 import ConfirmBookingPopup from '../ConfirmBookingPopup/ConfirmBookingPopup';
-// const db = require('../config/database');
+import AuthPopup from '../AuthPopup/AuthPopup';
 
 const useCurrentUserId = () => useMemo(() => {
     try {
@@ -51,9 +51,9 @@ const BookingCard = () => {
   const [checking, setChecking] = useState(false);
   const [status, setStatus] = useState(null); // { level: 'ok'|'warn'|'error', message: string }
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
   const unitPrice = Number(data?.details?.Price || 0);
   const nights = checkinDate && checkoutDate ? Math.max(1, Math.floor((new Date(checkoutDate) - new Date(checkinDate)) / 86400000)) : 0;
-   const totalAmount = unitPrice * nights;
 
   const buildQuery = () =>
     new URLSearchParams({ checkin: checkinDate, checkout: checkoutDate }).toString();
@@ -136,40 +136,35 @@ const BookingCard = () => {
     setShowConfirm(true);
   };
 
+  const doPlace = async () => {
+    const userData = JSON.parse(sessionStorage.getItem('userData') || 'null') || JSON.parse(localStorage.getItem('userData') || 'null');
+    const currentUserId = userData?.id;
+    if (!currentUserId) {
+      console.log("showLogin");
+      setShowLogin(true);
+      return;
+    }
+
+    const payload = {
+      uid: UID,
+      userId: currentUserId,
+      checkin: checkinDate,
+      checkout: checkoutDate,
+      holdMinutes: 30,
+    };
+
+    const r = await bookingApi.place(payload);
+    setShowConfirm(false);
+
+    const params = buildQuery?.() || '';
+    navigate(`/checkout/${r.bookingId}${params ? `?${params}` : ''}`, {
+      state: { guests, totalGuests, bookingId: r.bookingId, holdExpiresAt: r.holdExpiresAt }
+    });
+  };
+
   const onConfirmPlace = async () => {
     try {
-      // Lấy user hiện tại từ sessionStorage
-      const userData = JSON.parse(sessionStorage.getItem('userData') || 'null');
-      const currentUserId = userData?.id; // bạn nói: currentUserId là userData.id
-
-      if (!currentUserId) {
-        alert('Bạn cần đăng nhập trước khi đặt chỗ.');
-        navigate('/login');
-        return;
-      }
-
-      const payload = {
-        uid: UID,
-        userId: currentUserId,
-        checkin: checkinDate,   // Date hoặc 'YYYY-MM-DD' đều ổn, backend đã format lại
-        checkout: checkoutDate,
-        holdMinutes: 30,
-      };
-
-      const r = await bookingApi.place(payload);
-
-      setShowConfirm(false);
-
-      // Điều hướng checkout + truyền holdExpiresAt để đếm ngược
-      const params = buildQuery?.() || '';
-      navigate(`/checkout/${r.bookingId}${params ? `?${params}` : ''}`, {
-        state: {
-          guests,
-          totalGuests,
-          bookingId: r.bookingId,
-          holdExpiresAt: r.holdExpiresAt
-        }
-      });
+      await doPlace();
     } catch (e) {
       alert(e.message || 'Khoảng thời gian không còn trống, vui lòng chọn lại.');
     }
@@ -326,6 +321,16 @@ const BookingCard = () => {
             </button>
           </div>
         )}
+
+        <AuthPopup
+          open={showLogin}
+          onClose={() => setShowLogin(false)}
+          onSuccess={() => {
+            setShowLogin(false);
+            // đăng nhập xong thì tiếp tục flow đặt chỗ
+            doPlace();
+          }}
+        />
 
         <ConfirmBookingPopup
           open={showConfirm}

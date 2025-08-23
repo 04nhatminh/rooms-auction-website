@@ -90,7 +90,7 @@ const CheckoutPage = () => {
   };
 
   const priceVND = useMemo(() => {
-    const v = Number(booking?.WinningPrice || 0); // consider standardizing to one casing
+    const v = Number(booking?.Amount || 0); // consider standardizing to one casing
     return v.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
   }, [booking]);
 

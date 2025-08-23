@@ -1,0 +1,19 @@
+/* src/components/AuthPopup/AuthPopup.css */
+.auth-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:1100}
+.auth-card{width:100%;max-width:460px;background:#fff;border-radius:16px;padding:20px 22px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+.auth-title{margin:0 0 12px;font-size:18px;font-weight:600;text-align:center}
+.auth-form{display:flex;flex-direction:column;gap:10px;margin-top:6px}
+.auth-label{font-size:13px;color:#1C1B1F}
+.auth-input{padding:10px 12px;border:1px solid #e5e7eb;border-radius:10px;font-size:14px}
+.auth-input:focus{outline:none;border-color:#30a5bc;box-shadow:0 0 0 2px rgba(48,165,188,.12)}
+.auth-row{display:flex;justify-content:space-between;align-items:center;margin-top:2px}
+.auth-remember{display:flex;align-items:center;gap:8px;font-size:13px}
+.auth-link{background:none;border:none;color:#FF8682;cursor:pointer;font-size:13px}
+.auth-btn{width:100%;padding:10px 14px;border-radius:10px;border:1px solid transparent;cursor:pointer}
+.auth-btn-primary{background:#0ea5e9;color:#fff}
+.auth-btn-ghost{background:#fff;border-color:#ddd;margin-top:10px}
+.auth-btn:hover{filter:brightness(.98)}
+.auth-divider{display:flex;align-items:center;gap:10px;color:#a0aec0;font-size:12px;margin:12px 0;justify-content:center}
+.auth-divider:before,.auth-divider:after{content:'';height:1px;background:#e2e8f0;flex:1}
+.auth-footer{margin-top:10px;text-align:center;font-size:13px}
+.auth-footer a{color:#FF8682;text-decoration:none;font-weight:600}
