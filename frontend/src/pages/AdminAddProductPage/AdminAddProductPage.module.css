@@ -296,6 +296,70 @@
   margin-bottom: 1rem;
 }
 
+/* --- Image Groups --- */
+.imageGroupContainer {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background-color: #f9fafb;
+}
+
+.imageGroupHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.imageGroupHeader .formGroup {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.removeGroupBtn {
+  background-color: #ef4444;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+  margin-top: 1.5rem;
+  flex-shrink: 0;
+}
+
+.removeGroupBtn:hover {
+  background-color: #dc2626;
+}
+
+.addGroupBtn {
+  background: none;
+  border: 2px dashed #278C9F;
+  color: #278C9F;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  margin-top: 1rem;
+  width: 100%;
+  text-decoration: none;
+}
+
+.addGroupBtn:hover {
+  background-color: #f0fdfa;
+  border-color: rgb(1, 109, 113);
+  color: rgb(1, 109, 113);
+}
+
 .imageList {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));

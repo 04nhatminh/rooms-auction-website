@@ -28,7 +28,7 @@ const AdminAddProductPage = () => {
     amenities: [],
     houseRules: [''],
     safetyProperties: [''],
-    images: []
+    imageGroups: [{ title: '', images: [] }]
   });
 
   // Data for dropdowns
@@ -265,23 +265,56 @@ const AdminAddProductPage = () => {
     }));
   };
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = (groupIndex, e) => {
     const files = Array.from(e.target.files);
     if (files.length > 0) {
       // For now, just store file names. In real implementation, you'd upload to server
       const imageNames = files.map(file => file.name);
       setFormData(prev => ({
         ...prev,
-        images: [...prev.images, ...imageNames]
+        imageGroups: prev.imageGroups.map((group, index) => 
+          index === groupIndex 
+            ? { ...group, images: [...group.images, ...imageNames] }
+            : group
+        )
       }));
     }
   };
 
-  const removeImage = (index) => {
+  const removeImage = (groupIndex, imageIndex) => {
     setFormData(prev => ({
       ...prev,
-      images: prev.images.filter((_, i) => i !== index)
+      imageGroups: prev.imageGroups.map((group, index) => 
+        index === groupIndex 
+          ? { ...group, images: group.images.filter((_, i) => i !== imageIndex) }
+          : group
+      )
     }));
+  };
+
+  const handleImageGroupTitleChange = (groupIndex, title) => {
+    setFormData(prev => ({
+      ...prev,
+      imageGroups: prev.imageGroups.map((group, index) => 
+        index === groupIndex ? { ...group, title } : group
+      )
+    }));
+  };
+
+  const addImageGroup = () => {
+    setFormData(prev => ({
+      ...prev,
+      imageGroups: [...prev.imageGroups, { title: '', images: [] }]
+    }));
+  };
+
+  const removeImageGroup = (groupIndex) => {
+    if (formData.imageGroups.length > 1) {
+      setFormData(prev => ({
+        ...prev,
+        imageGroups: prev.imageGroups.filter((_, index) => index !== groupIndex)
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -354,7 +387,7 @@ const AdminAddProductPage = () => {
         amenities: formData.amenities,
         houseRules: formData.houseRules.filter(rule => rule.trim()),
         safetyProperties: formData.safetyProperties.filter(prop => prop.trim()),
-        images: formData.images
+        imageGroups: formData.imageGroups.filter(group => group.title.trim() || group.images.length > 0)
       };
 
       console.log('Product data to submit:', productDataToSubmit);
@@ -790,39 +823,77 @@ const AdminAddProductPage = () => {
               <div className={styles.section}>
                 <h3 className={styles.sectionTitle}>Hình ảnh</h3>
                 
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Upload hình ảnh</label>
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className={styles.fileInput}
-                  />
-                  <p className={styles.helpText}>
-                    Chọn nhiều hình ảnh cùng lúc. Hỗ trợ JPG, PNG, GIF.
-                  </p>
-                </div>
-
-                {formData.images.length > 0 && (
-                  <div className={styles.imagePreview}>
-                    <h4>Hình ảnh đã chọn:</h4>
-                    <div className={styles.imageList}>
-                      {formData.images.map((image, index) => (
-                        <div key={index} className={styles.imageItem}>
-                          <span className={styles.imageName}>{image}</span>
-                          <button
-                            type="button"
-                            onClick={() => removeImage(index)}
-                            className={styles.removeImageBtn}
-                          >
-                            ×
-                          </button>
-                        </div>
-                      ))}
+                {formData.imageGroups.map((group, groupIndex) => (
+                  <div key={groupIndex} className={styles.imageGroupContainer}>
+                    <div className={styles.imageGroupHeader}>
+                      <div className={styles.formGroup}>
+                        <label className={styles.label}>
+                          {groupIndex === 0 ? 'Tên danh mục hình ảnh' : `Tên danh mục #${groupIndex + 1}`}
+                        </label>
+                        <input
+                          type="text"
+                          value={group.title}
+                          onChange={(e) => handleImageGroupTitleChange(groupIndex, e.target.value)}
+                          className={styles.input}
+                          placeholder="Nhập tên danh mục (VD: Phòng khách, Phòng ngủ, Nhà bếp...)"
+                        />
+                      </div>
+                      {formData.imageGroups.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeImageGroup(groupIndex)}
+                          className={styles.removeGroupBtn}
+                          aria-label="Xóa danh mục"
+                        >
+                          ×
+                        </button>
+                      )}
                     </div>
+
+                    <div className={styles.formGroup}>
+                      <label className={styles.label}>Upload hình ảnh cho danh mục này</label>
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={(e) => handleImageUpload(groupIndex, e)}
+                        className={styles.fileInput}
+                      />
+                      <p className={styles.helpText}>
+                        Chọn nhiều hình ảnh cùng lúc. Hỗ trợ JPG, PNG, GIF.
+                      </p>
+                    </div>
+
+                    {group.images.length > 0 && (
+                      <div className={styles.imagePreview}>
+                        <h4>Hình ảnh đã chọn:</h4>
+                        <div className={styles.imageList}>
+                          {group.images.map((image, imageIndex) => (
+                            <div key={imageIndex} className={styles.imageItem}>
+                              <span className={styles.imageName}>{image}</span>
+                              <button
+                                type="button"
+                                onClick={() => removeImage(groupIndex, imageIndex)}
+                                className={styles.removeImageBtn}
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
+                ))}
+
+                <button
+                  type="button"
+                  onClick={addImageGroup}
+                  className={styles.addGroupBtn}
+                >
+                  <span>+ </span>
+                  <span style={{ textDecoration: 'underline' }}>Thêm danh mục</span>
+                </button>
               </div>
 
               {/* Submit Buttons */}
