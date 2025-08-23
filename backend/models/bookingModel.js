@@ -1,28 +1,47 @@
 // models/bookingModel.js
 const db = require('../config/database');
 
+function toDateStr(d) {
+    if (!d) return null;
+    const date = (d instanceof Date) ? d : new Date(d);
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}`;
+}
+
 class BookingModel {
-    async placeDraft({ userId, productId, start, end, nights, unitPrice, currency, provider, holdMinutes = 30 }) {
-        const conn = await db.getConnection();   // dùng cùng 1 connection cho @variables
+    async placeDraft({ userId, productId, start, end, holdMinutes = 30 }) {
+        const conn = await db.getConnection(); // dùng cùng 1 connection cho @variables
         try {
-        // 1) khai báo biến OUT
-        await conn.query('SET @outBookingID = NULL, @outPaymentID = NULL, @outHoldAt = NULL');
+            const startDate = toDateStr(start);
+            const endDate   = toDateStr(end);
+            if (!startDate || !endDate) {
+                throw new Error('start/end invalid date');
+            }
 
-        // 2) gọi SP, truyền @variables vào vị trí OUT
-        const sql = `
-            CALL sp_place_booking_draft(?, ?, ?, ?, ?, ?, ?, ?, ?, @outBookingID, @outPaymentID, @outHoldAt)
-        `;
-        await conn.query(sql, [userId, productId, start, end, nights, unitPrice, currency, provider, holdMinutes]);
+            // khai báo biến OUT trên session connection này
+            await conn.query('SET @outBookingID = NULL, @outHoldAt = NULL');
 
-        // 3) lấy OUT values
-        const [[out]] = await conn.query(
-            'SELECT @outBookingID AS bookingId, @outPaymentID AS paymentId, @outHoldAt AS holdExpiresAt'
-        );
+            // gọi SP: (userId, productId, start, end, holdMinutes, OUT bookingId, OUT holdAt)
+            const callSql = `
+            CALL sp_place_booking_draft(?, ?, ?, ?, ?, @outBookingID, @outHoldAt)
+            `;
+            await conn.query(callSql, [userId, productId, startDate, endDate, holdMinutes]);
 
-        if (!out || !out.bookingId) throw new Error('Failed to place booking draft');
-        return out;
+            // đọc OUT values
+            const [[out]] = await conn.query(`
+                SELECT @outBookingID AS bookingId, @outHoldAt AS holdExpiresAt
+            `);
+
+            if (!out || !out.bookingId) {
+                throw new Error('Failed to place booking draft');
+            }
+
+            return {
+                bookingId: out.bookingId,
+                holdExpiresAt: out.holdExpiresAt, // DATETIME (theo timezone của DB server)
+            };
         } finally {
-        conn.release();
+            conn.release();
         }
     }
 
@@ -39,7 +58,7 @@ class BookingModel {
     async findBookingById(bookingID)
     {
         try {
-            const query = `SELECT b.BookingID, b.BidID, b.UserID, p.Name, b.WinningPrice, b.StartDate, b.EndDate, b.BookingStatus
+            const query = `SELECT b.BookingID, b.BidID, b.UserID, p.Name, b.UnitPrice, b.Amount, b.StartDate, b.EndDate, b.BookingStatus
                            FROM Booking b
                            JOIN Products p ON b.ProductID = p.ProductID
                           WHERE b.BookingID = ?`;

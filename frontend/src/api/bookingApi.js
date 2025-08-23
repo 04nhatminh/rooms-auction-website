@@ -1,15 +1,17 @@
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000';
 
-const bookingApi = {
+export const bookingApi = {
   place: async (payload) => {
     const res = await fetch(`${API_BASE_URL}/booking/place`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-    if (!res.ok) throw new Error((await res.json()).message || 'Đặt chỗ thất bại');
-    return res.json();
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.message || 'Đặt chỗ thất bại');
+    return data; // { ok, bookingId, holdExpiresAt }
   },
-
+  
 //   confirmPayment: async (payload) => {
 //     const res = await fetch(`${API_BASE_URL}/bookings/payments/confirm`, {
 //       method: 'POST', headers: { 'Content-Type': 'application/json' },

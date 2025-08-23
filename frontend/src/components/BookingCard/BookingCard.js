@@ -138,23 +138,37 @@ const BookingCard = () => {
 
   const onConfirmPlace = async () => {
     try {
+      // Lấy user hiện tại từ sessionStorage
+      const userData = JSON.parse(sessionStorage.getItem('userData') || 'null');
+      const currentUserId = userData?.id; // bạn nói: currentUserId là userData.id
+
+      if (!currentUserId) {
+        alert('Bạn cần đăng nhập trước khi đặt chỗ.');
+        navigate('/login');
+        return;
+      }
+
       const payload = {
         uid: UID,
-        userId: 1,                    // TODO: thay bằng user hiện tại (auth)
-        checkin: checkinDate,
+        userId: currentUserId,
+        checkin: checkinDate,   // Date hoặc 'YYYY-MM-DD' đều ổn, backend đã format lại
         checkout: checkoutDate,
-        nights,
-        unitPrice,
-        currency: data?.details?.Currency || 'VND',
-        provider: 'cash',
         holdMinutes: 30,
       };
+
       const r = await bookingApi.place(payload);
+
       setShowConfirm(false);
-      // Điều hướng tới trang thanh toán/booking detail kèm holdExpiresAt để đếm ngược
-      const params = buildQuery();
-      navigate(`/checkout/${r.bookingId}`, {
-        state: { guests, totalGuests, bookingId: r.bookingId, paymentId: r.paymentId, holdExpiresAt: r.holdExpiresAt }
+
+      // Điều hướng checkout + truyền holdExpiresAt để đếm ngược
+      const params = buildQuery?.() || '';
+      navigate(`/checkout/${r.bookingId}${params ? `?${params}` : ''}`, {
+        state: {
+          guests,
+          totalGuests,
+          bookingId: r.bookingId,
+          holdExpiresAt: r.holdExpiresAt
+        }
       });
     } catch (e) {
       alert(e.message || 'Khoảng thời gian không còn trống, vui lòng chọn lại.');

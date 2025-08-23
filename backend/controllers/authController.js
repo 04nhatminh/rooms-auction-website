@@ -83,6 +83,15 @@ exports.googleCallback = async (req, res) => {
       { expiresIn: '1d' }
     );
 
+    const isProd = process.env.NODE_ENV === 'production';
+    res.cookie('bidstay_token', token, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax',
+      maxAge: 24*60*60*1000,
+      path: '/',
+    });
+
     const { hashPassword, verificationToken, verificationTokenExpires, ...safeUser } = user;
 
     // 7. Trả thông tin user cho frontend
