@@ -66,124 +66,7 @@ export const productApi = {
         }
     },
 
-    // Tạo sản phẩm mới (Admin)
-    addProduct: async (productData, token) => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/room/admin/add-product`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(productData)
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            return data;
-        } catch (error) {
-            console.error('Error creating product:', error);
-            throw error;
-        }
-    },
-
-    // Lấy danh sách sản phẩm (Admin)
-    getProducts: async (page = 1, limit = 10, token) => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/room/admin/list?page=${page}&limit=${limit}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            return data;
-        } catch (error) {
-            console.error('Error fetching products:', error);
-            throw error;
-        }
-    },
-
-    // Tìm kiếm sản phẩm theo UID (Admin)
-    searchProductsByUID: async (uid, page = 1, limit = 10, token) => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/room/admin/search?uid=${uid}&page=${page}&limit=${limit}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            return data;
-        } catch (error) {
-            console.error('Error searching products by UID:', error);
-            throw error;
-        }
-    },
-
-    // Cập nhật sản phẩm (Admin)
-    updateProduct: async (productId, productData, token) => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/room/admin/${productId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(productData)
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            return data;
-        } catch (error) {
-            console.error('Error updating product:', error);
-            throw error;
-        }
-    },
-
-    // Xóa sản phẩm (Admin)
-    deleteProduct: async (productId, token) => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/room/admin/${productId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            return data;
-        } catch (error) {
-            console.error('Error deleting product:', error);
-            throw error;
-        }
-    },
-
-    // Lấy danh sách loại bất động sản
+    // Lấy danh sách loại hình chỗ ở
     getPropertyTypes: async () => {
         try {
             const response = await fetch(`${API_BASE_URL}/api/room/properties/types`, {
@@ -266,6 +149,148 @@ export const productApi = {
             throw error;
         }
     },
+
+    // Admin
+    // Lấy danh sách sản phẩm (Admin)
+    getProducts: async (page = 1, limit = 10, token) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/room/admin/list?page=${page}&limit=${limit}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error fetching products:', error);
+            throw error;
+        }
+    },
+
+    // Tìm kiếm sản phẩm theo UID (Admin)
+    searchProductsByUID: async (uid, page = 1, limit = 10, token) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/room/admin/search?uid=${uid}&page=${page}&limit=${limit}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error searching products by UID:', error);
+            throw error;
+        }
+    },
+
+    // Upload image lên cloudinary
+    uploadImage: async (formData) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/uploads/images`, {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            if (!result.success) {
+                throw new Error(result.message || 'Upload failed');
+            }
+
+            return result;
+        } catch (error) {
+            console.error('Error uploading images:', error);
+            throw error;
+        }
+    },
+
+    // Tạo sản phẩm mới (Admin)
+    addProduct: async (productData, token) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/room/admin/add-product`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(productData)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error creating product:', error);
+            throw error;
+        }
+    },
+
+
+
+    // Cập nhật sản phẩm (Admin)
+    updateProduct: async (productId, productData, token) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/room/admin/${productId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(productData)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error updating product:', error);
+            throw error;
+        }
+    },
+
+    // Xóa sản phẩm (Admin)
+    deleteProduct: async (productId, token) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/room/admin/${productId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error deleting product:', error);
+            throw error;
+        }
+    }
+
+
 };
 
 export default productApi;

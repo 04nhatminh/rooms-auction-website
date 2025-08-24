@@ -369,22 +369,7 @@ const AdminAddProductPage = () => {
       formData.append('images', file);
     });
 
-    try {
-      const response = await fetch('http://localhost:3000/api/uploads/images', {
-        method: 'POST',
-        body: formData
-      });
-
-      const result = await response.json();
-      if (!result.success) {
-        throw new Error(result.message || 'Upload failed');
-      }
-
-      return result;
-    } catch (error) {
-      console.error('Error uploading images:', error);
-      throw error;
-    }
+    productApi.uploadImage(formData);
   };
 
   const handleSubmit = async (e) => {
