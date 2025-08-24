@@ -21,7 +21,6 @@ const SignUp = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [agreeTerms, setAgreeTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -41,6 +40,7 @@ const SignUp = () => {
       ...prev,
       [field]: value
     }));
+    setError(''); // Ẩn error khi focus hoặc thay đổi input
   };
 
   const togglePasswordVisibility = (field) => {
@@ -56,12 +56,7 @@ const SignUp = () => {
     
     const { firstName, lastName, email, phoneNumber, password, confirmPassword } = formData;
     
-    // Validation
-    if (!agreeTerms) {
-      alert('Vui lòng đồng ý với điều khoản và chính sách!');
-      return;
-    }
-    
+    // Validation    
     if (!firstName || !lastName || !email || !password) {
       setError('Vui lòng điền đầy đủ thông tin bắt buộc!');
       return;
@@ -103,15 +98,17 @@ const SignUp = () => {
       if (response.ok) {
         // Hiển thị thông báo thành công với hướng dẫn
         alert('🎉 Đăng ký thành công!\n\n📧 Vui lòng kiểm tra email để xác thực tài khoản.\n\n⚠️ Lưu ý: Bạn cần xác thực email trước khi có thể đăng nhập.');
-        
         // Có thể redirect đến trang thông báo thay vì login
         const shouldGoToLogin = window.confirm('Bạn có muốn đi đến trang đăng nhập ngay bây giờ?\n\n(Nhớ xác thực email trước khi đăng nhập)');
-        
         if (shouldGoToLogin) {
           navigate('/login');
         }
       } else {
-        alert('❌ ' + data.message);
+        if (data.message === 'Email đã tồn tại') {
+          setError('Email đã tồn tại!');
+        } else {
+          setError(data.message || 'Đăng ký thất bại!');
+        }
       }
     } catch (error) {
       alert('❌ Lỗi kết nối: ' + error.message);
