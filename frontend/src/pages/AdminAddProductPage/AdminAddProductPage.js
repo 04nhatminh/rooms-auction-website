@@ -6,6 +6,8 @@ import PageHeader from '../../components/PageHeader/PageHeader';
 import ChevronUpIcon from '../../assets/up.png'
 import ChevronDownIcon from '../../assets/down.png'
 
+
+
 import styles from './AdminAddProductPage.module.css';
 
 const AdminAddProductPage = () => {
@@ -28,7 +30,7 @@ const AdminAddProductPage = () => {
     amenities: [],
     houseRules: [''],
     safetyProperties: [''],
-    imageGroups: [{ title: '', images: [] }]
+    imageGroups: [{ title: '', images: [], files: [] }]
   });
 
   // Data for dropdowns
@@ -48,6 +50,7 @@ const AdminAddProductPage = () => {
   const [loadingRoomTypes, setLoadingRoomTypes] = useState(true);
   const [loadingAmenityGroups, setLoadingAmenityGroups] = useState(true);
   const [loadingAmenities, setLoadingAmenities] = useState(true);
+  const [uploadingImages, setUploadingImages] = useState(false);
 
   // Amenity groups collapse state
   const [collapsedGroups, setCollapsedGroups] = useState({});
@@ -268,13 +271,17 @@ const AdminAddProductPage = () => {
   const handleImageUpload = (groupIndex, e) => {
     const files = Array.from(e.target.files);
     if (files.length > 0) {
-      // For now, just store file names. In real implementation, you'd upload to server
+      // Lưu cả file thực tế và tên file
       const imageNames = files.map(file => file.name);
       setFormData(prev => ({
         ...prev,
         imageGroups: prev.imageGroups.map((group, index) => 
           index === groupIndex 
-            ? { ...group, images: [...group.images, ...imageNames] }
+            ? { 
+                ...group, 
+                images: [...group.images, ...imageNames],
+                files: [...(group.files || []), ...files]
+              }
             : group
         )
       }));
@@ -286,7 +293,11 @@ const AdminAddProductPage = () => {
       ...prev,
       imageGroups: prev.imageGroups.map((group, index) => 
         index === groupIndex 
-          ? { ...group, images: group.images.filter((_, i) => i !== imageIndex) }
+          ? { 
+              ...group, 
+              images: group.images.filter((_, i) => i !== imageIndex),
+              files: (group.files || []).filter((_, i) => i !== imageIndex)
+            }
           : group
       )
     }));
@@ -304,7 +315,7 @@ const AdminAddProductPage = () => {
   const addImageGroup = () => {
     setFormData(prev => ({
       ...prev,
-      imageGroups: [...prev.imageGroups, { title: '', images: [] }]
+      imageGroups: [...prev.imageGroups, { title: '', images: [], files: [] }]
     }));
   };
 
@@ -314,6 +325,65 @@ const AdminAddProductPage = () => {
         ...prev,
         imageGroups: prev.imageGroups.filter((_, index) => index !== groupIndex)
       }));
+    }
+  };
+
+  // Upload tất cả ảnh cho sản phẩm (tất cả đều phải có title - room tour)
+  const uploadAllProductImages = async (productId, imageGroups) => {
+    // Chỉ lấy groups có title và có files
+    const validGroups = imageGroups.filter(group => 
+      group.title && group.title.trim() && group.files && group.files.length > 0
+    );
+
+    if (validGroups.length === 0) {
+      return { success: true, message: 'No images to upload' };
+    }
+
+    // Gom tất cả files và tạo roomTourData
+    const allFiles = [];
+    const roomTourData = [];
+    let fileIndex = 0;
+
+    validGroups.forEach(group => {
+      const fileIndices = [];
+      
+      group.files.forEach(() => {
+        fileIndices.push(fileIndex);
+        fileIndex++;
+      });
+      
+      roomTourData.push({
+        title: group.title.trim(),
+        fileIndices: fileIndices
+      });
+      
+      allFiles.push(...group.files);
+    });
+
+    const formData = new FormData();
+    formData.append('ProductID', productId);
+    formData.append('Source', 'bidstay');
+    formData.append('roomTourData', JSON.stringify(roomTourData));
+    
+    allFiles.forEach(file => {
+      formData.append('images', file);
+    });
+
+    try {
+      const response = await fetch('http://localhost:3000/api/uploads/images', {
+        method: 'POST',
+        body: formData
+      });
+
+      const result = await response.json();
+      if (!result.success) {
+        throw new Error(result.message || 'Upload failed');
+      }
+
+      return result;
+    } catch (error) {
+      console.error('Error uploading images:', error);
+      throw error;
     }
   };
 
@@ -361,6 +431,26 @@ const AdminAddProductPage = () => {
       return;
     }
 
+    // Validation cho ảnh - tất cả ảnh phải có title
+    const hasImages = formData.imageGroups.some(group => 
+      group.files && group.files.length > 0
+    );
+    
+    if (hasImages) {
+      const groupsWithImages = formData.imageGroups.filter(group => 
+        group.files && group.files.length > 0
+      );
+      
+      const groupsWithoutTitle = groupsWithImages.filter(group => 
+        !group.title || !group.title.trim()
+      );
+      
+      if (groupsWithoutTitle.length > 0) {
+        alert('Tất cả danh mục có ảnh phải có tên danh mục. Vui lòng điền tên cho tất cả danh mục.');
+        return;
+      }
+    }
+
     const token = localStorage.getItem('token');
     if (!token) {
       alert('Vui lòng đăng nhập lại.');
@@ -392,7 +482,38 @@ const AdminAddProductPage = () => {
 
       console.log('Product data to submit:', productDataToSubmit);
 
-      await productApi.addProduct(productDataToSubmit, token);
+      // Bước 1: Tạo sản phẩm trước
+      const createResponse = await productApi.addProduct(productDataToSubmit, token);
+      console.log('Product created:', createResponse);
+      
+      // Lấy ProductID từ response
+      const productId = createResponse.data; // ProductModel.addProduct trả về productId số, controller wrap trong data
+      
+      if (!productId) {
+        console.error('Full response:', createResponse);
+        throw new Error('Không thể lấy ProductID từ response');
+      }
+
+      // Bước 2: Upload ảnh nếu có
+      const hasImages = formData.imageGroups.some(group => 
+        group.files && group.files.length > 0
+      );
+
+      if (hasImages) {
+        setUploadingImages(true);
+        try {
+          console.log('Uploading images for product:', productId);
+          const uploadResult = await uploadAllProductImages(productId, formData.imageGroups);
+          console.log('Upload result:', uploadResult);
+        } catch (imageError) {
+          console.error('Image upload error:', imageError);
+          // Không throw error ở đây vì sản phẩm đã được tạo thành công
+          alert('Sản phẩm đã được tạo nhưng có lỗi khi upload ảnh: ' + imageError.message);
+        } finally {
+          setUploadingImages(false);
+        }
+      }
+
       alert('Tạo sản phẩm thành công!');
       navigate('/admin/products-management');
     } catch (error) {
@@ -902,16 +1023,21 @@ const AdminAddProductPage = () => {
                   type="button"
                   onClick={handleCancel}
                   className={styles.cancelBtn}
-                  disabled={loading}
+                  disabled={loading || uploadingImages}
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   className={styles.submitBtn}
-                  disabled={loading}
+                  disabled={loading || uploadingImages}
                 >
-                  {loading ? 'Đang tạo...' : 'Tạo sản phẩm'}
+                  {loading 
+                    ? 'Đang tạo sản phẩm...' 
+                    : uploadingImages 
+                    ? 'Đang upload ảnh...' 
+                    : 'Tạo sản phẩm'
+                  }
                 </button>
               </div>
             </form>
