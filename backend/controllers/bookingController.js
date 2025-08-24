@@ -10,7 +10,6 @@ class BookingController {
         userId,
         checkin,
         checkout,
-        holdMinutes = 30, // default 30'
       } = req.body || {};
 
       // 1) Validate input tối thiểu
@@ -38,8 +37,7 @@ class BookingController {
         userId,
         productId,
         start: start,
-        end: end,
-        holdMinutes
+        end: end
       });
 
       // 4) Trả về kết quả

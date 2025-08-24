@@ -30,8 +30,8 @@ class CalendarModel {
         if (!rows.length) return { available: true, reason: null };
         const st = rows[0].Status;
         return {
-        available: false,
-        reason: st === 'booked' || st === 'blocked' ? st : 'reserved',
+            available: false,
+            reason: st === 'booked' || st === 'blocked' ? st : 'reserved',
         };
     }
 

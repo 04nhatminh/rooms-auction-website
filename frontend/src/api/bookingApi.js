@@ -8,27 +8,14 @@ export const bookingApi = {
       body: JSON.stringify(payload),
     });
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.message || 'Đặt chỗ thất bại');
+    if (!res.ok || data?.success === false || data?.ok === false) {
+      const err = new Error(data?.message || 'Đặt chỗ thất bại');
+      err.status = res.status;           // ví dụ: 409
+      err.rawMessage = data?.message;    // giữ lại message gốc của BE
+      throw err;
+    }
     return data; // { ok, bookingId, holdExpiresAt }
   },
-  
-//   confirmPayment: async (payload) => {
-//     const res = await fetch(`${API_BASE_URL}/bookings/payments/confirm`, {
-//       method: 'POST', headers: { 'Content-Type': 'application/json' },
-//       body: JSON.stringify(payload),
-//     });
-//     if (!res.ok) throw new Error((await res.json()).message || 'Xác nhận thanh toán thất bại');
-//     return res.json();
-//   },
-
-//   failPayment: async (payload) => {
-//     const res = await fetch(`${API_BASE_URL}/bookings/payments/fail`, {
-//       method: 'POST', headers: { 'Content-Type': 'application/json' },
-//       body: JSON.stringify(payload),
-//     });
-//     if (!res.ok) throw new Error((await res.json()).message || 'Hủy/thất bại thanh toán lỗi');
-//     return res.json();
-//   },
 };
 
 export default bookingApi;

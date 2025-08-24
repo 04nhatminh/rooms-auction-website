@@ -106,7 +106,7 @@ const CheckoutPage = () => {
     if (!booking) return;
     setPaying(true);
     try {
-      const amountVND = Number(booking.WinningPrice || 0);
+      const amountVND = Number(booking.Amount || 0);
 
       if (method === 'ZALOPAY') {
         // ZaloPay expects VND

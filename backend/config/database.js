@@ -61,7 +61,7 @@ async function createSystemParametersTable() {
             ('BidIncrementFactor', '0.05'),
             ('AuctionDurationDays', '5'),
             ('BidLeadTimeDays', '15'),
-            ('PaymentDeadlineDays', '3'),
+            ('PaymentDeadlineTime', '30'),
             ('ServiceFeeFactor', '0.15')
         `);
         console.log("✅ Seeded default SystemParameters");
@@ -493,14 +493,14 @@ async function createAuctionTable() {
             MaxBidID INT UNSIGNED,
             StartPrice DECIMAL(10, 2),
             BidIncrement DECIMAL(10, 2),
-            CurrentPrice DECIMAL(10, 2),
             Status ENUM('active','ended','cancelled') DEFAULT 'active',
+            EndReason ENUM('natural_end','buy_now','cancelled','admin_force') NULL,
             FOREIGN KEY (ProductID) REFERENCES Products(ProductID)
         )
     `);
 
     try {
-        await pool.execute(`CREATE UNIQUE INDEX idx_Auction_UID ON Auction(UID)`);
+        await pool.execute(`CREATE UNIQUE INDEX idx_Auction_UID ON Auction(AuctionUID)`);
     } catch (error) {
         if (error.code !== 'ER_DUP_KEYNAME') throw error;
     }
@@ -524,18 +524,42 @@ async function createAuctionTable() {
     }
 }
 
+async function createAuctionEventsTable() {
+    await pool.execute(`
+        CREATE TABLE IF NOT EXISTS AuctionEvents (
+        EventID BIGINT AUTO_INCREMENT PRIMARY KEY,
+        AuctionID INT UNSIGNED NOT NULL,
+        EventType ENUM('start','bid_placed','buy_now','ended','cancelled') NOT NULL,
+        ActorUserID INT NULL,
+        BookingID INT UNSIGNED NULL,
+        Note VARCHAR(255) NULL,
+        CreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_AuctionEvents_AuctionID (AuctionID),
+        FOREIGN KEY (AuctionID) REFERENCES Auction(AuctionID),
+        FOREIGN KEY (BookingID) REFERENCES Booking(BookingID),
+        FOREIGN KEY (ActorUserID) REFERENCES Users(UserID)
+        )
+    `);
+
+    try {
+        await pool.execute(`CREATE INDEX idx_AuctionEvents_AuctionID ON AuctionEvents(AuctionID)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
+}
+
 async function createBidsTable() {
     await pool.execute(`
         CREATE TABLE IF NOT EXISTS Bids (
             BidID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             AuctionID INT UNSIGNED,
             UserID INT,
+            StartDate DATE NOT NULL,
+            EndDate DATE NOT NULL,
             Amount DECIMAL(9, 2),
             BidTime TIMESTAMP,
-            PaymentMethodID INT,
             FOREIGN KEY (AuctionID) REFERENCES Auction(AuctionID),
-            FOREIGN KEY (UserID) REFERENCES Users(UserID),
-            FOREIGN KEY (PaymentMethodID) REFERENCES PaymentMethods(MethodID)
+            FOREIGN KEY (UserID) REFERENCES Users(UserID)
         )
     `);
     
@@ -551,8 +575,14 @@ async function createBidsTable() {
         if (error.code !== 'ER_DUP_KEYNAME') throw error;
     }
 
-     try {
-        await pool.execute(`CREATE INDEX idx_Bids_AuctionBidTime ON Bids(AuctionID, BidTime)`);
+    try {
+        await pool.execute(`CREATE INDEX idx_Bids_AuctionIDBidTime ON Bids(AuctionID, BidTime)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
+
+    try {
+        await pool.execute(`CREATE INDEX idx_Bids_AuctionIDStartDateEndDate ON Bids(AuctionID, StartDate, EndDate)`);
     } catch (error) {
         if (error.code !== 'ER_DUP_KEYNAME') throw error;
     }
@@ -573,6 +603,7 @@ async function createBookingTable() {
             ServiceFee DECIMAL(10, 2) DEFAULT 0.0,
             PaymentMethodID INT DEFAULT NULL,
             PaidAt TIMESTAMP DEFAULT NULL,
+            Source ENUM('direct','auction_win','auction_buy_now') NOT NULL DEFAULT 'direct',
             CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             FOREIGN KEY (BidID) REFERENCES Bids(BidID),
@@ -730,14 +761,14 @@ async function createCalendarTable() {
     `);
 
     const dbname = dbConfig.database;
-    const triggerNames = ['trg_Insert_Calendar_validate', 'trg_Update_Calendar_validate', 'trg_Insert_Calendar_refcheck', 'trg_Update_Calendar_refcheck'];
+    const triggerNames = ['trg_Insert_Calendar_validate', 'trg_Update_Calendar_validate', 'trg_Insert_Calendar_refcheck', 'trg_Update_Calendar_refcheck', 'trg_Update_Calendar_release_hold'];
 
     // Kiểm tra tồn tại trong INFORMATION_SCHEMA rồi DROP từng cái
     const [trgRows] = await pool.query(
         `SELECT TRIGGER_NAME 
         FROM INFORMATION_SCHEMA.TRIGGERS 
         WHERE TRIGGER_SCHEMA = ? 
-            AND TRIGGER_NAME IN (?, ?, ?, ?)`,
+            AND TRIGGER_NAME IN (?, ?, ?, ?, ?)`,
         [dbname, ...triggerNames]
     );
 
@@ -851,6 +882,43 @@ async function createCalendarTable() {
         BEFORE UPDATE ON \`${dbname}\`.\`Calendar\`
         FOR EACH ROW
         ${refcheckBody}
+    `);
+
+    await pool.query(`
+        CREATE TRIGGER \`${dbname}\`.\`trg_Update_Calendar_release_hold\`
+        AFTER UPDATE ON \`${dbname}\`.\`Calendar\`
+        FOR EACH ROW
+        BEGIN
+            DECLARE v_remaining INT DEFAULT 0;
+            DECLARE v_cur_status ENUM('pending','confirmed','cancelled','completed','expired');
+
+            -- Chỉ xử lý khi: trước đó là 'reserved' và sau update thành 'available'
+            IF OLD.Status = 'reserved' AND NEW.Status = 'available' THEN
+                -- Chỉ quan tâm các hold do booking_hold và có BookingID
+                IF OLD.LockReason = 'booking_hold' AND OLD.BookingID IS NOT NULL THEN
+                    -- Còn ngày nào của BookingID này đang reserved/booked không?
+                    SELECT COUNT(*) INTO v_remaining
+                    FROM Calendar
+                    WHERE BookingID = OLD.BookingID
+                        AND Status IN ('reserved','booked');
+
+                    -- Nếu không còn, và Booking vẫn đang pending thì chuyển expired
+                    IF v_remaining = 0 THEN
+                        SELECT BookingStatus INTO v_cur_status
+                        FROM Booking
+                        WHERE BookingID = OLD.BookingID
+                        LIMIT 1;
+
+                        IF v_cur_status = 'pending' THEN
+                            UPDATE Booking
+                                SET BookingStatus = 'expired',
+                                    UpdatedAt = NOW()
+                            WHERE BookingID = OLD.BookingID;
+                        END IF;
+                    END IF;
+                END IF;
+            END IF;
+        END
     `);
 
     try {
@@ -2051,34 +2119,32 @@ async function createAddCalendarForRoomProcedure() {
     `);
 }
 
-async function dropSpPlaceBookingDraftIfExists() {
-    await pool.query(`DROP PROCEDURE IF EXISTS sp_place_booking_draft;`);
+async function dropPlaceBookingDraftProcedureIfExists() {
+    await pool.query(`DROP PROCEDURE IF EXISTS PlaceBookingDraft;`);
 }
 
-async function createSpPlaceBookingDraft() {
+async function createPlaceBookingDraftProcedure() {
     await pool.query(`
-        CREATE PROCEDURE sp_place_booking_draft (
+        CREATE PROCEDURE PlaceBookingDraft (
             IN  p_UserID INT,
             IN  p_ProductID INT,
             IN  p_Start DATE,
-            IN  p_End DATE,              -- [start, end)
-            IN  p_HoldMinutes INT,
+            IN  p_End DATE,
             OUT p_BookingID INT UNSIGNED,
             OUT p_HoldExpiresAt DATETIME
         )
         proc:BEGIN
-            DECLARE v_lock_ok INT DEFAULT 0;
             DECLARE v_now DATETIME;
             DECLARE v_conflicts INT DEFAULT 0;
             DECLARE v_nights INT;
             DECLARE v_reserved_rows INT;
             DECLARE v_day DATE;
+            DECLARE v_hold_booking_time INT;
 
-            -- Luôn rollback + release lock nếu có lỗi
+            -- Handler rollback nếu lỗi
             DECLARE EXIT HANDLER FOR SQLEXCEPTION
             BEGIN
                 ROLLBACK;
-                DO RELEASE_LOCK(CONCAT('calprod:', p_ProductID));
                 RESIGNAL;
             END;
 
@@ -2088,22 +2154,30 @@ async function createSpPlaceBookingDraft() {
             END IF;
 
             SET v_now = NOW();
-            IF p_HoldMinutes IS NULL OR p_HoldMinutes <= 0 THEN
-                SET p_HoldMinutes = 30;
-            END IF;
+            SELECT CAST(ParamValue AS UNSIGNED) INTO v_hold_booking_time FROM SystemParameters WHERE ParamName='PaymentDeadlineTime' LIMIT 1;
 
             SET v_nights = DATEDIFF(p_End, p_Start);
-            SET p_HoldExpiresAt = v_now + INTERVAL p_HoldMinutes MINUTE;
-
-            -- Advisory lock theo Product
-            SELECT GET_LOCK(CONCAT('calprod:', p_ProductID), 10) INTO v_lock_ok;
-            IF v_lock_ok <> 1 THEN
-                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Cannot obtain product lock';
-            END IF;
+            SET p_HoldExpiresAt = v_now + INTERVAL v_hold_booking_time MINUTE;
 
             START TRANSACTION;
 
-            -- 0) Dọn hold hết hạn của chính product
+             /* 0) Bơm đủ ngày trong [p_Start, p_End)
+                (pattern tương tự AddCalendarForRoom: chỉ chèn khi chưa tồn tại) */
+            SET v_day = p_Start;
+            day_loop: WHILE v_day < p_End DO
+                INSERT IGNORE INTO Calendar(ProductID, Day, Status)
+                VALUES (p_ProductID, v_day, 'available');
+                SET v_day = v_day + INTERVAL 1 DAY;
+            END WHILE;
+
+            /* 1) KHÓA dải ngày cần giữ: khóa đúng các hàng của range */
+            SELECT Day
+            FROM Calendar FORCE INDEX(PRIMARY)
+            WHERE ProductID = p_ProductID
+            AND Day >= p_Start AND Day < p_End
+            FOR UPDATE;
+
+            /* 2) Dọn hold hết hạn trong dải đang khóa (tránh “blocked giả”) */
             UPDATE Calendar
             SET Status='available'
             WHERE ProductID = p_ProductID
@@ -2111,7 +2185,7 @@ async function createSpPlaceBookingDraft() {
             AND HoldExpiresAt IS NOT NULL
             AND HoldExpiresAt < v_now;
 
-            -- 1) Kiểm tra xung đột
+            /* 3) Kiểm tra xung đột thực sự còn lại trong dải */
             SELECT COUNT(*) INTO v_conflicts
             FROM Calendar
             WHERE ProductID = p_ProductID
@@ -2125,7 +2199,7 @@ async function createSpPlaceBookingDraft() {
                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Date range not available';
             END IF;
 
-            -- 2) Tạo Booking (pending) - UnitPrice/Amount/ServiceFee do trigger tính
+            /* 4) Tạo Booking pending (trigger Booking sẽ tính UnitPrice/Amount/ServiceFee) */
             INSERT INTO Booking (
                 UserID, ProductID, StartDate, EndDate,
                 BookingStatus, UnitPrice, Amount, ServiceFee,
@@ -2137,16 +2211,7 @@ async function createSpPlaceBookingDraft() {
             );
             SET p_BookingID = LAST_INSERT_ID();
 
-            -- 3a) Bơm ngày còn thiếu
-            SET v_day = p_Start;
-            day_loop: WHILE v_day < p_End DO
-                INSERT IGNORE INTO Calendar(ProductID, Day, Status)
-                VALUES (p_ProductID, v_day, 'available');
-                SET v_day = v_day + INTERVAL 1 DAY;
-            END WHILE;
-
-
-            -- 3b) Reserve dải ngày cho booking
+            /* 5) Reserve dải ngày cho booking vừa tạo */
             UPDATE Calendar
             SET Status='reserved',
                 LockReason='booking_hold',
@@ -2162,10 +2227,293 @@ async function createSpPlaceBookingDraft() {
             END IF;
 
             COMMIT;
-
-            DO RELEASE_LOCK(CONCAT('calprod:', p_ProductID));
         END;
+    `);
+}
 
+async function dropCreateAuctionForStayProcedureIfExists() {
+    await pool.query(`DROP PROCEDURE IF EXISTS CreateAuctionForStay;`);
+}
+
+async function createCreateAuctionForStayProcedure() {
+    await pool.query(`
+        CREATE PROCEDURE CreateAuctionForStay(
+            IN p_ProductID INT, IN p_Start DATE, IN p_End DATE, OUT p_AuctionID INT
+        )
+        BEGIN
+            DECLARE v_now DATETIME; DECLARE v_price DECIMAL(10,2);
+            DECLARE v_spf DECIMAL(6,4);
+            DECLARE v_bif DECIMAL(6,4);
+            DECLARE v_dur INT;
+            DECLARE v_lead INT;
+            DECLARE v_day DATE;
+
+            DECLARE EXIT HANDLER FOR SQLEXCEPTION
+            BEGIN
+                ROLLBACK;
+                RESIGNAL;
+            END;
+
+            IF p_End <= p_Start THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='End>Start required'; END IF;
+
+            SET v_now = NOW();
+            SELECT CAST(ParamValue AS DECIMAL(6,4)) INTO v_spf FROM SystemParameters WHERE ParamName='StartPriceFactor' LIMIT 1;
+            SELECT CAST(ParamValue AS DECIMAL(6,4)) INTO v_bif FROM SystemParameters WHERE ParamName='BidIncrementFactor' LIMIT 1;
+            SELECT CAST(ParamValue AS UNSIGNED) INTO v_dur FROM SystemParameters WHERE ParamName='AuctionDurationDays' LIMIT 1;
+            SELECT CAST(ParamValue AS UNSIGNED) INTO v_lead FROM SystemParameters WHERE ParamName='BidLeadTimeDays' LIMIT 1;
+
+            IF DATE(p_Start) < DATE(v_now + INTERVAL v_lead DAY) THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Stay start too soon for auction';
+            END IF;
+
+            START TRANSACTION;
+
+            -- Bơm ngày còn thiếu
+            SET v_day = p_Start;
+            WHILE v_day < p_End DO
+                INSERT IGNORE INTO Calendar(ProductID, Day, Status) VALUES (p_ProductID, v_day, 'available');
+                SET v_day = v_day + INTERVAL 1 DAY;
+            END WHILE;
+
+            -- Khóa range & kiểm tra xung đột
+            SELECT Day FROM Calendar WHERE ProductID=p_ProductID AND Day>=p_Start AND Day<p_End FOR UPDATE;
+            IF EXISTS(
+                SELECT 1 FROM Calendar
+                WHERE ProductID=p_ProductID AND Day>=p_Start AND Day<p_End
+                AND Status IN ('reserved','booked','blocked')
+            ) THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Date range not free to auction'; END IF;
+
+            SELECT Price INTO v_price FROM Products WHERE ProductID=p_ProductID LIMIT 1;
+
+            INSERT INTO Auction(ProductID, StayPeriodStart, StayPeriodEnd, StartTime, EndTime,
+                                StartPrice, BidIncrement, CurrentPrice, Status)
+            VALUES(p_ProductID, p_Start, p_End, v_now, v_now + INTERVAL v_dur DAY,
+                ROUND(v_price * v_spf,2), ROUND(v_price * v_bif,2), ROUND(v_price * v_spf,2), 'active');
+            SET p_AuctionID = LAST_INSERT_ID();
+
+            -- Block lịch bởi đấu giá (đúng theo rule blocked(auction))
+            UPDATE Calendar
+            SET Status='blocked', LockReason='auction', AuctionID=p_AuctionID, BookingID=NULL, HoldExpiresAt=NULL
+            WHERE ProductID=p_ProductID AND Day>=p_Start AND Day<p_End;
+
+            INSERT INTO AuctionEvents(AuctionID, EventType, Note) VALUES(p_AuctionID,'start','Auction created');
+
+            COMMIT;
+        END;
+    `);
+}
+
+async function dropPlaceBidProcedureIfExists() {
+    await pool.query(`DROP PROCEDURE IF EXISTS PlaceBid;`);
+}
+
+async function createPlaceBidProcedure() {
+    await pool.query(`
+        CREATE PROCEDURE PlaceBid(
+            IN p_AuctionID INT UNSIGNED,
+            IN p_UserID INT,
+            IN p_Amount DECIMAL(10,2),
+            IN p_Start DATE,
+            IN p_End DATE,
+            OUT p_BidID INT UNSIGNED
+        )
+        BEGIN
+            DECLARE v_status ENUM('active','ended','cancelled');
+            DECLARE v_now DATETIME;
+            DECLARE v_cur DECIMAL(10,2);
+            DECLARE v_inc DECIMAL(10,2);
+            DECLARE v_end TIMESTAMP;
+            DECLARE v_sp_start DATE;
+            DECLARE v_sp_end DATE;
+            DECLARE v_prod INT;
+            DECLARE v_lead INT;
+
+            DECLARE EXIT HANDLER FOR SQLEXCEPTION
+            BEGIN
+                ROLLBACK;
+                RESIGNAL;
+            END;
+
+            SET v_now = NOW();
+
+            IF p_End <= p_Start THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='End>Start required'; END IF;
+
+            SELECT CAST(ParamValue AS UNSIGNED) INTO v_lead FROM SystemParameters WHERE ParamName='BidLeadTimeDays' LIMIT 1;
+
+            IF DATE(p_Start) < DATE(v_now + INTERVAL v_lead DAY) THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Stay start too soon for auction';
+            END IF;
+
+            START TRANSACTION;
+
+            -- 1) Khóa row phiên
+            SELECT a.Status, b.Amount, a.BidIncrement, a.EndTime,
+                a.StayPeriodStart, a.StayPeriodEnd, a.ProductID
+            INTO v_status, v_cur, v_inc, v_end, v_sp_start, v_sp_end, v_prod
+            FROM Auction a JOIN Bids b ON a.AuctionID=b.AuctionID AND a.MaxBidID=b.BidID
+            WHERE AuctionID=p_AuctionID FOR UPDATE;
+
+            IF v_status <> 'active' OR v_end IS NULL OR v_end <= v_now THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Auction not active';
+            END IF;
+
+            -- 2) Giá hợp lệ
+            IF p_Amount < v_cur + v_inc THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Bid too low';
+            END IF;
+
+            -- 3) Nếu bid làm MỞ RỘNG phạm vi (trái/phải), phải khóa lịch phần mở rộng & kiểm tra xung đột
+            -- expand left
+            IF p_Start < v_sp_start THEN
+                -- khóa + kiểm tra conflict cho [p_Start, v_sp_start)
+                SELECT Day FROM Calendar
+                WHERE ProductID=v_prod AND Day>=p_Start AND Day<v_sp_start FOR UPDATE;
+
+                IF EXISTS(
+                    SELECT 1 FROM Calendar
+                    WHERE ProductID=v_prod AND Day>=p_Start AND Day<v_sp_start
+                    AND (Status IN ('reserved','booked') OR (Status='blocked' AND (LockReason<>'auction' OR AuctionID<>p_AuctionID)))
+                ) THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Range expansion conflicts (left)';
+                END IF;
+
+                -- block phần mở rộng
+                UPDATE Calendar
+                    SET Status='blocked', LockReason='auction', AuctionID=p_AuctionID,
+                        BookingID=NULL, HoldExpiresAt=NULL
+                WHERE ProductID=v_prod AND Day>=p_Start AND Day<v_sp_start;
+
+                SET v_sp_start = p_Start;
+            END IF;
+
+            -- expand right
+            IF p_End > v_sp_end THEN
+                -- khóa + kiểm tra conflict cho [v_sp_end, p_End)
+                SELECT Day FROM Calendar
+                WHERE ProductID=v_prod AND Day>=v_sp_end AND Day<p_End FOR UPDATE;
+
+                IF EXISTS(
+                    SELECT 1 FROM Calendar
+                    WHERE ProductID=v_prod AND Day>=v_sp_end AND Day<p_End
+                    AND (Status IN ('reserved','booked') OR (Status='blocked' AND (LockReason<>'auction' OR AuctionID<>p_AuctionID)))
+                ) THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Range expansion conflicts (right)';
+                END IF;
+
+                UPDATE Calendar
+                    SET Status='blocked', LockReason='auction', AuctionID=p_AuctionID,
+                        BookingID=NULL, HoldExpiresAt=NULL
+                WHERE ProductID=v_prod AND Day>=v_sp_end AND Day<p_End;
+
+                SET v_sp_end = p_End;
+            END IF;
+
+            -- 4) Cập nhật min/max phiên nếu thay đổi
+            IF v_sp_start <> StayPeriodStart OR v_sp_end <> StayPeriodEnd THEN
+            UPDATE Auction
+                SET StayPeriodStart=v_sp_start, StayPeriodEnd=v_sp_end
+            WHERE AuctionID=p_AuctionID;
+            END IF;
+
+            -- 5) Lưu bid (kèm ngày), cập nhật giá hiện tại & max bid
+            INSERT INTO Bids(AuctionID, UserID, Amount, BidTime, StartDate, EndDate)
+            VALUES(p_AuctionID, p_UserID, p_Amount, NOW(), p_Start, p_End);
+            SET p_BidID = LAST_INSERT_ID();
+
+            UPDATE Auction SET MaxBidID=p_BidID, CurrentPrice=p_Amount WHERE AuctionID=p_AuctionID;
+
+            INSERT INTO AuctionEvents(AuctionID, EventType, ActorUserID, Note)
+            VALUES(p_AuctionID, 'bid_placed', p_UserID,
+                CONCAT('Bid range ', p_Start, ' .. ', p_End));
+
+            COMMIT;
+        END;
+    `);
+}
+
+async function dropPlaceBookingBuyNowProcedureIfExists() {
+    await pool.query(`DROP PROCEDURE IF EXISTS PlaceBookingBuyNow;`);
+}
+
+async function createPlaceBookingBuyNowProcedure() {
+    await pool.query(`
+        CREATE PROCEDURE PlaceBookingBuyNow(
+            IN p_UserID INT,
+            IN p_ProductID INT,
+            IN p_Start DATE,
+            IN p_End DATE,
+            OUT p_BookingID INT UNSIGNED,
+            OUT p_HoldExpiresAt DATETIME
+        )
+        BEGIN
+            DECLARE v_now DATETIME;
+            DECLARE v_auc_id INT UNSIGNED;
+            DECLARE v_sp_start DATE;
+            DECLARE v_sp_end DATE;
+            DECLARE v_hold_booking_time INT;
+
+            DECLARE EXIT HANDLER FOR SQLEXCEPTION
+            BEGIN
+                ROLLBACK;
+                RESIGNAL;
+            END;
+            
+            IF p_End <= p_Start THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='End>Start required'; END IF;
+            
+            SET v_now = NOW();
+            SELECT CAST(ParamValue AS UNSIGNED) INTO v_hold_booking_time FROM SystemParameters WHERE ParamName='PaymentDeadlineTime' LIMIT 1;
+
+            START TRANSACTION;
+
+            -- 1) Tìm phiên bao phủ subrange và khóa
+            SELECT AuctionID, StayPeriodStart, StayPeriodEnd
+            INTO v_auc_id, v_sp_start, v_sp_end
+            FROM Auction
+            WHERE ProductID=p_ProductID AND Status='active'
+            AND p_Start >= StayPeriodStart AND p_End <= StayPeriodEnd
+            FOR UPDATE;
+
+            IF v_auc_id IS NULL THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='No covering auction for this stay';
+            END IF;
+
+            -- 2) Khóa & kiểm tra lịch subrange
+            SELECT Day FROM Calendar
+            WHERE ProductID=p_ProductID AND Day>=p_Start AND Day<p_End FOR UPDATE;
+
+            IF EXISTS(SELECT 1 FROM Calendar
+                    WHERE ProductID=p_ProductID AND Day>=p_Start AND Day<p_End
+                        AND Status='booked') THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Already booked';
+            END IF;
+
+            -- 3) Tạo booking confirmed (source='auction_buy_now')
+            INSERT INTO Booking(UserID, ProductID, StartDate, EndDate, BookingStatus, Source, CreatedAt, UpdatedAt)
+            VALUES(p_UserID, p_ProductID, p_Start, p_End, 'confirmed', 'auction_buy_now', NOW(), NOW());
+            SET p_BookingID = LAST_INSERT_ID();
+
+            -- 4) Đổi subrange sang booked
+            UPDATE Calendar
+            SET Status='booked', LockReason=NULL, AuctionID=NULL, HoldExpiresAt=v_hold_booking_time, BookingID=p_BookingID
+            WHERE ProductID=p_ProductID AND Day>=p_Start AND Day<p_End;
+
+            -- 5) Trả phần còn lại về available
+            UPDATE Calendar
+            SET Status='available', LockReason=NULL, AuctionID=NULL, HoldExpiresAt=NULL, BookingID=NULL
+            WHERE ProductID=p_ProductID AND Day>=v_sp_start AND Day<p_Start AND AuctionID=v_auc_id;
+
+            UPDATE Calendar
+            SET Status='available', LockReason=NULL, AuctionID=NULL, HoldExpiresAt=NULL, BookingID=NULL
+            WHERE ProductID=p_ProductID AND Day>=p_End AND Day<v_sp_end AND AuctionID=v_auc_id;
+
+            -- 6) Kết thúc phiên
+            UPDATE Auction
+            SET Status='ended', EndTime=NOW(), EndReason='buy_now', EndBookingID=p_BookingID
+            WHERE AuctionID=v_auc_id;
+
+            INSERT INTO AuctionEvents(AuctionID, EventType, ActorUserID, BookingID, Note)
+            VALUES(v_auc_id, 'buy_now', p_UserID, p_BookingID, 'Ended by buy-now (subrange)');
+
+            COMMIT;
+        END;
     `);
 }
 
@@ -2229,9 +2577,12 @@ async function initSchema() {
         
         await createBidsTable();
         console.log('✅ Bids table ready');
-        
+
         await createBookingTable();
         console.log('✅ Booking table ready');
+
+        await createAuctionEventsTable();
+        console.log('✅ AuctionEvents table ready');
 
         await createCalendarTable();
         console.log('✅ Calendar table ready');
@@ -2341,9 +2692,21 @@ async function initSchema() {
         await createAddCalendarForRoomProcedure();
         console.log('✅ AddCalendarForRoom procedure ready');
 
-        await dropSpPlaceBookingDraftIfExists();
-        await createSpPlaceBookingDraft();
-        console.log('✅ sp_place_booking_draft procedure ready');
+        await dropPlaceBookingDraftProcedureIfExists();
+        await createPlaceBookingDraftProcedure();
+        console.log('✅ PlaceBookingDraft procedure ready');
+
+        await dropCreateAuctionForStayProcedureIfExists();
+        await createCreateAuctionForStayProcedure();
+        console.log('✅ CreateAuctionForStay procedure ready');
+
+        await dropPlaceBidProcedureIfExists();
+        await createPlaceBidProcedure();
+        console.log('✅ PlaceBidProcedure procedure ready');
+
+        await dropPlaceBookingBuyNowProcedureIfExists();
+        await createPlaceBookingBuyNowProcedure();
+        console.log('✅ PlaceBookingBuyNow procedure ready');
 
         console.log('\n🎉 Database schema initialization completed successfully!');
         

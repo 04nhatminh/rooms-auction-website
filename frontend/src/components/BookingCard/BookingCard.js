@@ -8,6 +8,7 @@ import { useDateRange } from '../../contexts/DateRangeContext';
 import { ProductContext } from '../../contexts/ProductContext';
 import calendarApi from '../../api/calendarApi';
 import bookingApi from '../../api/bookingApi';
+import auctionApi from '../../api/auctionApi';
 import ConfirmBookingPopup from '../ConfirmBookingPopup/ConfirmBookingPopup';
 import AuthPopup from '../AuthPopup/AuthPopup';
 
@@ -19,6 +20,19 @@ const useCurrentUserId = () => useMemo(() => {
       return obj?.id ?? obj?.userId ?? null; // phòng trường hợp key là userId
     } catch { return null; }
 }, []);
+
+function translateBookingError(e) {
+  // Ưu tiên theo HTTP status:
+  if (e?.status === 409) {
+    return 'Khoảng thời gian bạn chọn hiện không khả dụng. Vui lòng chọn ngày khác.';
+  }
+  // Fallback theo nội dung raw (nếu BE dùng 200 + success:false ở nơi khác):
+  const raw = (e?.rawMessage || e?.message || '').toLowerCase();
+  if (raw.includes('giữ') || raw.includes('chặn') || raw.includes('trùng')) {
+    return 'Khoảng thời gian bạn chọn hiện không khả dụng. Vui lòng chọn ngày khác.';
+  }
+  return 'Không thể đặt chỗ. Vui lòng thử lại sau.';
+}
 
 const BookingCard = () => {
   const navigate = useNavigate();
@@ -122,6 +136,15 @@ const BookingCard = () => {
         message = data.hasAuction ? 'Đang có đấu giá cho các ngày đã chọn.' : 'Đang trống toàn bộ khoảng thời gian.';
       }
 
+      if (data.hasAuction && data.auction?.auctionUid) {
+        try {
+          const detail = await auctionApi.getByUid(data.auction.auctionUid);
+          const a = detail?.data?.auction;
+          const remainMs = new Date(a.endTime) - new Date();
+          const remainH = Math.max(0, Math.floor(remainMs/3600000));
+          message = `Đang có đấu giá. Còn ~${remainH} giờ • Giá hiện tại: ${a.currentPrice.toLocaleString()} ${data?.details?.Currency || ''}`;
+        } catch(_) {}
+      }
       setStatus({ tag, level, message });
     } catch (err) {
       console.error(err);
@@ -150,29 +173,97 @@ const BookingCard = () => {
       userId: currentUserId,
       checkin: checkinDate,
       checkout: checkoutDate,
-      holdMinutes: 30,
     };
 
-    const r = await bookingApi.place(payload);
-    setShowConfirm(false);
+    try {
+      const r = await bookingApi.place(payload);
+      setShowConfirm(false);
 
-    const params = buildQuery?.() || '';
-    navigate(`/checkout/${r.bookingId}${params ? `?${params}` : ''}`, {
-      state: { guests, totalGuests, bookingId: r.bookingId, holdExpiresAt: r.holdExpiresAt }
-    });
+      const params = buildQuery?.() || '';
+      navigate(`/checkout/${r.bookingId}${params ? `?${params}` : ''}`, {
+        state: { guests, totalGuests, bookingId: r.bookingId, holdExpiresAt: r.holdExpiresAt }
+      });
+    } catch (e) {
+      // // Đóng popup và hiện banner lỗi rõ ràng
+      // setShowConfirm(false);
+      // setStatus({
+      //   tag: 'soldout',
+      //   level: 'error',
+      //   message: e?.message || 'Khoảng thời gian đã bị giữ/chặn hoặc trùng lịch.',
+      // });
+      // // không ném lại lỗi để tránh alert() bật ra
+      const r = await bookingApi.place(payload);   // để lỗi ném ra ngoài
+      setShowConfirm(false);
+      return;
+    }
+
+    // const params = buildQuery?.() || '';
+    // navigate(`/checkout/${r.bookingId}${params ? `?${params}` : ''}`, {
+    //   state: { guests, totalGuests, bookingId: r.bookingId, holdExpiresAt: r.holdExpiresAt }
+    // });
   };
 
   const onConfirmPlace = async () => {
     try {
       await doPlace();
     } catch (e) {
-      alert(e.message || 'Khoảng thời gian không còn trống, vui lòng chọn lại.');
+      setShowConfirm(false);
+      setStatus({
+        tag: 'soldout',
+        level: 'error',
+        message: translateBookingError(e),
+      });
     }
   };
 
-  const onGoAuction = () => {
-    const params = buildQuery();
-    navigate(`/auction-check/${UID}?${params}`, { state: { guests, totalGuests } });
+  const onGoAuction = async () => {
+    if (!checkinDate || !checkoutDate) return alert('Vui lòng chọn ngày nhận/trả phòng');
+
+    // Yêu cầu đăng nhập
+    const userData = JSON.parse(sessionStorage.getItem('userData') || 'null') || JSON.parse(localStorage.getItem('userData') || 'null');
+    const currentUserId = userData?.id;
+    if (!currentUserId) { setShowLogin(true); return; }
+
+    try {
+      // 1) Kiểm tra lại lịch để biết có phiên đang diễn ra không
+      const avail = await calendarApi.checkAvailability(UID, {
+        checkin: checkinDate, checkout: checkoutDate, userId: currentUserId,
+      });
+ 
+      // Backend nên trả kèm auction { auctionUid, endTime, currentPrice } khi hasAuction=true
+      if (avail?.hasAuction && avail?.auction?.auctionUid) {
+        navigate(`/auction/${avail.auction.auctionUid}`);
+        return;
+      }
+ 
+      // 2) Chưa có phiên → preview thông số để hiển thị cho user xác nhận
+      const preview = await auctionApi.previewCreate({
+        productUid: UID, checkin: checkinDate, checkout: checkoutDate,
+      });
+      const p = preview?.data || {};
+      if (!p.eligible) {
+        alert(p.reason || 'Khoảng thời gian không đủ điều kiện mở đấu giá');
+        return;
+      }
+ 
+      const ok = window.confirm(
+        `Mở phiên đấu giá trong ${p.durationDays} ngày?\n` +
+        `Giá khởi điểm: ${p.startingPrice.toLocaleString()} ${data?.details?.Currency || 'VND'}\n` +
+        `Bước nhảy: ${p.bidIncrement.toLocaleString()}`
+      );
+      if (!ok) return;
+
+      // 3) Tạo phiên
+      const created = await auctionApi.createAuction({
+        productUid: UID, userId: currentUserId, checkin: checkinDate, checkout: checkoutDate,
+      });
+      const a = created?.data;
+      if (!a?.auctionUid) throw new Error('Tạo phiên thất bại');
+      navigate(`/auction/${a.auctionUid}`);
+    } catch (e) {
+      console.error(e);
+      alert(e.message || 'Không thể mở/đi đến phiên đấu giá.');
+    }
   };
 
   return (

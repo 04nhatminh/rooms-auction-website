@@ -98,7 +98,44 @@ export const auctionApi = {
             console.error('Error fetching auction details:', error);
             throw error;
         }
-    }
+    },
+
+    previewCreate: async ({ productUid, checkin, checkout }) => {
+        const r = await fetch(`${API_BASE_URL}/api/auction/preview`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productUid, checkin, checkout }),
+        });
+        const data = await r.json().catch(()=> ({}));
+        if (!r.ok) throw new Error(data.message || 'Không preview được phiên đấu giá');
+        return data; // { success:true, data:{ eligible, durationDays, startingPrice, bidIncrement, ... } }
+    },
+
+    createAuction: async ({ productUid, userId, checkin, checkout }) => {
+        const r = await fetch(`${API_BASE_URL}/api/auction/create`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productUid, userId, checkin, checkout }),
+        });
+        const data = await r.json().catch(()=> ({}));
+        if (!r.ok) throw new Error(data.message || 'Tạo phiên đấu giá thất bại');
+        return data; // { success:true, data:{ auctionUid, endTime, currentPrice, currency } }
+    },
+
+    getByUid: async (auctionUid) => {
+        const r = await fetch(`${API_BASE_URL}/api/auction/by-uid/${auctionUid}`);
+        const data = await r.json().catch(()=> ({}));
+        if (!r.ok) throw new Error(data.message || 'Không tải được phiên đấu giá');
+        return data; // { success:true, data:{ auction, room, fullHistory } }
+    },
+
+    bid: async (auctionUid, { userId, amount }) => {
+        const r = await fetch(`${API_BASE_URL}/api/auction/${auctionUid}/bid`, {
+            method: 'POST', headers: { 'Content-Type':'application/json' },
+            body: JSON.stringify({ userId, amount }),
+        });
+        const data = await r.json().catch(()=> ({}));
+        if (!r.ok) throw new Error(data.message || 'Đặt giá thất bại');
+        return data; // { success:true, data:{ ok:true, currentPrice } }
+    },
 };
 
 export default auctionApi;

@@ -9,7 +9,7 @@ function toDateStr(d) {
 }
 
 class BookingModel {
-    async placeDraft({ userId, productId, start, end, holdMinutes = 30 }) {
+    async placeDraft({ userId, productId, start, end }) {
         const conn = await db.getConnection(); // dùng cùng 1 connection cho @variables
         try {
             const startDate = toDateStr(start);
@@ -21,11 +21,11 @@ class BookingModel {
             // khai báo biến OUT trên session connection này
             await conn.query('SET @outBookingID = NULL, @outHoldAt = NULL');
 
-            // gọi SP: (userId, productId, start, end, holdMinutes, OUT bookingId, OUT holdAt)
+            // gọi SP: (userId, productId, start, end, OUT bookingId, OUT holdAt)
             const callSql = `
-            CALL sp_place_booking_draft(?, ?, ?, ?, ?, @outBookingID, @outHoldAt)
+            CALL PlaceBookingDraft(?, ?, ?, ?, @outBookingID, @outHoldAt)
             `;
-            await conn.query(callSql, [userId, productId, startDate, endDate, holdMinutes]);
+            await conn.query(callSql, [userId, productId, startDate, endDate]);
 
             // đọc OUT values
             const [[out]] = await conn.query(`
@@ -45,15 +45,15 @@ class BookingModel {
         }
     }
 
-    async confirmPaymentSuccess({ productId, bookingId, providerTxn }) {
-        await db.query('CALL sp_confirm_payment_success(?,?,?)', [productId, bookingId, providerTxn || null]);
-        return { ok: true };
-    }
+    // async confirmPaymentSuccess({ productId, bookingId, providerTxn }) {
+    //     await db.query('CALL sp_confirm_payment_success(?,?,?)', [productId, bookingId, providerTxn || null]);
+    //     return { ok: true };
+    // }
 
-    async paymentFailedOrExpired({ productId, bookingId, note }) {
-        await db.query('CALL sp_payment_failed_or_expired(?,?,?)', [productId, bookingId, note || null]);
-        return { ok: true };
-    }
+    // async paymentFailedOrExpired({ productId, bookingId, note }) {
+    //     await db.query('CALL sp_payment_failed_or_expired(?,?,?)', [productId, bookingId, note || null]);
+    //     return { ok: true };
+    // }
 
     async findBookingById(bookingID)
     {

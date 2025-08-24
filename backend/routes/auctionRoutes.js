@@ -11,4 +11,9 @@ router.get('/district/:districtCode', AuctionController.getAuctionsByDistrictByS
 // GET /api/auction/:auctionId
 router.get('/:auctionId', AuctionController.getAuctionById);
 
+router.post('/preview', AuctionController.previewCreateForGuest);
+router.post('/create',  AuctionController.createFromGuest);
+router.get('/by-uid/:auctionUid', AuctionController.getByUID);
+router.post('/:auctionUid/bid',    AuctionController.bid);
+
 module.exports = router;
