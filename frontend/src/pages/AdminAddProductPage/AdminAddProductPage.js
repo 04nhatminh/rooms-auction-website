@@ -1,14 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LocationAPI from '../../api/locationApi';
 import productApi from '../../api/productApi';
 import PageHeader from '../../components/PageHeader/PageHeader';
+import Location from '../../components/Location/Location';
 import ChevronUpIcon from '../../assets/up.png'
 import ChevronDownIcon from '../../assets/down.png'
-
-
-
 import styles from './AdminAddProductPage.module.css';
+
+function debounce(fn, ms) {
+  let t;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), ms);
+  };
+}
 
 const AdminAddProductPage = () => {
   const navigate = useNavigate();
@@ -27,6 +33,8 @@ const AdminAddProductPage = () => {
     provinceCode: '',
     districtCode: '',
     address: '',
+    latitude: '',
+    longitude: '',
     amenities: [],
     houseRules: [''],
     safetyProperties: [''],
@@ -36,11 +44,15 @@ const AdminAddProductPage = () => {
   // Data for dropdowns
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
+  const [lat, setLat] = useState(null);
+  const [lng, setLng] = useState(null);
   const [filteredDistricts, setFilteredDistricts] = useState([]);
   const [roomTypes, setRoomTypes] = useState([]);
   const [propertyTypes, setPropertyTypes] = useState([]);
   const [amenityGroups, setAmenityGroups] = useState([]);
   const [amenities, setAmenities] = useState([]);
+  const [geocoding, setGeocoding] = useState(false);
+  const [geocodeError, setGeocodeError] = useState('');
   
   // Loading states
   const [loading, setLoading] = useState(false);
@@ -372,6 +384,44 @@ const AdminAddProductPage = () => {
     productApi.uploadImage(formData);
   };
 
+  // Lấy tên province, district từ code đã chọn
+  const getProvinceName = (code) => provinces.find(p => p.code === code)?.Name || '';
+  const getDistrictName = (code) => districts.find(d => d.code === code)?.Name || '';
+
+  // Build full address cho geocode
+  const buildFullAddress = () => {    
+    const parts = [
+      formData.address?.trim(),
+      getDistrictName(formData.districtCode),
+      getProvinceName(formData.provinceCode),
+      'Việt Nam'
+    ].filter(Boolean);
+    return parts.join(', ');
+  };
+
+  // Debounce geocode khi người dùng gõ địa chỉ / chọn tỉnh / quận
+  const geocodeNow = async () => {
+    const q = buildFullAddress();
+    if (!q) return;
+    setGeocoding(true);
+    setGeocodeError('');
+    const geo = await LocationAPI.geocodeAddress(q);
+    if (geo) {
+      setLat(geo.lat);
+      setLng(geo.lng);
+    }
+  };
+
+  // Trigger khi đổi address/province/district
+  useEffect(() => {
+    if (formData.address && formData.provinceCode && formData.districtCode) {
+      // Tạo debounce function mới cho mỗi lần thay đổi
+      const debouncedGeocode = debounce(geocodeNow, 1000);
+      debouncedGeocode();
+    }
+  }, [formData.address, formData.provinceCode, formData.districtCode, provinces, districts]);
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -459,6 +509,8 @@ const AdminAddProductPage = () => {
         provinceCode: formData.provinceCode,
         districtCode: formData.districtCode,
         address: formData.address.trim(),
+        latitude: lat,
+        longitude: lng,
         amenities: formData.amenities,
         houseRules: formData.houseRules.filter(rule => rule.trim()),
         safetyProperties: formData.safetyProperties.filter(prop => prop.trim()),
@@ -744,6 +796,21 @@ const AdminAddProductPage = () => {
               <div className={styles.section}>
                 <h3 className={styles.sectionTitle}>Thông tin vị trí</h3>
 
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>
+                    Địa chỉ <span className={styles.required}>*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleInputChange}
+                    className={styles.input}
+                    placeholder="Nhập địa chỉ"
+                    required
+                  />
+                </div>
+
                 <div className={styles.formRow}>
                   <div className={styles.formGroup}>
                     <label className={styles.label}>
@@ -797,20 +864,16 @@ const AdminAddProductPage = () => {
                   </div>
                 </div>
 
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>
-                    Địa chỉ <span className={styles.required}>*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleInputChange}
-                    className={styles.input}
-                    placeholder="Nhập địa chỉ"
-                    required
-                  />
-                </div>
+                {/* Hiển thị map dựa trên địa chỉ đã nhập -> latitude, longitude với mapboxgl */}
+                {(formData.provinceCode && formData.districtCode && formData.address) && (
+                  <div className={styles.mapContainer}>
+                    <Location
+                      lat={formData.latitude}
+                      lng={formData.longitude}
+                      label={''}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Amenities */}

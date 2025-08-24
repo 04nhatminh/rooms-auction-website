@@ -26,7 +26,6 @@ class ProductModel {
         }
     }
 
-
     static generateSnowflakeKey() {
         if (!this.lastTimestamp) this.lastTimestamp = 0;
         if (!this.sequence) this.sequence = 0;
@@ -435,11 +434,12 @@ class ProductModel {
         const provinceCode   = sanitizeString(data.provinceCode);
         const districtCode   = sanitizeString(data.districtCode);
         const address        = sanitizeString(data.address);
+        const latitude       = parseFloat(data.latitude);
+        const longitude      = parseFloat(data.longitude);
         const amenities      = Array.isArray(data.amenities) ? data.amenities.map(a => toInt(a)).filter(Number.isFinite) : [];
         const descriptions   = Array.isArray(data.descriptions) ? data.descriptions : [];
         const houseRules     = Array.isArray(data.houseRules) ? data.houseRules.filter(x => x && x.trim()) : [];
         const safetyProps    = Array.isArray(data.safetyProperties) ? data.safetyProperties.filter(x => x && x.trim()) : [];
-        // const images      = Array.isArray(data.images) ? data.images : []; // hiện chưa lưu
 
         // Validate tối thiểu
         if (!name || !address || !provinceCode || !districtCode || !propertyType || !roomType || !Number.isFinite(price)) {
@@ -469,8 +469,8 @@ class ProductModel {
             address,
             provinceCode,
             districtCode,
-            null,                // Latitude (tạm)
-            null,                // Longitude (tạm)
+            latitude,
+            longitude,
             propertyType,
             roomType,
             maxGuests,

@@ -29,7 +29,7 @@ const RoomDetailPage = () => {
   useEffect(() => {
     axios.get(`http://localhost:3000/api/room/${UID}`)
       .then((res) => {
-        console.log("✅ API response:", res.data);
+        console.log("API response:", res.data);
         setData(res.data.data);
       })
       .catch((err) => {
@@ -68,7 +68,11 @@ const RoomDetailPage = () => {
               <hr />
               <Reviews />
               <hr />
-              <Location />
+              <div className="location-section">
+                <h3>Nơi bạn sẽ đến</h3>
+                <Location />
+              </div>
+
               <hr />
               <HouseRules />
             </main>

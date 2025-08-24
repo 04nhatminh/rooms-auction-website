@@ -84,11 +84,13 @@ const Location = ({ lat: latProp, lng: lngProp, label: labelProp, zoom = 14 }) =
   }, [lat, lng, label]);
 
   return (
-    <div className="location-section">
-      <h3>Nơi bạn sẽ đến</h3>
+    // <div className="location-section">
+    //   <h3>Nơi bạn sẽ đến</h3>
+    <>
       <span>{label}</span>
       <div className="location-map" ref={containerRef}/>
-    </div>
+    </>
+    // </div>
   );
 };
 

@@ -15,6 +15,7 @@ const wishlistRoutes = require('./wishlistRoutes');
 const searchRoutes = require('./searchRoutes');
 const systemParametersRoutes = require('./systemParametersRoutes');
 const uploadImagesRoutes = require('./uploadImagesRoutes')
+const geocodeRoutes = require('./geocodeRoutes');
 
 
 // Demo routes - điều hướng đến /demo
@@ -32,6 +33,7 @@ router.use('/wishlist', wishlistRoutes);
 router.use('/api/search', searchRoutes);
 router.use('/api/system-parameters', systemParametersRoutes);
 router.use('/api/uploads', uploadImagesRoutes);
+router.use('/api/geocode', geocodeRoutes);
 
 router.get('/', (req, res) => {
     res.status(200).json({
