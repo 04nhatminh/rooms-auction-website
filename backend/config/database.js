@@ -1226,6 +1226,7 @@ async function createGetPopularProvincesProcedure() {
                 prov.ProvinceCode AS code,
                 prov.Name,
                 prov.NameEn,
+                prov.FullName,
                 prov.CodeName,
                 COUNT(p.ProductID) AS ProductCount,
                 'province' AS type
@@ -1262,6 +1263,7 @@ async function createGetPopularDistrictsProcedure() {
                 disct.DistrictCode AS code,
                 disct.Name,
                 disct.NameEn,
+                disct.FullName,
                 disct.CodeName,
                 COUNT(p.ProductID) AS ProductCount,
                 'district' AS type
@@ -1272,6 +1274,7 @@ async function createGetPopularDistrictsProcedure() {
                 disct.DistrictCode, 
                 disct.Name, 
                 disct.NameEn, 
+                disct.FullName,
                 disct.CodeName
             HAVING ProductCount > 0
             ORDER BY 
@@ -1398,6 +1401,7 @@ async function createGetAllProvincesProcedure() {
                 ProvinceCode AS code,
                 Name,
                 NameEn,
+                FullName,
                 'province' AS type
             FROM Provinces;
         END;
@@ -1418,6 +1422,7 @@ async function createGetAllDistrictsProcedure() {
                 DistrictCode AS code,
                 Name,
                 NameEn,
+                FullName,
                 'district' AS type,
                 ProvinceCode AS provinceCode
             FROM Districts;

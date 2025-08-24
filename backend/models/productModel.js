@@ -54,7 +54,11 @@ class ProductModel {
     static async getProductDetails(productUID) 
     {
         try {
-            const query = 'SELECT * FROM products WHERE UID = ?';
+            const query = `SELECT p.*, pr.FullName AS ProvinceFullName, d.FullName AS DistrictFullName
+                            FROM products p 
+                            JOIN provinces pr ON p.ProvinceCode = pr.ProvinceCode
+                            JOIN districts d ON p.DistrictCode = d.DistrictCode
+                            WHERE p.UID = ?`;
             const [products] = await pool.execute(query, [productUID]);
             console.log(`Fetched product details for ProductID ${productUID}:`, products);
             return products[0]; // Trả về sản phẩm đầu tiên

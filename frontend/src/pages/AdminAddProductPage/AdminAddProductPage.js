@@ -44,8 +44,6 @@ const AdminAddProductPage = () => {
   // Data for dropdowns
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
-  const [lat, setLat] = useState(null);
-  const [lng, setLng] = useState(null);
   const [filteredDistricts, setFilteredDistricts] = useState([]);
   const [roomTypes, setRoomTypes] = useState([]);
   const [propertyTypes, setPropertyTypes] = useState([]);
@@ -407,16 +405,21 @@ const AdminAddProductPage = () => {
     setGeocodeError('');
     const geo = await LocationAPI.geocodeAddress(q);
     if (geo) {
-      setLat(geo.lat);
-      setLng(geo.lng);
+      // Cập nhật formData với lat/lng mới
+      setFormData(prev => ({
+        ...prev,
+        latitude: geo.lat,
+        longitude: geo.lng
+      }));
     }
+    setGeocoding(false);
   };
 
   // Trigger khi đổi address/province/district
   useEffect(() => {
     if (formData.address && formData.provinceCode && formData.districtCode) {
       // Tạo debounce function mới cho mỗi lần thay đổi
-      const debouncedGeocode = debounce(geocodeNow, 1000);
+      const debouncedGeocode = debounce(geocodeNow, 800);
       debouncedGeocode();
     }
   }, [formData.address, formData.provinceCode, formData.districtCode, provinces, districts]);
@@ -509,8 +512,8 @@ const AdminAddProductPage = () => {
         provinceCode: formData.provinceCode,
         districtCode: formData.districtCode,
         address: formData.address.trim(),
-        latitude: lat,
-        longitude: lng,
+        latitude: formData.latitude,
+        longitude: formData.longitude,
         amenities: formData.amenities,
         houseRules: formData.houseRules.filter(rule => rule.trim()),
         safetyProperties: formData.safetyProperties.filter(prop => prop.trim()),
@@ -865,7 +868,7 @@ const AdminAddProductPage = () => {
                 </div>
 
                 {/* Hiển thị map dựa trên địa chỉ đã nhập -> latitude, longitude với mapboxgl */}
-                {(formData.provinceCode && formData.districtCode && formData.address) && (
+                {(formData.provinceCode && formData.districtCode && formData.address && formData.latitude && formData.longitude) && (
                   <div className={styles.mapContainer}>
                     <Location
                       lat={formData.latitude}
