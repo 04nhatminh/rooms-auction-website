@@ -267,6 +267,74 @@ class AuctionModel {
             throw error;
         }
     }
+
+    // Admin
+    static async getAllAuctionsForAdmin(limit, offset) {
+        const safeLimit = parseInt(limit, 10);
+        const safeOffset = parseInt(offset, 10);
+        try {
+            const query = `
+                SELECT 
+                    a.AuctionID,
+                    a.AuctionUID,
+                    a.ProductID,
+                    a.StayPeriodStart,
+                    a.StayPeriodEnd,
+                    a.StartTime,
+                    a.EndTime,
+                    a.Status,
+                    a.CurrentPrice
+                FROM Auction a
+                ORDER BY 
+                    CASE a.Status
+                        WHEN 'active'    THEN 1
+                        WHEN 'ended'     THEN 2
+                        WHEN 'cancelled' THEN 3
+                    END,
+                    a.StartTime DESC
+                LIMIT ${safeLimit} OFFSET ${safeOffset}
+            `;
+            const [auctions] = await pool.execute(query);
+            return auctions;
+        } catch (error) {
+            console.error('Error fetching all auctions for admin:', error);
+            throw error;
+        }
+    }
+
+    static async getAllAuctionsByStatusForAdmin(status, limit, offset) {
+        const safeLimit = parseInt(limit, 10);
+        const safeOffset = parseInt(offset, 10);
+        try {
+            const query = `
+                SELECT 
+                    a.AuctionID,
+                    a.AuctionUID,
+                    a.ProductID,
+                    a.StayPeriodStart,
+                    a.StayPeriodEnd,
+                    a.StartTime,
+                    a.EndTime,
+                    a.Status,
+                    a.CurrentPrice
+                FROM Auction a
+                WHERE a.Status = ?
+                ORDER BY 
+                    CASE a.Status
+                        WHEN 'active'    THEN 1
+                        WHEN 'ended'     THEN 2
+                        WHEN 'cancelled' THEN 3
+                    END,
+                    a.StartTime DESC
+                LIMIT ${safeLimit} OFFSET ${safeOffset}
+            `;
+            const [auctions] = await pool.execute(query, [status]);
+            return auctions;
+        } catch (error) {
+            console.error('Error fetching all auctions by status for admin:', error);
+            throw error;
+        }
+    }
 }
 
 module.exports = AuctionModel;

@@ -197,6 +197,74 @@ export const auctionApi = {
             console.error('Error fetching newest auctions:', error);
             throw error;
         }
+    },
+
+    // Lấy danh sách tất cả auctions cho admin
+    getAllAuctionsForAdmin: async (token, limit, offset, abortSignal = null) => {
+        try {
+            const fetchOptions = {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+            };
+
+            // Thêm AbortSignal nếu được cung cấp
+            if (abortSignal) {
+                fetchOptions.signal = abortSignal;
+            }
+
+            const response = await fetch(`${API_BASE_URL}/admin/auctions?limit=${limit}&offset=${offset}`, fetchOptions);
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                console.log('Auction API request was aborted');
+                throw error;
+            }
+            console.error('Error fetching all auctions for admin:', error);
+            throw error;
+        }
+    },
+
+    // Lấy danh sách tất cả auctions theo status cho admin
+    getAllAuctionsByStatusForAdmin: async (token, status, limit, offset, abortSignal = null) => {
+        try {
+            const fetchOptions = {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+            };
+
+            // Thêm AbortSignal nếu được cung cấp
+            if (abortSignal) {
+                fetchOptions.signal = abortSignal;
+            }
+
+            const response = await fetch(`${API_BASE_URL}/admin/auctions/status/${status}?limit=${limit}&offset=${offset}`, fetchOptions);
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                console.log('Auction API request was aborted');
+                throw error;
+            }
+            console.error('Error fetching all auctions by status for admin:', error);
+            throw error;
+        }
     }
 
 };

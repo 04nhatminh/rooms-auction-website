@@ -418,6 +418,7 @@ async function createAuctionTable() {
             BidIncrement DECIMAL(10, 2),
             CurrentPrice DECIMAL(10, 2),
             Status ENUM('active','ended','cancelled') DEFAULT 'active',
+            EndReason ENUM('natural_end','buy_now','cancelled','admin_force') NULL,
             FOREIGN KEY (ProductID) REFERENCES Products(ProductID)
         )
     `);
@@ -477,15 +478,18 @@ async function createBookingTable() {
     await pool.execute(`
         CREATE TABLE IF NOT EXISTS Booking (
             BookingID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-            BidID INT UNSIGNED,
-            UserID INT,
-            ProductID INT,
-            StartDate DATE,
-            EndDate DATE,
+            BidID INT UNSIGNED DEFAULT NULL,
+            UserID INT NOT NULL,
+            ProductID INT NOT NULL,
+            StartDate DATE NOT NULL,
+            EndDate DATE NOT NULL,
             BookingStatus ENUM('pending','confirmed','cancelled','completed','expired') DEFAULT 'pending',
-            WinningPrice DECIMAL(10, 2),
-            PaymentMethodID INT,
-            PaidAt TIMESTAMP,
+            UnitPrice DECIMAL(10, 2) DEFAULT 0.0,
+            Amount DECIMAL(10, 2) DEFAULT 0.0,
+            ServiceFee DECIMAL(10, 2) DEFAULT 0.0,
+            PaymentMethodID INT DEFAULT NULL,
+            PaidAt TIMESTAMP DEFAULT NULL,
+            Source ENUM('direct','auction_win','auction_buy_now') NOT NULL DEFAULT 'direct',
             CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             FOREIGN KEY (BidID) REFERENCES Bids(BidID),

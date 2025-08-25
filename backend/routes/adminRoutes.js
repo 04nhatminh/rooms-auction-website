@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
+const auctionController = require('../controllers/auctionController');
 const scrapingController = require('../controllers/scrapingController');
 const { verifyToken, isAdmin } = require('../middleware/authMiddleware');
 
@@ -13,6 +14,17 @@ router.delete('/users/:id', verifyToken, isAdmin, userController.deleteUser);
 router.get('/users/:id', verifyToken, isAdmin, userController.getUserById);
 // Cập nhật trạng thái user
 router.patch('/users/:id/status', verifyToken, isAdmin, userController.updateUserStatus);
+
+// Auction management routes
+// Lấy danh sách tất cả auction
+router.get('/auctions', verifyToken, isAdmin, auctionController.getAllAuctionsForAdmin);
+// Lấy danh sách tất cả auction theo status
+router.get('/auctions/status/:status', verifyToken, isAdmin, auctionController.getAllAuctionsByStatusForAdmin);
+// Cập nhật trạng thái auction
+// router.patch('/auctions/:id/status', verifyToken, isAdmin, auctionController.updateAuctionStatus);
+// // Tìm kiếm auction theo UID
+// router.get('/auctions/search/:uid', verifyToken, isAdmin, auctionController.searchAuctionsByUID);
+
 
 // Data scraping routes
 // Chạy script thu thập dữ liệu listing info

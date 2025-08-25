@@ -8,6 +8,7 @@ export default function Sidebar({ onLogout, compact = false, onToggle }) {
     { to: '/admin/dashboard', label: 'Dashboard', icon: '🏠' },
     { to: '/admin/users-management', label: 'Quản lý khách hàng', icon: '👥' },
     { to: '/admin/products-management', label: 'Quản lý sản phẩm', icon: '🏘️' },
+    { to: '/admin/auctions-management', label: 'Quản lý đấu giá', icon: '🎨' },
     { to: '/admin/bookings-management', label: 'Quản lý đặt phòng', icon: '📆' },
     { to: '/admin/system-config', label: 'Cấu hình hệ thống', icon: '⚙️' },
     { to: '/admin/data-scraping', label: 'Thu thập dữ liệu', icon: '🔄' },

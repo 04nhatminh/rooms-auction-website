@@ -22,6 +22,7 @@ import AdminProductsManagementPage from './pages/AdminProductsManagementPage/Adm
 import AdminAddProductPage from './pages/AdminAddProductPage/AdminAddProductPage';
 import AdminViewProductPage from './pages/AdminViewProductPage/AdminViewProductPage';
 import AdminEditProductPage from './pages/AdminEditProductPage/AdminEditProductPage';
+import AdminAuctionsManagementPage from './pages/AdminAuctionsManagementPage/AdminAuctionsManagementPage';
 import SystemConfigPage from './pages/SystemConfigPage/SystemConfigPage';
 import DataScrapingPage from './pages/DataScrapingPage/DataScrapingPage';
 import AuctionPage from './pages/AuctionPage/AuctionPage';
@@ -57,6 +58,7 @@ function App() {
               <Route path="products-management/add" element={<AdminAddProductPage />} />
               <Route path="products-management/edit/:id" element={<AdminEditProductPage />} />
               <Route path="products-management/view/:id" element={<AdminViewProductPage />} />
+              <Route path="auctions-management" element={<AdminAuctionsManagementPage />} />
               <Route path="system-config" element={<SystemConfigPage />} />
               <Route path="data-scraping" element={<DataScrapingPage />} />
               {/* <Route path="edit-product/:id" element={<AdminEditProductPage />} /> */}
