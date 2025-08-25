@@ -67,6 +67,24 @@ export const LocationProvider = ({ children }) => {
   const allLocationsAbortRef = useRef(null);
   const searchAbortRef = useRef(null);
 
+  // Function để lấy districts theo province code từ popularLocations
+  const getDistrictsByProvince = useCallback(async (provinceCode, limit = 10) => {
+    // Lọc districts từ popularLocations theo provinceCode
+    const districtsInProvince = popularLocations.filter(location => 
+      location.type === 'district' && 
+      (location.provinceCode === provinceCode || location.ProvinceCode === provinceCode)
+    );
+
+    console.log('Found districts in popularLocations for province:', provinceCode, districtsInProvince.length);
+
+    return {
+      success: true,
+      data: {
+        districts: districtsInProvince.slice(0, limit)
+      }
+    };
+  }, [popularLocations]);
+
   // Function để load tất cả provinces và districts
   const loadAllLocationsData = useCallback(async () => {
     if (hasLoadedAllData || isLoadingAll) {
@@ -449,7 +467,8 @@ export const LocationProvider = ({ children }) => {
     getLocationSuggestions,
     getPopularLocations,
     loadAllLocationsData,
-    searchInLocalData
+    searchInLocalData,
+    getDistrictsByProvince
   };
 
   return (

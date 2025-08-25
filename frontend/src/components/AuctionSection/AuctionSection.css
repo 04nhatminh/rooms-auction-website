@@ -91,6 +91,10 @@
 
 /* Responsive Design */
 @media (max-width: 1200px) {
+  .content-auction-section {
+    padding: 16px 20px;
+  }
+
   .auction-card-slider .auction-card {
     flex: 0 0 calc(25% - 1.2rem); /* 4 cards trên tablet */
   }

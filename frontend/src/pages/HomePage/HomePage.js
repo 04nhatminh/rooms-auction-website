@@ -9,6 +9,7 @@ import RoomSection from '../../components/RoomSection/RoomSection';
 import AuctionSection from '../../components/AuctionSection/AuctionSection';
 import SignInUpAction from '../../components/SignInUpAction/SignInUpAction';
 import HeaderUserMenu from '../../components/HeaderUserMenu/HeaderUserMenu';
+import ProductsCatalog from '../../components/ProductsCatalog/ProductsCatalog';
 import Footer from '../../components/Footer/Footer';
 import logo from '../../assets/logo.png';
 import HomeBackground from '../../assets/home_background.jpg';
@@ -31,6 +32,15 @@ const HomePage = () => {
   const { user, isAuthenticated } = useUser();
   const navigate = useNavigate();
   
+  // State for search data to pass to catalog dropdowns
+  const [searchData, setSearchData] = useState({
+    checkinDate: '',
+    checkoutDate: ''
+  });
+  const [selectedRoomTypes, setSelectedRoomTypes] = useState([]);
+  const [selectedDestinations, setSelectedDestinations] = useState([]);
+  const [isShowSubCatalog, setIsShowSubCatalog] = useState(false);
+
   // Load popular locations khi component mount (chỉ khi chưa có data)
   useEffect(() => {
     if (popularLocations.length === 0 && !isLoadingLocations) {
@@ -43,6 +53,27 @@ const HomePage = () => {
 
   // Handler for accommodation type click
   const handleAccommodationTypeClick = (item) => {
+    if (item.roomTypeId) {
+      // // Navigate đến trang search với filter roomType
+      // const searchParams = new URLSearchParams({
+      //   accommodationTypes: item.roomTypeId
+      // });
+      // navigate(`/search?${searchParams.toString()}`);
+      // window.scrollTo(0, 0);
+      // Hiển thị catalog dropdown cho các loại phòng
+      // <CatalogDropdown
+      //   title={item.title}
+      //   provinceCode={item.provinceCode}
+      //   onItemClick={handleCatalogItemClick}
+      //   searchData={searchData}
+      // />
+      setSelectedRoomTypes(prev => [...prev, item.roomTypeId]);
+      setIsShowSubCatalog(true);
+    }
+  };
+
+  // Handler for catalog item click
+  const handleCatalogItemClick = (item) => {
     if (item.roomTypeId) {
       // Navigate đến trang search với filter roomType
       const searchParams = new URLSearchParams({
@@ -68,14 +99,6 @@ const HomePage = () => {
   };
   
   // Memoize các props để tránh tạo object mới mỗi lần render
-  const accommodationTypes = useMemo(() => [
-    { image: KhachSanImg, title: 'Khách sạn', roomTypeId: '1' },
-    { image: CanHoImg, title: 'Căn hộ', roomTypeId: '2' },
-    { image: HomestayImg, title: 'Homestay', roomTypeId: '3' },
-    { image: ResortImg, title: 'Resort', roomTypeId: '4' },
-    { image: BietThuImg, title: 'Biệt thự', roomTypeId: '5' },
-  ], []);
-
   const destinations = useMemo(() => [
     { image: HoChiMinhImg, title: 'Hồ Chí Minh', provinceCode: '79' },
     { image: HaNoiImg, title: 'Hà Nội', provinceCode: '01' },
@@ -108,14 +131,6 @@ const HomePage = () => {
             <span className="home-logo-text">bidstay</span>
           </div>
 
-          <div className="product-catalog">
-            <span className="catalog-item">Khách sạn</span>
-            <span className="catalog-item">Căn hộ</span>
-            <span className="catalog-item">Homestay</span>
-            <span className="catalog-item">Resort</span>
-            <span className="catalog-item">Biệt thự</span>
-          </div>
-
           {isAuthenticated() ? (
             <HeaderUserMenu />
           ) : (
@@ -129,14 +144,12 @@ const HomePage = () => {
           <p className="banner-subtitle">Ưu đãi linh hoạt cho mọi hành trình</p>
         </div>
       </div>
-      <SearchBar />
+      <SearchBar 
+        onSearchDataUpdate={setSearchData}
+      />
       
       <div className='home-content'>
-        <CardSection 
-          title="Tìm theo loại chỗ nghỉ" 
-          items={accommodationTypes} 
-          onItemClick={handleAccommodationTypeClick}
-        />
+        <ProductsCatalog />
         <CardSection 
           title="Điểm đến nổi bật tại Việt Nam" 
           items={destinations} 

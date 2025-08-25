@@ -1,5 +1,5 @@
 .content-card-section {
-  padding: 20px 56px;
+  padding: 16px 56px;
 }
 
 .content-card-section h2 {
@@ -18,4 +18,10 @@
   grid-template-columns: repeat(5, 1fr);
   gap: 1.5rem;
   width: 100%;
+}
+
+@media (max-width: 1030px) {
+  .content-card-section {
+    padding: 16px 20px;
+  }
 }

@@ -1,0 +1,302 @@
+.products-catalog {
+    padding: 30px 20px 0px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.catalog-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.catalog-header h2 {
+    font-family: Montserrat;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 12px;
+}
+
+.catalog-header p {
+    font-family: Montserrat;
+    font-size: 1.2rem;
+    color: #666;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.accommodation-types-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.accommodation-type-card {
+    position: relative;
+    height: 250px;
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.accommodation-type-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+.accommodation-image {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.accommodation-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.accommodation-type-card:hover .accommodation-image img {
+    transform: scale(1.05);
+}
+
+.accommodation-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+    color: white;
+    padding: 30px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.accommodation-title {
+    font-family: Montserrat;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.accommodation-description {
+    font-family: Montserrat;
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin-bottom: 15px;
+}
+
+.view-more-btn {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-family: Montserrat;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+}
+
+.accommodation-type-card:hover .view-more-btn {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.districts-dropdown-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.districts-dropdown {
+    background: white;
+    border-radius: 16px;
+    max-width: 800px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.dropdown-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 25px 30px;
+    border-bottom: 1px solid #eee;
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 10;
+}
+
+.dropdown-header h3 {
+    font-family: Montserrat;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.close-dropdown {
+    background: none;
+    border: none;
+    font-family: Montserrat;
+    font-size: 2rem;
+    color: #999;
+    cursor: pointer;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.close-dropdown:hover {
+    background: #f5f5f5;
+    color: #333;
+}
+
+.districts-grid {
+    padding: 20px 30px 30px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 15px;
+}
+
+.district-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #fafafa;
+}
+
+.district-card:hover {
+    border-color: #278C9F;
+    background: #fbfeff;
+    transform: translateX(5px);
+}
+
+.district-info h4 {
+    font-family: Montserrat;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 5px 0;
+}
+
+.district-info p {
+    font-family: Montserrat;
+    font-size: 0.9rem;
+    color: #666;
+    margin: 0;
+}
+
+.district-arrow {
+    font-family: Montserrat;
+    font-size: 1.2rem;
+    color: #278C9F;
+    font-weight: bold;
+    transition: transform 0.3s ease;
+}
+
+.district-card:hover .district-arrow {
+    transform: translateX(5px);
+}
+
+.loading-districts {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px;
+    color: #666;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .products-catalog {
+        padding: 40px 15px;
+    }
+    
+    .catalog-header h2 {
+        font-size: 2rem;
+    }
+    
+    .accommodation-types-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+    
+    .accommodation-type-card {
+        height: 220px;
+    }
+    
+    .districts-dropdown {
+        margin: 10px;
+        max-height: 90vh;
+    }
+    
+    .dropdown-header {
+        padding: 20px;
+    }
+    
+    .dropdown-header h3 {
+        font-size: 1.3rem;
+    }
+    
+    .districts-grid {
+        padding: 15px 20px 25px;
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .district-card {
+        padding: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .catalog-header h2 {
+        font-size: 1.8rem;
+    }
+    
+    .catalog-header p {
+        font-size: 1rem;
+    }
+    
+    .accommodation-types-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .accommodation-type-card {
+        height: 200px;
+    }
+    
+    .accommodation-title {
+        font-size: 1.3rem;
+    }
+    
+    .districts-dropdown-overlay {
+        padding: 10px;
+    }
+}
