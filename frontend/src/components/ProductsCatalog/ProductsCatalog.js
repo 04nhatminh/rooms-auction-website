@@ -180,14 +180,10 @@ const ProductsCatalog = () => {
         <div className="districts-dropdown-overlay" onClick={handleOverlayClick}>
           <div className="districts-dropdown" onClick={(e) => e.stopPropagation()}>
             <div className="dropdown-header">
-              <h3>{selectedAccommodationType.title} tại các khu vực phổ biến</h3>
-              <button 
-                className="close-dropdown"
-                onClick={handleOverlayClick}
-              >
-                ×
-              </button>
+                <button className="close-dropdown" onClick={handleOverlayClick}>×</button>
+                <h3>{selectedAccommodationType.title} tại các khu vực phổ biến</h3>
             </div>
+
             
             <div className="districts-grid">
               {popularLocations.map((district, index) => (

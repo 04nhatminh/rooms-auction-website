@@ -321,13 +321,6 @@ const SearchBar = ({
 
 
   // ====== Effect ======
-  // Gọi callback khi component mount để truyền initial search data
-  useEffect(() => {
-    if (onSearchDataUpdate) {
-      onSearchDataUpdate(searchData);
-    }
-  }, []); // Chỉ chạy một lần khi mount
-
   // Nếu popularLocations vừa load xong trong lúc input trống -> cập nhật dropdown
   useEffect(() => {
     if (!searchData.location || searchData.location.trim().length === 0) {
@@ -335,13 +328,9 @@ const SearchBar = ({
     }
   }, [popularLocations]);
 
-  // Khởi tạo guest display text ban đầu và notify parent về search data
+  // Khởi tạo guest display text ban đầu
   useEffect(() => {
     updateGuestDisplayText(guestCounts);
-    // Gọi callback để parent có search data ban đầu
-    if (onSearchDataUpdate) {
-      onSearchDataUpdate(searchData);
-    }
   }, []);
 
   // Xử lý click outside để đóng suggestions và guest dropdown

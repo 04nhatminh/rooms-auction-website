@@ -32,9 +32,6 @@ const HomePage = () => {
     checkinDate: '',
     checkoutDate: ''
   });
-  const [selectedRoomTypes, setSelectedRoomTypes] = useState([]);
-  const [selectedDestinations, setSelectedDestinations] = useState([]);
-  const [isShowSubCatalog, setIsShowSubCatalog] = useState(false);
 
   // Load popular locations khi component mount (chỉ khi chưa có data)
   useEffect(() => {
@@ -45,39 +42,6 @@ const HomePage = () => {
       console.log('HomePage: Popular locations already available:', popularLocations.length);
     }
   }, []);
-
-  // Handler for accommodation type click
-  const handleAccommodationTypeClick = (item) => {
-    if (item.roomTypeId) {
-      // // Navigate đến trang search với filter roomType
-      // const searchParams = new URLSearchParams({
-      //   accommodationTypes: item.roomTypeId
-      // });
-      // navigate(`/search?${searchParams.toString()}`);
-      // window.scrollTo(0, 0);
-      // Hiển thị catalog dropdown cho các loại phòng
-      // <CatalogDropdown
-      //   title={item.title}
-      //   provinceCode={item.provinceCode}
-      //   onItemClick={handleCatalogItemClick}
-      //   searchData={searchData}
-      // />
-      setSelectedRoomTypes(prev => [...prev, item.roomTypeId]);
-      setIsShowSubCatalog(true);
-    }
-  };
-
-  // Handler for catalog item click
-  const handleCatalogItemClick = (item) => {
-    if (item.roomTypeId) {
-      // Navigate đến trang search với filter roomType
-      const searchParams = new URLSearchParams({
-        accommodationTypes: item.roomTypeId
-      });
-      navigate(`/search?${searchParams.toString()}`);
-      window.scrollTo(0, 0);
-    }
-  };
 
   // Handler for destination click
   const handleDestinationClick = (item) => {
