@@ -17,7 +17,7 @@ import HoChiMinhImg from '../../assets/ho_chi_minh.jpg';
 import HaNoiImg from '../../assets/ha_noi.png';
 import VungTauImg from '../../assets/vung_tau.jpg';
 import DaLatImg from '../../assets/da_lat.jpg';
-import NhaTrangImg from '../../assets/nha_trang.jpg';
+import NhaTrangImg from '../../assets/nha_trang.png';
 import WishlistBox from '../../components/WishlistBox/WishlistBox';
 import './HomePage.css';
 
