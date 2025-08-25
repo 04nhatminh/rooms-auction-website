@@ -200,7 +200,7 @@ export const auctionApi = {
     },
 
     // Lấy danh sách tất cả auctions cho admin
-    getAllAuctionsForAdmin: async (token, limit, offset, abortSignal = null) => {
+    getAllAuctionsForAdmin: async (page = 1, limit = 10, token) => {
         try {
             const fetchOptions = {
                 method: 'GET',
@@ -210,12 +210,7 @@ export const auctionApi = {
                 },
             };
 
-            // Thêm AbortSignal nếu được cung cấp
-            if (abortSignal) {
-                fetchOptions.signal = abortSignal;
-            }
-
-            const response = await fetch(`${API_BASE_URL}/admin/auctions?limit=${limit}&offset=${offset}`, fetchOptions);
+            const response = await fetch(`${API_BASE_URL}/admin/auctions?page=${page}&limit=${limit}`, fetchOptions);
 
             if (!response.ok) {
                 const errorData = await response.json();

@@ -13,68 +13,85 @@ const AdminAuctionsManagementPage = () => {
   const [auctions, setAuctions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [searchUID, setSearchUID] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [pagination, setPagination] = useState(null);
 
+  const pageSize = 10;
+
+  const formatCurrency = (price) => {
+    const v = typeof price === 'number' ? price : Number(price);
+    if (Number.isNaN(v)) return '-';
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(v);
+  };
+
+  const fmtDateTime = (d) => {
+    if (!d) return '-';
+    const date = new Date(d);
+    if (isNaN(date.getTime())) return String(d);
+    return date.toLocaleString('vi-VN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
   const loadAuctions = async () => {
     const token = localStorage.getItem('token');
-    console.log('Loading auctions with token:', token);
     if (!token) { alert('Vui lòng đăng nhập lại.'); navigate('/login'); return; }
 
     try {
       setLoading(true);
-      const response = await auctionApi.getAllAuctionsForAdmin(token, currentPage, 10);
+      const response = await auctionApi.getAllAuctionsForAdmin(currentPage, pageSize, token);
 
-      // Handle different response formats
-      if (response.success) {
-        setAuctions(response.data?.items || response.data || []);
-        setTotalPages(response.data?.totalPages || 1);
+      if (response?.success) {
+        const items = response.data?.items || response.data || [];
+        setAuctions(items);
         setPagination({
           currentPage: response.data?.currentPage || currentPage,
           totalPages: response.data?.totalPages || 1,
-          totalItems: response.data?.totalItems || 0,
-          itemsPerPage: 10
+          totalItems: response.data?.totalItems || items.length,
+          itemsPerPage: pageSize,
         });
       } else {
-        // Fallback for direct array response
+        // Fallback nếu API trả mảng
         const list = Array.isArray(response) ? response : [];
         setAuctions(list);
-        setTotalPages(Math.ceil(list.length / 10));
+        const totalPages = Math.max(1, Math.ceil(list.length / pageSize));
         setPagination({
-          currentPage: currentPage,
-          totalPages: Math.ceil(list.length / 10),
+          currentPage,
+          totalPages,
           totalItems: list.length,
-          itemsPerPage: 10
+          itemsPerPage: pageSize,
         });
       }
     } catch (err) {
-      setError(err.message);
       console.error('Error loading auctions:', err);
+      setError(err.message || 'Đã xảy ra lỗi.');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (!isSearching) {
-      loadAuctions();
-    }
+    if (!isSearching) loadAuctions();
   }, [currentPage, isSearching]);
 
-  const searchAuctionsByUID = async (uid, page = 1) => {
+  const doSearch = async (uid, page = 1) => {
     const token = localStorage.getItem('token');
-    if (!token) {
-      alert('Vui lòng đăng nhập lại.');
-      navigate('/login');
-      return;
-    }
+    if (!token) { alert('Vui lòng đăng nhập lại.'); navigate('/login'); return; }
 
-    if (!uid || uid.trim() === '') {
-      // If UID is empty, return to normal list
+    if (!uid?.trim()) {
       setIsSearching(false);
       setSearchResults([]);
       setCurrentPage(1);
@@ -83,46 +100,51 @@ const AdminAuctionsManagementPage = () => {
 
     try {
       setLoading(true);
-      const response = await auctionApi.searchAuctionsByUID(uid, page, 10, token);
-      
-      if (response.success) {
+      const response = await auctionApi.searchAuctionsByUID(uid.trim(), page, pageSize, token);
+      if (response?.success) {
         setSearchResults(response.data?.items || []);
         setPagination({
           currentPage: response.data?.currentPage || page,
           totalPages: response.data?.totalPages || 1,
           totalItems: response.data?.totalItems || 0,
-          itemsPerPage: 10
+          itemsPerPage: pageSize,
         });
         setIsSearching(true);
       } else {
         setSearchResults([]);
-        setPagination(null);
+        setPagination({
+          currentPage: 1,
+          totalPages: 1,
+          totalItems: 0,
+          itemsPerPage: pageSize,
+        });
       }
     } catch (err) {
-      console.error('Error searching auctions by UID:', err);
+      console.error('Error searching auctions:', err);
       alert('Có lỗi xảy ra khi tìm kiếm: ' + err.message);
       setSearchResults([]);
-      setPagination(null);
+      setPagination({
+        currentPage: 1,
+        totalPages: 1,
+        totalItems: 0,
+        itemsPerPage: pageSize,
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSearchInputChange = (e) => {
-    const value = e.target.value;
-    setSearchUID(value);
-  };
-
   const handleSearch = () => {
     if (searchUID.trim() !== '') {
       setCurrentPage(1);
-      searchAuctionsByUID(searchUID, 1);
+      doSearch(searchUID, 1);
     }
   };
 
-  const handleSearchKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      handleSearch();
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    if (isSearching && searchUID.trim() !== '') {
+      doSearch(searchUID, page);
     }
   };
 
@@ -131,86 +153,44 @@ const AdminAuctionsManagementPage = () => {
     setIsSearching(false);
     setSearchResults([]);
     setCurrentPage(1);
-    // loadAuctions will be called by useEffect when isSearching changes to false
-  };
-
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-    
-    if (isSearching && searchUID.trim() !== '') {
-      // If we're searching, search with the new page
-      searchAuctionsByUID(searchUID, page);
-    }
-    // Otherwise, useEffect will handle loading normal auctions
   };
 
   const handleDeleteAuction = async (auctionId) => {
     const token = localStorage.getItem('token');
-    if (!token) {
-      alert('Vui lòng đăng nhập lại.');
-      navigate('/login');
-      return;
-    }
-
-    if (!window.confirm('Bạn có chắc muốn xóa sản phẩm này?')) return;
+    if (!token) { alert('Vui lòng đăng nhập lại.'); navigate('/login'); return; }
+    if (!window.confirm('Bạn có chắc muốn xóa đấu giá này?')) return;
 
     try {
       await auctionApi.deleteAuction(auctionId, token);
-      
-      // Reload the appropriate list
       if (isSearching && searchUID.trim() !== '') {
-        await searchAuctionsByUID(searchUID, currentPage);
+        await doSearch(searchUID, currentPage);
       } else {
         await loadAuctions();
       }
-      
-      alert('Xóa sản phẩm thành công!');
+      alert('Xóa đấu giá thành công!');
     } catch (err) {
-      alert('Có lỗi xảy ra khi xóa sản phẩm: ' + err.message);
+      alert('Có lỗi xảy ra khi xóa đấu giá: ' + err.message);
     }
   };
 
-  const handleAddAuction = () => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      alert('Vui lòng đăng nhập lại.');
-      navigate('/login');
-      return;
-    }
-    navigate('/admin/auctions-management/add');
-  };
+  // const handleAddAuction = () => {
+  //   const token = localStorage.getItem('token');
+  //   if (!token) { alert('Vui lòng đăng nhập lại.'); navigate('/login'); return; }
+  //   navigate('/admin/auctions-management/add');
+  // };
 
-  const handleViewAuction = async (auctionUID) => {
+  const handleViewAuction = (auctionUID) => {
     const token = localStorage.getItem('token');
-    if (!token) {
-      alert('Vui lòng đăng nhập lại.');
-      navigate('/login');
-      return;
-    }
+    if (!token) { alert('Vui lòng đăng nhập lại.'); navigate('/login'); return; }
     navigate(`/admin/auctions-management/view/${auctionUID}`);
   };
 
-  const handleEditAuction = async (auctionUID) => {
+  const handleEditAuction = (auctionUID) => {
     const token = localStorage.getItem('token');
-    if (!token) {
-      alert('Vui lòng đăng nhập lại.');
-      navigate('/login');
-      return;
-    }
+    if (!token) { alert('Vui lòng đăng nhập lại.'); navigate('/login'); return; }
     navigate(`/admin/auctions-management/edit/${auctionUID}`);
   };
 
-  const formatCurrency = (price) => {
-    if (!price || isNaN(price)) return '-';
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(price);
-  };
-
-  // Get the auctions to display (either search results or normal auctions)
   const displayAuctions = isSearching ? searchResults : auctions;
 
   if (loading) {
@@ -226,15 +206,10 @@ const AdminAuctionsManagementPage = () => {
       <div className={styles.page}>
         <PageHeader
           title="Quản lý đấu giá"
-          crumbs={[
-            { label: 'Dashboard', to: '/admin/dashboard' },
-            { label: 'Quản lý đấu giá' }
-          ]}
+          crumbs={[{ label: 'Dashboard', to: '/admin/dashboard' }, { label: 'Quản lý đấu giá' }]}
         />
         <div className={styles.error}>Lỗi: {error}</div>
-        <button onClick={loadAuctions} className={styles.retryBtn}>
-          Thử lại
-        </button>
+        <button onClick={loadAuctions} className={styles.retryBtn}>Thử lại</button>
       </div>
     );
   }
@@ -243,10 +218,7 @@ const AdminAuctionsManagementPage = () => {
     <div className={styles.page}>
       <PageHeader
         title="Quản lý đấu giá"
-        crumbs={[
-          { label: 'Dashboard', to: '/admin/dashboard' },
-          { label: 'Quản lý đấu giá' }
-        ]}
+        crumbs={[{ label: 'Dashboard', to: '/admin/dashboard' }, { label: 'Quản lý đấu giá' }]}
       />
 
       <div className={styles.controlsBar}>
@@ -255,23 +227,15 @@ const AdminAuctionsManagementPage = () => {
             type="text"
             placeholder="Tìm kiếm theo UID..."
             value={searchUID}
-            onChange={handleSearchInputChange}
-            onKeyPress={handleSearchKeyPress}
+            onChange={(e) => setSearchUID(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             className={styles.searchInput}
           />
-          <button onClick={handleSearch} className={styles.searchBtn}>
-            Tìm kiếm
-          </button>
+          <button onClick={handleSearch} className={styles.searchBtn}>Tìm kiếm</button>
           {isSearching && (
-            <button onClick={handleReset} className={styles.resetBtn}>
-              Reset
-            </button>
+            <button onClick={handleReset} className={styles.resetBtn}>Reset</button>
           )}
         </div>
-
-        <button onClick={handleAddAuction} className={styles.addBtn}>
-          + Thêm sản phẩm mới
-        </button>
       </div>
 
       <div className={styles.layout}>
@@ -280,67 +244,66 @@ const AdminAuctionsManagementPage = () => {
             <table className={styles.table}>
               <thead>
                 <tr className={styles.tableHeader}>
-                  <th className={styles.AuctionID}>ID</th>
-                  <th className={styles.AuctionUID}>AuctionUID</th>
-                  <th className={styles.ProductID}>ProductID</th>
-                  <th className={styles.StayPeriodStart}>StayPeriodStart</th>
-                  <th className={styles.StayPeriodEnd}>StayPeriodEnd</th>
-                  <th className={styles.StartTime}>StartTime</th>
-                  <th className={styles.EndTime}>EndTime</th>
-                  <th className={styles.CurrentPrice}>CurrentPrice</th>
-                  <th className={styles.Status}>Status</th>
+                  <th className={styles.colId}>ID</th>
+                  <th className={styles.colUid}>UID</th>
+                  <th className={styles.colProductId}>ProID</th>
+                  <th className={styles.colStayStart}>Stay Start</th>
+                  <th className={styles.colStayEnd}>Stay End</th>
+                  <th className={styles.colStartTime}>Start Time</th>
+                  <th className={styles.colEndTime}>End Time</th>
+                  <th className={styles.colPrice}>Current Price</th>
+                  <th className={styles.colStatus}>Status</th>
                   <th className={styles.colActions}>Hành động</th>
                 </tr>
               </thead>
 
               <tbody>
-                {displayAuctions.map((auction) => {
-                  const auctionId = auction.AuctionID;
-                  const auctionUID = auction.AuctionUID;
+                {displayAuctions.map((a) => {
+                  const auctionId = a.AuctionID ?? a.auctionId ?? a.id;
+                  const auctionUID = a.AuctionUID ?? a.UID ?? a.uid;
+                  const productId = a.ProductID ?? a.productId;
+                  const stayStart = a.StayPeriodStart ?? a.stayStart ?? a.stayPeriod?.start;
+                  const stayEnd = a.StayPeriodEnd ?? a.stayEnd ?? a.stayPeriod?.end;
+                  const startTime = a.StartTime ?? a.startTime;
+                  const endTime = a.EndTime ?? a.endTime;
+                  const currentPrice = (a.CurrentPrice ?? a.currentPrice);
+                  const status = a.Status ?? a.status;
+
                   return (
-                    <tr key={auctionId} className={styles.row}>
-                      <td className={styles.AuctionID}>{auctionId}</td>
+                    <tr key={`${auctionId}-${auctionUID}`} className={styles.row}>
+                      <td className={styles.colId}>{auctionId}</td>
 
                       <td className={styles.colUid}>
-                        <span className={styles.AuctionUIDt} title={auctionUID}>
-                          {auctionUID}
-                        </span>
+                        <span className={styles.uidText} title={auctionUID}>{auctionUID}</span>
                       </td>
 
-                      <td className={styles.colName}>
-                        <span className={styles.ProductID} title={auction.ProductID}>
-                          {auction.ProductID}
-                        </span>
+                      <td className={styles.colProductId}>{productId}</td>
+
+                      <td className={styles.colStayStart}>{fmtDateTime(stayStart)}</td>
+                      <td className={styles.colStayEnd}>{fmtDateTime(stayEnd)}</td>
+
+                      <td className={styles.colStartTime}>{fmtDateTime(startTime)}</td>
+                      <td className={styles.colEndTime}>{fmtDateTime(endTime)}</td>
+
+                      <td className={styles.colPrice}>
+                        <span className={styles.priceText}>{formatCurrency(currentPrice)}</span>
                       </td>
 
-                      <td className={styles.StayPeriodStart}>{auction.StayPeriodStart}</td>
-                      <td className={styles.StayPeriodEnd}>{auction.StayPeriodEnd}</td>
+                      <td className={styles.colStatus}>{status || '-'}</td>
 
-                      <td className={styles.StartTime}>
-                        <span className={styles.StartTimet} title={auction.StartTime}>
-                          {auction.StartTime}
-                        </span>
-                      </td>
-
-                      <td className={styles.EndTime}>
-                        <span className={styles.EndTimet} title={auction.EndTime}>
-                          {auction.EndTime}
-                        </span>
-                      </td>
-
-                      <td className={styles.currentPrice}>
-                        <span className={styles.currentPrice}>
-                          {formatCurrency(auction.currentPrice)}
-                        </span>
-                      </td>
-
-                      <td className={styles.status}>{auction.Status}</td>
-                      
                       <td className={styles.colActions}>
                         <div className={styles.actions}>
                           <button
+                            className={styles.btnView}
+                            onClick={() => handleViewAuction(auctionUID)}
+                            title="Xem chi tiết"
+                          >
+                            <img src={ViewIcon} alt="Xem chi tiết" />
+                          </button>
+
+                          <button
                             className={styles.btnEdit}
-                            onClick={() => handleEditAuction(auction.AuctionUID)}
+                            onClick={() => handleEditAuction(auctionUID)}
                             title="Chỉnh sửa"
                           >
                             <img src={EditIcon} alt="Chỉnh sửa" />
@@ -361,19 +324,17 @@ const AdminAuctionsManagementPage = () => {
 
                 {displayAuctions.length === 0 && !isSearching && (
                   <tr>
-                    <td colSpan={9} className={styles.empty}>
-                      <div className={styles.emptyText}>
-                        Chưa có sản phẩm nào
-                      </div>
+                    <td colSpan={10} className={styles.empty}>
+                      <div className={styles.emptyText}>Chưa có đấu giá nào</div>
                     </td>
                   </tr>
                 )}
 
                 {displayAuctions.length === 0 && isSearching && (
                   <tr>
-                    <td colSpan={9} className={styles.empty}>
+                    <td colSpan={10} className={styles.empty}>
                       <div className={styles.emptyText}>
-                        Không tìm thấy sản phẩm nào với UID "{searchUID}"
+                        Không tìm thấy đấu giá nào với UID “{searchUID}”
                       </div>
                     </td>
                   </tr>
@@ -383,10 +344,7 @@ const AdminAuctionsManagementPage = () => {
           </div>
 
           {pagination && pagination.totalPages > 1 && (
-            <Pagination 
-              pagination={pagination} 
-              onPageChange={handlePageChange} 
-            />
+            <Pagination pagination={pagination} onPageChange={handlePageChange} />
           )}
         </main>
       </div>

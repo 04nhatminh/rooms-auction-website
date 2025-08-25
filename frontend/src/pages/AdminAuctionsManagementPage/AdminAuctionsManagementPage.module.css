@@ -1,0 +1,233 @@
+.page {
+  font-family: 'Montserrat';
+  color: #000000;
+}
+
+.layout { display: block; }
+.main { padding: 0; }
+
+.controlsBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.addBtn {
+  background-color: #008489;
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-family: Montserrat;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.addBtn:hover { background-color: #006b6f; }
+
+.searchContainer {
+  position: relative;
+  min-width: 50vh;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.searchInput {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+.searchInput:focus {
+  border-color: #008489;
+  box-shadow: 0 0 0 2px rgba(0, 132, 137, 0.1);
+}
+
+.searchBtn {
+  background-color: #008489;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-family: Montserrat;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+}
+.searchBtn:hover { background-color: #006b6f; }
+
+.resetBtn {
+  background-color: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-family: Montserrat;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.resetBtn:hover { background-color: #e5e7eb; border-color: #9ca3af; }
+
+.tableContainer {
+  background-color: #fff;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table thead {
+  background-color: #008489;
+  color: #fff;
+  font-size: 14px;
+  letter-spacing: 0.05em;
+}
+
+.table th {
+  padding: 1rem 0.75rem;
+  text-align: left;
+  font-family: Montserrat;
+  font-size: 14px;
+  font-weight: 600;
+  overflow: hidden;
+}
+.table th:last-child { text-align: center; }
+.tableHeader { color: #fff; }
+
+.row {
+  border-bottom: 1px solid #e5e7eb;
+  transition: background-color 0.2s ease;
+}
+.row:hover { background-color: #f9fafb; }
+
+.table td {
+  padding: 0.75rem;
+  text-align: left;
+  vertical-align: middle;
+  font-family: Montserrat;
+  font-size: 13px;
+  overflow: hidden;
+}
+.table td:last-child { text-align: center; }
+
+.colId { width: 10%; }
+.colUid { width: 15%; }
+.colProductId { width: 12%; }
+.colStayStart { width: 12%; }
+.colStayEnd { width: 12%; }
+.colStartTime { width: 12%; }
+.colEndTime { width: 12%; }
+.colPrice { width: 15%; }
+.colStatus { width: 12%; }
+.colActions { width: 15%; }
+
+.uidText {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.priceText {
+  font-weight: 500;
+  color: #008489;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.btnView, .btnEdit, .btnDelete {
+  border: none;
+  padding: 0.375rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btnView { background-color: #e0f2fe; color: #0891b2; }
+.btnView:hover { background-color: #bae6fd; }
+.btnEdit { background-color: #fef3c7; color: #92400e; }
+.btnEdit:hover { background-color: #fde68a; }
+.btnDelete { background-color: #fecaca; color: #dc2626; }
+.btnDelete:hover { background-color: #fca5a5; }
+
+.empty { text-align: center; padding: 3rem; }
+.emptyText {
+  font-family: Montserrat;
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+.pageBtn {
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  color: #000000;
+  font-family: Montserrat;
+  font-size: 0.875rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.pageBtn:hover:not(:disabled) { background: #eafeff; }
+.pageBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+.pageInfo { font-size: 0.875rem; color: #000000; }
+
+.loading, .error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+.error { color: #ef4444; flex-direction: column; gap: 1rem; }
+
+.retryBtn {
+  background-color: #008489;
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.retryBtn:hover { background-color: #006b6f; }
