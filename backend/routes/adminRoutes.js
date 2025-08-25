@@ -22,8 +22,8 @@ router.get('/auctions', verifyToken, isAdmin, auctionController.getAllAuctionsFo
 router.get('/auctions/status/:status', verifyToken, isAdmin, auctionController.getAllAuctionsByStatusForAdmin);
 // Cập nhật trạng thái auction
 // router.patch('/auctions/:id/status', verifyToken, isAdmin, auctionController.updateAuctionStatus);
-// // Tìm kiếm auction theo UID
-// router.get('/auctions/search/:uid', verifyToken, isAdmin, auctionController.searchAuctionsByUID);
+// Tìm kiếm auction theo UID
+router.get('/auctions/search/:uid', verifyToken, isAdmin, auctionController.searchAuctionsByUID);
 
 
 // Data scraping routes

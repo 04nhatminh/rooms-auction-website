@@ -335,6 +335,25 @@ class AuctionModel {
             throw error;
         }
     }
+
+    static async searchAuctionsByUID(uid) {
+        const query = `
+            SELECT 
+                a.AuctionID,
+                a.AuctionUID,
+                a.ProductID,
+                a.StayPeriodStart,
+                a.StayPeriodEnd,
+                a.StartTime,
+                a.EndTime,
+                a.Status,
+                a.CurrentPrice
+            FROM Auction a
+            WHERE a.AuctionUID = ?
+        `;
+        const [auctions] = await pool.execute(query, [uid]);
+        return auctions;
+    }
 }
 
 module.exports = AuctionModel;

@@ -229,7 +229,7 @@ export const auctionApi = {
     },
 
     // Lấy danh sách tất cả auctions theo status cho admin
-    getAllAuctionsByStatusForAdmin: async (token, status, limit, offset, abortSignal = null) => {
+    getAllAuctionsByStatusForAdmin: async (status, page, limit, token, abortSignal = null) => {
         try {
             const fetchOptions = {
                 method: 'GET',
@@ -244,7 +244,7 @@ export const auctionApi = {
                 fetchOptions.signal = abortSignal;
             }
 
-            const response = await fetch(`${API_BASE_URL}/admin/auctions/status/${status}?limit=${limit}&offset=${offset}`, fetchOptions);
+            const response = await fetch(`${API_BASE_URL}/admin/auctions/status/${status}?page=${page}&limit=${limit}`, fetchOptions);
 
             if (!response.ok) {
                 const errorData = await response.json();
@@ -258,6 +258,74 @@ export const auctionApi = {
                 throw error;
             }
             console.error('Error fetching all auctions by status for admin:', error);
+            throw error;
+        }
+    },
+
+    // Tìm kiếm auction theo UID
+    searchAuctionsByUID: async (uid, token, abortSignal = null) => {
+        try {
+            const fetchOptions = {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+            };
+
+            // Thêm AbortSignal nếu được cung cấp
+            if (abortSignal) {
+                fetchOptions.signal = abortSignal;
+            }
+
+            const response = await fetch(`${API_BASE_URL}/admin/auctions/search/${uid}`, fetchOptions);
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                console.log('Auction API request was aborted');
+                throw error;
+            }
+            console.error('Error searching auctions by UID:', error);
+            throw error;
+        }
+    },
+
+    // Xóa auction
+    deleteAuction: async (auctionId, token, abortSignal = null) => {
+        try {
+            const fetchOptions = {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+            };
+
+            // Thêm AbortSignal nếu được cung cấp
+            if (abortSignal) {
+                fetchOptions.signal = abortSignal;
+            }
+
+            const response = await fetch(`${API_BASE_URL}/admin/auctions/${auctionId}`, fetchOptions);
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                console.log('Auction API request was aborted');
+                throw error;
+            }
+            console.error('Error deleting auction:', error);
             throw error;
         }
     }

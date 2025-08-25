@@ -296,7 +296,33 @@ class AuctionController {
     //router.patch('/auctions/:id/status', verifyToken, isAdmin, auctionController.updateAuctionStatus);
 
     // Tìm kiếm auction theo UID
-    //router.get('/auctions/search/:uid', verifyToken, isAdmin, auctionController.searchAuctionsByUID);
+    // router.get('/auctions/search/:uid', verifyToken, isAdmin, auctionController.searchAuctionsByUID);
+    static async searchAuctionsByUID(req, res) {
+        try {
+            const { uid } = req.params;
+            console.log(`\nsearchAuctionsByUID - uid: ${uid}`);
+
+            const auctions = await AuctionModel.searchAuctionsByUID(uid);
+            console.log(`Found ${auctions.length} auctions matching UID ${uid}`);
+
+            return res.status(200).json({
+                success: true,
+                data: {
+                    uid: uid,
+                    totalItems: auctions.length,
+                    items: auctions
+                }
+            });
+
+        } catch (error) {
+            console.error('Error in searchAuctionsByUID:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Internal server error',
+                error: error.message
+            });
+        }
+    }
 }
 
 module.exports = AuctionController;

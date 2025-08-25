@@ -19,6 +19,10 @@ const AdminAuctionsManagementPage = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [pagination, setPagination] = useState(null);
+  
+  const [selectedStatus, setSelectedStatus] = useState('');
+  const [isFilteringByStatus, setIsFilteringByStatus] = useState(false);
+  const [statusFilterResults, setStatusFilterResults] = useState([]);
 
   const pageSize = 10;
 
@@ -84,8 +88,8 @@ const AdminAuctionsManagementPage = () => {
   };
 
   useEffect(() => {
-    if (!isSearching) loadAuctions();
-  }, [currentPage, isSearching]);
+    if (!isSearching && !isFilteringByStatus) loadAuctions();
+  }, [currentPage, isSearching, isFilteringByStatus]);
 
   const doSearch = async (uid, page = 1) => {
     const token = localStorage.getItem('token');
@@ -100,16 +104,20 @@ const AdminAuctionsManagementPage = () => {
 
     try {
       setLoading(true);
-      const response = await auctionApi.searchAuctionsByUID(uid.trim(), page, pageSize, token);
+      // Sửa lại để gọi đúng signature của API
+      const response = await auctionApi.searchAuctionsByUID(uid.trim(), token);
       if (response?.success) {
-        setSearchResults(response.data?.items || []);
+        const items = response.data?.items || response.data || [];
+        setSearchResults(items);
         setPagination({
-          currentPage: response.data?.currentPage || page,
-          totalPages: response.data?.totalPages || 1,
-          totalItems: response.data?.totalItems || 0,
+          currentPage: page,
+          totalPages: Math.ceil(items.length / pageSize),
+          totalItems: items.length,
           itemsPerPage: pageSize,
         });
         setIsSearching(true);
+        setIsFilteringByStatus(false); // Reset status filter khi search
+        setSelectedStatus('');
       } else {
         setSearchResults([]);
         setPagination({
@@ -134,6 +142,56 @@ const AdminAuctionsManagementPage = () => {
     }
   };
 
+  const doFilterByStatus = async (status, page = 1) => {
+    const token = localStorage.getItem('token');
+    if (!token) { alert('Vui lòng đăng nhập lại.'); navigate('/login'); return; }
+
+    if (!status) {
+      setIsFilteringByStatus(false);
+      setStatusFilterResults([]);
+      setCurrentPage(1);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await auctionApi.getAllAuctionsByStatusForAdmin(status, page, pageSize, token);
+      if (response?.success) {
+        const items = response.data?.items || response.data || [];
+        setStatusFilterResults(items);
+        setPagination({
+          currentPage: response.data?.currentPage || page,
+          totalPages: response.data?.totalPages || Math.ceil(items.length / pageSize),
+          totalItems: response.data?.totalItems || items.length,
+          itemsPerPage: pageSize,
+        });
+        setIsFilteringByStatus(true);
+        setIsSearching(false); // Reset search khi filter by status
+        setSearchUID('');
+      } else {
+        setStatusFilterResults([]);
+        setPagination({
+          currentPage: 1,
+          totalPages: 1,
+          totalItems: 0,
+          itemsPerPage: pageSize,
+        });
+      }
+    } catch (err) {
+      console.error('Error filtering auctions by status:', err);
+      alert('Có lỗi xảy ra khi lọc theo trạng thái: ' + err.message);
+      setStatusFilterResults([]);
+      setPagination({
+        currentPage: 1,
+        totalPages: 1,
+        totalItems: 0,
+        itemsPerPage: pageSize,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSearch = () => {
     if (searchUID.trim() !== '') {
       setCurrentPage(1);
@@ -145,13 +203,29 @@ const AdminAuctionsManagementPage = () => {
     setCurrentPage(page);
     if (isSearching && searchUID.trim() !== '') {
       doSearch(searchUID, page);
+    } else if (isFilteringByStatus && selectedStatus) {
+      doFilterByStatus(selectedStatus, page);
+    }
+  };
+
+  const handleStatusChange = (status) => {
+    setSelectedStatus(status);
+    setCurrentPage(1);
+    if (status) {
+      doFilterByStatus(status, 1);
+    } else {
+      setIsFilteringByStatus(false);
+      setStatusFilterResults([]);
     }
   };
 
   const handleReset = () => {
     setSearchUID('');
+    setSelectedStatus('');
     setIsSearching(false);
+    setIsFilteringByStatus(false);
     setSearchResults([]);
+    setStatusFilterResults([]);
     setCurrentPage(1);
   };
 
@@ -162,8 +236,11 @@ const AdminAuctionsManagementPage = () => {
 
     try {
       await auctionApi.deleteAuction(auctionId, token);
+      // Reload dựa trên trạng thái hiện tại
       if (isSearching && searchUID.trim() !== '') {
         await doSearch(searchUID, currentPage);
+      } else if (isFilteringByStatus && selectedStatus) {
+        await doFilterByStatus(selectedStatus, currentPage);
       } else {
         await loadAuctions();
       }
@@ -191,7 +268,7 @@ const AdminAuctionsManagementPage = () => {
     navigate(`/admin/auctions-management/edit/${auctionUID}`);
   };
 
-  const displayAuctions = isSearching ? searchResults : auctions;
+  const displayAuctions = isSearching ? searchResults : (isFilteringByStatus ? statusFilterResults : auctions);
 
   if (loading) {
     return (
@@ -232,9 +309,22 @@ const AdminAuctionsManagementPage = () => {
             className={styles.searchInput}
           />
           <button onClick={handleSearch} className={styles.searchBtn}>Tìm kiếm</button>
-          {isSearching && (
-            <button onClick={handleReset} className={styles.resetBtn}>Reset</button>
-          )}
+        </div>
+        
+        {(isSearching || isFilteringByStatus) && (
+          <button onClick={handleReset} className={styles.resetBtn}>Reset</button>
+        )}
+        <div className={styles.filterContainer}>
+          <select 
+            value={selectedStatus} 
+            onChange={(e) => handleStatusChange(e.target.value)}
+            className={styles.statusSelect}
+          >
+            <option value="">Tất cả trạng thái</option>
+            <option value="active">Đang hoạt động</option>
+            <option value="ended">Đã kết thúc</option>
+            <option value="cancelled">Đã hủy</option>
+          </select>
         </div>
       </div>
 
@@ -330,11 +420,19 @@ const AdminAuctionsManagementPage = () => {
                   </tr>
                 )}
 
+                {displayAuctions.length === 0 && !isSearching && !isFilteringByStatus && (
+                  <tr>
+                    <td colSpan={10} className={styles.empty}>
+                      <div className={styles.emptyText}>Chưa có đấu giá nào</div>
+                    </td>
+                  </tr>
+                )}
+
                 {displayAuctions.length === 0 && isSearching && (
                   <tr>
                     <td colSpan={10} className={styles.empty}>
                       <div className={styles.emptyText}>
-                        Không tìm thấy đấu giá nào với UID “{searchUID}”
+                        Không tìm thấy đấu giá nào với UID "{searchUID}"
                       </div>
                     </td>
                   </tr>
