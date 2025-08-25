@@ -174,11 +174,33 @@ const AdminProductsManagementPage = () => {
   };
 
   const handleAddProduct = () => {
-    navigate('/admin/add-product');
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Vui lòng đăng nhập lại.');
+      navigate('/login');
+      return;
+    }
+    navigate('/admin/products-management/add');
   };
 
-  const handleEditProduct = (productId) => {
-    navigate(`/admin/edit-product/${productId}`);
+  const handleViewProduct = async (productUID) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Vui lòng đăng nhập lại.');
+      navigate('/login');
+      return;
+    }
+    navigate(`/admin/products-management/view/${productUID}`);
+  };
+
+  const handleEditProduct = async (productUID) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Vui lòng đăng nhập lại.');
+      navigate('/login');
+      return;
+    }
+    navigate(`/admin/products-management/edit/${productUID}`);
   };
 
   const formatCurrency = (price) => {
@@ -276,6 +298,7 @@ const AdminProductsManagementPage = () => {
               <tbody>
                 {displayProducts.map((product) => {
                   const productId = product.ProductID;
+                  const UID = product.UID;
                   return (
                     <tr key={productId} className={styles.row}>
                       <td className={styles.colId}>{productId}</td>
@@ -317,7 +340,7 @@ const AdminProductsManagementPage = () => {
                       <td className={styles.colActions}>
                         <div className={styles.actions}>
                           <button className={styles.btnView}
-                            onClick={() => navigate(`/product/${productId}`)}
+                            onClick={() => handleViewProduct(UID)}
                             title="Xem chi tiết"
                           >
                             <img src={ViewIcon} alt="Xem chi tiết" />
@@ -325,7 +348,7 @@ const AdminProductsManagementPage = () => {
 
                           <button
                             className={styles.btnEdit}
-                            onClick={() => handleEditProduct(productId)}
+                            onClick={() => handleEditProduct(UID)}
                             title="Chỉnh sửa"
                           >
                             <img src={EditIcon} alt="Chỉnh sửa" />

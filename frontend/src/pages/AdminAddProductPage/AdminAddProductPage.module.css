@@ -369,6 +369,7 @@
 .imageItem {
   display: flex;
   align-items: center;
+  overflow: hidden;
   justify-content: space-between;
   padding: 0.75rem;
   background-color: #f3f4f6;
@@ -412,8 +413,6 @@
   justify-content: flex-end;
   gap: 1rem;
   margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 1px solid #e5e7eb;
 }
 
 .cancelBtn,
@@ -456,7 +455,7 @@
 /* --- Responsive Design --- */
 @media (max-width: 1024px) {
   .form {
-    padding: 4rem 2rem 4rem 4rem;
+    padding: 4rem 2rem 4rem 2rem;
   }
 
   .formRow {
@@ -484,7 +483,7 @@
 
 @media (max-width: 480px) {
   .form {
-    padding: 4rem;
+    padding: 0.5rem;
   }
 
   .section {

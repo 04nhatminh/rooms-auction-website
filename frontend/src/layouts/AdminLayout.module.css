@@ -23,7 +23,6 @@
 
 @media (max-width: 1024px) { 
   .main { 
-    padding: 20px 0px 20px 20px;
-    margin-left: 20px;
+    padding: 20px 20px 20px 20px;
   } 
 }

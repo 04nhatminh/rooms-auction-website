@@ -20,6 +20,8 @@ import UsersManagementPage from './pages/UsersManagementPage/UsersManagementPage
 import UsersManagementDetailPage from './pages/UsersManagementDetailPage/UsersManagementDetailPage';
 import AdminProductsManagementPage from './pages/AdminProductsManagementPage/AdminProductsManagementPage';
 import AdminAddProductPage from './pages/AdminAddProductPage/AdminAddProductPage';
+import AdminViewProductPage from './pages/AdminViewProductPage/AdminViewProductPage';
+import AdminEditProductPage from './pages/AdminEditProductPage/AdminEditProductPage';
 import SystemConfigPage from './pages/SystemConfigPage/SystemConfigPage';
 import DataScrapingPage from './pages/DataScrapingPage/DataScrapingPage';
 import AuctionPage from './pages/AuctionPage/AuctionPage';
@@ -52,7 +54,9 @@ function App() {
               <Route path="users-management" element={<UsersManagementPage />} />
               <Route path="users-management/:id" element={<UsersManagementDetailPage />} />
               <Route path="products-management" element={<AdminProductsManagementPage />} />
-              <Route path="add-product" element={<AdminAddProductPage />} />
+              <Route path="products-management/add" element={<AdminAddProductPage />} />
+              <Route path="products-management/edit/:id" element={<AdminEditProductPage />} />
+              <Route path="products-management/view/:id" element={<AdminViewProductPage />} />
               <Route path="system-config" element={<SystemConfigPage />} />
               <Route path="data-scraping" element={<DataScrapingPage />} />
               {/* <Route path="edit-product/:id" element={<AdminEditProductPage />} /> */}

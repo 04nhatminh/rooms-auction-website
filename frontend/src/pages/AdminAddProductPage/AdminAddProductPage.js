@@ -16,8 +16,11 @@ function debounce(fn, ms) {
   };
 }
 
-const AdminAddProductPage = () => {
+const AdminAddProductPage = ({ type = 'add', product = null }) => {
   const navigate = useNavigate();
+  
+  // Original product data for comparison (used in edit mode)
+  const [originalFormData, setOriginalFormData] = useState(null);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -65,6 +68,15 @@ const AdminAddProductPage = () => {
   // Amenity groups collapse state
   const [collapsedGroups, setCollapsedGroups] = useState({});
 
+  // Check if form data has changed (for edit mode)
+  const [hasChanges, setHasChanges] = useState(false);
+
+  // Loading states for update
+  const [updating, setUpdating] = useState(false);
+
+  // Determine if fields should be disabled
+  const isDisabled = type === 'view';
+
   // Load provinces, districts, and other data on component mount
   useEffect(() => {
     loadProvinces();
@@ -74,6 +86,101 @@ const AdminAddProductPage = () => {
     loadAmenityGroups();
     loadAmenities();
   }, []);
+
+  // Load product data when in view or edit mode
+  useEffect(() => {
+    if ((type === 'view' || type === 'edit') && product) {
+      loadProductData(product);
+    }
+  }, [type, product]);
+
+  // Function to load product data into form
+  const loadProductData = (productData) => {
+    
+    // Handle case where productData might be the full API response with success/data structure
+    let actualData = productData;
+    if (productData && productData.success && productData.data) {
+      actualData = productData.data;
+    }
+    
+    // Extract data from the response structure
+    const details = actualData.details || actualData;
+    const amenitiesData = actualData.amenities || [];
+    const descriptionsData = actualData.description || [];
+    const imagesData = actualData.images || [];
+    const policiesData = actualData.policies || {};
+    
+    // Map amenities from response (extract AmenityID if it exists, otherwise use the amenity object)
+    const amenityIds = amenitiesData.map(amenity => 
+      amenity.AmenityID || amenity.amenityId || amenity.id || amenity
+    );
+    
+    // Map descriptions from response
+    const descriptions = descriptionsData.length > 0 
+      ? descriptionsData.map(desc => ({
+          title: desc.title || null,
+          htmlText: desc.htmlText || desc.content || desc.text || ''
+        }))
+      : [{ title: null, htmlText: '' }];
+    
+    // Map house rules and safety properties
+    const houseRules = policiesData.house_rules && policiesData.house_rules.length > 0 
+      ? policiesData.house_rules 
+      : [''];
+      
+    const safetyProperties = policiesData.safety_properties && policiesData.safety_properties.length > 0 
+      ? policiesData.safety_properties 
+      : [''];
+    
+    // Create image groups from images (group by category or create one group)
+    let imageGroups = [{ title: '', images: [], files: [] }];
+    if (imagesData.length > 0) {
+      // For now, put all images in one group called "Hình ảnh sản phẩm"
+      // You can enhance this later to group by accessibility label or other criteria
+      imageGroups = [{
+        title: 'Hình ảnh sản phẩm',
+        images: imagesData.map(img => img.baseUrl || img.url || img.src || img),
+        files: []
+      }];
+    }
+    
+    const loadedFormData = {
+      name: details.Name || details.name || '',
+      roomType: details.RoomType || details.roomType || '',
+      propertyType: details.PropertyType || details.propertyType || '',
+      bedrooms: details.NumBedrooms || details.bedrooms || '',
+      beds: details.NumBeds || details.beds || '',
+      bathrooms: details.NumBathrooms || details.bathrooms || '',
+      maxGuests: details.MaxGuests || details.maxGuests || '',
+      price: details.Price || details.price || '',
+      descriptions: descriptions,
+      provinceCode: details.ProvinceCode || details.provinceCode || '',
+      districtCode: details.DistrictCode || details.districtCode || '',
+      address: details.Address || details.address || '',
+      latitude: details.Latitude || details.latitude || '',
+      longitude: details.Longitude || details.longitude || '',
+      amenities: amenityIds,
+      houseRules: houseRules,
+      safetyProperties: safetyProperties,
+      imageGroups: imageGroups
+    };
+    
+    setFormData(loadedFormData);
+    
+    // Save original data for comparison in edit mode
+    if (type === 'edit') {
+      setOriginalFormData(JSON.parse(JSON.stringify(loadedFormData)));
+    }
+  };
+
+  // Check for changes in edit mode
+  useEffect(() => {
+    if (type === 'edit' && originalFormData) {
+      const currentDataString = JSON.stringify(formData);
+      const originalDataString = JSON.stringify(originalFormData);
+      setHasChanges(currentDataString !== originalDataString);
+    }
+  }, [formData, originalFormData, type]);
 
   // Initialize collapsed state for all amenity groups (default to collapsed)
   useEffect(() => {
@@ -496,6 +603,14 @@ const AdminAddProductPage = () => {
       return;
     }
 
+    if (type === 'add') {
+      await handleAdd(token);
+    } else if (type === 'edit') {
+      await handleUpdate(token);
+    }
+  };
+
+  const handleAdd = async (token) => {
     setLoading(true);
     try {
       // Prepare data for API
@@ -564,27 +679,125 @@ const AdminAddProductPage = () => {
     }
   };
 
-  const handleCancel = () => {
-    if (window.confirm('Bạn có chắc muốn hủy? Dữ liệu đã nhập sẽ bị mất.')) {
+  const handleUpdate = async (token) => {
+    setUpdating(true);
+    try {
+      // Prepare data for API
+      const productDataToSubmit = {
+        name: formData.name.trim(),
+        roomType: formData.roomType,
+        propertyType: formData.propertyType,
+        bedrooms: formData.bedrooms,
+        beds: formData.beds,
+        bathrooms: formData.bathrooms,
+        maxGuests: formData.maxGuests,
+        price: formData.price,
+        descriptions: formData.descriptions.filter(desc => desc.htmlText.trim()),
+        provinceCode: formData.provinceCode,
+        districtCode: formData.districtCode,
+        address: formData.address.trim(),
+        latitude: formData.latitude,
+        longitude: formData.longitude,
+        amenities: formData.amenities,
+        houseRules: formData.houseRules.filter(rule => rule.trim()),
+        safetyProperties: formData.safetyProperties.filter(prop => prop.trim()),
+        imageGroups: formData.imageGroups.filter(group => group.title.trim() || group.images.length > 0)
+      };
+
+      console.log('Product data to update:', productDataToSubmit);
+
+      // Call update API (productId, productData, token)
+      const updateResponse = await productApi.updateProduct(product.id, productDataToSubmit, token);
+      console.log('Product updated:', updateResponse);
+
+      // Handle image uploads if there are new images
+      const hasNewImages = formData.imageGroups.some(group => 
+        group.files && group.files.length > 0
+      );
+
+      if (hasNewImages) {
+        setUploadingImages(true);
+        try {
+          console.log('Uploading new images for product:', product.id);
+          const uploadResult = await uploadAllProductImages(product.id, formData.imageGroups);
+          console.log('Upload result:', uploadResult);
+        } catch (imageError) {
+          console.error('Image upload error:', imageError);
+          alert('Sản phẩm đã được cập nhật nhưng có lỗi khi upload ảnh: ' + imageError.message);
+        } finally {
+          setUploadingImages(false);
+        }
+      }
+
+      alert('Cập nhật sản phẩm thành công!');
       navigate('/admin/products-management');
+    } catch (error) {
+      console.error('Error updating product:', error);
+      alert('Có lỗi xảy ra khi cập nhật sản phẩm: ' + error.message);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleCancel = () => {
+    const confirmMessage = type === 'add' 
+      ? 'Bạn có chắc muốn hủy? Dữ liệu đã nhập sẽ bị mất.'
+      : type === 'edit'
+      ? 'Bạn có chắc muốn hủy? Các thay đổi sẽ không được lưu.'
+      : 'Bạn có chắc muốn thoát?';
+      
+    if (window.confirm(confirmMessage)) {
+      navigate('/admin/products-management');
+    }
+  };
+
+  // Get page title based on type
+  const getPageTitle = () => {
+    switch (type) {
+      case 'view':
+        return 'Xem chi tiết sản phẩm';
+      case 'edit':
+        return 'Chỉnh sửa sản phẩm';
+      default:
+        return 'Thêm sản phẩm mới';
+    }
+  };
+
+  // Get breadcrumbs based on type
+  const getBreadcrumbs = () => {
+    const baseCrumbs = [
+      { label: 'Dashboard', to: '/admin/dashboard' },
+      { label: 'Quản lý sản phẩm', to: '/admin/products-management' }
+    ];
+    
+    switch (type) {
+      case 'view':
+        return [...baseCrumbs, { label: 'Xem chi tiết sản phẩm' }];
+      case 'edit':
+        return [...baseCrumbs, { label: 'Chỉnh sửa sản phẩm' }];
+      default:
+        return [...baseCrumbs, { label: 'Thêm sản phẩm mới' }];
     }
   };
 
   return (
     <div className={styles.page}>
       <PageHeader
-        title="Thêm sản phẩm mới"
-        crumbs={[
-          { label: 'Dashboard', to: '/admin/dashboard' },
-          { label: 'Quản lý sản phẩm', to: '/admin/products-management' },
-          { label: 'Thêm sản phẩm mới' }
-        ]}
+        title={getPageTitle()}
+        crumbs={getBreadcrumbs()}
       />
 
-      <div className={styles.layout}>
-        <main className={styles.main}>
-          <div className={styles.formContainer}>
-            <form onSubmit={handleSubmit} className={styles.form}>
+      {(type === 'view' || type === 'edit') && !product ? (
+        <div className={styles.layout}>
+          <main className={styles.main}>
+            <div className={styles.loading}>Đang tải dữ liệu sản phẩm...</div>
+          </main>
+        </div>
+      ) : (
+        <div className={styles.layout}>
+          <main className={styles.main}>
+            <div className={styles.formContainer}>
+              <form onSubmit={handleSubmit} className={styles.form}>
               
               {/* Basic Information */}
               <div className={styles.section}>
@@ -592,7 +805,7 @@ const AdminAddProductPage = () => {
                 
                 <div className={styles.formGroup}>
                   <label className={styles.label}>
-                    Tên sản phẩm <span className={styles.required}>*</span>
+                    Tên sản phẩm {type !== 'view' && <span className={styles.required}>*</span>}
                   </label>
                   <input
                     type="text"
@@ -601,29 +814,30 @@ const AdminAddProductPage = () => {
                     onChange={handleInputChange}
                     className={styles.input}
                     placeholder="Nhập tên phòng/nhà/căn hộ"
-                    required
+                    required={type !== 'view'}
+                    disabled={isDisabled}
                   />
                 </div>
 
                 <div className={styles.formRow}>
                   <div className={styles.formGroup}>
                     <label className={styles.label}>
-                      Loại chỗ ở <span className={styles.required}>*</span>
+                      Loại chỗ ở {type !== 'view' && <span className={styles.required}>*</span>}
                     </label>
                     <select
                       name="roomType"
                       value={formData.roomType}
                       onChange={handleInputChange}
                       className={styles.select}
-                      required
-                      disabled={loadingRoomTypes}
+                      required={type !== 'view'}
+                      disabled={isDisabled || loadingRoomTypes}
                     >
                       <option value="">
                         {loadingRoomTypes ? 'Đang tải...' : 'Chọn loại chỗ ở'}
                       </option>
-                      {roomTypes.map(type => (
-                        <option key={type.RoomTypeID} value={type.RoomTypeID}>
-                          {type.RoomTypeName}
+                      {roomTypes.map(roomType => (
+                        <option key={roomType.RoomTypeID} value={roomType.RoomTypeID}>
+                          {roomType.RoomTypeName}
                         </option>
                       ))}
                     </select>
@@ -631,22 +845,22 @@ const AdminAddProductPage = () => {
 
                   <div className={styles.formGroup}>
                     <label className={styles.label}>
-                      Hình thức chỗ ở <span className={styles.required}>*</span>
+                      Hình thức chỗ ở {type !== 'view' && <span className={styles.required}>*</span>}
                     </label>
                     <select
                       name="propertyType"
                       value={formData.propertyType}
                       onChange={handleInputChange}
                       className={styles.select}
-                      required
-                      disabled={loadingPropertyTypes}
+                      required={type !== 'view'}
+                      disabled={isDisabled || loadingPropertyTypes}
                     >
                       <option value="">
                         {loadingPropertyTypes ? 'Đang tải...' : 'Chọn loại hình'}
                       </option>
-                      {propertyTypes.map(type => (
-                        <option key={type.PropertyID} value={type.PropertyID}>
-                          {type.PropertyName}
+                      {propertyTypes.map(propertyType => (
+                        <option key={propertyType.PropertyID} value={propertyType.PropertyID}>
+                          {propertyType.PropertyName}
                         </option>
                       ))}
                     </select>
@@ -665,7 +879,8 @@ const AdminAddProductPage = () => {
                       className={styles.input}
                       placeholder="Nhập số phòng ngủ"
                       min={1}
-                      required
+                      required={type !== 'view'}
+                      disabled={isDisabled}
                     />
                   </div>
 
@@ -680,7 +895,8 @@ const AdminAddProductPage = () => {
                       className={styles.input}
                       placeholder="Nhập số giường ngủ"
                       min={1}
-                      required
+                      required={type !== 'view'}
+                      disabled={isDisabled}
                     />
                   </div>
                 </div>
@@ -697,7 +913,8 @@ const AdminAddProductPage = () => {
                       className={styles.input}
                       placeholder="Nhập số phòng tắm"
                       min={1}
-                      required
+                      required={type !== 'view'}
+                      disabled={isDisabled}
                     />
                   </div>
 
@@ -712,14 +929,15 @@ const AdminAddProductPage = () => {
                       className={styles.input}
                       placeholder="Nhập số khách tối đa"
                       min={1}
-                      required
+                      required={type !== 'view'}
+                      disabled={isDisabled}
                     />
                   </div>
                 </div>
 
                 <div className={styles.formGroup}>
                   <label className={styles.label}>
-                    Giá phòng (VND) <span className={styles.required}>*</span>
+                    Giá phòng (VND) {type !== 'view' && <span className={styles.required}>*</span>}
                   </label>
                   <input
                     type="number"
@@ -730,7 +948,8 @@ const AdminAddProductPage = () => {
                     className={styles.input}
                     placeholder="Nhập giá phòng"
                     min={0}
-                    required
+                    required={type !== 'view'}
+                    disabled={isDisabled}
                   />
                 </div>
               </div>
@@ -743,7 +962,7 @@ const AdminAddProductPage = () => {
                     {index === 0 ? (
                       <div className={styles.formGroup}>
                         <label className={styles.label}>
-                          Mô tả chính <span className={styles.required}>*</span>
+                          Mô tả chính {type !== 'view' && <span className={styles.required}>*</span>}
                         </label>
                         <textarea
                           value={description.htmlText}
@@ -751,20 +970,23 @@ const AdminAddProductPage = () => {
                           className={styles.textarea}
                           placeholder="Nhập mô tả chi tiết về sản phẩm..."
                           rows={4}
-                          required
+                          required={type !== 'view'}
+                          disabled={isDisabled}
                         />
                       </div>
                     ) : (
                       <div className={styles.formGroup}>
                         <div className={styles.descriptionHeader}>
                           <label className={styles.label}>Mô tả #{index + 1}</label>
-                          <button
-                            type="button"
-                            onClick={() => removeDescription(index)}
-                            className={styles.removeDescBtn}
-                          >
-                            ×
-                          </button>
+                          {!isDisabled && (
+                            <button
+                              type="button"
+                              onClick={() => removeDescription(index)}
+                              className={styles.removeDescBtn}
+                            >
+                              ×
+                            </button>
+                          )}
                         </div>
                         <input
                           type="text"
@@ -773,6 +995,7 @@ const AdminAddProductPage = () => {
                           className={styles.input}
                           placeholder="Nhập tiêu đề mô tả..."
                           style={{ marginBottom: '8px' }}
+                          disabled={isDisabled}
                         />
                         <textarea
                           value={description.htmlText}
@@ -780,19 +1003,22 @@ const AdminAddProductPage = () => {
                           className={styles.textarea}
                           placeholder="Nhập nội dung mô tả..."
                           rows={3}
+                          disabled={isDisabled}
                         />
                       </div>
                     )}
                   </div>
                 ))}
-                <button
-                  type="button"
-                  onClick={addDescription}
-                  className={styles.addDescBtn}
-                >
-                  <span>+ </span>
-                  <span style={{ textDecoration: 'underline' }}>Thêm mô tả</span>
-                </button>
+                {!isDisabled && (
+                  <button
+                    type="button"
+                    onClick={addDescription}
+                    className={styles.addDescBtn}
+                  >
+                    <span>+ </span>
+                    <span style={{ textDecoration: 'underline' }}>Thêm mô tả</span>
+                  </button>
+                )}
               </div>
 
               {/* Location Information */}
@@ -801,7 +1027,7 @@ const AdminAddProductPage = () => {
 
                 <div className={styles.formGroup}>
                   <label className={styles.label}>
-                    Địa chỉ <span className={styles.required}>*</span>
+                    Địa chỉ {type !== 'view' && <span className={styles.required}>*</span>}
                   </label>
                   <input
                     type="text"
@@ -810,22 +1036,23 @@ const AdminAddProductPage = () => {
                     onChange={handleInputChange}
                     className={styles.input}
                     placeholder="Nhập địa chỉ"
-                    required
+                    required={type !== 'view'}
+                    disabled={isDisabled}
                   />
                 </div>
 
                 <div className={styles.formRow}>
                   <div className={styles.formGroup}>
                     <label className={styles.label}>
-                      Tỉnh <span className={styles.required}>*</span>
+                      Tỉnh {type !== 'view' && <span className={styles.required}>*</span>}
                     </label>
                     <select
                       name="provinceCode"
                       value={formData.provinceCode}
                       onChange={handleInputChange}
                       className={styles.select}
-                      required
-                      disabled={loadingProvinces}
+                      required={type !== 'view'}
+                      disabled={isDisabled || loadingProvinces}
                     >
                       <option value="">
                         {loadingProvinces ? 'Đang tải...' : 'Chọn tỉnh/thành phố'}
@@ -840,15 +1067,15 @@ const AdminAddProductPage = () => {
 
                   <div className={styles.formGroup}>
                     <label className={styles.label}>
-                      Thành phố/Quận/Huyện <span className={styles.required}>*</span>
+                      Thành phố/Quận/Huyện {type !== 'view' && <span className={styles.required}>*</span>}
                     </label>
                     <select
                       name="districtCode"
                       value={formData.districtCode}
                       onChange={handleInputChange}
                       className={styles.select}
-                      required
-                      disabled={!formData.provinceCode || loadingDistricts}
+                      required={type !== 'view'}
+                      disabled={isDisabled || !formData.provinceCode || loadingDistricts}
                     >
                       <option value="">
                         {!formData.provinceCode 
@@ -908,6 +1135,7 @@ const AdminAddProductPage = () => {
                                   checked={formData.amenities.includes(amenity.AmenityID)}
                                   onChange={() => handleAmenityChange(amenity.AmenityID)}
                                   className={styles.checkbox}
+                                  disabled={isDisabled}
                                 />
                                 <span className={styles.checkboxText}>{amenity.AmenityName}</span>
                               </label>
@@ -935,8 +1163,9 @@ const AdminAddProductPage = () => {
                           onChange={(e) => handlePolicyChange('houseRules', index, e.target.value)}
                           className={styles.policyInput}
                           placeholder="Nhập nội quy nhà..."
+                          disabled={isDisabled}
                         />
-                        {formData.houseRules.length > 1 && index !== 0 && (
+                        {!isDisabled && formData.houseRules.length > 1 && index !== 0 && (
                           <button
                             type="button"
                             onClick={() => removePolicy('houseRules', index)}
@@ -947,14 +1176,16 @@ const AdminAddProductPage = () => {
                       </div>
                     ))}
 
-                    <button
-                      type="button"
-                      onClick={() => addPolicy('houseRules')}
-                      className={styles.addPolicyBtn}
-                    >
-                      <span>+ </span>
-                      <span style={{ textDecoration: 'underline' }}>Thêm nội quy nhà</span>
-                    </button>
+                    {!isDisabled && (
+                      <button
+                        type="button"
+                        onClick={() => addPolicy('houseRules')}
+                        className={styles.addPolicyBtn}
+                      >
+                        <span>+ </span>
+                        <span style={{ textDecoration: 'underline' }}>Thêm nội quy nhà</span>
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -966,28 +1197,31 @@ const AdminAddProductPage = () => {
                         type="text"
                         value={property}
                         onChange={(e) => handlePolicyChange('safetyProperties', index, e.target.value)}
-                        className={styles.policyInput}          // đổi class
+                        className={styles.policyInput}
                         placeholder="Nhập chính sách an toàn..."
+                        disabled={isDisabled}
                       />
                       {formData.safetyProperties.length > 1 && index !== 0 && (
                         <button
                           type="button"
                           onClick={() => removePolicy('safetyProperties', index)}
-                          className={styles.policyClearBtn}      // nút “x” trong input
+                          className={styles.policyClearBtn}
                           aria-label="Xoá chính sách"
                         />
                       )}
                     </div>
                   ))}
 
-                  <button
-                    type="button"
-                    onClick={() => addPolicy('safetyProperties')}
-                    className={styles.addPolicyBtn}
-                  >
-                    <span>+ </span>
-                    <span style={{ textDecoration: 'underline' }}>Thêm chính sách an toàn</span>
-                  </button>
+                  {!isDisabled && (
+                    <button
+                      type="button"
+                      onClick={() => addPolicy('safetyProperties')}
+                      className={styles.addPolicyBtn}
+                    >
+                      <span>+ </span>
+                      <span style={{ textDecoration: 'underline' }}>Thêm chính sách an toàn</span>
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -1008,9 +1242,10 @@ const AdminAddProductPage = () => {
                           onChange={(e) => handleImageGroupTitleChange(groupIndex, e.target.value)}
                           className={styles.input}
                           placeholder="Nhập tên danh mục (VD: Phòng khách, Phòng ngủ, Nhà bếp...)"
+                          disabled={isDisabled}
                         />
                       </div>
-                      {formData.imageGroups.length > 1 && (
+                      {!isDisabled && formData.imageGroups.length > 1 && (
                         <button
                           type="button"
                           onClick={() => removeImageGroup(groupIndex)}
@@ -1022,19 +1257,21 @@ const AdminAddProductPage = () => {
                       )}
                     </div>
 
-                    <div className={styles.formGroup}>
-                      <label className={styles.label}>Upload hình ảnh cho danh mục này</label>
-                      <input
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        onChange={(e) => handleImageUpload(groupIndex, e)}
-                        className={styles.fileInput}
-                      />
-                      <p className={styles.helpText}>
-                        Chọn nhiều hình ảnh cùng lúc. Hỗ trợ JPG, PNG, GIF.
-                      </p>
-                    </div>
+                    {!isDisabled && (
+                      <div className={styles.formGroup}>
+                        <label className={styles.label}>Upload hình ảnh cho danh mục này</label>
+                        <input
+                          type="file"
+                          multiple
+                          accept="image/*"
+                          onChange={(e) => handleImageUpload(groupIndex, e)}
+                          className={styles.fileInput}
+                        />
+                        <p className={styles.helpText}>
+                          Chọn nhiều hình ảnh cùng lúc. Hỗ trợ JPG, PNG, GIF.
+                        </p>
+                      </div>
+                    )}
 
                     {group.images.length > 0 && (
                       <div className={styles.imagePreview}>
@@ -1043,13 +1280,15 @@ const AdminAddProductPage = () => {
                           {group.images.map((image, imageIndex) => (
                             <div key={imageIndex} className={styles.imageItem}>
                               <span className={styles.imageName}>{image}</span>
-                              <button
-                                type="button"
-                                onClick={() => removeImage(groupIndex, imageIndex)}
-                                className={styles.removeImageBtn}
-                              >
-                                ×
-                              </button>
+                              {!isDisabled && (
+                                <button
+                                  type="button"
+                                  onClick={() => removeImage(groupIndex, imageIndex)}
+                                  className={styles.removeImageBtn}
+                                >
+                                  ×
+                                </button>
+                              )}
                             </div>
                           ))}
                         </div>
@@ -1058,14 +1297,16 @@ const AdminAddProductPage = () => {
                   </div>
                 ))}
 
-                <button
-                  type="button"
-                  onClick={addImageGroup}
-                  className={styles.addGroupBtn}
-                >
-                  <span>+ </span>
-                  <span style={{ textDecoration: 'underline' }}>Thêm danh mục</span>
-                </button>
+                {!isDisabled && (
+                  <button
+                    type="button"
+                    onClick={addImageGroup}
+                    className={styles.addGroupBtn}
+                  >
+                    <span>+ </span>
+                    <span style={{ textDecoration: 'underline' }}>Thêm danh mục</span>
+                  </button>
+                )}
               </div>
 
               {/* Submit Buttons */}
@@ -1074,27 +1315,46 @@ const AdminAddProductPage = () => {
                   type="button"
                   onClick={handleCancel}
                   className={styles.cancelBtn}
-                  disabled={loading || uploadingImages}
+                  disabled={loading || uploadingImages || updating}
                 >
-                  Hủy
+                  {type === 'view' ? 'Đóng' : 'Hủy'}
                 </button>
-                <button
-                  type="submit"
-                  className={styles.submitBtn}
-                  disabled={loading || uploadingImages}
-                >
-                  {loading 
-                    ? 'Đang tạo sản phẩm...' 
-                    : uploadingImages 
-                    ? 'Đang upload ảnh...' 
-                    : 'Tạo sản phẩm'
-                  }
-                </button>
+                
+                {type === 'add' && (
+                  <button
+                    type="submit"
+                    className={styles.submitBtn}
+                    disabled={loading || uploadingImages}
+                  >
+                    {loading 
+                      ? 'Đang tạo sản phẩm...' 
+                      : uploadingImages 
+                      ? 'Đang upload ảnh...' 
+                      : 'Tạo sản phẩm'
+                    }
+                  </button>
+                )}
+                
+                {type === 'edit' && (
+                  <button
+                    type="submit"
+                    className={styles.submitBtn}
+                    disabled={!hasChanges || loading || uploadingImages || updating}
+                  >
+                    {updating 
+                      ? 'Đang cập nhật...' 
+                      : uploadingImages 
+                      ? 'Đang upload ảnh...'
+                      : 'Cập nhật sản phẩm'
+                    }
+                  </button>
+                )}
               </div>
             </form>
           </div>
         </main>
       </div>
+      )}
     </div>
   );
 };
