@@ -60,6 +60,7 @@ const RoomCard = ({ product, durationDays = 1 }) => {
       const roomId = product.UID;
       if (roomId) {
         navigate(`/room/${roomId}`);
+        window.scrollTo(0, 0);
       }
     }
   };
