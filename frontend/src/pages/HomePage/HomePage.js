@@ -108,6 +108,14 @@ const HomePage = () => {
             <span className="home-logo-text">bidstay</span>
           </div>
 
+          <div className="product-catalog">
+            <span className="catalog-item">Khách sạn</span>
+            <span className="catalog-item">Căn hộ</span>
+            <span className="catalog-item">Homestay</span>
+            <span className="catalog-item">Resort</span>
+            <span className="catalog-item">Biệt thự</span>
+          </div>
+
           {isAuthenticated() ? (
             <HeaderUserMenu />
           ) : (
