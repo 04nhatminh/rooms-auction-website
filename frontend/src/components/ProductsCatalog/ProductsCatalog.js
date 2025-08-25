@@ -223,12 +223,14 @@ const ProductsCatalog = () => {
                     onClick={() => handleDistrictClick(district)}
                 >
                     <div className="location-image">
-                    <img src={district.image} alt={district.name || district.displayText} />
-                    <div className="location-overlay">
-                        <span className="location-title">{district.name || district.displayText}</span>
-                        <span className="location-description">{district.description}</span>
-                        <div className="district-arrow">→</div>
-                    </div>
+                        <img src={district.image} alt={district.name || district.displayText} />
+                        <div className="location-overlay">
+                            <div className="location-meta">
+                                <span className="location-title">{district.name || district.displayText}</span>
+                                <span className="location-description">{district.description}</span>
+                            </div>
+                            <div className="district-arrow">→</div>
+                        </div>
                     </div>
                 </div>
                 ))}
