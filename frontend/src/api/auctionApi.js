@@ -105,9 +105,9 @@ export const auctionApi = {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ productUid, checkin, checkout }),
         });
-        const data = await r.json().catch(()=> ({}));
+        const data = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(data.message || 'Không preview được phiên đấu giá');
-        return data; // { success:true, data:{ eligible, durationDays, startingPrice, bidIncrement, ... } }
+        return data;
     },
 
     createAuction: async ({ productUid, userId, checkin, checkout }) => {
@@ -115,26 +115,36 @@ export const auctionApi = {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ productUid, userId, checkin, checkout }),
         });
-        const data = await r.json().catch(()=> ({}));
+        const data = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(data.message || 'Tạo phiên đấu giá thất bại');
-        return data; // { success:true, data:{ auctionUid, endTime, currentPrice, currency } }
+        return data;
     },
 
-    getByUid: async (auctionUid) => {
-        const r = await fetch(`${API_BASE_URL}/api/auction/by-uid/${auctionUid}`);
-        const data = await r.json().catch(()=> ({}));
-        if (!r.ok) throw new Error(data.message || 'Không tải được phiên đấu giá');
-        return data; // { success:true, data:{ auction, room, fullHistory } }
+    getByUid: async (auctionUid, abortSignal = null) => {
+        const opts = { method: 'GET', headers: { 'Content-Type':'application/json' } };
+        if (abortSignal) opts.signal = abortSignal;
+        try {
+            const r = await fetch(`${API_BASE_URL}/api/auction/by-uid/${auctionUid}`, opts);
+            const data = await r.json().catch(()=> ({}));
+            if (!r.ok) throw new Error(data.message || 'Không tải được phiên đấu giá');
+            return data; // { success:true, data:{ auction, room, fullHistory } }
+        } catch (err) {
+            // Bỏ qua AbortError
+            if (err.name === 'AbortError') {
+                throw err;
+            }
+            throw err;
+        }
     },
 
-    bid: async (auctionUid, { userId, amount }) => {
+    bid: async (auctionUid, { userId, amount, checkin, checkout }) => {
         const r = await fetch(`${API_BASE_URL}/api/auction/${auctionUid}/bid`, {
-            method: 'POST', headers: { 'Content-Type':'application/json' },
-            body: JSON.stringify({ userId, amount }),
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, amount, checkin, checkout }),
         });
-        const data = await r.json().catch(()=> ({}));
+        const data = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(data.message || 'Đặt giá thất bại');
-        return data; // { success:true, data:{ ok:true, currentPrice } }
+        return data;
     },
 };
 

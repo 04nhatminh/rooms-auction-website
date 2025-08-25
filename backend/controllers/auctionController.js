@@ -126,7 +126,7 @@ class AuctionController {
         try {
             const { productUid, checkin, checkout } = req.body || {};
             if (!productUid || !checkin || !checkout)
-            return res.status(400).json({ success:false, message:'Thiếu tham số' });
+                return res.status(400).json({ success:false, message:'Thiếu tham số' });
 
             const out = await AuctionModel.previewCreate({ productUid, checkin, checkout });
             return res.json({ success:true, data: out });
@@ -141,16 +141,17 @@ class AuctionController {
         try {
             const { productUid, userId, checkin, checkout } = req.body || {};
             if (!productUid || !userId || !checkin || !checkout)
-            return res.status(400).json({ success:false, message:'Thiếu tham số' });
+                return res.status(400).json({ success:false, message:'Thiếu tham số' });
 
-            const out = await AuctionModel.createAuction({ productUid, userId, checkin, checkout });
+            const out = await AuctionModel.createAuctionAndInitialBid({ productUid, userId, checkin, checkout });
             return res.json({ success:true, data: out });
         } catch (e) {
-            const m = e?.message || '';
-            if (m.includes('Not enough lead time'))
-            return res.status(409).json({ success:false, message:'Chưa đủ thời gian mở phiên' });
-            if (m.includes('Active auction'))
-            return res.status(409).json({ success:false, message:'Đã có phiên trùng khoảng lưu trú' });
+        const m = e?.message || '';
+            if (m.includes('Stay start too soon')) // từ SP nếu vi phạm lead time
+                return res.status(409).json({ success:false, message:'Chưa đủ thời gian mở phiên' });
+            if (m.includes('Date range not free') || m.includes('Active auction'))
+                return res.status(409).json({ success:false, message:'Đã có phiên trùng khoảng lưu trú' });
+            console.log(m);
             return res.status(500).json({ success:false, message:'Không thể tạo phiên' });
         }
     }
@@ -172,20 +173,32 @@ class AuctionController {
     }
 
     // POST /api/auction/:auctionUid/bid
+    // Body cần: { userId, amount, checkin, checkout }
     static async bid(req, res) {
         try {
             const { auctionUid } = req.params || {};
-            const { userId, amount } = req.body || {};
-            if (!auctionUid || !userId || !amount)
-            return res.status(400).json({ success:false, message:'Thiếu tham số' });
+            const { userId, amount, checkin, checkout } = req.body || {};
+            if (!auctionUid || !userId || !amount || !checkin || !checkout)
+                return res.status(400).json({ success:false, message:'Thiếu tham số' });
 
-            const out = await AuctionModel.placeBid({ auctionUid, userId, amount: Number(amount) });
+            const out = await AuctionModel.placeBid({
+                auctionUid,
+                userId,
+                amount: Number(amount),
+                checkin,
+                checkout
+            });
             return res.json({ success:true, data: out });
         } catch (e) {
             const m = e?.message || '';
-            if (m.includes('not found')) return res.status(404).json({ success:false, message:'Phiên không tồn tại' });
-            if (m.includes('ended'))     return res.status(409).json({ success:false, message:'Phiên đã kết thúc' });
-            if (m.includes('Bid too low')) return res.status(409).json({ success:false, message:m });
+            if (m.includes('not found'))           return res.status(404).json({ success:false, message:'Phiên không tồn tại' });
+            if (m.includes('Auction not active') || m.includes('Auction ended'))
+                return res.status(409).json({ success:false, message:'Phiên đã kết thúc' });
+            if (m.includes('Bid too low'))         return res.status(409).json({ success:false, message:m });
+            if (m.includes('Range expansion conflicts'))
+                return res.status(409).json({ success:false, message:'Khoảng ngày bạn chọn xung đột lịch' });
+            if (m.includes('Stay start too soon'))
+                return res.status(409).json({ success:false, message:'Thời gian lưu trú quá sớm so với quy định đấu giá' });
             return res.status(500).json({ success:false, message:'Đặt giá thất bại' });
         }
     }

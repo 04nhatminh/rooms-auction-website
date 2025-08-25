@@ -1,8 +1,6 @@
-// src/pages/AuctionPage/AuctionPage.js
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import './AuctionPage.css';
-
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
 import AuctionTitle from '../../components/AuctionTitle/AuctionTitle';
@@ -13,228 +11,227 @@ import BiddingForm from '../../components/BiddingForm/BiddingForm';
 import AuctionRoomDetails from '../../components/AuctionRoomDetails/AuctionRoomDetails';
 import AuctionHistory from '../../components/AuctionHistory/AuctionHistory';
 import PolicySections from '../../components/PolicySections/PolicySections';
-
 import auctionApi from '../../api/auctionApi';
-import AuthPopup from '../../components/AuthPopup/AuthPopup';
 
-// ------- helpers -------
-function maskName(name) {
-    if (!name) return 'Ẩn danh';
-    const s = String(name).trim();
-    if (s.length <= 3) return s[0] + '***';
-    const head = s.slice(0, 3);
-    const tail = s.slice(-2);
-    return `${head}***${tail}`;
-}
-
-function fmtDateTime(dt) {
-    const d = new Date(dt);
-    const dd = String(d.getDate()).padStart(2, '0');
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const yyyy = d.getFullYear();
-    const hh = String(d.getHours()).padStart(2, '0');
-    const mi = String(d.getMinutes()).padStart(2, '0');
-    const ss = String(d.getSeconds()).padStart(2, '0');
-    return `${hh}:${mi}:${ss} - ${dd}/${mm}/${yyyy}`;
-}
-
-function daysBetween(a, b) {
-    const A = new Date(a), B = new Date(b);
-    return Math.max(0, Math.ceil((B - A) / 86400000));
-}
-
-function formatStayRange(startISO, endISO, withNights = true) {
-    if (!startISO || !endISO) return '';
-
-    const s = new Date(startISO); // tự đổi sang giờ local
-    const e = new Date(endISO);   // [start, end) — end là ngày trả phòng
-
-    const pad = (n) => String(n).padStart(2, '0');
-
-    const sY = s.getFullYear(), sM = s.getMonth() + 1, sD = s.getDate();
-    const eY = e.getFullYear(), eM = e.getMonth() + 1, eD = e.getDate();
-
-    let label;
-    if (sY === eY && sM === eM) {
-        // Cùng tháng/năm → "10–13/09/2025"
-        label = `${pad(sD)}–${pad(eD)}/${pad(sM)}/${sY}`;
-    } else if (sY === eY) {
-        // Khác tháng, cùng năm → "28/09–02/10/2025"
-        label = `${pad(sD)}/${pad(sM)}–${pad(eD)}/${pad(eM)}/${sY}`;
-    } else {
-        // Khác năm → "30/12/2025–02/01/2026"
-        label = `${pad(sD)}/${pad(sM)}/${sY}–${pad(eD)}/${pad(eM)}/${eY}`;
+function fmtDate(d) {
+    try {
+        const date = typeof d === 'string' || typeof d === 'number' ? new Date(d) : d;
+        const dd = String(date.getDate()).padStart(2, '0');
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const yyyy = date.getFullYear();
+        const hh = String(date.getHours()).padStart(2, '0');
+        const mi = String(date.getMinutes()).padStart(2, '0');
+        const ss = String(date.getSeconds()).padStart(2, '0');
+        return { dmy: `${dd}/${mm}/${yyyy}`, hms_dmy: `${hh}:${mi}:${ss} - ${dd}/${mm}/${yyyy}` };
+    } catch (_) {
+        return { dmy: '', hms_dmy: '' };
     }
-
-    if (withNights) {
-        const nights = Math.max(0, Math.round((e - s) / 86400000));
-        label += ` (${nights} đêm)`;
-    }
-    return label;
 }
 
-export default function AuctionPage() {
-    // Chấp nhận nhiều tên param để tránh lệch router
+function maskBidder(nameOrId) {
+    if (!nameOrId) return '***';
+    const s = String(nameOrId);
+    if (s.length <= 3) return `${s[0]}**`;
+    return `${s.slice(0, 3)}***${s.slice(-3)}`;
+}
+
+// Map payload từ API sang đúng format UI hiện tại của AuctionPage mock
+function mapApiToView(payload, currentUserId) {
+    const { auction = {}, room = {}, fullHistory = [] } = payload?.data || {};
+
+    // Ảnh
+    const imageList = Array.isArray(room?.Images || room?.images)
+    ? (room.Images || room.images)
+    : (room.ImageUrls || room.imageUrls || []);
+    const images = {
+        main: imageList?.[0] || room?.CoverImage || room?.coverImage || '',
+        thumbnails: imageList?.slice(0, 3) || [],
+        moreCount: Math.max(0, (imageList?.length || 0) - 3),
+    };
+
+    // Chi tiết phiên
+    const start = auction.StartTime || auction.startTime || auction.start || auction.start_date || auction.Checkin || auction.checkin;
+    const end = auction.EndTime || auction.endTime || auction.end || auction.end_date;
+    const stayStart = auction.Checkin || auction.checkin || auction.StayStart || auction.stayStart;
+    const stayEnd = auction.Checkout || auction.checkout || auction.StayEnd || auction.stayEnd;
+    const { dmy: stayStartDMY } = fmtDate(stayStart);
+    const { dmy: stayEndDMY } = fmtDate(stayEnd);
+    const { hms_dmy: startFmt } = fmtDate(start);
+    const { hms_dmy: endFmt } = fmtDate(end);
+
+    const auctionDetails = {
+        endDate: end ? new Date(end) : undefined,
+        stayPeriod: stayStartDMY && stayEndDMY ? `${stayStartDMY} - ${stayEndDMY}` : '',
+        startTime: startFmt,
+        endTime: endFmt,
+        duration: (() => {
+            const s = start ? new Date(start) : null;
+            const e = end ? new Date(end) : null;
+            if (!s || !e) return '';
+            const ms = Math.max(0, e - s);
+            const days = Math.ceil(ms / (24 * 3600 * 1000));
+            return `${days} ngày`;
+        })(),
+        bidIncrement: auction.BidIncrement || auction.bidIncrement || 0,
+        startingPrice: auction.StartingPrice || auction.startingPrice || 0,
+        currentPrice: auction.CurrentPrice || auction.currentPrice || auction.lastPrice || auction.startingPrice || 0,
+        currency: auction.Currency || auction.currency || 'VND',
+    };
+
+    // Thông tin phòng
+    const roomInfo = {
+        type: room?.PropertyTypeLabel || room?.type || 'Phòng/ căn hộ',
+        capacity:
+        room?.CapacityLabel ||
+        `${room?.livingRooms || 0} phòng khách - ${room?.bedrooms || 0} phòng ngủ - ${room?.beds || 0} giường - ${room?.bathrooms || 0} phòng tắm`,
+        location: room?.LocationLabel || room?.location || [room?.DistrictName, room?.ProvinceName, room?.CountryName].filter(Boolean).join(', '),
+        title: room?.Title || room?.name || auction?.Title || '',
+    };
+
+    // Lịch sử đấu giá
+    const full = (fullHistory || []).map((b, i) => ({
+        id: b.id || b.BidID || i + 1,
+        time: fmtDate(b.time || b.CreatedAt || b.createdAt).dmy,
+        bidder: maskBidder(b.userName || b.UserName || b.userId || b.UserID),
+        price: b.amount || b.Amount || b.BidAmount || 0,
+        status: b.status || b.Status || '',
+    }));
+    const personal = full.filter((b) => {
+        const rawUser = fullHistory.find((h) => (h.userId ?? h.UserID) === currentUserId);
+        return rawUser ? (b.bidder === maskBidder(rawUser.userId || rawUser.UserID)) : false;
+    });
+
+    return {
+        title: roomInfo.title || 'Phiên đấu giá',
+        images,
+        auctionDetails,
+        roomInfo,
+        fullHistory: full,
+        personalHistory: personal,
+        __raw: { auction, room, fullHistory },
+    };
+}
+
+const AuctionPage = () => {
     const params = useParams();
-    const auctionUid = params.auctionUid ?? params.UID ?? params.id ?? params.auctionId;
-
+    const auctionUid =
+        params.UID ||
+        (typeof window !== 'undefined'
+            ? window.location.pathname.split('/').filter(Boolean).pop()
+            : '');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [auction, setAuction] = useState(null);   // { endTime, startTime, stayPeriod, startPrice, bidIncrement, currentPrice, status ... }
-    const [room, setRoom] = useState(null);         // { name, currency, basePrice }
-    const [history, setHistory] = useState([]);     // [{ BidID, Amount, BidTime, FullName }]
+    const [viewData, setViewData] = useState(null);
 
-    const [showLogin, setShowLogin] = useState(false);
-
-    // lấy current userId từ session/local
     const currentUserId = useMemo(() => {
         try {
-        const s = JSON.parse(sessionStorage.getItem('userData') || 'null') || JSON.parse(localStorage.getItem('userData') || 'null');
-        return s?.id ?? s?.userId ?? null;
+            const userData = JSON.parse(sessionStorage.getItem('userData') || 'null');
+            return userData?.id || userData?.userId || null;
         } catch { return null; }
     }, []);
 
-    // gọi API lấy phiên
-    const refresh = useCallback(async () => {
-        if (!auctionUid) { setError('Thiếu Auction UID'); return; }
+    useEffect(() => {
+        const aborter = new AbortController();
+        let alive = true;
+
         setLoading(true);
         setError('');
-        try {
-        const r = await auctionApi.getByUid(auctionUid);
-        const d = r?.data || {};
-        setAuction(d.auction || null);
-        setRoom(d.room || null);
-        setHistory(Array.isArray(d.fullHistory) ? d.fullHistory : []);
-        } catch (e) {
-        setError(e?.message || 'Không tải được phiên đấu giá');
-        } finally {
-        setLoading(false);
-        }
-    }, [auctionUid]);
 
-    useEffect(() => { refresh(); }, [refresh]);
+        auctionApi.getByUid(auctionUid, aborter.signal)
+            .then((resp) => {
+                if (!alive || !resp) return;
+                setViewData(mapApiToView(resp, currentUserId));
+            })
+            .catch((e) => {
+                if (!alive) return;
+                if (e.name === 'AbortError') return;       // <-- bỏ qua abort
+                setError(e.message || 'Không tải được dữ liệu phiên');
+            })
+            .finally(() => {
+                if (alive) setLoading(false);
+            });
 
-    // countdown: truyền cho CountdownTimer theo định dạng cũ (details.endDate là Date)
-    const countdownDetails = useMemo(() => {
-        if (!auction) return null;
-        return { endDate: new Date(auction.endTime) };
-    }, [auction]);
-
-    // map dữ liệu cho AuctionInfo (khớp props cũ)
-    const infoDetails = useMemo(() => {
-        if (!auction || !room) return null;
-        return {
-        stayPeriod: formatStayRange(auction.stayPeriod?.start, auction.stayPeriod?.end),
-        startTime: fmtDateTime(auction.startTime),
-        endTime: fmtDateTime(auction.endTime),
-        duration: `${daysBetween(auction.startTime, auction.endTime)} ngày`,
-        bidIncrement: auction.bidIncrement,
-        startingPrice: auction.startPrice,
-        currentPrice: auction.currentPrice,
-        currency: room.currency || 'VND',
+        return () => {
+            alive = false;
+            aborter.abort();
         };
-    }, [auction, room]);
+    }, [auctionUid, currentUserId]);
 
-    // map lịch sử cho component AuctionHistory (giữ layout cũ)
-    const viewFullHistory = useMemo(() => {
-        if (!history || !history.length || !auction) return [];
-        return history.map((b, idx) => ({
-        id: b.BidID,
-        time: fmtDateTime(b.BidTime),
-        bidder: maskName(b.FullName),
-        price: Number(b.Amount || 0),
-        status: idx === 0 ? 'Đang dẫn đầu' : 'Bị vượt giá',
-        }));
-    }, [history, auction]);
 
-    const personalHistory = useMemo(() => {
-        if (!currentUserId || !history?.length) return [];
-        const mine = history.filter(h => Number(h.UserID) === Number(currentUserId));
-        return mine.map((b) => ({
-        id: b.BidID,
-        time: fmtDateTime(b.BidTime),
-        bidder: maskName(b.FullName),
-        price: Number(b.Amount || 0),
-        status: b.BidID === history[0]?.BidID ? 'Đang dẫn đầu' : 'Bị vượt giá',
-        }));
-    }, [history, currentUserId]);
+    if (loading) {
+        return (
+            <div className="auction-page-container">
+                <Header />
+                <main className="auction-main-content"><div className="loading">Đang tải phiên đấu giá…</div></main>
+                <Footer />
+            </div>
+        );
+    }
 
-    // đặt giá
-    const handleBid = useCallback(async (amount) => {
-        if (!currentUserId) { setShowLogin(true); return; }
-        if (!auctionUid) return;
-        try {
-        await auctionApi.bid(auctionUid, { userId: currentUserId, amount: Number(amount) });
-        await refresh();
-        } catch (e) {
-        alert(e?.message || 'Đặt giá thất bại');
-        }
-    }, [auctionUid, currentUserId, refresh]);
+    if (error || !viewData) {
+        return (
+            <div className="auction-page-container">
+                <Header />
+                <main className="auction-main-content"><div className="error">{error || 'Không có dữ liệu phiên'}</div></main>
+                <Footer />
+            </div>
+        );
+    }
 
-    // ảnh phòng (nếu chưa có ảnh từ API, dùng rỗng/placeholder)
-    const images = useMemo(() => {
-        // Nếu backend sau này trả images, map vào đây. Tạm thời để rỗng => component tự xử lý.
-        return { main: null, thumbnails: [], moreCount: 0 };
-    }, []);
+    const { images, auctionDetails, roomInfo, fullHistory, personalHistory, title } = viewData;
 
-    // render
-    if (!auctionUid) return <div style={{ padding: 24 }}>Sai đường dẫn: thiếu Auction UID.</div>;
-    if (loading) return <div style={{ padding: 24 }}>Đang tải phiên đấu giá...</div>;
-    if (error || !auction) return <div style={{ padding: 24, color: 'tomato' }}>{error || 'Không tìm thấy phiên đấu giá.'}</div>;
+    console.log(auctionDetails);
 
     return (
         <div className="auction-page-container">
-        <Header />
-        <main className="auction-main-content">
-            <AuctionTitle />
-            <div className="auction-layout-grid">
-            <div className="left-column">
-                <AuctionImageGallery images={images} />
-            </div>
+            <Header />
+            <main className="auction-main-content">
+                {/* Giữ nguyên UI/format của AuctionPage cũ */}
+                <AuctionTitle title={title} />
+                <div className="auction-layout-grid">
+                    <div className="left-column">
+                        <AuctionImageGallery images={images} />
+                    </div>
 
-            <div className="right-column auction-info-card">
-                {countdownDetails && <CountdownTimer details={countdownDetails} />}
-                {infoDetails && (
-                <AuctionInfo details={infoDetails} />
-                )}
-                {/* BiddingForm của bạn trước đây nhận currentPrice & bidIncrement.
-                    Mình bổ sung thêm onBid & currency (component có thể bỏ qua nếu không dùng). */}
-                <BiddingForm
-                currentPrice={auction.currentPrice}
-                bidIncrement={auction.bidIncrement}
-                currency={room?.currency || 'VND'}
-                onBid={handleBid}
-                disabled={new Date(auction.endTime) <= new Date()}
-                />
-            </div>
-            </div>
+                    <div className="right-column auction-info-card">
+                        <CountdownTimer details={auctionDetails} />
+                        <AuctionInfo details={auctionDetails} />
+                        <BiddingForm
+                            currentPrice={auctionDetails.currentPrice}
+                            bidIncrement={auctionDetails.bidIncrement}
+                            // Truyền thêm thông tin cần thiết cho submit bid
+                            onSubmit={async (amount) => {
+                                try {
+                                    if (!currentUserId) throw new Error('Bạn cần đăng nhập để đặt giá');
+                                    await auctionApi.bid(auctionUid, {
+                                        userId: currentUserId,
+                                        amount,
+                                        checkin: viewData.__raw?.auction?.Checkin || viewData.__raw?.auction?.checkin,
+                                        checkout: viewData.__raw?.auction?.Checkout || viewData.__raw?.auction?.checkout,
+                                    });
+                                    // Sau khi bid thành công, refresh dữ liệu
+                                    const refreshed = await auctionApi.getByUid(auctionUid);
+                                    setViewData(mapApiToView(refreshed, currentUserId));
+                                } catch (e) {
+                                    alert(e.message || 'Đặt giá thất bại');
+                                }
+                            }}
+                        />
+                    </div>
+                </div>
 
-            <div className="bottom-sections">
-            <AuctionRoomDetails
-                info={{
-                type: 'Phòng/nhà cho thuê',
-                capacity: '', // nếu backend có thêm, map vào đây
-                location: '', // nếu backend có thêm, map vào đây
-                name: room?.name || '',
-                basePrice: room?.basePrice || 0,
-                currency: room?.currency || 'VND',
-                }}
-            />
-
-            <AuctionHistory title="Lịch sử đấu giá toàn phòng" bids={viewFullHistory} />
-            <AuctionHistory title="Lịch sử đấu giá của bạn" bids={personalHistory} />
-
-            <PolicySections />
-            </div>
-        </main>
-
-        <Footer />
-
-        <AuthPopup
-            open={showLogin}
-            onClose={() => setShowLogin(false)}
-            onSuccess={() => { setShowLogin(false); /* vừa login xong → user có thể bấm đặt giá lại */ }}
-        />
+                <div className="bottom-sections">
+                    <AuctionRoomDetails info={roomInfo} />
+                    <AuctionHistory title="Lịch sử đấu giá toàn phòng" bids={fullHistory} />
+                    <AuctionHistory title="Lịch sử đấu giá cá nhân" bids={personalHistory} />
+                    <PolicySections />
+                </div>
+            </main>
+            <Footer />
         </div>
     );
-}
+};
+
+
+export default AuctionPage;
+

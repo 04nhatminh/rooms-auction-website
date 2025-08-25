@@ -184,23 +184,10 @@ const BookingCard = () => {
         state: { guests, totalGuests, bookingId: r.bookingId, holdExpiresAt: r.holdExpiresAt }
       });
     } catch (e) {
-      // // Đóng popup và hiện banner lỗi rõ ràng
-      // setShowConfirm(false);
-      // setStatus({
-      //   tag: 'soldout',
-      //   level: 'error',
-      //   message: e?.message || 'Khoảng thời gian đã bị giữ/chặn hoặc trùng lịch.',
-      // });
-      // // không ném lại lỗi để tránh alert() bật ra
-      const r = await bookingApi.place(payload);   // để lỗi ném ra ngoài
-      setShowConfirm(false);
-      return;
+        const r = await bookingApi.place(payload);   // để lỗi ném ra ngoài
+        setShowConfirm(false);
+        return;
     }
-
-    // const params = buildQuery?.() || '';
-    // navigate(`/checkout/${r.bookingId}${params ? `?${params}` : ''}`, {
-    //   state: { guests, totalGuests, bookingId: r.bookingId, holdExpiresAt: r.holdExpiresAt }
-    // });
   };
 
   const onConfirmPlace = async () => {

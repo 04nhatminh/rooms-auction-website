@@ -16,7 +16,8 @@ const dbConfig = {
     connectionLimit: 10,
     queueLimit: 0,
     supportBigNumbers: true,
-    bigNumberStrings: true
+    bigNumberStrings: true,
+    decimalNumbers: true
 };
 
 console.log('🔍 Database config:', {
@@ -247,7 +248,7 @@ async function createUsersTable() {
         await pool.query(`DROP TRIGGER IF EXISTS \`${r.TRIGGER_NAME}\``);
     }
 
-    // Trigger check tại cùng 1 thời điểm không có nhiều hơn 2 user active với cùng email
+    // Trigger check tại cùng 1 thời điểm không có nhiều hơn 2 user !deleted với cùng email
     await pool.query(`
         CREATE TRIGGER \`${dbname}\`.\`trg_Insert_Users_Active_Email\`
         BEFORE INSERT ON \`${dbname}\`.\`Users\`
@@ -256,7 +257,7 @@ async function createUsersTable() {
             DECLARE active_count INT;
             SELECT COUNT(*) INTO active_count
             FROM Users
-            WHERE Email = NEW.Email AND Status = 'active';
+            WHERE Email = NEW.Email AND Status <> 'deleted';
             IF active_count >= 2 THEN
                 SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = 'Không thể có nhiều hơn 2 người dùng active với cùng email.';
@@ -484,7 +485,7 @@ async function createAuctionTable() {
     await pool.execute(`
         CREATE TABLE IF NOT EXISTS Auction (
             AuctionID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-            AuctionUID BIGINT UNSIGNED,
+            AuctionUID BIGINT UNSIGNED NOT NULL,
             ProductID INT,
             StayPeriodStart DATE,
             StayPeriodEnd DATE,
@@ -2238,7 +2239,12 @@ async function dropCreateAuctionForStayProcedureIfExists() {
 async function createCreateAuctionForStayProcedure() {
     await pool.query(`
         CREATE PROCEDURE CreateAuctionForStay(
-            IN p_ProductID INT, IN p_Start DATE, IN p_End DATE, OUT p_AuctionID INT
+            IN p_AuctionUID BIGINT UNSIGNED,
+            IN p_ProductID INT,
+            IN p_Start DATE,
+            IN p_End DATE,
+            IN p_UserID INT,
+            OUT p_AuctionID INT
         )
         BEGIN
             DECLARE v_now DATETIME; DECLARE v_price DECIMAL(10,2);
@@ -2285,10 +2291,10 @@ async function createCreateAuctionForStayProcedure() {
 
             SELECT Price INTO v_price FROM Products WHERE ProductID=p_ProductID LIMIT 1;
 
-            INSERT INTO Auction(ProductID, StayPeriodStart, StayPeriodEnd, StartTime, EndTime,
-                                StartPrice, BidIncrement, CurrentPrice, Status)
-            VALUES(p_ProductID, p_Start, p_End, v_now, v_now + INTERVAL v_dur DAY,
-                ROUND(v_price * v_spf,2), ROUND(v_price * v_bif,2), ROUND(v_price * v_spf,2), 'active');
+            INSERT INTO Auction(AuctionUID, ProductID, StayPeriodStart, StayPeriodEnd, StartTime, EndTime,
+                                StartPrice, BidIncrement, Status)
+            VALUES(p_AuctionUID, p_ProductID, p_Start, p_End, v_now, v_now + INTERVAL v_dur DAY,
+                ROUND(v_price * v_spf,2), ROUND(v_price * v_bif,2), 'active');
             SET p_AuctionID = LAST_INSERT_ID();
 
             -- Block lịch bởi đấu giá (đúng theo rule blocked(auction))
@@ -2296,7 +2302,109 @@ async function createCreateAuctionForStayProcedure() {
             SET Status='blocked', LockReason='auction', AuctionID=p_AuctionID, BookingID=NULL, HoldExpiresAt=NULL
             WHERE ProductID=p_ProductID AND Day>=p_Start AND Day<p_End;
 
-            INSERT INTO AuctionEvents(AuctionID, EventType, Note) VALUES(p_AuctionID,'start','Auction created');
+            INSERT INTO AuctionEvents(AuctionID, EventType, ActorUserID, Note) VALUES(p_AuctionID,'start', p_UserID, 'Auction created');
+
+            COMMIT;
+        END;
+    `);
+}
+
+async function dropCreateAuctionAndInitialBidProcedureIfExists() {
+    await pool.query(`DROP PROCEDURE IF EXISTS CreateAuctionAndInitialBid;`);
+}
+
+async function createCreateAuctionAndInitialBidProcedure() {
+    await pool.query(`
+        CREATE PROCEDURE CreateAuctionAndInitialBid(
+            IN p_AuctionUID BIGINT UNSIGNED,
+            IN p_ProductID INT,
+            IN p_Start DATE,
+            IN p_End DATE,
+            IN p_UserID INT,
+            OUT p_AuctionID INT,
+            OUT p_BidID INT
+        )
+        BEGIN
+            DECLARE v_now DATETIME;
+            DECLARE v_price DECIMAL(10,2);
+            DECLARE v_spf DECIMAL(6,4);
+            DECLARE v_bif DECIMAL(6,4);
+            DECLARE v_dur INT;
+            DECLARE v_lead INT;
+            DECLARE v_day DATE;
+            DECLARE v_start_price DECIMAL(10,2);
+            DECLARE v_bid_increment DECIMAL(10,2);
+
+            DECLARE EXIT HANDLER FOR SQLEXCEPTION
+            BEGIN
+                ROLLBACK;
+                RESIGNAL;
+            END;
+
+            SET p_AuctionID = NULL;
+            SET p_BidID = NULL;
+
+            IF p_End <= p_Start THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='End>Start required'; END IF;
+
+            IF p_UserID IS NULL THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='UserID required for initial bid';
+            END IF;
+
+            SET v_now = NOW();
+            SELECT CAST(ParamValue AS DECIMAL(6,4)) INTO v_spf FROM SystemParameters WHERE ParamName='StartPriceFactor' LIMIT 1;
+            SELECT CAST(ParamValue AS DECIMAL(6,4)) INTO v_bif FROM SystemParameters WHERE ParamName='BidIncrementFactor' LIMIT 1;
+            SELECT CAST(ParamValue AS UNSIGNED) INTO v_dur FROM SystemParameters WHERE ParamName='AuctionDurationDays' LIMIT 1;
+            SELECT CAST(ParamValue AS UNSIGNED) INTO v_lead FROM SystemParameters WHERE ParamName='BidLeadTimeDays' LIMIT 1;
+
+            IF DATE(p_Start) < DATE(v_now + INTERVAL v_lead DAY) THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Stay start too soon for auction';
+            END IF;
+
+            START TRANSACTION;
+
+            -- Bơm ngày còn thiếu
+            SET v_day = p_Start;
+            WHILE v_day < p_End DO
+                INSERT IGNORE INTO Calendar(ProductID, Day, Status) VALUES (p_ProductID, v_day, 'available');
+                SET v_day = v_day + INTERVAL 1 DAY;
+            END WHILE;
+
+            -- Khóa range & kiểm tra xung đột
+            SELECT Day FROM Calendar WHERE ProductID=p_ProductID AND Day>=p_Start AND Day<p_End FOR UPDATE;
+            IF EXISTS(
+                SELECT 1 FROM Calendar
+                WHERE ProductID=p_ProductID AND Day>=p_Start AND Day<p_End
+                AND Status IN ('reserved','booked','blocked')
+            ) THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Date range not free to auction'; END IF;
+
+            -- Giá và tham số
+            SELECT Price INTO v_price FROM Products WHERE ProductID=p_ProductID LIMIT 1;
+            IF v_price IS NULL THEN 
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Product not found';
+            END IF;
+
+            SET v_start_price = ROUND(v_price * v_spf, 2);
+            SET v_bid_increment = ROUND(v_price * v_bif, 2);
+
+            INSERT INTO Auction(AuctionUID, ProductID, StayPeriodStart, StayPeriodEnd, StartTime, EndTime,
+                                StartPrice, BidIncrement, Status)
+            VALUES(p_AuctionUID, p_ProductID, p_Start, p_End, v_now, v_now + INTERVAL v_dur DAY,
+                ROUND(v_price * v_spf,2), ROUND(v_price * v_bif,2), 'active');
+            SET p_AuctionID = LAST_INSERT_ID();
+
+            -- Block lịch bởi đấu giá (đúng theo rule blocked(auction))
+            UPDATE Calendar
+            SET Status='blocked', LockReason='auction', AuctionID=p_AuctionID, BookingID=NULL, HoldExpiresAt=NULL
+            WHERE ProductID=p_ProductID AND Day>=p_Start AND Day<p_End;
+
+            INSERT INTO AuctionEvents(AuctionID, EventType, ActorUserID, Note) VALUES(p_AuctionID,'start', p_UserID, 'Auction created');
+
+            -- Đặt bid đầu tiên = StartPrice
+            INSERT INTO Bids(AuctionID, UserID, Amount, BidTime, StartDate, EndDate)
+            VALUES(p_AuctionID, p_UserID, v_start_price, NOW(), p_Start, p_End);
+            SET p_BidID = LAST_INSERT_ID();
+
+            UPDATE Auction SET MaxBidID = p_BidID WHERE AuctionID = p_AuctionID;
 
             COMMIT;
         END;
@@ -2418,7 +2526,7 @@ async function createPlaceBidProcedure() {
             VALUES(p_AuctionID, p_UserID, p_Amount, NOW(), p_Start, p_End);
             SET p_BidID = LAST_INSERT_ID();
 
-            UPDATE Auction SET MaxBidID=p_BidID, CurrentPrice=p_Amount WHERE AuctionID=p_AuctionID;
+            UPDATE Auction SET MaxBidID=p_BidID WHERE AuctionID=p_AuctionID;
 
             INSERT INTO AuctionEvents(AuctionID, EventType, ActorUserID, Note)
             VALUES(p_AuctionID, 'bid_placed', p_UserID,
@@ -2699,6 +2807,10 @@ async function initSchema() {
         await dropCreateAuctionForStayProcedureIfExists();
         await createCreateAuctionForStayProcedure();
         console.log('✅ CreateAuctionForStay procedure ready');
+
+        await dropCreateAuctionAndInitialBidProcedureIfExists();
+        await createCreateAuctionAndInitialBidProcedure();
+        console.log('✅ CreateAuctionAndInitialBid procedure ready');
 
         await dropPlaceBidProcedureIfExists();
         await createPlaceBidProcedure();
