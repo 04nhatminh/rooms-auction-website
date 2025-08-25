@@ -68,7 +68,6 @@ const AdminAuctionsManagementPage = () => {
           itemsPerPage: pageSize,
         });
       } else {
-        // Fallback nếu API trả mảng
         const list = Array.isArray(response) ? response : [];
         setAuctions(list);
         const totalPages = Math.max(1, Math.ceil(list.length / pageSize));
@@ -89,6 +88,7 @@ const AdminAuctionsManagementPage = () => {
 
   useEffect(() => {
     if (!isSearching && !isFilteringByStatus) loadAuctions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, isSearching, isFilteringByStatus]);
 
   const doSearch = async (uid, page = 1) => {
@@ -104,7 +104,6 @@ const AdminAuctionsManagementPage = () => {
 
     try {
       setLoading(true);
-      // Sửa lại để gọi đúng signature của API
       const response = await auctionApi.searchAuctionsByUID(uid.trim(), token);
       if (response?.success) {
         const items = response.data?.items || response.data || [];
@@ -116,7 +115,8 @@ const AdminAuctionsManagementPage = () => {
           itemsPerPage: pageSize,
         });
         setIsSearching(true);
-        setIsFilteringByStatus(false); // Reset status filter khi search
+        // khi search thì tắt filter
+        setIsFilteringByStatus(false);
         setSelectedStatus('');
       } else {
         setSearchResults([]);
@@ -166,7 +166,8 @@ const AdminAuctionsManagementPage = () => {
           itemsPerPage: pageSize,
         });
         setIsFilteringByStatus(true);
-        setIsSearching(false); // Reset search khi filter by status
+        // khi filter thì tắt search
+        setIsSearching(false);
         setSearchUID('');
       } else {
         setStatusFilterResults([]);
@@ -219,12 +220,18 @@ const AdminAuctionsManagementPage = () => {
     }
   };
 
-  const handleReset = () => {
+  // ⬇️ Reset riêng cho Search
+  const handleResetSearch = () => {
     setSearchUID('');
-    setSelectedStatus('');
     setIsSearching(false);
-    setIsFilteringByStatus(false);
     setSearchResults([]);
+    setCurrentPage(1);
+  };
+
+  // ⬇️ Reset riêng cho Dropdown (Status)
+  const handleResetFilter = () => {
+    setSelectedStatus('');
+    setIsFilteringByStatus(false);
     setStatusFilterResults([]);
     setCurrentPage(1);
   };
@@ -236,7 +243,6 @@ const AdminAuctionsManagementPage = () => {
 
     try {
       await auctionApi.deleteAuction(auctionId, token);
-      // Reload dựa trên trạng thái hiện tại
       if (isSearching && searchUID.trim() !== '') {
         await doSearch(searchUID, currentPage);
       } else if (isFilteringByStatus && selectedStatus) {
@@ -249,12 +255,6 @@ const AdminAuctionsManagementPage = () => {
       alert('Có lỗi xảy ra khi xóa đấu giá: ' + err.message);
     }
   };
-
-  // const handleAddAuction = () => {
-  //   const token = localStorage.getItem('token');
-  //   if (!token) { alert('Vui lòng đăng nhập lại.'); navigate('/login'); return; }
-  //   navigate('/admin/auctions-management/add');
-  // };
 
   const handleViewAuction = (auctionUID) => {
     const token = localStorage.getItem('token');
@@ -299,6 +299,7 @@ const AdminAuctionsManagementPage = () => {
       />
 
       <div className={styles.controlsBar}>
+        {/* Khối Search + Reset riêng của Search */}
         <div className={styles.searchContainer}>
           <input
             type="text"
@@ -309,12 +310,16 @@ const AdminAuctionsManagementPage = () => {
             className={styles.searchInput}
           />
           <button onClick={handleSearch} className={styles.searchBtn}>Tìm kiếm</button>
+          {isSearching && (
+            <button onClick={handleResetSearch} className={styles.resetBtn}>Reset</button>
+          )}
         </div>
-        
-        {(isSearching || isFilteringByStatus) && (
-          <button onClick={handleReset} className={styles.resetBtn}>Reset</button>
-        )}
+
+        {/* Khối Reset của Dropdown (bên trái) + Dropdown */}
         <div className={styles.filterContainer}>
+          {isFilteringByStatus && (
+            <button onClick={handleResetFilter} className={styles.resetBtn}>Reset</button>
+          )}
           <select 
             value={selectedStatus} 
             onChange={(e) => handleStatusChange(e.target.value)}
@@ -336,13 +341,13 @@ const AdminAuctionsManagementPage = () => {
                 <tr className={styles.tableHeader}>
                   <th className={styles.colId}>ID</th>
                   <th className={styles.colUid}>UID</th>
-                  <th className={styles.colProductId}>ProID</th>
+                  <th className={styles.colProductId}>ProductID</th>
                   <th className={styles.colStayStart}>Stay Start</th>
                   <th className={styles.colStayEnd}>Stay End</th>
                   <th className={styles.colStartTime}>Start Time</th>
                   <th className={styles.colEndTime}>End Time</th>
                   <th className={styles.colPrice}>Current Price</th>
-                  <th className={styles.colStatus}>Status</th>
+                  <th className={styles.colStatus}>Trạng thái</th>
                   <th className={styles.colActions}>Hành động</th>
                 </tr>
               </thead>
@@ -412,14 +417,6 @@ const AdminAuctionsManagementPage = () => {
                   );
                 })}
 
-                {displayAuctions.length === 0 && !isSearching && (
-                  <tr>
-                    <td colSpan={10} className={styles.empty}>
-                      <div className={styles.emptyText}>Chưa có đấu giá nào</div>
-                    </td>
-                  </tr>
-                )}
-
                 {displayAuctions.length === 0 && !isSearching && !isFilteringByStatus && (
                   <tr>
                     <td colSpan={10} className={styles.empty}>
@@ -432,7 +429,17 @@ const AdminAuctionsManagementPage = () => {
                   <tr>
                     <td colSpan={10} className={styles.empty}>
                       <div className={styles.emptyText}>
-                        Không tìm thấy đấu giá nào với UID "{searchUID}"
+                        Không tìm thấy đấu giá nào với UID “{searchUID}”
+                      </div>
+                    </td>
+                  </tr>
+                )}
+
+                {displayAuctions.length === 0 && isFilteringByStatus && (
+                  <tr>
+                    <td colSpan={10} className={styles.empty}>
+                      <div className={styles.emptyText}>
+                        Không có đấu giá nào với trạng thái “{selectedStatus}”
                       </div>
                     </td>
                   </tr>
