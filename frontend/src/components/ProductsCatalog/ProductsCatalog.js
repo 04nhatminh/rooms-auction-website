@@ -9,6 +9,16 @@ import HomestayImg from '../../assets/homestay.jpg';
 import ResortImg from '../../assets/resort.jpg';
 import BietThuImg from '../../assets/biet_thu.jpg';
 import StudioImg from '../../assets/studio.jpg';
+import HoChiMinhImg from '../../assets/ho_chi_minh.jpg';
+import HaNoiImg from '../../assets/ha_noi.png';
+import VungTauImg from '../../assets/vung_tau.jpg';
+import DaLatImg from '../../assets/da_lat.jpg';
+import NhaTrangImg from '../../assets/nha_trang.jpg';
+import PhuYenImg from '../../assets/phu_yen.jpg';
+import DaNangImg from '../../assets/da_nang.jpg';
+import HueImg from '../../assets/hue.jpg';
+import HaLongImg from '../../assets/ha_long.jpg';
+import HaiPhongImg from '../../assets/hai_phong.jpg';
 
 const ProductsCatalog = () => {
   const navigate = useNavigate();
@@ -22,61 +32,81 @@ const ProductsCatalog = () => {
       name: 'Hồ Chí Minh', 
       code: '79', 
       type: 'province',
+      image: HoChiMinhImg,
+      description: 'Trung tâm kinh tế, văn hóa',
       displayText: 'Hồ Chí Minh'
     },
     { 
       name: 'Hà Nội', 
       code: '01', 
+      image: HaNoiImg,
       type: 'province',
+      description: 'Thủ đô ngàn năm văn hiến',
       displayText: 'Hà Nội'
     },
     { 
       name: 'Đà Nẵng', 
       code: '48', 
       type: 'province',
+      image: DaNangImg,
+      description: 'Thành phố đáng sống',
       displayText: 'Đà Nẵng'
     },
     { 
       name: 'Hải Phòng', 
       code: '31', 
+      image: HaiPhongImg,
       type: 'province',
+      description: 'Thành phố cảng sôi động',
       displayText: 'Hải Phòng'
     },
     { 
-      name: 'Cần Thơ', 
-      code: '92', 
+      name: 'Huế', 
+      code: '46', 
       type: 'province',
-      displayText: 'Cần Thơ'
+      image: HueImg,
+      description: 'Cố đô lịch sử',
+      displayText: 'Huế'
     },
     { 
       name: 'Đà Lạt', 
       code: '68', 
       type: 'province',
+      image: DaLatImg,
+      description: 'Thành phố ngàn hoa',
       displayText: 'Đà Lạt'
+    },
+    { 
+      name: 'Phú Yên', 
+      code: '54', 
+      type: 'province',
+      image: PhuYenImg,
+      description: 'Vùng đất nắng gió, biển xanh cát trắng',
+      displayText: 'Phú Yên'
     },
     { 
       name: 'Nha Trang', 
       code: '56', 
       type: 'province',
+      image: NhaTrangImg,
+      description: 'Thành phố biển xinh đẹp',
       displayText: 'Nha Trang'
     },
     { 
       name: 'Vũng Tàu', 
       code: '77', 
+      image: VungTauImg,
       type: 'province',
+      description: 'Thành phố biển nổi tiếng',
       displayText: 'Vũng Tàu'
     },
     { 
       name: 'Hạ Long', 
       code: '22', 
       type: 'province',
+      image: HaLongImg,
+      description: 'Kỳ quan thiên nhiên thế giới',
       displayText: 'Hạ Long'
-    },
-    { 
-      name: 'Phú Quốc', 
-      code: '91', 
-      type: 'province',
-      displayText: 'Phú Quốc'
     }
   ], []);
 
@@ -138,6 +168,7 @@ const ProductsCatalog = () => {
     });
 
     navigate(`/search?${searchParams.toString()}`);
+    window.scrollTo(0, 0);
     setIsDropdownOpen(false);
     setSelectedAccommodationType(null);
   };
@@ -184,21 +215,23 @@ const ProductsCatalog = () => {
                 <h3>{selectedAccommodationType.title} tại các khu vực phổ biến</h3>
             </div>
 
-            
-            <div className="districts-grid">
-              {popularLocations.map((district, index) => (
+            <div className="location-types-grid">
+                {popularLocations.map((district, index) => (
                 <div
-                  key={district.code || index}
-                  className="district-card"
-                  onClick={() => handleDistrictClick(district)}
+                    key={district.code || index}
+                    className="location-type-card"
+                    onClick={() => handleDistrictClick(district)}
                 >
-                  <div className="district-info">
-                    <h4>{district.name || district.displayText}</h4>
-                    <p>Khám phá {selectedAccommodationType.title.toLowerCase()} tại đây</p>
-                  </div>
-                  <div className="district-arrow">→</div>
+                    <div className="location-image">
+                    <img src={district.image} alt={district.name || district.displayText} />
+                    <div className="location-overlay">
+                        <span className="location-title">{district.name || district.displayText}</span>
+                        <span className="location-description">{district.description}</span>
+                        <div className="district-arrow">→</div>
+                    </div>
+                    </div>
                 </div>
-              ))}
+                ))}
             </div>
           </div>
         </div>
