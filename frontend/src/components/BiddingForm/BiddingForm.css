@@ -142,3 +142,13 @@
   font-family: Montserrat;
   padding: 4px 5px;
 }
+
+.buy-now-button{
+  width:40%; height:48px; padding:0 14px;
+  border:none; border-radius:8px;
+  background:#10B981; color:#fff;
+  font-family:Montserrat; font-size:16px; font-weight:700;
+  cursor:pointer; transition:background-color .2s; white-space:nowrap;
+}
+.buy-now-button:hover{ background:#059669; }
+.buy-now-button:disabled{ opacity:.6; cursor:not-allowed; }

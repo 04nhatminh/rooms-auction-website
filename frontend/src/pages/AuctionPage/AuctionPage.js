@@ -250,6 +250,28 @@ const AuctionPage = () => {
                                     alert(e.message || 'Đặt giá thất bại');
                                 }
                             }}
+                            onBuyNow={async ({ checkin, checkout }) => {
+                                try {
+                                    if (!currentUserId) throw new Error('Bạn cần đăng nhập để thuê ngay');
+                                    await auctionApi.buyNow(auctionUid, {
+                                        userId: currentUserId,
+                                        checkin: checkin  || userCheckin,
+                                        checkout: checkout || userCheckout,
+                                    });
+                                    // Reload phiên để reflect: status=ended, currentPrice có thể thay đổi, lịch sử cập nhật, v.v.
+                                    const mapped = await loadAuction(auctionUid, currentUserId);
+                                    setViewData(mapped);
+                                    alert('Thuê ngay thành công! Phiên đã kết thúc.');
+                                } catch (e) {
+                                    // Map thông điệp để tránh lộ chi tiết
+                                    let msg = 'Không thể thuê ngay. Vui lòng chọn khoảng thời gian khác.';
+                                    const t = e.message || '';
+                                    if (t.includes('giữ/chặn') || t.includes('trùng lịch')) {
+                                        msg = 'Khoảng thời gian bạn chọn hiện không khả dụng. Vui lòng chọn ngày khác.';
+                                    }
+                                    alert(msg);
+                                }
+                            }}
                         />
                     </div>
                 </div>

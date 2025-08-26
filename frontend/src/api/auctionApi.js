@@ -156,6 +156,20 @@ export const auctionApi = {
         if (!r.ok) throw new Error(data.message || 'Không thể kết thúc phiên');
         return data;
     },
+
+    buyNow: async (auctionUid, { userId, checkin, checkout }, abortSignal = null) => {
+        const r = await fetch(`${API_BASE_URL}/api/auction/${auctionUid}/buy-now`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            signal: abortSignal || undefined,
+            body: JSON.stringify({ userId, checkin, checkout })
+        });
+        if (!r.ok) {
+            const err = await r.json().catch(() => ({}));
+            throw new Error(err.message || `Buy-now failed (${r.status})`);
+        }
+        return r.json();
+    }
 };
 
 export default auctionApi;

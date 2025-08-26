@@ -18,5 +18,6 @@ router.post('/preview', AuctionController.previewCreateForGuest);
 router.post('/create',  AuctionController.createFromGuest);
 router.get('/by-uid/:auctionUid', AuctionController.getByUID);
 router.post('/:auctionUid/bid',    AuctionController.bid);
+router.post('/:auctionUid/buy-now',    AuctionController.buyNow);
 
 module.exports = router;

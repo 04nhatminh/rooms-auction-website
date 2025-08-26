@@ -216,6 +216,53 @@ class AuctionController {
             return res.status(500).json({ success:false, message:'Đặt giá thất bại' });
         }
     }
+
+    // POST /api/auction/:auctionUid/buy-now
+    static async buyNow(req, res) {
+        const auctionUid = req.params.auctionUid;
+        const { userId, checkin, checkout } = req.body || {};
+
+        // Validate nhanh
+        if (!auctionUid) return res.status(400).json({ success:false, message:'Thiếu auctionUid' });
+        if (!userId)     return res.status(401).json({ success:false, message:'Bạn cần đăng nhập' });
+        if (!checkin || !checkout) {
+            return res.status(400).json({ success:false, message:'Thiếu checkin/checkout' });
+        }
+        if (new Date(checkout) <= new Date(checkin)) {
+            return res.status(400).json({ success:false, message:'Ngày trả phòng phải sau ngày nhận phòng' });
+        }
+
+        try {
+            const { bookingId } = await AuctionModel.buyNow({ auctionUid, userId, checkin, checkout });
+            return res.status(200).json({ success:true, message:'Thuê ngay thành công', bookingId });
+        } catch (e) {
+
+            console.log(e);
+            // Chuẩn hóa thông điệp lỗi từ SP cho UX
+            const m = (e && e.message) ? String(e.message) : '';
+
+            if (m.includes('not found')) {
+                // Ví dụ: "Auction not found"
+                return res.status(404).json({ success:false, message:'Phiên không tồn tại' });
+            }
+            if (m.includes('Auction ended') || m.includes('Auction not active')) {
+                return res.status(409).json({ success:false, message:'Phiên đã kết thúc' });
+            }
+            if (m.includes('Range expansion conflicts') || m.includes('conflict') || m.includes('trùng lịch')) {
+                // SP của bạn có thể throw SIGNAL ... 'Range expansion conflicts'
+                return res.status(409).json({ success:false, message:'Khoảng thời gian bạn chọn hiện không khả dụng. Vui lòng chọn ngày khác.' });
+            }
+            if (m.includes('Stay start too soon')) {
+                return res.status(409).json({ success:false, message:'Thời gian lưu trú quá sớm so với quy định đấu giá.' });
+            }
+            if (m.includes('booking not created') || m.includes('BuyNow failed')) {
+                return res.status(500).json({ success:false, message:'Không thể tạo booking. Vui lòng thử lại.' });
+            }
+
+            // Mặc định
+            return res.status(500).json({ success:false, message:'Thuê ngay thất bại' });
+        }
+    }
 }
 
 module.exports = AuctionController;

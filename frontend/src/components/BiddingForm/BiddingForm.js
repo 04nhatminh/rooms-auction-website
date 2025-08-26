@@ -4,8 +4,6 @@ import auctionApi from '../../api/auctionApi';
 import './BiddingForm.css';
 import DownIcon from '../../assets/down.png';
 
-
-
 const BiddingForm = ({
   currentPrice,
   bidIncrement,
@@ -13,7 +11,8 @@ const BiddingForm = ({
   checkout,
   status,
   onChangeDates,
-  onSubmit
+  onSubmit,
+  onBuyNow,
 }) => {
   const isEnded = status === 'ended';
   const [bidValue, setBidValue] = useState('');
@@ -74,6 +73,29 @@ const BiddingForm = ({
             setBidValue('');
         } catch (err) {
             alert(err?.message || 'Đặt giá thất bại');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleBuyNow = async (e) => {
+        e?.preventDefault?.();
+        if (!ci || !co) return alert('Vui lòng chọn ngày nhận/trả phòng.');
+        if (new Date(co) <= new Date(ci)) return alert('Ngày trả phòng phải sau ngày nhận phòng.');
+
+        // yêu cầu đăng nhập giống luồng đặt giá
+        const userData = JSON.parse(sessionStorage.getItem('userData') || 'null');
+        const userId = userData?.id || userData?.userId;
+        if (!userId) return alert('Bạn cần đăng nhập để thuê ngay.');
+
+        if (!window.confirm('Kết thúc phiên và thuê ngay với khoảng ngày đã chọn?')) return;
+
+        try {
+            setSubmitting(true);
+            // Gọi parent để parent quyết định API (buy-now)
+            await onBuyNow?.({ checkin: ci, checkout: co });
+        } catch (err) {
+            alert(err?.message || 'Thuê ngay thất bại');
         } finally {
             setSubmitting(false);
         }
@@ -144,6 +166,15 @@ const BiddingForm = ({
                 />
                 <button className="submit-bid-button" onClick={handleBidSubmit} disabled={isEnded || submitting}>
                      {isEnded ? 'Đã kết thúc' : 'Đặt giá'}
+                </button>
+
+                <button
+                    className="buy-now-button"
+                    onClick={handleBuyNow}
+                    disabled={isEnded || submitting || !ci || !co}
+                    title={!ci || !co ? 'Chọn ngày nhận/trả phòng trước' : 'Thuê ngay và kết thúc phiên'}
+                >
+                    Thuê ngay
                 </button>
             </div>
         </div>

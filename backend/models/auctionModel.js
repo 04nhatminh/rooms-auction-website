@@ -330,7 +330,6 @@ class AuctionModel {
     static async placeBid({ auctionUid, userId, amount, checkin, checkout }) {
         const conn = await pool.getConnection();
         try {
-            // Khóa phiên để xác nhận tồn tại + active (logic chi tiết nằm trong SP)
             const a = await this._getAuctionByUID(conn, auctionUid, /*forUpdate*/ false);
             if (!a) throw new Error('Auction not found');
 
@@ -347,14 +346,44 @@ class AuctionModel {
                 FROM Auction a JOIN Bids b ON a.AuctionID = b.AuctionID AND a.MaxBidID = b.BidID
                 WHERE a.AuctionID=?`, [a.AuctionID]);
 
-            console.log(after);
-
             return {
                 ok: true,
                 bidId,
                 currentPrice: after?.Amount ?? null,
                 maxBidId: after?.MaxBidID ?? null
             };
+        } catch (e) {
+            throw e;
+        } finally {
+            conn.release();
+        }
+    }
+
+    static async buyNow({ auctionUid, userId, checkin, checkout }) {
+        const conn = await pool.getConnection();
+        try {
+            const a = await this._getAuctionByUID(conn, auctionUid, /*forUpdate*/ false);
+            if (!a) throw new Error('Auction not found');
+
+            console.log(a);
+           
+            const ci = toDateStr(checkin);
+            const co = toDateStr(checkout);
+
+            await conn.query(
+                `CALL PlaceBookingBuyNow(?, ?, ?, ?, @p_booking_id, @p_hold_expires_at)`,
+                [userId, a.AuctionID, ci, co]
+            );
+
+            // Lấy OUT param
+            const [[row]] = await conn.query(
+                `SELECT @p_booking_id AS bookingId, @p_hold_expires_at AS holdExpiresAt`
+            );
+
+            const bookingId = row?.bookingId ?? null;
+            if (!bookingId) throw new Error('BuyNow failed: booking not created');
+
+            return { bookingId, holdExpiresAt: row?.holdExpiresAt || null };
         } catch (e) {
             throw e;
         } finally {

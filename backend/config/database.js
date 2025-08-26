@@ -2564,7 +2564,7 @@ async function createPlaceBookingBuyNowProcedure() {
     await pool.query(`
         CREATE PROCEDURE PlaceBookingBuyNow(
             IN p_UserID INT,
-            IN p_ProductID INT,
+            IN p_AuctionID INT UNSIGNED,
             IN p_Start DATE,
             IN p_End DATE,
             OUT p_BookingID INT UNSIGNED,
@@ -2572,7 +2572,7 @@ async function createPlaceBookingBuyNowProcedure() {
         )
         BEGIN
             DECLARE v_now DATETIME;
-            DECLARE v_auc_id INT UNSIGNED;
+            DECLARE v_prod_id INT;
             DECLARE v_sp_start DATE;
             DECLARE v_sp_end DATE;
             DECLARE v_hold_booking_time INT;
@@ -2588,56 +2588,70 @@ async function createPlaceBookingBuyNowProcedure() {
             SET v_now = NOW();
             SELECT CAST(ParamValue AS UNSIGNED) INTO v_hold_booking_time FROM SystemParameters WHERE ParamName='PaymentDeadlineTime' LIMIT 1;
 
+            SET p_HoldExpiresAt = v_now + INTERVAL v_hold_booking_time MINUTE;
+
             START TRANSACTION;
 
+            -- 1) Lấy thông tin phiên và khóa
+            SELECT ProductID, StayPeriodStart, StayPeriodEnd
+            INTO v_prod_id, v_sp_start, v_sp_end
+            FROM Auction
+            WHERE AuctionID = p_AuctionID AND Status='active'
+            FOR UPDATE;
+
+            IF v_prod_id IS NULL THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Auction not active';
+            END IF;
+
             -- 1) Tìm phiên bao phủ subrange và khóa
-            SELECT AuctionID, StayPeriodStart, StayPeriodEnd
+            /*SELECT AuctionID, StayPeriodStart, StayPeriodEnd
             INTO v_auc_id, v_sp_start, v_sp_end
             FROM Auction
             WHERE ProductID=p_ProductID AND Status='active'
             AND p_Start >= StayPeriodStart AND p_End <= StayPeriodEnd
-            FOR UPDATE;
+            FOR UPDATE;*/
 
-            IF v_auc_id IS NULL THEN
+            IF p_AuctionID IS NULL THEN
                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='No covering auction for this stay';
             END IF;
 
             -- 2) Khóa & kiểm tra lịch subrange
             SELECT Day FROM Calendar
-            WHERE ProductID=p_ProductID AND Day>=p_Start AND Day<p_End FOR UPDATE;
+            WHERE ProductID = v_prod_id AND Day >= p_Start AND Day < p_End
+            FOR UPDATE;
 
             IF EXISTS(SELECT 1 FROM Calendar
-                    WHERE ProductID=p_ProductID AND Day>=p_Start AND Day<p_End
+                    WHERE ProductID=v_prod_id AND Day>=p_Start AND Day<p_End
                         AND Status='booked') THEN
                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Already booked';
             END IF;
 
-            -- 3) Tạo booking confirmed (source='auction_buy_now')
+            -- 3) Tạo booking pending (source='auction_buy_now')
             INSERT INTO Booking(UserID, ProductID, StartDate, EndDate, BookingStatus, Source, CreatedAt, UpdatedAt)
-            VALUES(p_UserID, p_ProductID, p_Start, p_End, 'confirmed', 'auction_buy_now', NOW(), NOW());
+            VALUES(p_UserID, v_prod_id, p_Start, p_End, 'pending', 'auction_buy_now', NOW(), NOW());
             SET p_BookingID = LAST_INSERT_ID();
 
             -- 4) Đổi subrange sang booked
             UPDATE Calendar
-            SET Status='booked', LockReason=NULL, AuctionID=NULL, HoldExpiresAt=v_hold_booking_time, BookingID=p_BookingID
-            WHERE ProductID=p_ProductID AND Day>=p_Start AND Day<p_End;
+            SET Status='booked', LockReason=NULL, AuctionID=NULL, HoldExpiresAt=p_HoldExpiresAt, BookingID=p_BookingID
+            WHERE ProductID=v_prod_id AND Day>=p_Start AND Day<p_End;
 
             -- 5) Trả phần còn lại về available
             UPDATE Calendar
             SET Status='available', LockReason=NULL, AuctionID=NULL, HoldExpiresAt=NULL, BookingID=NULL
-            WHERE ProductID=p_ProductID AND Day>=v_sp_start AND Day<p_Start AND AuctionID=v_auc_id;
+            WHERE ProductID=v_prod_id AND Day>=v_sp_start AND Day<p_Start AND AuctionID=p_AuctionID;
 
             UPDATE Calendar
             SET Status='available', LockReason=NULL, AuctionID=NULL, HoldExpiresAt=NULL, BookingID=NULL
-            WHERE ProductID=p_ProductID AND Day>=p_End AND Day<v_sp_end AND AuctionID=v_auc_id;
+            WHERE ProductID=v_prod_id AND Day>=p_End AND Day<v_sp_end AND AuctionID=p_AuctionID;
 
             -- 6) Kết thúc phiên
             UPDATE Auction
-            SET Status='ended', EndTime=NOW(), EndReason='buy_now', EndBookingID=p_BookingID
-            WHERE AuctionID=v_auc_id;
+            SET Status='ended', EndTime=NOW(), EndReason='buy_now'
+            WHERE AuctionID=p_AuctionID;
 
             INSERT INTO AuctionEvents(AuctionID, EventType, ActorUserID, BookingID, Note)
-            VALUES(v_auc_id, 'buy_now', p_UserID, p_BookingID, 'Ended by buy-now (subrange)');
+            VALUES(p_AuctionID, 'buy_now', p_UserID, p_BookingID, 'Ended by buy-now (subrange)');
 
             COMMIT;
         END;
