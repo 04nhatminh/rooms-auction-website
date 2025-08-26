@@ -354,7 +354,7 @@ class CheckoutController {
       }
 
       if (success) {
-        await finalizePaid(bookingId, captureId); // <-- thêm await
+        await finalizePaid(bookingId, captureId); 
         return res.json({ return_code: 1, return_message: 'success' });
       } else {
         await PaymentModel.updateFailedLatestByBooking(

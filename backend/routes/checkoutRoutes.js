@@ -13,11 +13,6 @@ router.post('/webhooks/zalopay',
   (req, res) => CheckoutController.webhookZaloPay(req, res)
 );
 
-router.post('/vnpay/create', CheckoutController.createOrderVNPay);
-router.get('/vnpay/return', CheckoutController.handleReturnVNPay);
-router.get('/webhooks/vnpay-ipn', CheckoutController.webhookVNPayIP);
-// (tuỳ) nếu VNPay gửi POST, thêm:
-router.post('/webhooks/vnpay-ipn', CheckoutController.webhookVNPayIP);
 
 router.post('/zalopay/query', (req, res) => CheckoutController.queryZaloPay(req, res));
 

@@ -81,7 +81,7 @@ const CheckoutPage = () => {
       const t = e?.data?.type;
       const st = e?.data?.status;
       const bid = e?.data?.bookingId || bookingId;
-      if (t === 'paypal-captured' || t === 'zalopay-return' || t === 'vnpay-return') {
+      if (t === 'paypal-captured' || t === 'zalopay-return') {
         // làm tươi booking
         const ac = new AbortController();
         checkoutApi.getBooking(bid, ac.signal).then(setBooking).catch(() => {});
@@ -141,42 +141,21 @@ const CheckoutPage = () => {
         const popup = openPopup(zalo.order_url);
         if (!popup) alert('Popup blocked. Hãy cho phép popup cho trang này.');
       } 
-      else if (method === 'VNPAY') {
-        // const resp = await checkoutApi.createVNPayOrder({ bookingId, amount: grandTotal });
-        // if (!resp?.ok) throw new Error(resp?.error || 'Cannot create VNPay order');
-        // const payUrl = resp?.vnpay?.url;
-        // window.open(payUrl, 'vnpayPopup', 'width=480,height=720');
-        // return;
-
-        const resp = await checkoutApi.createVNPayOrder({
-          bookingId,
-          amount: grandTotal,         // số tiền VNĐ (BE sẽ *100)
-          // bankCode: 'NCB'          // optional, dùng code hợp lệ của VNPay
-        });
-        if (!resp?.ok) throw new Error(resp?.error || 'Cannot create VNPay order');
-
-        const payUrl = resp?.vnpay?.url;
-        const win = window.open(payUrl, 'vnpayPopup', 'width=480,height=720');
-        if (!win) alert('Hãy cho phép popup để tiếp tục thanh toán.');
-        return;
-      }
       else {
         // PAYPAL expects USD -> convert from VND simply
         const amountUSD = vndToUsd(amountVND);
         const { approveUrl } = await checkoutApi.createPayPalOrder({ bookingId, amount: amountUSD });
         if (!approveUrl)
           throw new Error(error || 'Create PayPal order failed');
-        const popup = openPopup(approveUrl);
-        if (!popup) alert('Popup blocked. Hãy cho phép popup cho trang này.');
         popupRef.current = openPopup(approveUrl);
         if (!popupRef.current) alert('Popup blocked. Hãy cho phép popup cho trang này.');
         // Về Home khi popup đóng (fallback nếu user tự đóng không thanh toán)
         //startPopupWatcher(() => navigate('/'));
         // Nếu user đóng popup mà không có message -> coi như thất bại
-        startPopupWatcher(() => {
-          const pid = productUidFromBooking();
-          navigate(`/checkout/failed${pid ? `?productUID=${pid}` : ''}${bookingId ? `${pid ? '&' : '?'}bookingId=${bookingId}` : ''}`);
-        });
+        // startPopupWatcher(() => {
+        //   const pid = productUidFromBooking();
+        //   navigate(`/checkout/failed${pid ? `?productUID=${pid}` : ''}${bookingId ? `${pid ? '&' : '?'}bookingId=${bookingId}` : ''}`);
+        // });
       }
     } catch (e) {
       alert(e.message || 'Payment error');

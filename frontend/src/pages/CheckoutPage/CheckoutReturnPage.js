@@ -36,24 +36,42 @@ export default function CheckoutReturnPage() {
         const bookingId = initialBookingId;
 
         // --- Validate ---
-        if (!bookingId) throw new Error('Missing bookingId in return URL');
+        if (!bookingId) {
+          window.opener?.postMessage({ type: 'paypal-captured', status: 'failed' }, '*');
+          setMsg('Missing bookingId in return URL');
+          setTimeout(() => window.close(), 800);
+          return;
+        }
 
         // ===== PayPal flow (giữ nguyên) =====
         if (isPayPal) {
-          if (!token) throw new Error('Missing PayPal token in return URL');
+          if (!token) {
+            window.opener?.postMessage({ type: 'paypal-captured', bookingId, status: 'failed' }, '*');
+            window.close();
+            return;
+          }
           const guardKey = `pp-capture:${bookingId}:${token}`;
           if (sessionStorage.getItem(guardKey)) {
             setMsg('Payment already processed. You may close this window.');
+            try {
+              await checkoutApi.capturePayPalOrder({ bookingId, orderID: token }, ac.signal);
+              window.opener?.postMessage({ type: 'paypal-captured', bookingId, status: 'success' }, '*');
+              setMsg('Payment completed successfully.');
+            } catch (e) {
+              window.opener?.postMessage({ type: 'paypal-captured', bookingId, status: 'failed' }, '*');
+              setMsg('Payment failed.');
+            }
             setTimeout(() => window.close(), 700);
             return;
           }
           sessionStorage.setItem(guardKey, '1');
           setSub(`Provider: PayPal • Order: ${token} • Booking: ${bookingId}`);
 
-          await checkoutApi.capturePayPalOrder({ bookingId, orderID: token }, ac.signal);
-          window.opener?.postMessage({ type: 'paypal-captured', bookingId, status: 'success' }, '*');
-          setMsg('Payment completed successfully.');
-          setTimeout(() => window.close(), 1500);
+          // await checkoutApi.capturePayPalOrder({ bookingId, orderID: token }, ac.signal);
+          // window.opener?.postMessage({ type: 'paypal-captured', bookingId, status: 'success' }, '*');
+          // setMsg('Payment completed successfully.');
+          // setTimeout(() => window.close(), 1500);
+          
           return;
         }
 
