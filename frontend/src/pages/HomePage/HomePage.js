@@ -26,7 +26,7 @@ const API_BASE_URL = (process.env.REACT_APP_API_BASE_URL?.replace(/\/$/, '')) ||
 
 const HomePage = () => {
   const { popularLocations, isLoading: isLoadingLocations, error: locationError, getPopularLocations } = useLocation();
-  const [user, setUser] = React.useState(null);
+  const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,7 +35,7 @@ const HomePage = () => {
       if (stored) setUser(JSON.parse(stored));
       else setUser(null);
     } catch (_) {}
-  }, []);
+  }, [sessionStorage.getItem('userData')]);
 
   // State for search data to pass to catalog dropdowns
   const [searchData, setSearchData] = useState({
