@@ -42,6 +42,7 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage/ResetPasswordPage';
 import FailedCheckoutPage from './pages/CheckoutPage/FailedCheckoutPage';
 import SuccessfulCheckoutPage from './pages/CheckoutPage/SuccessfulCheckoutPage';
+import NotificationPage from './pages/NotificationPage/NotificationPage';
 
 function App() {
   return (
@@ -59,6 +60,7 @@ function App() {
             <Route path="/search" element={<SearchResult />} />
             <Route path="/profile" element={<UserProfilePage />} />
             <Route path="/favorite" element={<FavoritePage />} />
+            <Route path="/notifications" element={<NotificationPage />} />
             <Route path="/checkout/success" element={<SuccessfulCheckoutPage />} />
             <Route path="/checkout/failed" element={<FailedCheckoutPage />} />
             <Route path="/checkout/booking/:bookingId" element={<CheckoutPage />} />

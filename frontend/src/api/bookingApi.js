@@ -28,6 +28,16 @@ export const bookingApi = {
     // kỳ vọng: { success:true, bookingId, holdExpiresAt? }
     return data;
   },
+
+  getUserTransactionHistory: async () => {
+    const res = await fetch(`${API_BASE_URL}/user/transaction-history`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    if (!res.ok) throw new Error('Không lấy được lịch sử giao dịch');
+    return await res.json();
+  }
 };
 
 export default bookingApi;

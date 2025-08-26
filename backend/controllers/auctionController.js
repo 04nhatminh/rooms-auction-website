@@ -466,6 +466,26 @@ class AuctionController {
             });
         }
     }
+
+    static async getUserAuctionHistory(req, res) {
+    try {
+        const userId = req.user.id;
+        const rows = await AuctionModel.getUserAuctionHistory(userId);
+
+        const items = rows.map(row => ({
+            auctionUid: row.auctionUid,
+            room: row.room,
+            date: row.date,
+            status: row.status,
+            result: row.result,
+            winAmount: row.winAmount 
+        }));
+
+        res.json({ success: true, items });
+    } catch (e) {
+        res.status(500).json({ success: false, message: e.message });
+    }
+}
 }
 
 module.exports = AuctionController;

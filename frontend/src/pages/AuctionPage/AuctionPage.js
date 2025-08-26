@@ -156,6 +156,7 @@ const AuctionPage = () => {
     const [userCheckout, setUserCheckout] = useState(qsCheckout);
     const [, setAuctionDetails] = useState(null);
     const [isEnded, setIsEnded] = useState(false);
+    const [hasEndedCalled, setHasEndedCalled] = useState(false);
 
     const currentUserId = useMemo(() => {
         try {
@@ -224,6 +225,8 @@ const AuctionPage = () => {
                         <CountdownTimer
                             details={auctionDetails}
                             onEnded={async () => {
+                                if (hasEndedCalled) return; // Đã gọi rồi thì bỏ qua
+                                setHasEndedCalled(true);
                                 setIsEnded(true);
                                 setAuctionDetails(prev => ({ ...prev, status: 'ended' }));
                                 try {

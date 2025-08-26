@@ -1,5 +1,5 @@
 // controllers/bookingController.js
-const productModel = require('../models/productModel'); // bạn đã dùng trong calendarController
+const productModel = require('../models/productModel');
 const bookingModel = require('../models/bookingModel');
 
 class BookingController {
@@ -68,6 +68,16 @@ class BookingController {
 
       // default
       return res.status(409).json({ ok: false, message: 'Không thể tạo giữ chỗ/đơn' });
+    }
+  }
+
+  async getUserTransactionHistory(req, res) {
+    try {
+      const userId = req.user.id;
+      const rows = await bookingModel.getUserTransactionHistory(userId);
+      res.json({ success: true, items: rows });
+    } catch (e) {
+      res.status(500).json({ success: false, message: e.message });
     }
   }
 

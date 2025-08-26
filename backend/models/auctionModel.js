@@ -630,6 +630,44 @@ class AuctionModel {
         const [auctions] = await pool.execute(query, [uid]);
         return auctions;
     }
+
+    static async getUserAuctionHistory(userId) {
+        const [rows] = await pool.execute(`
+            SELECT
+                a.AuctionID,
+                a.AuctionUID,
+                a.Status,
+                a.EndTime,
+                a.CurrentPrice,
+                a.MaxBidID,
+                r.Name as room,
+                ub.BidID as userBidId,
+                mb.Amount as winAmount -- lấy Amount của bid thắng
+            FROM auction a
+            JOIN Products r ON a.ProductID = r.ProductID
+            JOIN (
+                SELECT AuctionID, MAX(BidID) as BidID
+                FROM bids
+                WHERE UserID = ?
+                GROUP BY AuctionID
+            ) ub ON ub.AuctionID = a.AuctionID
+            LEFT JOIN bids mb ON mb.BidID = a.MaxBidID -- lấy bid thắng
+            ORDER BY a.EndTime DESC
+        `, [userId]);
+        // Format ngày và số tiền thắng
+        return rows.map(row => ({
+            auctionUid: row.AuctionUID,
+            room: row.room,
+            date: toDateStr(row.EndTime),
+            status: row.Status,
+            result: row.Status === 'ended'
+                ? (row.MaxBidID === row.userBidId ? 'Thắng' : 'Thua')
+                : (row.Status === 'active' ? 'Đang diễn ra' : ''),
+            winAmount: (row.Status === 'ended' && row.MaxBidID === row.userBidId)
+                ? row.winAmount
+                : null
+        }));
+    }
 }
 
 module.exports = AuctionModel;

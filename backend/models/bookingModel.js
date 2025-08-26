@@ -97,6 +97,18 @@ class BookingModel {
             throw error;
         }
     }
+
+    static async getUserTransactionHistory(userId) {
+        const [rows] = await pool.execute(`
+            SELECT bk.BookingID, r.Name as room, bk.CreatedAt as date, bk.PaymentMethod as method,
+                   bk.Amount as amount, bk.BookingStatus as status
+            FROM Booking bk
+            JOIN Products r ON bk.ProductID = r.ProductID
+            WHERE bk.UserID = ?
+            ORDER BY bk.CreatedAt DESC
+        `, [userId]);
+        return rows;
+    }
 }
 
 module.exports = BookingModel;
