@@ -53,36 +53,12 @@ const ProductsCatalog = () => {
       displayText: 'Đà Nẵng'
     },
     { 
-      name: 'Hải Phòng', 
-      code: '31', 
-      image: HaiPhongImg,
-      type: 'province',
-      description: 'Thành phố cảng sôi động',
-      displayText: 'Hải Phòng'
-    },
-    { 
-      name: 'Huế', 
-      code: '46', 
-      type: 'province',
-      image: HueImg,
-      description: 'Cố đô lịch sử',
-      displayText: 'Huế'
-    },
-    { 
       name: 'Đà Lạt', 
       code: '68', 
       type: 'province',
       image: DaLatImg,
       description: 'Thành phố ngàn hoa',
       displayText: 'Đà Lạt'
-    },
-    { 
-      name: 'Phú Yên', 
-      code: '54', 
-      type: 'province',
-      image: PhuYenImg,
-      description: 'Vùng đất nắng gió, biển xanh cát trắng',
-      displayText: 'Phú Yên'
     },
     { 
       name: 'Nha Trang', 
@@ -101,12 +77,36 @@ const ProductsCatalog = () => {
       displayText: 'Vũng Tàu'
     },
     { 
+      name: 'Huế', 
+      code: '46', 
+      type: 'province',
+      image: HueImg,
+      description: 'Cố đô lịch sử',
+      displayText: 'Huế'
+    },
+    { 
+      name: 'Phú Yên', 
+      code: '54', 
+      type: 'province',
+      image: PhuYenImg,
+      description: 'Vùng đất nắng gió, biển xanh cát trắng',
+      displayText: 'Phú Yên'
+    },
+    { 
       name: 'Hạ Long', 
       code: '22', 
       type: 'province',
       image: HaLongImg,
       description: 'Kỳ quan thiên nhiên thế giới',
       displayText: 'Hạ Long'
+    },
+    { 
+      name: 'Hải Phòng', 
+      code: '31', 
+      image: HaiPhongImg,
+      type: 'province',
+      description: 'Thành phố cảng sôi động',
+      displayText: 'Hải Phòng'
     }
   ], []);
 

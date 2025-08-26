@@ -181,9 +181,9 @@ def main(province=None):
         print(f"File created: {output_filename}")
         
         # 6. Upsert dữ liệu vào mongodb
-        # from database.upsert_room_review import main as upsert_reviews
-        # upsert_reviews(output_filename)
-        # print("\n=== COMPLETED UPSERT REVIEWS ===")
+        from database.upsert_room_review import main as upsert_reviews
+        upsert_reviews(output_filename)
+        print("\n=== COMPLETED UPSERT REVIEWS ===")
         
     except Exception as e:
         print(f"[ERROR] Error occurred during processing: {e}")
