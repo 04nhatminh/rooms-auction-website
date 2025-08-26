@@ -90,7 +90,7 @@ const AdminDashboard = () => {
       'completed': '#059669',
       'cancelled': '#ef4444',
       'expired': '#9ca3af',
-      'active': '#3b82f6',
+      'active': '#3bf679ff',
       'ended': '#6b7280'
     };
     return colors[status] || '#9ca3af';
@@ -106,7 +106,7 @@ const AdminDashboard = () => {
             <h1 className={styles.bannerTitle}>Chào mừng đến với</h1>
             <h1 className={styles.bannerTitle}>Dashboard Quản trị</h1>
             <p className={styles.bannerSubtitle}>
-              Quản lý và theo dõi hoạt động của hệ thống đấu giá phòng
+              Quản lý và theo dõi hoạt động của hệ thống đấu giá phòng Bidstay
             </p>
             <button className={styles.scrollButton} onClick={scrollToStats}>
               Xem thống kê

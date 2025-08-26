@@ -186,7 +186,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    background: #278C9F;
     border-radius: 12px;
     color: white;
     flex-shrink: 0;
@@ -194,7 +194,7 @@
 
 .statInfo h3 {
     font-family: Montserrat;
-    font-size: 1.875rem;
+    font-size: 1.5rem;
     font-weight: 700;
     color: #1e293b;
     margin: 0 0 4px 0;
@@ -250,7 +250,7 @@
 }
 
 .periodBtn.active {
-    background: #3b82f6;
+    background: #278C9F;
     color: white;
 }
 

@@ -2,18 +2,15 @@ const API_BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
 // Helper function để gọi API với authentication
 const apiCall = async (url, options = {}) => {
-    const token = localStorage.getItem('token');
-    
-    const config = {
+    const fetchOptions = {
+        method: 'GET',
+        credentials: 'include',
         headers: {
-            'Content-Type': 'application/json',
-            ...(token && { 'Authorization': `Bearer ${token}` }),
-            ...options.headers,
+            'Content-Type': 'application/json'
         },
-        ...options,
     };
 
-    const response = await fetch(`${API_BASE_URL}${url}`, config);
+    const response = await fetch(`${API_BASE_URL}${url}`, fetchOptions);
     
     if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -26,22 +23,22 @@ const apiCall = async (url, options = {}) => {
 export const statisticsApi = {
     // Lấy thống kê tổng quan dashboard
     getDashboardStats: async () => {
-        return apiCall('/api/admin/dashboard/stats');
+        return apiCall('/admin/dashboard/stats');
     },
 
     // Lấy thống kê doanh thu theo thời gian
     getRevenueStats: async (period = 'month', year = new Date().getFullYear()) => {
-        return apiCall(`/api/admin/dashboard/revenue?period=${period}&year=${year}`);
+        return apiCall(`/admin/dashboard/revenue?period=${period}&year=${year}`);
     },
 
     // Lấy thống kê khách hàng
     getCustomerStats: async () => {
-        return apiCall('/api/admin/dashboard/customers');
+        return apiCall('/admin/dashboard/customers');
     },
 
     // Lấy thống kê sản phẩm
     getProductStats: async () => {
-        return apiCall('/api/admin/dashboard/products');
+        return apiCall('/admin/dashboard/products');
     },
 
     // Lấy tất cả thống kê cùng lúc
