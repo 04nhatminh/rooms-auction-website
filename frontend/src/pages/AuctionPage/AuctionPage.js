@@ -230,14 +230,14 @@ const AuctionPage = () => {
                                     status={auctionDetailsState?.status}
                                     onChangeDates={(ci, co) => { setUserCheckin(ci); setUserCheckout(co); }}
                                     // Truyền thêm thông tin cần thiết cho submit bid
-                                    oonSubmit={async (amount, { checkin, checkout }) => {
-                                            try {
-                                                    if (!currentUserId) throw new Error('Bạn cần đăng nhập để đặt giá');
-                                    await auctionApi.bid(auctionUid, {
-                                        userId: currentUserId,
-                                        amount,
-                                        checkin: checkin  || userCheckin,
-                                        checkout: checkout || userCheckout,
+                                    onSubmit={async (amount, { checkin, checkout }) => {
+                                        try {
+                                                if (!currentUserId) throw new Error('Bạn cần đăng nhập để đặt giá');
+                                        await auctionApi.bid(auctionUid, {
+                                            userId: currentUserId,
+                                            amount,
+                                            checkin: checkin  || userCheckin,
+                                            checkout: checkout || userCheckout,
                                     });
                                     // Sau khi bid thành công, refresh dữ liệu
                                     const refreshed = await auctionApi.getByUid(auctionUid);

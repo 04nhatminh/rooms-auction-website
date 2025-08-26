@@ -36,7 +36,7 @@ const BiddingForm = ({
 
   const handleBidSubmit = async (e) => {
       e?.preventDefault?.();
-      const amount = Number(String(bidValue).replace(/\D/g, ''));
+      const amount = Number(String(bidValue).replace(/[^0-9.]/g, ''));
       const min = numPrice + numInc;
       if (!Number.isFinite(amount) || amount <= 0) {
           alert('Vui lòng nhập số hợp lệ.');
