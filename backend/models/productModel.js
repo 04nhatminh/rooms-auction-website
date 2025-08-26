@@ -130,7 +130,6 @@ class ProductModel {
     }
 
     static async getProductImages(productID) {
-
         // Step 2: Fetch matching document from MongoDB
         const collection = this.mongoDb.collection('images');
         const matchingDoc = await collection.findOne({ ProductID: productID });
@@ -148,8 +147,25 @@ class ProductModel {
 
     }
 
-    static async getProductPolicies(productID) {
+    static async getRoomTourImages(productID) {
+        // Step 2: Fetch matching document from MongoDB
+        const collection = this.mongoDb.collection('room_tour_images');
+        const matchingDoc = await collection.findOne({ ProductID: productID });
 
+        if (!matchingDoc) {
+            return { success: false, message: 'No room tour images found in MongoDB' };
+        }
+
+        // Step 3: Return the MongoDB document
+
+        console.log(`Found room tour images in MongoDB for ExternalID ${productID}`);
+        console.log(`Room Tour Images: ${matchingDoc.RoomTourItems}`);
+
+        return matchingDoc.RoomTourItems || []; // Trả về mảng hình ảnh, nếu không có thì trả về mảng rỗng
+
+    }
+
+    static async getProductPolicies(productID) {
         // Step 2: Fetch matching document from MongoDB
         const collection = this.mongoDb.collection('policies');
         const matchingDoc = await collection.findOne({ ProductID: productID });

@@ -10,11 +10,12 @@ router.get('/top-rated/province', ProductController.getTopRatedProductsByProvinc
 router.get('/top-rated/district', ProductController.getTopRatedProductsByDistrict);
 
 // Admin routes - Cần authentication
+router.get('/admin/get/:id', verifyToken, ProductController.getAllInfoByUID);
 router.get('/admin/list', verifyToken, ProductController.getAllProductsForAdmin);
 router.get('/admin/search', verifyToken, ProductController.searchProductsByUID);
-router.post('/admin/add-product', verifyToken, ProductController.addProduct);
-router.put('/admin/:id', verifyToken, ProductController.updateProduct);
-router.delete('/admin/:id', verifyToken, ProductController.deleteProduct);
+router.post('/admin/add', verifyToken, ProductController.addProduct);
+router.put('/admin/update/:id', verifyToken, ProductController.updateProduct);
+router.delete('/admin/delete/:id', verifyToken, ProductController.deleteProduct);
 
 // GET /api/room/properties/types - Lấy danh sách property types
 router.get('/properties/types', ProductController.getAllPropertyTypes);

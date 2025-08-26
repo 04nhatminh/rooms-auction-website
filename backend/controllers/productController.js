@@ -370,6 +370,95 @@ class ProductController {
             res.status(500).json({ success: false, message: 'Lỗi server', error: error.message });
         }
     }
+
+    // Lấy thông tin chi tiết 1 sản phẩm
+    static async getAllInfoByUID(req, res) {
+        const productUID = req.params.id;
+
+        try {
+            // Fetch all in parallel
+            const productDetails = await ProductModel.getProductDetails(productUID);
+            
+            if (!productDetails) {
+                return res.status(404).json({
+                    success: false,
+                    message: `No product found with UID ${productUID}`
+                });
+            }
+            
+            const productID = productDetails.ProductID;
+            
+            // Remove ProductID, ExternalID, Source, CreatedAt, LastSyncedAt, from details before sending response
+            const { ProductID: _, ExternalID: __, Source: ___, CreatedAt: ____, LastSyncedAt: _____, 
+                ...detailsWithoutProductID } = productDetails;
+
+            const [
+                productProvinceName,
+                productDistrictName,
+                productPropertyName,
+                productAmenitiesRaw,
+                productDescription,
+                productReviewsRaw,
+                productImages,
+                productRoomTourImages,
+                productPolicies
+            ] = await Promise.all([
+                
+                ProductModel.getProductProvinceName(productID),
+                ProductModel.getProductDistrictName(productID),
+                ProductModel.getProductPropertyTypeName(productID),
+                ProductModel.getProductAmenities(productID),
+                ProductModel.getProductDescription(productID),
+                ProductModel.getProductReviews(productID),
+                ProductModel.getProductImages(productID),
+                ProductModel.getRoomTourImages(productID),
+                ProductModel.getProductPolicies(productID)
+            ]);
+
+            // Remove AmenityID from amenities
+            const productAmenities = productAmenitiesRaw.map(({ AmenityID, ...amenity }) => amenity);
+
+            // Remove unwanted fields from reviews
+            let productReviews = productReviewsRaw;
+            if (productReviewsRaw && typeof productReviewsRaw === 'object') {
+                const { _id, ProductID: reviewProductID, Source, ...reviewsWithoutUnwantedFields } = productReviewsRaw;
+                
+                // Remove externalId from each review in the reviews array
+                if (reviewsWithoutUnwantedFields.reviews && Array.isArray(reviewsWithoutUnwantedFields.reviews)) {
+                    reviewsWithoutUnwantedFields.reviews = reviewsWithoutUnwantedFields.reviews.map(({ externalId, ...review }) => review);
+                }
+                
+                productReviews = reviewsWithoutUnwantedFields;
+            }
+
+            const averageRating = calculateRating(productReviews);
+
+            res.status(200).json({
+                success: true,
+                data: {
+                    details: detailsWithoutProductID,
+                    provinceName: productProvinceName,
+                    districtName: productDistrictName,
+                    propertyName: productPropertyName,
+                    amenities: productAmenities,
+                    description: productDescription,
+                    reviews: productReviews,
+                    images: productImages,
+                    roomTourImages: productRoomTourImages,
+                    policies: productPolicies,
+                    averageRating: averageRating
+                }
+            });
+
+        } catch (error) {
+            console.error('Error fetching full product data:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Server error',
+                error: error.message
+            });
+        }
+    }
 }
 
 function calculateRating(productReviews) {

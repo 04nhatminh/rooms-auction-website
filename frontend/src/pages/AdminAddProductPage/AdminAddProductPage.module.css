@@ -12,7 +12,8 @@
 }
 
 .main {
-  padding: 0;
+  padding: 0 0 1.5rem 0;
+
 }
 
 /* --- Form Container --- */
@@ -37,8 +38,9 @@
   border-bottom: 1px solid #e5e7eb;
 }
 
-.section:last-child {
+.section:has(+ .actionButtons) {
   border-bottom: none;
+  padding-bottom: 0;
   margin-bottom: 0;
 }
 
@@ -266,8 +268,9 @@
 
 /* --- File Input --- */
 .fileInput {
+  margin-top: 4px;
   padding: 0.75rem;
-  border: 2px dashed #d1d5db;
+  border: 1px dashed #d1d5db;
   border-radius: 6px;
   background-color: #f9fafb;
   cursor: pointer;
@@ -342,7 +345,7 @@
 
 .addGroupBtn {
   background: none;
-  border: 2px dashed #278C9F;
+  border: 1px dashed #278C9F;
   color: #278C9F;
   padding: 0.75rem 1.5rem;
   border-radius: 6px;

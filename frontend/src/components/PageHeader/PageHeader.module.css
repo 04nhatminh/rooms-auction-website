@@ -66,6 +66,12 @@
   color: black;
 }
 
+@media screen and (max-width: 960px) {
+  .title {
+    display: none;
+  }
+}
+
 .actions{ 
   display: flex; 
   gap: 8px; 

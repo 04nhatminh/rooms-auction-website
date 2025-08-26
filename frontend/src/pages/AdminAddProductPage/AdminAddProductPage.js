@@ -96,82 +96,119 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
 
   // Function to load product data into form
   const loadProductData = (productData) => {
-    
-    // Handle case where productData might be the full API response with success/data structure
+    // 1) Chuẩn hoá dữ liệu đầu vào (trường hợp response là {success, data})
     let actualData = productData;
     if (productData && productData.success && productData.data) {
       actualData = productData.data;
     }
-    
-    // Extract data from the response structure
-    const details = actualData.details || actualData;
-    const amenitiesData = actualData.amenities || [];
-    const descriptionsData = actualData.description || [];
-    const imagesData = actualData.images || [];
-    const policiesData = actualData.policies || {};
-    
-    // Map amenities from response (extract AmenityID if it exists, otherwise use the amenity object)
-    const amenityIds = amenitiesData.map(amenity => 
+
+    // 2) Tách các phần dữ liệu
+    const details         = actualData.details || actualData;
+    const amenitiesData   = actualData.amenities || [];
+    const descriptionsRes = actualData.description || [];
+    const imagesData      = actualData.images || [];
+    const roomTourImages  = actualData.roomTourImages || [];
+    const policiesData    = actualData.policies || {};
+
+    // 3) Map amenity ids
+    const amenityIds = amenitiesData.map(amenity =>
       amenity.AmenityID || amenity.amenityId || amenity.id || amenity
     );
-    
-    // Map descriptions from response
-    const descriptions = descriptionsData.length > 0 
-      ? descriptionsData.map(desc => ({
+
+    // 4) Map descriptions
+    const descriptions = descriptionsRes.length > 0
+      ? descriptionsRes.map(desc => ({
           title: desc.title || null,
           htmlText: desc.htmlText || desc.content || desc.text || ''
         }))
       : [{ title: null, htmlText: '' }];
-    
-    // Map house rules and safety properties
-    const houseRules = policiesData.house_rules && policiesData.house_rules.length > 0 
-      ? policiesData.house_rules 
+
+    // 5) Map policies
+    const houseRules = Array.isArray(policiesData.house_rules) && policiesData.house_rules.length > 0
+      ? policiesData.house_rules
       : [''];
-      
-    const safetyProperties = policiesData.safety_properties && policiesData.safety_properties.length > 0 
-      ? policiesData.safety_properties 
+
+    const safetyProperties = Array.isArray(policiesData.safety_properties) && policiesData.safety_properties.length > 0
+      ? policiesData.safety_properties
       : [''];
-    
-    // Create image groups from images (group by category or create one group)
+
+    // 6) Chuẩn hoá ảnh: tạo map { id -> baseUrl } để tra nhanh
+    //    Đồng thời hỗ trợ trường hợp image có field khác (url/src) hoặc đã là string URL.
+    const imageMap = {};
+    imagesData.forEach(img => {
+      if (!img) return;
+      const id = img.id || img.imageId || img.ImageID;
+      const url = img.baseUrl || img.url || img.src || (typeof img === 'string' ? img : '');
+      if (id && url) imageMap[id] = url;
+    });
+
+    // 7) Tạo imageGroups theo roomTourImages (title + imageIds). Nếu không có thì fallback gom tất cả ảnh vào 1 group.
     let imageGroups = [{ title: '', images: [], files: [] }];
-    if (imagesData.length > 0) {
-      // For now, put all images in one group called "Hình ảnh sản phẩm"
-      // You can enhance this later to group by accessibility label or other criteria
+
+    if (Array.isArray(roomTourImages) && roomTourImages.length > 0) {
+      imageGroups = roomTourImages.map(rt => {
+        const urls = Array.isArray(rt.imageIds)
+          ? rt.imageIds
+              .map(id => imageMap[id])
+              .filter(Boolean)
+          : [];
+
+        return {
+          title: rt.title || '',
+          images: urls,   // chứa URL ảnh để hiển thị trực tiếp
+          files: []       // rỗng vì ảnh này là ảnh đã có sẵn trên server (không phải file upload mới)
+        };
+      });
+
+      // Trong trường hợp có imageIds không khớp id nào: vẫn giữ group nhưng có thể rỗng
+      // Nếu tất cả group đều rỗng (thi thoảng dữ liệu thiếu), fallback gom tất cả ảnh
+      const anyHasImage = imageGroups.some(g => g.images.length > 0);
+      if (!anyHasImage && imagesData.length > 0) {
+        imageGroups = [{
+          title: 'Hình ảnh sản phẩm',
+          images: imagesData.map(img => img.baseUrl || img.url || img.src).filter(Boolean),
+          files: []
+        }];
+      }
+    } else if (imagesData.length > 0) {
+      // Fallback: không có roomTourImages
       imageGroups = [{
         title: 'Hình ảnh sản phẩm',
-        images: imagesData.map(img => img.baseUrl || img.url || img.src || img),
+        images: imagesData.map(img => img.baseUrl || img.url || img.src || (typeof img === 'string' ? img : '')).filter(Boolean),
         files: []
       }];
     }
-    
+
+    // 8) Gán vào formData
     const loadedFormData = {
-      name: details.Name || details.name || '',
-      roomType: details.RoomType || details.roomType || '',
-      propertyType: details.PropertyType || details.propertyType || '',
-      bedrooms: details.NumBedrooms || details.bedrooms || '',
-      beds: details.NumBeds || details.beds || '',
-      bathrooms: details.NumBathrooms || details.bathrooms || '',
-      maxGuests: details.MaxGuests || details.maxGuests || '',
-      price: details.Price || details.price || '',
-      descriptions: descriptions,
+      name:        details.Name        || details.name        || '',
+      roomType:    details.RoomType    || details.roomType    || '',
+      propertyType:details.PropertyType|| details.propertyType|| '',
+      bedrooms:    details.NumBedrooms || details.bedrooms    || '',
+      beds:        details.NumBeds     || details.beds        || '',
+      bathrooms:   details.NumBathrooms|| details.bathrooms   || '',
+      maxGuests:   details.MaxGuests   || details.maxGuests   || '',
+      price:       details.Price       || details.price       || '',
+      descriptions,
       provinceCode: details.ProvinceCode || details.provinceCode || '',
       districtCode: details.DistrictCode || details.districtCode || '',
-      address: details.Address || details.address || '',
-      latitude: details.Latitude || details.latitude || '',
-      longitude: details.Longitude || details.longitude || '',
+      address:      details.Address      || details.address      || '',
+      latitude:     details.Latitude     || details.latitude     || '',
+      longitude:    details.Longitude    || details.longitude    || '',
       amenities: amenityIds,
-      houseRules: houseRules,
-      safetyProperties: safetyProperties,
-      imageGroups: imageGroups
+      houseRules,
+      safetyProperties,
+      imageGroups
     };
-    
+
     setFormData(loadedFormData);
-    
-    // Save original data for comparison in edit mode
+
+    // 9) Lưu lại bản gốc để so sánh trong chế độ edit
     if (type === 'edit') {
       setOriginalFormData(JSON.parse(JSON.stringify(loadedFormData)));
     }
   };
+
 
   // Check for changes in edit mode
   useEffect(() => {
@@ -1266,13 +1303,42 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
                       </div>
                     )}
 
-                    {group.images.length > 0 && (
+                    {/* {group.images.length > 0 && (
                       <div className={styles.imagePreview}>
                         <h4>Hình ảnh đã chọn:</h4>
                         <div className={styles.imageList}>
                           {group.images.map((image, imageIndex) => (
                             <div key={imageIndex} className={styles.imageItem}>
                               <span className={styles.imageName}>{image}</span>
+                              {!isDisabled && (
+                                <button
+                                  type="button"
+                                  onClick={() => removeImage(groupIndex, imageIndex)}
+                                  className={styles.removeImageBtn}
+                                >
+                                  ×
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )} */}
+                    {group.images.length > 0 && (
+                      <div className={styles.imagePreview}>
+                        <h4>Hình ảnh đã chọn:</h4>
+                        <div className={styles.imageList}>
+                          {group.images.map((image, imageIndex) => (
+                            <div key={imageIndex} className={styles.imageItem}>
+                              {(type === 'view' || type === 'edit') ? (
+                                <img
+                                  src={image}
+                                  alt={`Image ${imageIndex}`}
+                                  className={styles.previewImg}
+                                />
+                              ) : (
+                                <span className={styles.imageName}>{image}</span>
+                              )}
                               {!isDisabled && (
                                 <button
                                   type="button"

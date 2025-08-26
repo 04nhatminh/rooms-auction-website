@@ -223,7 +223,7 @@ export const productApi = {
     // addProduct: async (productData, token) => {
     addProduct: async (productData) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/room/admin/add-product`, {
+            const response = await fetch(`${API_BASE_URL}/api/room/admin/add`, {
                 method: 'POST',
                 credentials: 'include',
                 headers: {
@@ -250,7 +250,7 @@ export const productApi = {
     // Cập nhật sản phẩm (Admin)
     updateProduct: async (productId, productData) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/room/admin/${productId}`, {
+            const response = await fetch(`${API_BASE_URL}/api/room/admin/update/${productId}`, {
                 method: 'PUT',
                 credentials: 'include',
                 headers: {
@@ -274,7 +274,7 @@ export const productApi = {
     // Xóa sản phẩm (Admin)
     deleteProduct: async (productId) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/room/admin/${productId}`, {
+            const response = await fetch(`${API_BASE_URL}/api/room/admin/delete/${productId}`, {
                 method: 'DELETE',
                 credentials: 'include', // gửi cookie xác thực
                 headers: {
@@ -297,8 +297,9 @@ export const productApi = {
     // Lấy full dữ liệu room
     getFullProductDataByProductId: async (productId) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/room/${productId}`, {
+            const response = await fetch(`${API_BASE_URL}/api/room/admin/get/${productId}`, {
                 method: 'GET',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json'
                 }
