@@ -47,13 +47,13 @@ class CheckoutController {
           return res.status(400).json({ error: 'Invalid booking status' });
         }
 
-        if (booking.BookingStatus === 'confirmed') {
+        if (booking.BookingStatus === 'completed') {
           return res.json({ ok: true, status: 'ALREADY_CONFIRMED' });
         }
 
         const amount = (req.body?.amount != null)     
         ? Number(req.body.amount)                      // USD từ FE (đã convert)
-        : Number(booking.WinningPrice || 0);  
+        : Number(booking.Amount || 0);  
         if (amount <= 0) return res.status(400).json({ error: 'Invalid amount' });
 
         // === Nhánh 1: Có methodId -> charge bằng vault (server-to-server) ===
@@ -217,7 +217,7 @@ class CheckoutController {
 
         const amount = (req.body?.amount != null)     
         ? Number(req.body.amount)                      // USD từ FE (đã convert)
-        : Number(booking.WinningPrice + booking.ServiceFee || 0);  
+        : Number(booking.Amount + booking.ServiceFee || 0);  
         if (amount <= 0) return res.status(400).json({ error: 'Invalid amount' });
 
         // 1) Tạo/đọc sẵn method ZaloPay cho user này (idempotent)

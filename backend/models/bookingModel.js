@@ -85,7 +85,7 @@ class BookingModel {
             console.log(`Updating booking paid status for ${bookingID} with methodID ${methodID}`);
 
             const query =   `UPDATE Booking
-                        SET PaymentMethodID = ?, PaidAt = NOW(), BookingStatus = 'confirmed', UpdatedAt = NOW()
+                        SET PaymentMethodID = ?, PaidAt = NOW(), BookingStatus = 'completed', UpdatedAt = NOW()
                         WHERE BookingID = ?`;
            
             await db.query(query, [methodID, bookingID]);

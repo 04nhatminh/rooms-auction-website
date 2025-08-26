@@ -132,7 +132,7 @@ const CheckoutPage = () => {
     if (!booking) return;
     setPaying(true);
     try {
-      const amountVND = Number(grandTotal || booking.WinningPrice || 0);
+      const amountVND = Number(grandTotal || booking.Amount || 0);
 
       if (method === 'ZALOPAY') {
         // ZaloPay expects VND (dùng helper từ checkoutApi)
@@ -198,7 +198,7 @@ const CheckoutPage = () => {
           <section className="checkout-left">
             <h2 style={{ marginTop: 16 }}>Đặt phòng</h2>
             <BookingSummary
-              unitPrice={Number(booking?.WinningPrice || 0)}
+              unitPrice={Number(booking?.Amount || 0)}
               nights={nights}
               currency="VND"
               checkin={booking?.StartDate}
