@@ -41,6 +41,16 @@ export const statisticsApi = {
         return apiCall('/admin/dashboard/products');
     },
 
+    // Lấy thống kê booking theo thời gian
+    getBookingStats: async (period = 'month', year = new Date().getFullYear()) => {
+        return apiCall(`/admin/dashboard/bookings?period=${period}&year=${year}`);
+    },
+
+    // Lấy thống kê bids theo thời gian
+    getBidsStats: async (period = 'month', year = new Date().getFullYear()) => {
+        return apiCall(`/admin/dashboard/bids?period=${period}&year=${year}`);
+    },
+
     // Lấy tất cả thống kê cùng lúc
     getAllStats: async () => {
         try {

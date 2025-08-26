@@ -38,6 +38,10 @@ router.get('/dashboard/revenue', verifyToken, isAdmin, statisticsController.getR
 router.get('/dashboard/customers', verifyToken, isAdmin, statisticsController.getCustomerStats);
 // Thống kê sản phẩm
 router.get('/dashboard/products', verifyToken, isAdmin, statisticsController.getProductStats);
+// Thống kê booking theo thời gian
+router.get('/dashboard/bookings', verifyToken, isAdmin, statisticsController.getBookingStats);
+// Thống kê bids theo thời gian
+router.get('/dashboard/bids', verifyToken, isAdmin, statisticsController.getBidsStats);
 
 
 // Data scraping routes

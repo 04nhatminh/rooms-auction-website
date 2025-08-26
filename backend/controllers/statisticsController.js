@@ -110,9 +110,73 @@ const getProductStats = async (req, res) => {
     }
 };
 
+// Thống kê booking theo thời gian
+const getBookingStats = async (req, res) => {
+    try {
+        const { period = 'month', year = new Date().getFullYear() } = req.query;
+
+        let bookingData;
+
+        if (period === 'day') {
+            // Thống kê theo ngày trong tháng hiện tại
+            const currentMonth = new Date().getMonth() + 1;
+            bookingData = await StatisticsModel.getBookingByDay(year, currentMonth);
+        } else if (period === 'month') {
+            // Thống kê theo tháng trong năm
+            bookingData = await StatisticsModel.getBookingByMonth(year);
+        } else if (period === 'year') {
+            // Thống kê theo năm
+            bookingData = await StatisticsModel.getBookingByYear();
+        }
+
+        res.json({ success: true, data: bookingData });
+
+    } catch (error) {
+        console.error('Error getting booking stats:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Lỗi khi lấy thống kê booking',
+            error: error.message
+        });
+    }
+};
+
+// Thống kê bids theo thời gian
+const getBidsStats = async (req, res) => {
+    try {
+        const { period = 'month', year = new Date().getFullYear() } = req.query;
+
+        let bidsData;
+
+        if (period === 'day') {
+            // Thống kê theo ngày trong tháng hiện tại
+            const currentMonth = new Date().getMonth() + 1;
+            bidsData = await StatisticsModel.getBidsByDay(year, currentMonth);
+        } else if (period === 'month') {
+            // Thống kê theo tháng trong năm
+            bidsData = await StatisticsModel.getBidsByMonth(year);
+        } else if (period === 'year') {
+            // Thống kê theo năm
+            bidsData = await StatisticsModel.getBidsByYear();
+        }
+
+        res.json({ success: true, data: bidsData });
+
+    } catch (error) {
+        console.error('Error getting bids stats:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Lỗi khi lấy thống kê bids',
+            error: error.message
+        });
+    }
+};
+
 module.exports = {
     getDashboardStats,
     getRevenueStats,
     getCustomerStats,
-    getProductStats
+    getProductStats,
+    getBookingStats,
+    getBidsStats
 };

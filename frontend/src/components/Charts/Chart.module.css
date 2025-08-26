@@ -1,0 +1,65 @@
+.chartContainer {
+    width: 100%;
+    height: 350px;
+    padding: 20px;
+    background: #fff;
+    color: #000 !important;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.chartWrapper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.chartTitle {
+    font-family: Montserrat;
+    font-size: 18px;
+    font-weight: 600;
+    color: #000;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.chartSubtitle {
+    font-family: Montserrat;
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.noDataMessage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    color: #a0aec0;
+    font-family: Montserrat;
+    font-size: 16px;
+    text-align: center;
+}
+
+.loadingSpinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e2e8f0;
+    border-top: 4px solid #3182ce;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

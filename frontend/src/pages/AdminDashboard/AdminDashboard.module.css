@@ -131,7 +131,7 @@
 
 /* Stats Section */
 .statsSection {
-    padding: 40px 0;
+    padding: 40px 0px 20px 0px;
     background: #f8fafc;
 }
 
@@ -296,6 +296,25 @@
     margin-bottom: 40px;
 }
 
+.bookingSection {
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 40px;
+    border: 1px solid #e2e8f0;
+}
+
+.bidsSection {
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 40px;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 40px;
+}
+
 .statusGrid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -354,9 +373,11 @@
 
 .statusCount {
     font-family: Montserrat;
+    font-size: 0.875rem;
     font-weight: 600;
     color: #1e293b;
 }
+
 
 /* Product Section */
 .productSection {

@@ -209,6 +209,92 @@ class StatisticsModel {
         `);
         return result;
     }
+
+    // Thống kê booking theo ngày
+    static async getBookingByDay(year, month) {
+        const [result] = await pool.execute(`
+            SELECT 
+                DAY(CreatedAt) as period,
+                COUNT(*) as bookings
+            FROM Booking 
+            WHERE YEAR(CreatedAt) = ? 
+                AND MONTH(CreatedAt) = ?
+            GROUP BY DAY(CreatedAt)
+            ORDER BY period
+        `, [year, month]);
+        return result;
+    }
+
+    // Thống kê booking theo tháng
+    static async getBookingByMonth(year) {
+        const [result] = await pool.execute(`
+            SELECT 
+                MONTH(CreatedAt) as period,
+                COUNT(*) as bookings
+            FROM Booking 
+            WHERE YEAR(CreatedAt) = ?
+            GROUP BY MONTH(CreatedAt)
+            ORDER BY period
+        `, [year]);
+        return result;
+    }
+
+    // Thống kê booking theo năm
+    static async getBookingByYear() {
+        const [result] = await pool.execute(`
+            SELECT 
+                YEAR(CreatedAt) as period,
+                COUNT(*) as bookings
+            FROM Booking 
+            GROUP BY YEAR(CreatedAt)
+            ORDER BY period DESC
+            LIMIT 5
+        `);
+        return result;
+    }
+
+    // Thống kê bids theo ngày
+    static async getBidsByDay(year, month) {
+        const [result] = await pool.execute(`
+            SELECT 
+                DAY(BidTime) as period,
+                COUNT(*) as bids
+            FROM Bids 
+            WHERE YEAR(BidTime) = ? 
+                AND MONTH(BidTime) = ?
+            GROUP BY DAY(BidTime)
+            ORDER BY period
+        `, [year, month]);
+        return result;
+    }
+
+    // Thống kê bids theo tháng
+    static async getBidsByMonth(year) {
+        const [result] = await pool.execute(`
+            SELECT 
+                MONTH(BidTime) as period,
+                COUNT(*) as bids
+            FROM Bids 
+            WHERE YEAR(BidTime) = ?
+            GROUP BY MONTH(BidTime)
+            ORDER BY period
+        `, [year]);
+        return result;
+    }
+
+    // Thống kê bids theo năm
+    static async getBidsByYear() {
+        const [result] = await pool.execute(`
+            SELECT 
+                YEAR(BidTime) as period,
+                COUNT(*) as bids
+            FROM Bids 
+            GROUP BY YEAR(BidTime)
+            ORDER BY period DESC
+            LIMIT 5
+        `);
+        return result;
+    }
 }
 
 module.exports = StatisticsModel;
