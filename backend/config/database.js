@@ -159,8 +159,6 @@ async function createUsersTable() {
             IsVerified TINYINT(1) DEFAULT FALSE,
             VerificationToken VARCHAR(255),
             VerificationTokenExpires DATETIME,
-            ResetToken VARCHAR(255),
-            ResetTokenExpires DATETIME,
             Status ENUM('active','disabled','suspended','deleted') DEFAULT 'active',
             SuspendedUntil DATETIME NULL,
             UnpaidStrikeCount INT NOT NULL DEFAULT 0,
@@ -1910,7 +1908,7 @@ async function createSpPlaceBookingDraft() {
     await pool.query(`
         CREATE PROCEDURE sp_place_booking_draft (
             IN  p_UserID INT, IN  p_ProductID INT,
-            IN  p_Start DATE, IN  p_End DATE,          -- [start, end)
+            IN  p_Start DATE, IN  p_End DATE,         
             IN  p_Nights INT, IN  p_UnitPrice DECIMAL(10,2),
             IN  p_Currency VARCHAR(10), IN  p_Provider VARCHAR(50),
             IN  p_HoldMinutes INT,
@@ -1951,29 +1949,29 @@ async function createSpPlaceBookingDraft() {
                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Date range not available';
             END IF;
 
-            -- 3a) Bơm dòng thiếu (CTE đứng trước INSERT)
-            INSERT IGNORE INTO Calendar(ProductID, Day, Status)
-            WITH RECURSIVE d AS (
-                SELECT p_Start AS Day
-                UNION ALL
-                SELECT Day + INTERVAL 1 DAY FROM d WHERE Day + INTERVAL 1 DAY < p_End
-            )
-            SELECT p_ProductID, Day, 'available' FROM d;
+            CREATE TEMPORARY TABLE tmp_days (Day DATE PRIMARY KEY);
 
-            -- 3b) Reserve dải ngày (CTE đứng trước UPDATE, rồi JOIN trực tiếp d2)
-            WITH RECURSIVE d2 AS (
-                SELECT p_Start AS Day
-                UNION ALL
-                SELECT Day + INTERVAL 1 DAY FROM d2 WHERE Day + INTERVAL 1 DAY < p_End
-            )
+            SET @d = p_Start;
+            WHILE @d < p_End DO
+            INSERT IGNORE INTO tmp_days(Day) VALUES (@d);
+            SET @d = DATE_ADD(@d, INTERVAL 1 DAY);
+            END WHILE;
+
+            -- 3a) Backfill missing calendar rows
+            INSERT IGNORE INTO Calendar(ProductID, Day, Status)
+            SELECT p_ProductID, Day, 'available' FROM tmp_days;
+
+            -- 3b) Reserve range
             UPDATE Calendar c
-            JOIN d2 x ON x.Day = c.Day
+            JOIN tmp_days x ON x.Day = c.Day
             SET c.Status='reserved',
                 c.LockReason='booking_hold',
                 c.BookingID=p_BookingID,
                 c.AuctionID=NULL,
                 c.HoldExpiresAt=p_HoldExpiresAt
             WHERE c.ProductID=p_ProductID AND c.Day>=p_Start AND c.Day<p_End;
+
+            DROP TEMPORARY TABLE tmp_days;
 
             -- 4) Payment initiated
             /*INSERT INTO Payments(BookingID, UserID, Amount, Currency, Provider, Status, CreatedAt, UpdatedAt)
