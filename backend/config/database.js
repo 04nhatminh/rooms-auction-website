@@ -615,14 +615,14 @@ async function createBookingTable() {
     `);
 
     const dbname = dbConfig.database;
-    const triggerNames = ['trg_Insert_Booking_validate', 'trg_Update_Booking_validate'];
+    const triggerNames = ['trg_Insert_Booking_validate', 'trg_Update_Booking_validate', 'trg_Update_Booking_status_propagate'];
 
     // Kiểm tra tồn tại trong INFORMATION_SCHEMA rồi DROP từng cái
     const [trgRows] = await pool.query(
         `SELECT TRIGGER_NAME 
         FROM INFORMATION_SCHEMA.TRIGGERS 
         WHERE TRIGGER_SCHEMA = ? 
-            AND TRIGGER_NAME IN (?, ?)`,
+            AND TRIGGER_NAME IN (?, ?, ?)`,
         [dbname, ...triggerNames]
     );
 
@@ -711,6 +711,26 @@ async function createBookingTable() {
             SET NEW.ServiceFee = NEW.Amount * sf_factor;
         END
     `;
+
+    // ------ Trigger propagate BookingStatus=completed -> Calendar.status=booked ------
+    await pool.query(`
+        CREATE TRIGGER \`${dbname}\`.\`trg_Update_Booking_status_propagate\`
+        AFTER UPDATE ON \`${dbname}\`.\`Booking\`
+        FOR EACH ROW
+        BEGIN
+        -- Chỉ chạy khi trạng thái đổi sang 'completed'
+        IF NEW.BookingStatus = 'completed' AND OLD.BookingStatus <> 'completed' THEN
+            UPDATE \`${dbname}\`.\`Calendar\`
+            SET 
+            Status = 'booked',
+            LockReason = NULL,
+            HoldExpiresAt = NULL,
+            AuctionID = NULL,
+            UpdatedAt = NOW()
+            WHERE BookingID = NEW.BookingID;
+        END IF;
+        END
+    `);
 
     await pool.query(`
         CREATE TRIGGER \`${dbname}\`.\`trg_Insert_Booking_validate\`
@@ -2455,11 +2475,10 @@ async function createPlaceBidProcedure() {
             START TRANSACTION;
 
             -- 1) Khóa row phiên
-            SELECT a.Status, b.Amount, a.BidIncrement, a.EndTime,
-                a.StayPeriodStart, a.StayPeriodEnd, a.ProductID
+            SELECT a.Status, b.Amount, a.BidIncrement, a.EndTime, a.StayPeriodStart, a.StayPeriodEnd, a.ProductID
             INTO v_status, v_cur, v_inc, v_end, v_sp_start, v_sp_end, v_prod
             FROM Auction a JOIN Bids b ON a.AuctionID=b.AuctionID AND a.MaxBidID=b.BidID
-            WHERE AuctionID=p_AuctionID FOR UPDATE;
+            WHERE a.AuctionID=p_AuctionID FOR UPDATE;
 
             IF v_status <> 'active' OR v_end IS NULL OR v_end <= v_now THEN
                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Auction not active';
@@ -2515,7 +2534,7 @@ async function createPlaceBidProcedure() {
             END IF;
 
             -- 4) Cập nhật min/max phiên nếu thay đổi
-            IF v_sp_start <> StayPeriodStart OR v_sp_end <> StayPeriodEnd THEN
+            IF p_Start <> v_sp_start OR p_End <> v_sp_end THEN
             UPDATE Auction
                 SET StayPeriodStart=v_sp_start, StayPeriodEnd=v_sp_end
             WHERE AuctionID=p_AuctionID;

@@ -173,11 +173,12 @@ class AuctionController {
     }
 
     // POST /api/auction/:auctionUid/bid
-    // Body cần: { userId, amount, checkin, checkout }
+    // Body cần: { auctionUID, userId, amount, checkin, checkout }
     static async bid(req, res) {
         try {
             const { auctionUid } = req.params || {};
             const { userId, amount, checkin, checkout } = req.body || {};
+
             if (!auctionUid || !userId || !amount || !checkin || !checkout)
                 return res.status(400).json({ success:false, message:'Thiếu tham số' });
 

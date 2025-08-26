@@ -308,7 +308,7 @@ class AuctionModel {
             WHERE B.AuctionID = ? 
             ORDER BY B.BidTime DESC`, [a.AuctionID]);
 
-        console.log([fullHistory]);
+        const currentPrice = fullHistory[0].Amount;
 
         return {
             auction: {
@@ -318,7 +318,7 @@ class AuctionModel {
                 startTime: a.StartTime, endTime: a.EndTime,
                 startingPrice: a.StartPrice,
                 bidIncrement: a.BidIncrement,
-                currentPrice: a.CurrentPrice ?? a.StartPrice,
+                currentPrice: currentPrice ?? a.StartPrice,
                 status: a.Status
             },
             room: { name: a.ProductName, basePrice: a.BasePrice, currency: a.Currency },
@@ -345,7 +345,9 @@ class AuctionModel {
             const [[after]] = await conn.query(`
                 SELECT b.Amount, a.MaxBidID
                 FROM Auction a JOIN Bids b ON a.AuctionID = b.AuctionID AND a.MaxBidID = b.BidID
-                WHERE AuctionID=?`, [a.AuctionID]);
+                WHERE a.AuctionID=?`, [a.AuctionID]);
+
+            console.log(after);
 
             return {
                 ok: true,

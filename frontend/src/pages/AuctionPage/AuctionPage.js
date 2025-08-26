@@ -213,7 +213,7 @@ const AuctionPage = () => {
                             checkout={userCheckout}
                             onChangeDates={(ci, co) => { setUserCheckin(ci); setUserCheckout(co); }}
                             // Truyền thêm thông tin cần thiết cho submit bid
-                            oonSubmit={async (amount, { checkin, checkout }) => {
+                            onSubmit={async (amount, { checkin, checkout }) => {
                                 try {
                                     if (!currentUserId) throw new Error('Bạn cần đăng nhập để đặt giá');
                                     await auctionApi.bid(auctionUid, {
