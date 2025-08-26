@@ -94,6 +94,7 @@ const BiddingForm = ({
                 <div className="date-field">
                     <label>Ngày nhận phòng</label>
                     <input
+                        class="bidding-form-date-inputs"
                         type="date"
                         value={ci || ''}
                         min={new Date().toISOString().slice(0,10)}
@@ -109,6 +110,7 @@ const BiddingForm = ({
                 <div className="date-field">
                     <label>Ngày trả phòng</label>
                     <input
+                        class="bidding-form-date-inputs"
                         type="date"
                         value={co || ''}
                         min={ci ? new Date(new Date(ci).getTime()+86400000).toISOString().slice(0,10) : new Date().toISOString().slice(0,10)}

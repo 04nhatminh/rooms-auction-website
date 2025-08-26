@@ -4,7 +4,8 @@ import './AuctionPage.css';
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
 import AuctionTitle from '../../components/AuctionTitle/AuctionTitle';
-import AuctionImageGallery from '../../components/AuctionImageGallery/AuctionImageGallery';
+import ImageGallery from '../../components/ImageGallery/ImageGallery';
+import productApi from '../../api/productApi';
 import CountdownTimer from '../../components/CountdownTimer/CountdownTimer';
 import AuctionInfo from '../../components/AuctionInfo/AuctionInfo';
 import BiddingForm from '../../components/BiddingForm/BiddingForm';
@@ -40,14 +41,11 @@ function mapApiToView(payload, currentUserId) {
     const { auction = {}, room = {}, fullHistory = [] } = payload?.data || {};
 
     // Ảnh
-    const imageList = Array.isArray(room?.Images || room?.images)
-    ? (room.Images || room.images)
-    : (room.ImageUrls || room.imageUrls || []);
-    const images = {
-        main: imageList?.[0] || room?.CoverImage || room?.coverImage || '',
-        thumbnails: imageList?.slice(0, 3) || [],
-        moreCount: Math.max(0, (imageList?.length || 0) - 3),
-    };
+    const imagesArr = Array.isArray(room?.Images ?? room?.images)
+        ? (room.Images ?? room.images)
+        : (room?.ImageUrls ?? room?.imageUrls ?? []);
+ 
+    const productUid = auction.ProductUID || auction.productUid || room.ProductUID || room.productUid || '';
 
     // Chi tiết phiên
     const start = auction.StartTime || auction.startTime || auction.start || auction.start_date || auction.Checkin || auction.checkin;
@@ -104,13 +102,41 @@ function mapApiToView(payload, currentUserId) {
 
     return {
         title: roomInfo.title || 'Phiên đấu giá',
-        images,
+        imagesArr,
+        productUid,
         auctionDetails,
         roomInfo,
         fullHistory: full,
         personalHistory: personal,
         __raw: { auction, room, fullHistory },
     };
+}
+
+function normalizeImages(arr) {
+    const a = Array.isArray(arr) ? arr : [];
+    return a
+        .map(x => {
+        if (typeof x === 'string') return x;
+        return x?.url || x?.Url || x?.imageUrl || x?.ImageUrl || x?.path || '';
+        })
+        .filter(Boolean);
+}
+
+async function loadAuction(auctionUid, currentUserId, signal) {
+    const resp = await auctionApi.getByUid(auctionUid, signal);
+    const mapped = mapApiToView(resp, currentUserId);
+
+    // Fallback ảnh phòng nếu phiên chưa có ảnh
+    if ((!mapped.imagesArr || mapped.imagesArr.length === 0) && mapped.productUid) {
+        try {
+        const roomRes = await productApi.getRoomByUID(mapped.productUid, signal);
+        const more = roomRes?.data?.images ?? roomRes?.data?.Images ?? [];
+        mapped.imagesArr = Array.isArray(more) ? more : [];   // ✅ GIỮ NGUYÊN OBJECT
+        } catch (e) {
+        if (e.name !== 'AbortError') console.warn(e);
+        }
+    }
+    return mapped;
 }
 
 const AuctionPage = () => {
@@ -128,7 +154,7 @@ const AuctionPage = () => {
     const [viewData, setViewData] = useState(null);
     const [userCheckin, setUserCheckin] = useState(qsCheckin);
     const [userCheckout, setUserCheckout] = useState(qsCheckout);
-    const [auctionDetailsState, setAuctionDetails] = useState(null);
+    const [, setAuctionDetails] = useState(null);
 
     const currentUserId = useMemo(() => {
         try {
@@ -140,35 +166,14 @@ const AuctionPage = () => {
     useEffect(() => {
         const aborter = new AbortController();
         let alive = true;
+        setLoading(true); setError('');
 
-        setLoading(true);
-        setError('');
+        loadAuction(auctionUid, currentUserId, aborter.signal)
+            .then(mapped => { if (alive) setViewData(mapped); })
+            .catch(e => { if (alive && e.name !== 'AbortError') setError(e.message || 'Không tải được dữ liệu phiên'); })
+            .finally(() => { if (alive) setLoading(false); });
 
-        auctionApi.getByUid(auctionUid, aborter.signal)
-            .then((resp) => {
-                if (!alive || !resp) return;
-                const mapped = mapApiToView(resp, currentUserId);
-                setViewData(mapped);
-                setAuctionDetails(mapped.auctionDetails); // cập nhật state auctionDetailsState
-                // Nếu chưa có từ query thì fallback từ dữ liệu phiên
-                const raw = resp?.data?.auction || {};
-                const toYMD = (d) => (d ? new Date(d).toISOString().slice(0,10) : '');
-                if (!qsCheckin  && !userCheckin)  setUserCheckin(toYMD(raw.Checkin  || raw.checkin));
-                if (!qsCheckout && !userCheckout) setUserCheckout(toYMD(raw.Checkout || raw.checkout));
-            })
-            .catch((e) => {
-                if (!alive) return;
-                if (e.name === 'AbortError') return;       // <-- bỏ qua abort
-                setError(e.message || 'Không tải được dữ liệu phiên');
-            })
-            .finally(() => {
-                if (alive) setLoading(false);
-            });
-
-        return () => {
-            alive = false;
-            aborter.abort();
-        };
+        return () => { alive = false; aborter.abort(); };
     }, [auctionUid, currentUserId]);
 
 
@@ -192,9 +197,10 @@ const AuctionPage = () => {
         );
     }
 
-    const { images, auctionDetails, roomInfo, fullHistory, personalHistory, title } = viewData;
+    const { imagesArr, auctionDetails, roomInfo, fullHistory, personalHistory, title } = viewData;
+    const images = imagesArr; // alias cho dễ đọc ở dưới
 
-    console.log('images',images);
+    console.log('auctioninfo', auctionDetails);
 
     return (
         <div className="auction-page-container">
@@ -204,44 +210,42 @@ const AuctionPage = () => {
                 <AuctionTitle title={title} />
                 <div className="auction-layout-grid">
                     <div className="left-column">
-                        <AuctionImageGallery images={images} />
+                        <ImageGallery images={images} />
                     </div>
 
                     <div className="right-column auction-info-card">
-                            <CountdownTimer
-                                details={auctionDetailsState}
-                                onEnded={async () => {
-                                    if (auctionDetailsState?.status !== 'ended' && auctionUid) {
-                                        try {
-                                            await auctionApi.endAuction(auctionUid);
-                                            setAuctionDetails(prev => ({ ...prev, status: 'ended' }));
-                                        } catch (e) {
-                                            // Có thể log hoặc báo lỗi nếu cần
-                                        }
+                        <CountdownTimer
+                            details={auctionDetails}
+                            onEnded={async () => {
+                                if (auctionDetails?.status !== 'ended' && auctionUid) {
+                                    try {
+                                        await auctionApi.endAuction(auctionUid);
+                                        setAuctionDetails(prev => ({ ...prev, status: 'ended' }));
+                                    } catch (e) {
+                                        // Có thể log hoặc báo lỗi nếu cần
                                     }
-                                }}
-                            />
-                            <AuctionInfo details={auctionDetailsState} />
-                            <BiddingForm
-                                    currentPrice={auctionDetailsState?.currentPrice}
-                                    bidIncrement={auctionDetailsState?.bidIncrement}
-                                    checkin={userCheckin}
-                                    checkout={userCheckout}
-                                    status={auctionDetailsState?.status}
-                                    onChangeDates={(ci, co) => { setUserCheckin(ci); setUserCheckout(co); }}
-                                    // Truyền thêm thông tin cần thiết cho submit bid
-                                    onSubmit={async (amount, { checkin, checkout }) => {
-                                        try {
-                                                if (!currentUserId) throw new Error('Bạn cần đăng nhập để đặt giá');
-                                        await auctionApi.bid(auctionUid, {
-                                            userId: currentUserId,
-                                            amount,
-                                            checkin: checkin  || userCheckin,
-                                            checkout: checkout || userCheckout,
+                                }
+                            }}
+                        />
+                        <AuctionInfo details={auctionDetails} />
+                        <BiddingForm
+                            currentPrice={auctionDetails?.currentPrice}
+                            bidIncrement={auctionDetails?.bidIncrement}
+                            checkin={userCheckin}
+                            checkout={userCheckout}
+                            status={auctionDetails?.status}
+                            onChangeDates={(ci, co) => { setUserCheckin(ci); setUserCheckout(co); }}
+                            onSubmit={async (amount, { checkin, checkout }) => {
+                                try {
+                                    if (!currentUserId) throw new Error('Bạn cần đăng nhập để đặt giá');
+                                    await auctionApi.bid(auctionUid, {
+                                    userId: currentUserId,
+                                    amount,
+                                    checkin: checkin  || userCheckin,
+                                    checkout: checkout || userCheckout,
                                     });
-                                    // Sau khi bid thành công, refresh dữ liệu
-                                    const refreshed = await auctionApi.getByUid(auctionUid);
-                                    setViewData(mapApiToView(refreshed, currentUserId));
+                                    const mapped = await loadAuction(auctionUid, currentUserId); // ← dùng lại fallback ảnh
+                                    setViewData(mapped);
                                 } catch (e) {
                                     alert(e.message || 'Đặt giá thất bại');
                                 }

@@ -61,23 +61,34 @@ function pickAlt(obj, idx) {
 }
 
 const ImageGallery = ({ images: imagesProp }) => {
-  const { data } = useProduct();
+  // const { data } = useProduct();
+  const ctx = useProduct?.() ?? null;
+  const data = ctx?.data;
+
+  const raw = imagesProp ?? data?.images ?? data?.Images ?? [];
 
   // Support both "images" and "Images"
-  const rawFromCtx = data?.images ?? data?.Images ?? [];
-  const raw = imagesProp ?? rawFromCtx;
+  // const rawFromCtx = data?.images ?? data?.Images ?? [];
+  // const raw = imagesProp ?? rawFromCtx;
 
   const images = useMemo(() => {
-    if (!Array.isArray(raw)) return [];
     return raw
       .map((it, i) => {
-        if (typeof it === 'string') return { src: it, alt: `Ảnh ${i + 1}` };
+        if (typeof it === "string") return { src: it, alt: `Ảnh ${i + 1}` };
         const src = pickUrl(it);
         const alt = pickAlt(it, i);
         return src ? { src, alt } : null;
       })
       .filter(Boolean);
   }, [raw]);
+
+  if (!images.length) {
+    return (
+      <div className="image-gallery empty">
+        <div className="placeholder">Chưa có ảnh</div>
+      </div>
+    );
+  }
 
   const main = images[0];
   const side = images.slice(1, 5);

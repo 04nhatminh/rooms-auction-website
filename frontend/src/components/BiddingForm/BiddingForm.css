@@ -122,3 +122,23 @@
 .submit-bid-button:hover {
     background-color: #c9302c;
 }
+
+.date-field {
+  display: flex;
+  align-items: center;   /* canh giữa theo chiều dọc */
+  width: 50%;           /* cho full width thay vì 51% */
+  margin-bottom: 10px;
+}
+
+.date-field label {
+  width: 50%;          /* cố định độ rộng cho label */
+  margin-right: 10px;    /* khoảng cách giữa label và input */
+}
+
+.bidding-form-date-inputs {
+  flex: 1;
+  border: 1px solid #B0B0B0;
+  border-radius: 8px;
+  font-family: Montserrat;
+  padding: 4px 5px;
+}
