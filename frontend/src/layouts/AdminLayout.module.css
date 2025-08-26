@@ -20,9 +20,3 @@
 .mainExpanded {
   margin-left: 70px;
 }
-
-@media (max-width: 1024px) { 
-  .main { 
-    padding: 20px 20px 20px 20px;
-  } 
-}

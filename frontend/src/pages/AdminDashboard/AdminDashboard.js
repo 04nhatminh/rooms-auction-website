@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { statisticsApi } from '../../api/statisticsApi';
 import styles from './AdminDashboard.module.css';
 import AdminDashboardBg from '../../assets/admin_dashboard_bg.avif';
 
@@ -42,28 +43,14 @@ const AdminDashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const headers = {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      };
-
-      // Fetch tất cả dữ liệu song song
-      const [dashboardRes, customerRes, productRes] = await Promise.all([
-        fetch('/api/admin/dashboard/stats', { headers }),
-        fetch('/api/admin/dashboard/customers', { headers }),
-        fetch('/api/admin/dashboard/products', { headers })
-      ]);
-
-      const [dashboardData, customerData, productData] = await Promise.all([
-        dashboardRes.json(),
-        customerRes.json(),
-        productRes.json()
-      ]);
-
-      if (dashboardData.success) setDashboardData(dashboardData.data);
-      if (customerData.success) setCustomerData(customerData.data);
-      if (productData.success) setProductData(productData.data);
+      // Sử dụng statisticsApi thay vì gọi API trực tiếp
+      const allStats = await statisticsApi.getAllStats();
+      
+      if (allStats.success) {
+        setDashboardData(allStats.data.dashboard);
+        setCustomerData(allStats.data.customers);
+        setProductData(allStats.data.products);
+      }
 
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -74,17 +61,11 @@ const AdminDashboard = () => {
 
   const fetchRevenueData = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const headers = {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      };
-
-      const response = await fetch(`/api/admin/dashboard/revenue?period=${selectedPeriod}`, { headers });
-      const data = await response.json();
-
-      if (data.success) {
-        setRevenueData(data.data);
+      // Sử dụng statisticsApi
+      const revenueStats = await statisticsApi.getRevenueStats(selectedPeriod);
+      
+      if (revenueStats.success) {
+        setRevenueData(revenueStats.data);
       }
     } catch (error) {
       console.error('Error fetching revenue data:', error);
@@ -114,17 +95,6 @@ const AdminDashboard = () => {
     };
     return colors[status] || '#9ca3af';
   };
-
-  if (loading) {
-    return (
-      <div className={styles.dashboardPage}>
-        <div className={styles.loading}>
-          <div className={styles.loadingSpinner}></div>
-          <p>Đang tải dữ liệu...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className={styles.dashboardPage}>
@@ -159,14 +129,6 @@ const AdminDashboard = () => {
                 <div className={styles.statInfo}>
                   <h3>{dashboardData.totalStats.totalUsers || 0}</h3>
                   <p>Tổng khách hàng</p>
-                </div>
-              </div>
-
-              <div className={styles.statCard}>
-                <div className={styles.statIcon}>🏠</div>
-                <div className={styles.statInfo}>
-                  <h3>{dashboardData.totalStats.totalProducts || 0}</h3>
-                  <p>Tổng sản phẩm</p>
                 </div>
               </div>
 

@@ -3,7 +3,7 @@ const router = express.Router();
 const userController = require('../controllers/userController');
 const auctionController = require('../controllers/auctionController');
 const scrapingController = require('../controllers/scrapingController');
-const adminController = require('../controllers/adminController');
+const statisticsController = require('../controllers/statisticsController');
 const { verifyToken, isAdmin } = require('../middleware/authMiddleware');
 
 // User management routes
@@ -31,13 +31,13 @@ router.get('/auctions/search/:uid', verifyToken, isAdmin, auctionController.sear
 
 // Dashboard stats routes
 // Thống kê tổng quan dashboard
-router.get('/dashboard/stats', verifyToken, isAdmin, adminController.getDashboardStats);
+router.get('/dashboard/stats', verifyToken, isAdmin, statisticsController.getDashboardStats);
 // Thống kê doanh thu theo thời gian
-router.get('/dashboard/revenue', verifyToken, isAdmin, adminController.getRevenueStats);
+router.get('/dashboard/revenue', verifyToken, isAdmin, statisticsController.getRevenueStats);
 // Thống kê khách hàng
-router.get('/dashboard/customers', verifyToken, isAdmin, adminController.getCustomerStats);
+router.get('/dashboard/customers', verifyToken, isAdmin, statisticsController.getCustomerStats);
 // Thống kê sản phẩm
-router.get('/dashboard/products', verifyToken, isAdmin, adminController.getProductStats);
+router.get('/dashboard/products', verifyToken, isAdmin, statisticsController.getProductStats);
 
 
 // Data scraping routes
