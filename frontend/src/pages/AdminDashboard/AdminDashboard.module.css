@@ -203,7 +203,9 @@
 .statInfo p {
     color: #64748b;
     margin: 0;
-    font-weight: 500;
+    font-family: Montserrat;
+    font-size: 0.875rem;
+    font-weight: 600;
 }
 
 /* Revenue Section */
@@ -244,6 +246,7 @@
     background: transparent;
     border-radius: 6px;
     cursor: pointer;
+    font-family: Montserrat;
     font-weight: 500;
     color: #64748b;
     transition: all 0.2s ease;
@@ -265,6 +268,7 @@
     grid-template-columns: 1fr 1fr 2fr;
     gap: 16px;
     padding: 16px 24px;
+    font-family: Montserrat;
     background: #e2e8f0;
     font-weight: 600;
     color: #374151;
@@ -341,12 +345,15 @@
 
 .statusName {
     flex: 1;
+    font-family: Montserrat;
+    font-size: 0.875rem;
     font-weight: 500;
     color: #374151;
     text-transform: capitalize;
 }
 
 .statusCount {
+    font-family: Montserrat;
     font-weight: 600;
     color: #1e293b;
 }
@@ -390,6 +397,8 @@
     align-items: center;
     padding: 12px 0;
     border-bottom: 1px solid #f1f5f9;
+    font-family: Montserrat;
+    font-size: 0.875rem;
 }
 
 .productItem:last-child {
@@ -458,6 +467,7 @@
 }
 
 .customerName {
+    font-family: Montserrat;
     font-weight: 600;
     color: #1e293b;
 }
