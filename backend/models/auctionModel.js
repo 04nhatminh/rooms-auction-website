@@ -407,7 +407,7 @@ class AuctionModel {
                 SELECT a.AuctionUID,
                         p.UID as ProductUID,
                         a.StartPrice,
-                        a.CurrentPrice,
+                        b.Amount as CurrentPrice,
                         a.StayPeriodStart,
                         a.StayPeriodEnd,
                         a.StartTime,
@@ -429,6 +429,7 @@ class AuctionModel {
                             COALESCE(p.ConveniencePoint, 0)
                         ) / 6, 2) AS AverageRating
                 FROM Auction a
+                JOIN Bids b ON b.BidID = a.MaxBidID
                 JOIN Products p ON a.ProductID = p.ProductID
                 LEFT JOIN Provinces prov ON p.ProvinceCode = prov.ProvinceCode
                 LEFT JOIN Districts dist ON p.DistrictCode = dist.DistrictCode
@@ -453,7 +454,7 @@ class AuctionModel {
                 SELECT a.AuctionUID,
                         p.UID as ProductUID,
                         a.StartPrice,
-                        a.CurrentPrice,
+                        b.Amount as CurrentPrice,
                         a.StayPeriodStart,
                         a.StayPeriodEnd,
                         a.StartTime,
@@ -476,6 +477,7 @@ class AuctionModel {
                         ) / 6, 2) AS AverageRating,
                         COALESCE(bid_count.BidCount, 0) AS BidCount
                 FROM Auction a
+                JOIN Bids b ON b.BidID = a.MaxBidID
                 JOIN Products p ON a.ProductID = p.ProductID
                 LEFT JOIN Provinces prov ON p.ProvinceCode = prov.ProvinceCode
                 LEFT JOIN Districts dist ON p.DistrictCode = dist.DistrictCode
@@ -505,7 +507,7 @@ class AuctionModel {
                 SELECT a.AuctionUID,
                         p.UID as ProductUID,
                         a.StartPrice,
-                        a.CurrentPrice,
+                        b.Amount as CurrentPrice,
                         a.StayPeriodStart,
                         a.StayPeriodEnd,
                         a.StartTime,
@@ -528,6 +530,7 @@ class AuctionModel {
                         ) / 6, 2) AS AverageRating
                 FROM Auction a
                 JOIN Products p ON a.ProductID = p.ProductID
+                JOIN Bids b ON b.BidID = a.MaxBidID
                 LEFT JOIN Provinces prov ON p.ProvinceCode = prov.ProvinceCode
                 LEFT JOIN Districts dist ON p.DistrictCode = dist.DistrictCode
                 LEFT JOIN RoomTypes rt ON p.RoomType = rt.RoomTypeID
@@ -559,8 +562,9 @@ class AuctionModel {
                     a.StartTime,
                     a.EndTime,
                     a.Status,
-                    a.CurrentPrice
+                    b.Amount as CurrentPrice
                 FROM Auction a
+                JOIN Bids b ON b.BidID = a.MaxBidID
                 ORDER BY 
                     CASE a.Status
                         WHEN 'active'    THEN 1
@@ -592,8 +596,9 @@ class AuctionModel {
                     a.StartTime,
                     a.EndTime,
                     a.Status,
-                    a.CurrentPrice
+                    b.Amount as CurrentPrice
                 FROM Auction a
+                JOIN Bids b ON b.BidID = a.MaxBidID
                 WHERE a.Status = ?
                 ORDER BY 
                     CASE a.Status
@@ -623,8 +628,9 @@ class AuctionModel {
                 a.StartTime,
                 a.EndTime,
                 a.Status,
-                a.CurrentPrice
+                b.Amount as CurrentPrice
             FROM Auction a
+            JOIN Bids b ON b.BidID = a.MaxBidID
             WHERE a.AuctionUID = ?
         `;
         const [auctions] = await pool.execute(query, [uid]);
