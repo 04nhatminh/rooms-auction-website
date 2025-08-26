@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import FavoritesApi from '../../api/favoritesApi';
 import Header from '../../components/Header/Header';
+import { imageApi } from '../../api/imageApi';
 
-const API_BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:3000';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000';
 
 const FavoritePage = () => {
     const [favorites, setFavorites] = useState([]);
@@ -23,24 +24,25 @@ const FavoritePage = () => {
             // Lấy danh sách yêu thích
             const data = await FavoritesApi.getUserFavorites();
             const favorites = data.favorites || [];
-            
-            // Lấy ảnh cho từng sản phẩm
-            const favoritesWithImages = await Promise.all(
-                favorites.map(async (item) => {
-                    try {
-                        const imageResponse = await fetch(`${API_BASE_URL}/api/images/product/${item.ProductID}/main`);
-                        if (imageResponse.ok) {
-                            const imageData = await imageResponse.json();
-                            item.MainImageURL = imageData.url;
-                        }
-                    } catch (error) {
-                        console.error(`Error loading image for product ${item.ProductID}:`, error);
-                        item.MainImageURL = null;
-                    }
-                    return item;
-                })
-            );
-            
+
+            // Lấy danh sách UID
+            const uids = favorites.map(item => item.UID).filter(Boolean);
+
+            // Gọi batch API lấy ảnh
+            let imageMap = {};
+            if (uids.length > 0) {
+                const imageRes = await imageApi.getBatchImages(uids);
+                if (imageRes.success) {
+                    imageMap = imageRes.data.imagesMapByUID || {};
+                }
+            }
+
+            // Gắn ảnh vào từng item
+            const favoritesWithImages = favorites.map(item => ({
+                ...item,
+                MainImageURL: imageMap[item.UID] || null
+            }));
+
             setFavorites(favoritesWithImages);
         } catch (err) {
             setError(err.message);
@@ -53,17 +55,15 @@ const FavoritePage = () => {
         }
     };
 
-    const handleRemoveFavorite = async (productId, productName) => {
+    const handleRemoveFavorite = async (uid, productName) => {
         if (!window.confirm(`Bạn có muốn bỏ yêu thích "${productName}"?`)) {
             return;
         }
 
         try {
-            await FavoritesApi.removeFavorite(productId);
+            await FavoritesApi.removeFavorite(uid);
             // Cập nhật state local
-            setFavorites(prev => prev.filter(item => 
-                (item.ProductID || item.id) !== productId
-            ));
+            setFavorites(prev => prev.filter(item => item.UID !== uid));
             alert('Đã bỏ yêu thích thành công!');
         } catch (err) {
             alert('Lỗi: ' + err.message);

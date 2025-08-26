@@ -21,42 +21,42 @@ const AdminProductsManagementPage = () => {
   const [pagination, setPagination] = useState(null);
 
   const loadProducts = async () => {
-    const token = localStorage.getItem('token');
-    console.log('Loading products with token:', token);
-    if (!token) { alert('Vui lòng đăng nhập lại.'); navigate('/login'); return; }
+    // const token = localStorage.getItem('token');
+    // console.log('Loading products with token:', token);
+    // if (!token) { alert('Vui lòng đăng nhập lại.'); navigate('/login'); return; }
 
     try {
-      setLoading(true);
-      const response = await productApi.getProducts(currentPage, 10, token);
-      
-      // Handle different response formats
-      if (response.success) {
-        setProducts(response.data?.items || response.data || []);
-        setTotalPages(response.data?.totalPages || 1);
-        setPagination({
-          currentPage: response.data?.currentPage || currentPage,
-          totalPages: response.data?.totalPages || 1,
-          totalItems: response.data?.totalItems || 0,
-          itemsPerPage: 10
-        });
-      } else {
-        // Fallback for direct array response
-        const list = Array.isArray(response) ? response : [];
-        setProducts(list);
-        setTotalPages(Math.ceil(list.length / 10));
-        setPagination({
-          currentPage: currentPage,
-          totalPages: Math.ceil(list.length / 10),
-          totalItems: list.length,
-          itemsPerPage: 10
-        });
+        setLoading(true);
+        const response = await productApi.getProducts(currentPage, 10);
+        
+        // Handle different response formats
+        if (response.success) {
+          setProducts(response.data?.items || response.data || []);
+          setTotalPages(response.data?.totalPages || 1);
+          setPagination({
+            currentPage: response.data?.currentPage || currentPage,
+            totalPages: response.data?.totalPages || 1,
+            totalItems: response.data?.totalItems || 0,
+            itemsPerPage: 10
+          });
+        } else {
+          // Fallback for direct array response
+          const list = Array.isArray(response) ? response : [];
+          setProducts(list);
+          setTotalPages(Math.ceil(list.length / 10));
+          setPagination({
+            currentPage: currentPage,
+            totalPages: Math.ceil(list.length / 10),
+            totalItems: list.length,
+            itemsPerPage: 10
+          });
+        }
+      } catch (err) {
+        setError(err.message);
+        console.error('Error loading products:', err);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      setError(err.message);
-      console.error('Error loading products:', err);
-    } finally {
-      setLoading(false);
-    }
   };
 
   useEffect(() => {
@@ -66,12 +66,12 @@ const AdminProductsManagementPage = () => {
   }, [currentPage, isSearching]);
 
   const searchProductsByUID = async (uid, page = 1) => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      alert('Vui lòng đăng nhập lại.');
-      navigate('/login');
-      return;
-    }
+    // const token = localStorage.getItem('token');
+    // if (!token) {
+    //   alert('Vui lòng đăng nhập lại.');
+    //   navigate('/login');
+    //   return;
+    // }
 
     if (!uid || uid.trim() === '') {
       // If UID is empty, return to normal list
@@ -83,7 +83,8 @@ const AdminProductsManagementPage = () => {
 
     try {
       setLoading(true);
-      const response = await productApi.searchProductsByUID(uid, page, 10, token);
+      // const response = await productApi.searchProductsByUID(uid, page, 10, token);
+      const response = await productApi.searchProductsByUID(uid, page, 10);
       
       if (response.success) {
         setSearchResults(response.data?.items || []);
@@ -145,58 +146,57 @@ const AdminProductsManagementPage = () => {
   };
 
   const handleDeleteProduct = async (productId) => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      alert('Vui lòng đăng nhập lại.');
-      navigate('/login');
-      return;
-    }
+    // Bỏ kiểm tra token ở đây
+    // const token = localStorage.getItem('token');
+    // if (!token) {
+    //   alert('Vui lòng đăng nhập lại.');
+    //   navigate('/login');
+    //   return;
+    // }
 
     if (!window.confirm('Bạn có chắc muốn xóa sản phẩm này?')) return;
 
     try {
-      await productApi.deleteProduct(productId, token);
-      
+      await productApi.deleteProduct(productId); // KHÔNG truyền token
       // Reload the appropriate list
       if (isSearching && searchUID.trim() !== '') {
         await searchProductsByUID(searchUID, currentPage);
       } else {
         await loadProducts();
       }
-      
       alert('Xóa sản phẩm thành công!');
     } catch (err) {
-      alert('Có lỗi xảy ra khi xóa sản phẩm: ' + err.message);
+      alert(err.message || 'Xóa sản phẩm thất bại.');
     }
   };
 
   const handleAddProduct = () => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      alert('Vui lòng đăng nhập lại.');
-      navigate('/login');
-      return;
-    }
+    // const token = localStorage.getItem('token');
+    // if (!token) {
+    //   alert('Vui lòng đăng nhập lại.');
+    //   navigate('/login');
+    //   return;
+    // }
     navigate('/admin/products-management/add');
   };
 
   const handleViewProduct = async (productUID) => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      alert('Vui lòng đăng nhập lại.');
-      navigate('/login');
-      return;
-    }
+    // const token = localStorage.getItem('token');
+    // if (!token) {
+    //   alert('Vui lòng đăng nhập lại.');
+    //   navigate('/login');
+    //   return;
+    // }
     navigate(`/admin/products-management/view/${productUID}`);
   };
 
   const handleEditProduct = async (productUID) => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      alert('Vui lòng đăng nhập lại.');
-      navigate('/login');
-      return;
-    }
+    // const token = localStorage.getItem('token');
+    // if (!token) {
+    //   alert('Vui lòng đăng nhập lại.');
+    //   navigate('/login');
+    //   return;
+    // }
     navigate(`/admin/products-management/edit/${productUID}`);
   };
 

@@ -33,6 +33,10 @@ import FavoritePage from './pages/FavoritePage/FavoritePage';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import '@fortawesome/fontawesome-free/css/all.min.css';
+import CheckoutPage from './pages/CheckoutPage/CheckoutPage';
+import CheckoutReturnPage from './pages/CheckoutPage/CheckoutReturnPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage/ResetPasswordPage';
 
 function App() {
   return (
@@ -50,6 +54,8 @@ function App() {
             <Route path="/search" element={<SearchResult />} />
             <Route path="/profile" element={<UserProfilePage />} />
             <Route path="/favorite" element={<FavoritePage />} />
+            <Route path="/checkout/:bookingId" element={<CheckoutPage />} />
+            <Route path="/checkout/paypal/return" element={<CheckoutReturnPage />} />
             <Route path="/auction-history" element={<AuctionHistoryPage />} />
             <Route path="/transaction-history" element={<TransactionHistoryPage />} />
             <Route path="/admin" element={<AdminLayout />}>
@@ -67,6 +73,8 @@ function App() {
               {/* <Route path="bookings-management" element={<BookingsManagementPage />} /> */}
             </Route>
             <Route path="/auction/:UID" element={<AuctionPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
           </Routes>
         </div>
       </Router>

@@ -51,12 +51,12 @@ const AdminAuctionsManagementPage = () => {
   };
 
   const loadAuctions = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) { alert('Vui lòng đăng nhập lại.'); navigate('/login'); return; }
+    // const token = localStorage.getItem('token');
+    // if (!token) { alert('Vui lòng đăng nhập lại.'); navigate('/login'); return; }
 
     try {
       setLoading(true);
-      const response = await auctionApi.getAllAuctionsForAdmin(currentPage, pageSize, token);
+      const response = await auctionApi.getAllAuctionsForAdmin(currentPage, pageSize);
 
       if (response?.success) {
         const items = response.data?.items || response.data || [];
@@ -92,8 +92,8 @@ const AdminAuctionsManagementPage = () => {
   }, [currentPage, isSearching, isFilteringByStatus]);
 
   const doSearch = async (uid, page = 1) => {
-    const token = localStorage.getItem('token');
-    if (!token) { alert('Vui lòng đăng nhập lại.'); navigate('/login'); return; }
+    // const token = localStorage.getItem('token');
+    // if (!token) { alert('Vui lòng đăng nhập lại.'); navigate('/login'); return; }
 
     if (!uid?.trim()) {
       setIsSearching(false);
@@ -104,7 +104,7 @@ const AdminAuctionsManagementPage = () => {
 
     try {
       setLoading(true);
-      const response = await auctionApi.searchAuctionsByUID(uid.trim(), token);
+      const response = await auctionApi.searchAuctionsByUID(uid.trim());
       if (response?.success) {
         const items = response.data?.items || response.data || [];
         setSearchResults(items);
@@ -143,8 +143,8 @@ const AdminAuctionsManagementPage = () => {
   };
 
   const doFilterByStatus = async (status, page = 1) => {
-    const token = localStorage.getItem('token');
-    if (!token) { alert('Vui lòng đăng nhập lại.'); navigate('/login'); return; }
+    // const token = localStorage.getItem('token');
+    // if (!token) { alert('Vui lòng đăng nhập lại.'); navigate('/login'); return; }
 
     if (!status) {
       setIsFilteringByStatus(false);
@@ -155,7 +155,7 @@ const AdminAuctionsManagementPage = () => {
 
     try {
       setLoading(true);
-      const response = await auctionApi.getAllAuctionsByStatusForAdmin(status, page, pageSize, token);
+      const response = await auctionApi.getAllAuctionsByStatusForAdmin(status, page, pageSize);
       if (response?.success) {
         const items = response.data?.items || response.data || [];
         setStatusFilterResults(items);
@@ -237,12 +237,12 @@ const AdminAuctionsManagementPage = () => {
   };
 
   const handleDeleteAuction = async (auctionId) => {
-    const token = localStorage.getItem('token');
-    if (!token) { alert('Vui lòng đăng nhập lại.'); navigate('/login'); return; }
-    if (!window.confirm('Bạn có chắc muốn xóa đấu giá này?')) return;
+    // const token = localStorage.getItem('token');
+    // if (!token) { alert('Vui lòng đăng nhập lại.'); navigate('/login'); return; }
+    // if (!window.confirm('Bạn có chắc muốn xóa đấu giá này?')) return;
 
     try {
-      await auctionApi.deleteAuction(auctionId, token);
+      await auctionApi.deleteAuction(auctionId);
       if (isSearching && searchUID.trim() !== '') {
         await doSearch(searchUID, currentPage);
       } else if (isFilteringByStatus && selectedStatus) {
@@ -257,14 +257,14 @@ const AdminAuctionsManagementPage = () => {
   };
 
   const handleViewAuction = (auctionUID) => {
-    const token = localStorage.getItem('token');
-    if (!token) { alert('Vui lòng đăng nhập lại.'); navigate('/login'); return; }
+    // const token = localStorage.getItem('token');
+    // if (!token) { alert('Vui lòng đăng nhập lại.'); navigate('/login'); return; }
     navigate(`/admin/auctions-management/view/${auctionUID}`);
   };
 
   const handleEditAuction = (auctionUID) => {
-    const token = localStorage.getItem('token');
-    if (!token) { alert('Vui lòng đăng nhập lại.'); navigate('/login'); return; }
+    // const token = localStorage.getItem('token');
+    // if (!token) { alert('Vui lòng đăng nhập lại.'); navigate('/login'); return; }
     navigate(`/admin/auctions-management/edit/${auctionUID}`);
   };
 

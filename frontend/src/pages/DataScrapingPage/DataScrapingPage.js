@@ -35,9 +35,9 @@ export default function DataScrapingPage() {
     try {
       const response = await fetch(`${API_BASE_URL}/admin/scraping/listing`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ locationName: listingLocationNameEn })
       });
@@ -84,9 +84,9 @@ export default function DataScrapingPage() {
     try {
       const response = await fetch(`${API_BASE_URL}/admin/scraping/review`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ locationName: reviewLocationNameEn })
       });

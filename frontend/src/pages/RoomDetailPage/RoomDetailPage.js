@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { ProductContext } from '../../contexts/ProductContext';
 import { DateRangeProvider } from '../../contexts/DateRangeContext';
-import axios from 'axios';
 import { useParams } from 'react-router-dom';
+import productApi from '../../api/productApi';
 import Header from '../../components/Header/Header';
 import RoomTitle from '../../components/RoomTitle/RoomTitle';
 import ImageGallery from '../../components/ImageGallery/ImageGallery';
@@ -27,15 +27,22 @@ const RoomDetailPage = () => {
   const [wishlistChanged, setWishlistChanged] = useState(false);
 
   useEffect(() => {
-    axios.get(`http://localhost:3000/api/room/${UID}`)
-      .then((res) => {
-        console.log("API response:", res.data);
-        setData(res.data.data);
-      })
-      .catch((err) => {
-        console.error("Error loading product data", err);
-        setError(err?.response?.data?.message || err.message || 'Không thể tải dữ liệu sản phẩm.');
-      });
+    const ac = new AbortController();
+
+    (async () => {
+      try {
+        setError(null);
+        const resJson = await productApi.getRoomByUID(UID, ac.signal);
+        // Backend của bạn đang trả { data: ... } và trước đây bạn set res.data.data
+        setData(resJson.data);
+      } catch (err) {
+        if (err.name === 'AbortError') return;
+        setError(err.message || 'Không thể tải dữ liệu sản phẩm.');
+        console.error('Error loading product data', err);
+      }
+    })();
+
+    return () => ac.abort();
   }, [UID]);
   
   if (error) return <p>{error}</p>;

@@ -256,7 +256,6 @@ class ProductModel {
             // MySQL stored procedure trả về array of arrays, lấy result set đầu tiên
             const products = Array.isArray(rows[0]) ? rows[0] : rows;
             
-            console.log('Stored procedure result count:', products.length);
             return products;
             
         } catch (error) {
@@ -566,9 +565,13 @@ class ProductModel {
         return result.affectedRows;
     }
 
-
-
-
+    static async findProductIdByUID(uid) {
+        const [rows] = await pool.query(
+        `SELECT ProductID FROM Products WHERE UID = ? LIMIT 1`,
+        [uid]
+        );
+        return rows[0]?.ProductID || null;
+    }
 }
 
 // Initialize MongoDB connection when module is loaded

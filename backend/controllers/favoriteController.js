@@ -74,14 +74,18 @@ class FavoriteController {
     async removeFavorite(req, res) {
         try {
             const userId = req.user?.UserID || req.user?.id;
-            const { productId } = req.params;
+            const { uid } = req.params;
 
             if (!userId) {
-                return res.status(401).json({ 
-                    success: false, 
-                    message: 'Unauthorized' 
-                });
+                return res.status(401).json({ success: false, message: 'Unauthorized' });
             }
+
+            // Tra cứu ProductID từ UID
+            const [productRows] = await pool.query('SELECT ProductID FROM Products WHERE UID = ?', [uid]);
+            if (productRows.length === 0) {
+                return res.status(404).json({ success: false, message: 'Sản phẩm không tồn tại' });
+            }
+            const productId = productRows[0].ProductID;
 
             const [result] = await pool.query(
                 'DELETE FROM Favorites WHERE UserID = ? AND ProductID = ?',
@@ -89,23 +93,12 @@ class FavoriteController {
             );
 
             if (result.affectedRows === 0) {
-                return res.status(404).json({ 
-                    success: false, 
-                    message: 'Không tìm thấy sản phẩm trong danh sách yêu thích' 
-                });
+                return res.status(404).json({ success: false, message: 'Không tìm thấy sản phẩm trong danh sách yêu thích' });
             }
 
-            res.json({ 
-                success: true, 
-                message: 'Đã xóa khỏi danh sách yêu thích' 
-            });
+            res.json({ success: true, message: 'Đã xóa khỏi danh sách yêu thích' });
         } catch (error) {
-            console.error('removeFavorite error:', error);
-            res.status(500).json({ 
-                success: false, 
-                message: 'Lỗi server khi xóa yêu thích',
-                error: error.message 
-            });
+            res.status(500).json({ success: false, message: 'Lỗi server khi xóa yêu thích', error: error.message });
         }
     }
 
@@ -113,45 +106,27 @@ class FavoriteController {
     async addFavorite(req, res) {
         try {
             const userId = req.user?.UserID || req.user?.id;
-            const { productId } = req.params;
+            const { uid } = req.params;
 
             if (!userId) {
-                return res.status(401).json({ 
-                    success: false, 
-                    message: 'Unauthorized' 
-                });
+                return res.status(401).json({ success: false, message: 'Unauthorized' });
             }
 
-            // Kiểm tra sản phẩm có tồn tại không
-            const [product] = await pool.query(
-                'SELECT ProductID FROM Products WHERE ProductID = ?',
-                [productId]
+            // Tra cứu ProductID từ UID
+            const [productRows] = await pool.query('SELECT ProductID FROM Products WHERE UID = ?', [uid]);
+            if (productRows.length === 0) {
+                return res.status(404).json({ success: false, message: 'Sản phẩm không tồn tại' });
+            }
+            const productId = productRows[0].ProductID;
+
+            await pool.query(
+                'INSERT IGNORE INTO Favorites (UserID, ProductID) VALUES (?, ?)',
+                [userId, productId]
             );
 
-            if (product.length === 0) {
-                return res.status(404).json({ 
-                    success: false, 
-                    message: 'Sản phẩm không tồn tại' 
-                });
-            }
-
-            // Thêm vào favorites (ignore nếu đã tồn tại)
-            await pool.query(`
-                INSERT IGNORE INTO Favorites (UserID, ProductID) 
-                VALUES (?, ?)
-            `, [userId, productId]);
-
-            res.json({ 
-                success: true, 
-                message: 'Đã thêm vào danh sách yêu thích' 
-            });
+            res.json({ success: true, message: 'Đã thêm vào danh sách yêu thích' });
         } catch (error) {
-            console.error('addFavorite error:', error);
-            res.status(500).json({ 
-                success: false, 
-                message: 'Lỗi server khi thêm yêu thích',
-                error: error.message 
-            });
+            res.status(500).json({ success: false, message: 'Lỗi server khi thêm yêu thích', error: error.message });
         }
     }
 }

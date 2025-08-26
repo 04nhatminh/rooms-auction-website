@@ -6,8 +6,9 @@ export const systemParametersApi = {
         try {
             const fetchOptions = {
                 method: 'GET',
+                credentials: 'include',
                 headers: {
-                'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 }
             };
 
@@ -40,8 +41,9 @@ export const systemParametersApi = {
         try {
             const fetchOptions = {
                 method: 'PUT',
+                credentials: 'include',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ ParamValue: paramValue })
             };

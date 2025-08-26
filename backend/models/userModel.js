@@ -74,6 +74,10 @@ class UserModel {
                 conditions.push('VerificationToken = ?');
                 values.push(criteria.verificationToken);
             }
+            if (criteria.resetToken) {
+                conditions.push('ResetToken = ?');
+                values.push(criteria.resetToken);
+            }
 
             if (conditions.length === 0) {
                 throw new Error('Không có điều kiện tìm kiếm');
@@ -97,6 +101,8 @@ class UserModel {
                     address: user.Address,
                     verificationToken: user.VerificationToken,
                     verificationTokenExpires: user.VerificationTokenExpires,
+                    resetToken: user.ResetToken,
+                    resetTokenExpires: user.ResetTokenExpires,
                     role: user.Role,
                     rating: user.Rating,
                     createdAt: user.CreatedAt,
@@ -120,6 +126,7 @@ class UserModel {
                     id: user.UserID,
                     fullName: user.FullName,
                     email: user.Email,
+                    hashPassword: user.HashPassword,
                     phoneNumber: user.PhoneNumber,
                     dateOfBirth: user.DateOfBirth,
                     gender: user.Gender,
@@ -128,7 +135,7 @@ class UserModel {
                     isVerified: user.IsVerified,
                     role: user.Role,
                     rating: user.Rating,
-                    status: user.status,
+                    status: user.Status,
                     suspendedUntil: user.SuspendedUntil,
                     unpaidStrikeCount: user.UnpaidStrikeCount,
                     createdAt: user.CreatedAt,
@@ -158,6 +165,8 @@ class UserModel {
                 isVerified: 'IsVerified',
                 verificationToken: 'VerificationToken',
                 verificationTokenExpires: 'VerificationTokenExpires',
+                resetToken: 'ResetToken',
+                resetTokenExpires: 'ResetTokenExpires',
                 rating: 'Rating',
                 dateOfBirth: 'DateOfBirth',
                 gender: 'Gender',
@@ -249,7 +258,7 @@ class UserModel {
                 isVerified: user.IsVerified,
                 role: user.Role,
                 rating: user.Rating,
-                status: user.status,
+                status: user.Status,
                 suspendedUntil: user.SuspendedUntil,
                 unpaidStrikeCount: user.UnpaidStrikeCount,
                 createdAt: user.CreatedAt,

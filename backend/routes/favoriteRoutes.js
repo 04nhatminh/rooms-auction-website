@@ -6,10 +6,10 @@ const { verifyToken } = require('../middleware/authMiddleware');
 // GET /favorite - Lấy danh sách yêu thích
 router.get('/', verifyToken, favoriteController.getUserFavorites);
 
-// POST /favorite/:productId - Thêm vào yêu thích
-router.post('/:productId', verifyToken, favoriteController.addFavorite);
+// POST /favorite/:uid - Thêm vào yêu thích
+router.post('/:uid', verifyToken, favoriteController.addFavorite);
 
-// DELETE /favorite/:productId - Xóa khỏi yêu thích
-router.delete('/:productId', verifyToken, favoriteController.removeFavorite);
+// DELETE /favorite/:uid - Xóa khỏi yêu thích
+router.delete('/:uid', verifyToken, favoriteController.removeFavorite);
 
 module.exports = router;

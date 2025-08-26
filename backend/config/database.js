@@ -7,9 +7,10 @@ const { create } = require('domain');
 const dbConfig = {
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
-    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3306,
-    password: process.env.DB_PASSWORD || '', 
+    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3308,
+    password: process.env.DB_PASSWORD || '22127007', 
     database: process.env.DB_NAME || 'a2airbnb',
+    multipleStatements: true,
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
@@ -26,6 +27,11 @@ console.log('🔍 Database config:', {
 });
 
 const pool = mysql.createPool(dbConfig);
+
+pool.on('connection', (conn) => {
+  conn.query("SET time_zone = '+07:00'");
+  conn.query("SET SESSION sql_mode = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION,ONLY_FULL_GROUP_BY'");
+});
 
 async function testConnection() {
     try {
@@ -153,7 +159,9 @@ async function createUsersTable() {
             IsVerified TINYINT(1) DEFAULT FALSE,
             VerificationToken VARCHAR(255),
             VerificationTokenExpires DATETIME,
-            status ENUM('active','disabled','suspended','deleted') DEFAULT 'active',
+            ResetToken VARCHAR(255),
+            ResetTokenExpires DATETIME,
+            Status ENUM('active','disabled','suspended','deleted') DEFAULT 'active',
             SuspendedUntil DATETIME NULL,
             UnpaidStrikeCount INT NOT NULL DEFAULT 0,
             CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -208,38 +216,6 @@ async function createPaymentMethodsTable() {
     } catch (error) {
         if (error.code !== 'ER_DUP_KEYNAME') throw error;
     }
-}
-
-async function createUserViolationsTable() {
-    await pool.execute(`
-        CREATE TABLE IF NOT EXISTS UserViolations (
-            ViolationID BIGINT AUTO_INCREMENT PRIMARY KEY,
-            UserID INT NOT NULL,
-            BookingID INT UNSIGNED NULL,
-            Kind ENUM('non_payment') NOT NULL,
-            Note VARCHAR(255) NULL,
-            CreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            UNIQUE KEY uniq_user_booking_kind (UserID, BookingID, Kind),
-            INDEX idx_user_kind (UserID, Kind),
-            FOREIGN KEY (UserID) REFERENCES Users(UserID)
-        );
-    `);
-}
-
-async function createEmailOutboxTable() {
-    await pool.execute(`
-        CREATE TABLE IF NOT EXISTS EmailOutbox (
-            EmailID BIGINT AUTO_INCREMENT PRIMARY KEY,
-            ToEmail VARCHAR(255) NOT NULL,
-            Subject VARCHAR(255) NOT NULL,
-            Body TEXT NOT NULL,
-            SendAfter DATETIME DEFAULT CURRENT_TIMESTAMP,
-            Meta JSON NULL,
-            ProcessedAt DATETIME NULL,
-            CreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            INDEX idx_unprocessed (ProcessedAt)
-        );
-    `);
 }
 
 async function createPropertiesTable() {
@@ -313,6 +289,12 @@ async function createProductsTable() {
     
     try {
         await pool.execute(`CREATE INDEX idx_Products_Price ON Products(Price)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
+
+    try {
+        await pool.execute(`CREATE UNIQUE INDEX idx_Products_UID ON Products(UID)`);
     } catch (error) {
         if (error.code !== 'ER_DUP_KEYNAME') throw error;
     }
@@ -498,6 +480,49 @@ async function createBookingTable() {
             FOREIGN KEY (PaymentMethodID) REFERENCES PaymentMethods(MethodID)
         )
     `);
+
+    // const dbname = dbConfig.database;
+    // const triggerNames = ['bi_Booking_validate', 'bu_Booking_validate'];
+
+    // const [trgRows] = await pool.query(
+    //     `SELECT TRIGGER_NAME 
+    //     FROM INFORMATION_SCHEMA.TRIGGERS 
+    //     WHERE TRIGGER_SCHEMA = ? 
+    //         AND TRIGGER_NAME IN (?, ?)`,
+    //     [dbname, ...triggerNames]
+    // );
+
+    // for (const r of trgRows) {
+    //     // schema-qualified DROP
+    //     await pool.query(`DROP TRIGGER IF EXISTS \`${dbname}\`.\`${r.TRIGGER_NAME}\``);
+    // }
+
+    // const validateBody = `
+    //     BEGIN
+    //     END
+    // `;
+
+    // try {
+    //     await pool.query(`
+    //         CREATE TRIGGER \`${dbname}\`.\`bi_Booking_validate\`
+    //         BEFORE INSERT ON \`${dbname}\`.\`Booking\`
+    //         FOR EACH ROW
+    //         ${validateBody}
+    //     `);
+    // } catch (error) {
+    //     if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    // }
+
+    // try {
+    //     await pool.query(`
+    //         CREATE TRIGGER \`${dbname}\`.\`bu_Booking_validate\`
+    //         BEFORE UPDATE ON \`${dbname}\`.\`Booking\`
+    //         FOR EACH ROW
+    //         ${validateBody}
+    //     `);
+    // } catch (error) {
+    //     if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    // }
     
     try {
         await pool.execute(`CREATE INDEX idx_Booking_UserID ON Booking(UserID)`);
@@ -524,6 +549,216 @@ async function createBookingTable() {
     }
 }
 
+async function createCalendarTable() {
+    await pool.execute(`
+        CREATE TABLE IF NOT EXISTS Calendar (
+            ProductID INT NOT NULL,
+            Day DATE NOT NULL,
+            Status ENUM('available','reserved','booked','blocked') NOT NULL DEFAULT 'available',
+            LockReason ENUM('booking_hold','manual','auction','external_sync') NULL,
+            BookingID INT UNSIGNED NULL,    -- nếu status=reserved/booked
+            AuctionID INT UNSIGNED NULL,    -- nếu status=auction
+            HoldExpiresAt DATETIME NULL,  -- cho “giữ chỗ tạm” (reserve)
+            CreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UpdatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (ProductID, Day)
+        );
+    `);
+
+    const dbname = dbConfig.database;
+    const triggerNames = ['bi_Calendar_validate', 'bu_Calendar_validate', 'bi_Calendar_refcheck', 'bu_Calendar_refcheck'];
+
+    // Kiểm tra tồn tại trong INFORMATION_SCHEMA rồi DROP từng cái
+    const [trgRows] = await pool.query(
+        `SELECT TRIGGER_NAME 
+        FROM INFORMATION_SCHEMA.TRIGGERS 
+        WHERE TRIGGER_SCHEMA = ? 
+            AND TRIGGER_NAME IN (?, ?, ?, ?)`,
+        [dbname, ...triggerNames]
+    );
+
+    for (const r of trgRows) {
+        // schema-qualified DROP
+        await pool.query(`DROP TRIGGER IF EXISTS \`${dbname}\`.\`${r.TRIGGER_NAME}\``);
+    }
+
+    const validateBody = `
+        BEGIN
+        IF NEW.Status = 'available' THEN
+            SET NEW.BookingID = NULL,
+                NEW.AuctionID = NULL,
+                NEW.LockReason = NULL,
+                NEW.HoldExpiresAt = NULL;
+
+        ELSEIF NEW.Status = 'reserved' THEN
+            IF NEW.LockReason IS NULL THEN SET NEW.LockReason = 'booking_hold'; END IF;
+            IF NOT (NEW.LockReason = 'booking_hold' AND NEW.BookingID IS NOT NULL AND NEW.HoldExpiresAt IS NOT NULL) THEN
+            SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = 'reserved: require LockReason=booking_hold, BookingID, HoldExpiresAt';
+            END IF;
+            SET NEW.AuctionID = NULL;
+
+        ELSEIF NEW.Status = 'booked' THEN
+            IF NEW.BookingID IS NULL THEN
+            SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = 'booked: require BookingID';
+            END IF;
+            SET NEW.LockReason = NULL,
+                NEW.HoldExpiresAt = NULL,
+                NEW.AuctionID = NULL;
+
+        ELSEIF NEW.Status = 'blocked' THEN
+            IF NEW.LockReason = 'auction' THEN
+                IF NEW.AuctionID IS NULL THEN
+                    SIGNAL SQLSTATE '45000'
+                    SET MESSAGE_TEXT = 'blocked(auction): require AuctionID';
+                END IF;
+                SET NEW.BookingID = NULL,
+                    NEW.HoldExpiresAt = NULL;
+
+            ELSEIF NEW.LockReason IN ('manual','external_sync') THEN
+                SET NEW.BookingID = NULL,
+                    NEW.AuctionID = NULL,
+                    NEW.HoldExpiresAt = NULL;
+
+            ELSE
+                SIGNAL SQLSTATE '45000'
+                    SET MESSAGE_TEXT = 'blocked: LockReason must be auction/manual/external_sync';
+            END IF;
+
+        ELSE
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Unknown Status';
+        END IF;
+        END
+    `;
+
+    try {
+        await pool.query(`
+            CREATE TRIGGER \`${dbname}\`.\`bi_Calendar_validate\`
+            BEFORE INSERT ON \`${dbname}\`.\`Calendar\`
+            FOR EACH ROW
+            ${validateBody}
+        `);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
+
+    try {
+        await pool.query(`
+            CREATE TRIGGER \`${dbname}\`.\`bu_Calendar_validate\`
+            BEFORE UPDATE ON \`${dbname}\`.\`Calendar\`
+            FOR EACH ROW
+            ${validateBody}
+        `);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
+    
+    const refcheckBody = `
+    BEGIN
+        DECLARE v_exists INT;
+
+        -- Product phải tồn tại
+        SELECT 1 INTO v_exists FROM Products WHERE Products.ProductID = NEW.ProductID LIMIT 1;
+        IF v_exists IS NULL THEN
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'ProductID not found';
+        END IF;
+
+        -- BookingID nếu có phải tồn tại
+        IF NEW.BookingID IS NOT NULL THEN
+            SET v_exists = NULL;
+            SELECT 1 INTO v_exists FROM Booking WHERE Booking.BookingID = NEW.BookingID LIMIT 1;
+            IF v_exists IS NULL THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'BookingID not found';
+            END IF;
+        END IF;
+
+        -- AuctionID nếu có phải tồn tại
+        IF NEW.AuctionID IS NOT NULL THEN
+            SET v_exists = NULL;
+            SELECT 1 INTO v_exists FROM Auction WHERE Auction.AuctionID = NEW.AuctionID LIMIT 1;
+            IF v_exists IS NULL THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'AuctionID not found';
+            END IF;
+        END IF;
+    END`;
+
+    try {
+        await pool.query(`
+            CREATE TRIGGER \`${dbname}\`.\`bi_Calendar_refcheck\`
+            BEFORE INSERT ON \`${dbname}\`.\`Calendar\`
+            FOR EACH ROW
+            ${refcheckBody}
+        `);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
+
+    try {
+        await pool.query(`
+            CREATE TRIGGER \`${dbname}\`.\`bu_Calendar_refcheck\`
+            BEFORE UPDATE ON \`${dbname}\`.\`Calendar\`
+            FOR EACH ROW
+            ${refcheckBody}
+        `);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
+
+    try {
+        await pool.execute(`CREATE INDEX idx_Calendar_BookingID ON Calendar(BookingID)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
+
+    try {
+        await pool.execute(`CREATE INDEX idx_Calendar_AuctionID ON Calendar(AuctionID)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
+
+    try {
+        await pool.execute(`CREATE INDEX idx_Calendar_Day ON Calendar(Day)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
+
+    try {
+        await pool.execute(`CREATE INDEX idx_Calendar_StatusDayProductID ON Calendar(Status, Day, ProductID)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
+
+    const [pinfo] = await pool.query(`
+        SELECT 
+        SUM(CASE WHEN PARTITION_NAME IS NOT NULL THEN 1 ELSE 0 END) AS part_count,
+        SUM(CASE WHEN PARTITION_NAME = 'pmax' THEN 1 ELSE 0 END)    AS has_pmax
+        FROM information_schema.PARTITIONS
+        WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'Calendar';
+    `, [dbname]);
+
+    const partCount = Number(pinfo?.[0]?.part_count || 0);
+    const hasPmax   = Number(pinfo?.[0]?.has_pmax   || 0);
+
+    if (partCount === 0) {
+        // Bảng chưa partition -> thêm scheme với pmax
+        await pool.query(`
+        ALTER TABLE \`${dbname}\`.\`Calendar\`
+        PARTITION BY RANGE COLUMNS(Day) (
+            PARTITION pmax VALUES LESS THAN (MAXVALUE)
+        );
+        `);
+    } else if (hasPmax === 0) {
+        // Đã partition nhưng thiếu pmax -> bổ sung pmax
+        await pool.query(`
+        ALTER TABLE \`${dbname}\`.\`Calendar\`
+        ADD PARTITION (
+            PARTITION pmax VALUES LESS THAN (MAXVALUE)
+        );
+        `);
+    }
+}
+
 async function createPaymentsTable() {
     await pool.execute(`
         CREATE TABLE IF NOT EXISTS Payments (
@@ -543,6 +778,7 @@ async function createPaymentsTable() {
             UNIQUE KEY uq_provider_txn (Provider, ProviderTxnID)
         );
     `);
+
     try {
         await pool.execute(`CREATE INDEX idx_Payments_BookingID ON Payments(BookingID)`);
     } catch (error) {
@@ -566,6 +802,45 @@ async function createPaymentsTable() {
     } catch (error) {
         if (error.code !== 'ER_DUP_KEYNAME') throw error;
     }
+}
+
+async function createUserViolationsTable() {
+    await pool.execute(`
+        CREATE TABLE IF NOT EXISTS UserViolations (
+            ViolationID BIGINT AUTO_INCREMENT PRIMARY KEY,
+            UserID INT NOT NULL,
+            BookingID INT UNSIGNED NULL,
+            Kind ENUM('non_payment') NOT NULL,
+            Note VARCHAR(255) NULL,
+            CreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY uniq_user_booking_kind (UserID, BookingID, Kind),
+            INDEX idx_user_kind (UserID, Kind),
+            FOREIGN KEY (UserID) REFERENCES Users(UserID),
+            FOREIGN KEY (BookingID) REFERENCES Booking(BookingID) ON DELETE SET NULL
+        );
+    `);
+
+    try {
+        await pool.execute(`CREATE INDEX idx_UserViolations_BookingID ON UserViolations(BookingID)`);
+    } catch (error) {
+        if (error.code !== 'ER_DUP_KEYNAME') throw error;
+    }
+}
+
+async function createEmailOutboxTable() {
+    await pool.execute(`
+        CREATE TABLE IF NOT EXISTS EmailOutbox (
+            EmailID BIGINT AUTO_INCREMENT PRIMARY KEY,
+            ToEmail VARCHAR(255) NOT NULL,
+            Subject VARCHAR(255) NOT NULL,
+            Body TEXT NOT NULL,
+            SendAfter DATETIME DEFAULT CURRENT_TIMESTAMP,
+            Meta JSON NULL,
+            ProcessedAt DATETIME NULL,
+            CreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_unprocessed (ProcessedAt)
+        );
+    `);
 }
 
 async function createRatingTable() {
@@ -1434,9 +1709,270 @@ async function createGetAllDistrictsProcedure() {
     `);
 }
 
+async function dropRotateMonthPartitionsProcedureIfExists() {
+    await pool.query(`
+        DROP PROCEDURE IF EXISTS RotateMonthPartitions;
+    `);
+}
+
+async function createRotateMonthPartitionsProcedure(pool) {
+    await pool.query(`
+        CREATE PROCEDURE RotateMonthPartitions(
+        IN in_schema VARCHAR(64),
+        IN in_table  VARCHAR(64),
+        IN keep_months INT
+        )
+        proc: BEGIN
+            DECLARE v_schema VARCHAR(64);
+            DECLARE v_table  VARCHAR(64);
+
+            DECLARE v_today DATE;
+            DECLARE v_month0 DATE;        -- ngày 1 của tháng hiện tại
+            DECLARE v_is_first_day BOOLEAN;
+
+            DECLARE v_has_pmax INT DEFAULT 0;
+
+            DECLARE i INT DEFAULT 0;
+            DECLARE v_part_name VARCHAR(16);
+            DECLARE v_part_boundary DATE;
+
+            DECLARE v_sql TEXT;
+
+            -- Cursor xóa partition cũ (boundary < v_month0)
+            DECLARE c_name VARCHAR(64);
+            DECLARE done INT DEFAULT 0;
+            DECLARE cur_old CURSOR FOR
+                SELECT PARTITION_NAME
+                FROM information_schema.PARTITIONS
+                WHERE TABLE_SCHEMA = v_schema
+                AND TABLE_NAME   = v_table
+                AND PARTITION_NAME IS NOT NULL
+                AND PARTITION_NAME <> 'pmax'
+                AND PARTITION_DESCRIPTION REGEXP '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'
+                AND PARTITION_DESCRIPTION < DATE_FORMAT(v_month0, '%Y-%m-%d');
+            DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
+            -- Chuẩn hóa input
+            SET v_schema = NULLIF(TRIM(in_schema), '');
+            IF v_schema IS NULL THEN SET v_schema = DATABASE(); END IF;
+
+            SET v_table = TRIM(in_table);
+            IF v_table IS NULL OR v_table = '' THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Table name is required';
+            END IF;
+
+            IF keep_months IS NULL OR keep_months < 1 THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'keep_months must be >= 1';
+            END IF;
+
+            -- Chỉ chạy đầu tháng
+            SET v_today = CURRENT_DATE();
+            SET v_month0 = DATE_SUB(v_today, INTERVAL DAY(v_today) - 1 DAY);
+            SET v_is_first_day = (v_today = v_month0);
+            /*IF NOT v_is_first_day THEN
+                LEAVE proc;
+            END IF;*/
+
+            -- Phải có pmax
+            SELECT COUNT(*) INTO v_has_pmax
+            FROM information_schema.PARTITIONS
+            WHERE TABLE_SCHEMA = v_schema
+            AND TABLE_NAME   = v_table
+            AND PARTITION_NAME = 'pmax';
+            IF v_has_pmax = 0 THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Missing partition pmax (MAXVALUE).';
+            END IF;
+
+            -- (1) Xóa tất cả partition cũ (boundary < ngày đầu tháng hiện tại)
+            OPEN cur_old;
+            old_loop: LOOP
+                FETCH cur_old INTO c_name;
+                IF done = 1 THEN LEAVE old_loop; END IF;
+
+                SET v_sql = CONCAT(
+                'ALTER TABLE ', v_schema, '.', v_table, ' DROP PARTITION ', c_name
+                );
+                SET @sql := v_sql;
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+            END LOOP;
+            CLOSE cur_old;
+
+            -- (2) Bổ sung đủ các partition từ tháng hiện tại → hiện tại + (keep_months - 1)
+            SET i = 0;
+            ensure_loop: WHILE i < keep_months DO
+                SET v_part_name = CONCAT('p', DATE_FORMAT(DATE_ADD(v_month0, INTERVAL i MONTH), '%Y_%m'));
+                SET v_part_boundary = DATE_ADD(DATE_ADD(v_month0, INTERVAL i MONTH), INTERVAL 1 MONTH);
+
+                IF NOT EXISTS (
+                SELECT 1
+                FROM information_schema.PARTITIONS
+                WHERE TABLE_SCHEMA = v_schema
+                    AND TABLE_NAME   = v_table
+                    AND PARTITION_NAME = v_part_name
+                ) THEN
+                SET v_sql = CONCAT(
+                    'ALTER TABLE ', v_schema, '.', v_table, ' ',
+                    'REORGANIZE PARTITION pmax INTO (',
+                    'PARTITION ', v_part_name, ' VALUES LESS THAN (''',
+                    DATE_FORMAT(v_part_boundary, '%Y-%m-01'), '''), ',
+                    'PARTITION pmax VALUES LESS THAN (MAXVALUE)',
+                    ')'
+                );
+                SET @sql := v_sql;
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+                END IF;
+
+                SET i = i + 1;
+            END WHILE;
+
+        END
+    `);
+}
+
+async function dropAddCalendarForRoomProcedureIfExists() {
+    await pool.query(`
+        DROP PROCEDURE IF EXISTS AddCalendarForRoom;
+    `);
+}
+
+async function createAddCalendarForRoomProcedure() {
+    await pool.query(`
+        CREATE PROCEDURE \`AddCalendarForRoom\`(
+        IN in_schema       VARCHAR(64),   -- NULL => DATABASE()
+        IN in_product_id   INT,           -- NULL => tất cả Products
+        IN in_months_ahead INT            -- số tháng (>=1)
+        )
+        BEGIN
+            DECLARE v_months INT;
+            DECLARE v_cur DATE;
+            DECLARE v_end DATE;
+            DECLARE v_total BIGINT DEFAULT 0;
+
+            -- months >= 1
+            SET v_months = IFNULL(in_months_ahead, 6);
+            IF v_months < 1 THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'in_months_ahead must be >= 1';
+            END IF;
+
+            -- [v_cur .. v_end) theo ngày
+            SET v_cur = DATE_SUB(CURRENT_DATE(), INTERVAL DAY(CURRENT_DATE())-1 DAY);
+            SET v_end = DATE_ADD(v_cur, INTERVAL v_months MONTH);
+
+            day_loop: WHILE v_cur < v_end DO
+                -- chỉ chèn (ProductID, v_cur) chưa tồn tại
+                INSERT INTO Calendar (ProductID, Day, Status)
+                SELECT p.ProductID, v_cur, 'available'
+                FROM Products p
+                LEFT JOIN Calendar c
+                    ON c.ProductID = p.ProductID AND c.Day = v_cur
+                WHERE c.ProductID IS NULL
+                AND (in_product_id IS NULL OR p.ProductID = in_product_id);
+
+                SET v_total = v_total + ROW_COUNT();
+
+                SET v_cur = DATE_ADD(v_cur, INTERVAL 1 DAY);
+            END WHILE;
+
+            -- trả về số dòng đã thêm (optional)
+            SELECT v_total AS inserted_rows;
+        END
+    `);
+}
+
+async function dropSpPlaceBookingDraftIfExists() {
+    await pool.query(`DROP PROCEDURE IF EXISTS sp_place_booking_draft;`);
+}
+
+async function createSpPlaceBookingDraft() {
+    await pool.query(`
+        CREATE PROCEDURE sp_place_booking_draft (
+            IN  p_UserID INT, IN  p_ProductID INT,
+            IN  p_Start DATE, IN  p_End DATE,          -- [start, end)
+            IN  p_Nights INT, IN  p_UnitPrice DECIMAL(10,2),
+            IN  p_Currency VARCHAR(10), IN  p_Provider VARCHAR(50),
+            IN  p_HoldMinutes INT,
+            OUT p_BookingID INT UNSIGNED, OUT p_PaymentID BIGINT, OUT p_HoldExpiresAt DATETIME
+        )
+        proc:BEGIN
+            DECLARE v_lock_ok INT DEFAULT 0; DECLARE v_now DATETIME;
+            DECLARE v_amount DECIMAL(10,2); DECLARE v_conflicts INT DEFAULT 0;
+
+            IF p_End <= p_Start THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='End>Start required'; END IF;
+            SET v_now = NOW(); IF p_HoldMinutes IS NULL OR p_HoldMinutes<=0 THEN SET p_HoldMinutes=30; END IF;
+            IF p_Nights IS NULL OR p_Nights<=0 THEN SET p_Nights = DATEDIFF(p_End, p_Start); END IF;
+            SET v_amount = p_Nights * p_UnitPrice; SET p_HoldExpiresAt = v_now + INTERVAL p_HoldMinutes MINUTE;
+
+            SELECT GET_LOCK(CONCAT('calprod:', p_ProductID), 10) INTO v_lock_ok;
+            IF v_lock_ok <> 1 THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Cannot obtain product lock'; END IF;
+
+            START TRANSACTION;
+
+            -- 0) Dọn reserved hết hạn
+            UPDATE Calendar
+            SET Status='available', LockReason=NULL, BookingID=NULL, AuctionID=NULL, HoldExpiresAt=NULL
+            WHERE Status='reserved' AND HoldExpiresAt IS NOT NULL AND HoldExpiresAt < v_now;
+
+            -- 1) Booking pending
+            INSERT INTO Booking(UserID, ProductID, StartDate, EndDate, BookingStatus, WinningPrice, CreatedAt, UpdatedAt)
+            VALUES(p_UserID, p_ProductID, p_Start, p_End, 'pending', v_amount, v_now, v_now);
+            SET p_BookingID = LAST_INSERT_ID();
+
+            -- 2) Kiểm tra xung đột
+            SELECT COUNT(*) INTO v_conflicts
+            FROM Calendar
+            WHERE ProductID=p_ProductID AND Day>=p_Start AND Day<p_End
+            AND ( Status IN ('booked','blocked')
+                OR (Status='reserved' AND (HoldExpiresAt IS NULL OR HoldExpiresAt >= v_now)) );
+            IF v_conflicts>0 THEN
+                ROLLBACK; DO RELEASE_LOCK(CONCAT('calprod:', p_ProductID));
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Date range not available';
+            END IF;
+
+            -- 3a) Bơm dòng thiếu (CTE đứng trước INSERT)
+            INSERT IGNORE INTO Calendar(ProductID, Day, Status)
+            WITH RECURSIVE d AS (
+                SELECT p_Start AS Day
+                UNION ALL
+                SELECT Day + INTERVAL 1 DAY FROM d WHERE Day + INTERVAL 1 DAY < p_End
+            )
+            SELECT p_ProductID, Day, 'available' FROM d;
+
+            -- 3b) Reserve dải ngày (CTE đứng trước UPDATE, rồi JOIN trực tiếp d2)
+            WITH RECURSIVE d2 AS (
+                SELECT p_Start AS Day
+                UNION ALL
+                SELECT Day + INTERVAL 1 DAY FROM d2 WHERE Day + INTERVAL 1 DAY < p_End
+            )
+            UPDATE Calendar c
+            JOIN d2 x ON x.Day = c.Day
+            SET c.Status='reserved',
+                c.LockReason='booking_hold',
+                c.BookingID=p_BookingID,
+                c.AuctionID=NULL,
+                c.HoldExpiresAt=p_HoldExpiresAt
+            WHERE c.ProductID=p_ProductID AND c.Day>=p_Start AND c.Day<p_End;
+
+            -- 4) Payment initiated
+            /*INSERT INTO Payments(BookingID, UserID, Amount, Currency, Provider, Status, CreatedAt, UpdatedAt)
+            VALUES(p_BookingID, p_UserID, v_amount, p_Currency, p_Provider, 'initiated', v_now, v_now);
+            SET p_PaymentID = LAST_INSERT_ID();*/
+
+            COMMIT; DO RELEASE_LOCK(CONCAT('calprod:', p_ProductID));
+        END
+    `);
+}
+
+
+
+
 async function initSchema() {
     try {
         await testConnection();
+        console.log('✅ Database connection established successfully!');
         
         console.log('\n📋 Creating tables...');
 
@@ -1463,12 +1999,6 @@ async function initSchema() {
         
         await createPaymentMethodsTable();
         console.log('✅ PaymentMethods table ready');
-
-        await createUserViolationsTable();
-        console.log('✅ UserViolations table ready');
-
-        await createEmailOutboxTable();
-        console.log('✅ EmailOutbox table ready');
         
         await createPropertiesTable();
         console.log('✅ Properties table ready');
@@ -1503,8 +2033,17 @@ async function initSchema() {
         await createBookingTable();
         console.log('✅ Booking table ready');
 
+        await createCalendarTable();
+        console.log('✅ Calendar table ready');
+
         await createPaymentsTable();
         console.log('✅ Payments table ready');
+
+        await createUserViolationsTable();
+        console.log('✅ UserViolations table ready');
+
+        await createEmailOutboxTable();
+        console.log('✅ EmailOutbox table ready');
         
         await createRatingTable();
         console.log('✅ Rating table ready');
@@ -1592,6 +2131,21 @@ async function initSchema() {
         await dropGetAllDistrictsProcedureIfExists();
         await createGetAllDistrictsProcedure();
         console.log('✅ GetAllDistricts procedure ready');
+
+        await dropRotateMonthPartitionsProcedureIfExists();
+        await createRotateMonthPartitionsProcedure(pool);
+        console.log('✅ RotateMonthPartitions procedure ready');
+
+        await pool.execute('CALL RotateMonthPartitions(NULL, ?, ?)', ['Calendar', 12]);
+        console.log('✅ Initial partition rotation for Calendar table completed');
+
+        await dropAddCalendarForRoomProcedureIfExists();
+        await createAddCalendarForRoomProcedure();
+        console.log('✅ AddCalendarForRoom procedure ready');
+
+        await dropSpPlaceBookingDraftIfExists();
+        await createSpPlaceBookingDraft();
+        console.log('✅ sp_place_booking_draft procedure ready');
 
         console.log('\n🎉 Database schema initialization completed successfully!');
         

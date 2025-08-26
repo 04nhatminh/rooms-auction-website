@@ -191,7 +191,7 @@
   text-align: center;
 }
 
-.auction-button {
+.check-calendar-button {
   width: 100%;
   background: linear-gradient(135deg, #278C9F, #53B0BC);
   color: #fff;
@@ -207,10 +207,84 @@
   transition: background-color 0.2s ease;
 }
 
-.auction-button:hover {
+.check-calendar-button:hover {
   background: #2fa7bf;
 }
 
-.auction-button:active {
+.check-calendar-button:active {
   background: #278C9F;
 }
+
+.action-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.rent-now-button {
+  background: #46a249;
+  color: #fff;
+}
+
+.rent-now-button:hover {
+  background: #5cb85c;
+}
+
+.go-auction-button {
+  background: #ea8016;
+  color: #fff;
+}
+
+.go-auction-button:hover {
+  background: rgb(239, 133, 67);
+}
+
+.hint-line {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #555;
+}
+
+.limit-warning {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #fffbe6;
+  border: 1px solid #ffe58f;
+  font-size: 12px;
+}
+
+.availability-banner {
+  background: #d6fbdf;
+  padding: 10px 10px;
+  margin: 0 0 16px;
+  border-radius: 8px;
+  border: 1px solid #bcfacb;
+}
+
+.availability-banner.status-available {
+  background:#e8fff0;
+  border-color:#b8f3c8;
+  color:#165b31;
+}
+
+.availability-banner.status-auction {
+  background:#eef6ff;
+  border-color:#cfe5ff;
+  color:#0b3f87;
+}
+
+.availability-banner.status-soldout {
+  background:#fff1f0;
+  border-color:#ffcdc7;
+  color:#a8071a;
+}
+
+.availability-banner.status-reserved  {
+  background:#fffbe6;
+  border-color:#ffe58f;
+  color:#614700;
+}
+
+

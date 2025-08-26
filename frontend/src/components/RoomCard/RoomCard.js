@@ -9,11 +9,15 @@ import favoriteIcon from '../../assets/favorite.png';
 import favoriteFilledIcon from '../../assets/favorite_filled.png';
 import FavoritesApi from '../../api/favoritesApi';
 
-const RoomCard = ({ product, durationDays = 1 }) => {
+const RoomCard = ({ product, durationDays = 1, isFavorite: initialIsFavorite = false }) => {
   const navigate = useNavigate();
   const defaultImage = PlaceHolderImg;
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(initialIsFavorite);
   const [loadingFavorite, setLoadingFavorite] = useState(false);
+
+  useEffect(() => {
+    setIsFavorite(initialIsFavorite);
+  }, [initialIsFavorite]);
 
   // Format giá tiền
   const formatPrice = (price, currency = 'VND') => {
@@ -65,36 +69,23 @@ const RoomCard = ({ product, durationDays = 1 }) => {
     }
   };
 
-  useEffect(() => {
-    let mounted = true;
-    async function fetchFavoriteStatus() {
-      try {
-        const data = await FavoritesApi.getUserFavorites();
-        if (mounted && data.favorites) {
-          setIsFavorite(data.favorites.some(f => f.ProductID === product.ProductID));
-        }
-      } catch (err) {
-        // Không cần alert khi load trạng thái ban đầu
-      }
-    }
-    fetchFavoriteStatus();
-    return () => { mounted = false; };
-  }, [product.ProductID]);
-
   // Toggle favorite
   const handleToggleFavorite = async (e) => {
     e.stopPropagation();
     if (loadingFavorite) return;
+    if (!product?.UID) {
+      alert('Không xác định được phòng để yêu thích!');
+      setLoadingFavorite(false);
+      return;
+    }
     setLoadingFavorite(true);
     try {
       if (isFavorite) {
-        await FavoritesApi.removeFavorite(product.ProductID);
+        await FavoritesApi.removeFavorite(product.UID);
         setIsFavorite(false);
-        alert('Đã bỏ khỏi danh sách yêu thích!');
       } else {
-        await FavoritesApi.addFavorite(product.ProductID);
+        await FavoritesApi.addFavorite(product.UID);
         setIsFavorite(true);
-        alert('Đã thêm vào danh sách yêu thích!');
       }
     } catch (err) {
       alert('Có lỗi khi cập nhật yêu thích: ' + (err.message || ''));

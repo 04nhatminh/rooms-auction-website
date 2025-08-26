@@ -70,18 +70,50 @@ class WishlistController {
         }
     }
 
-    // DELETE /wishlist/:productId - Xóa khỏi wishlist
+    // POST /wishlist/:uid - Thêm vào wishlist
+    async addWishlist(req, res) {
+        try {
+            const userId = req.user?.UserID || req.user?.id;
+            const { uid } = req.params;
+
+            if (!userId) {
+                return res.status(401).json({ success: false, message: 'Unauthorized' });
+            }
+
+            // Tra cứu ProductID từ UID
+            const [productRows] = await pool.query('SELECT ProductID FROM Products WHERE UID = ?', [uid]);
+            if (productRows.length === 0) {
+                return res.status(404).json({ success: false, message: 'Sản phẩm không tồn tại' });
+            }
+            const productId = productRows[0].ProductID;
+
+            await pool.query(
+                'INSERT IGNORE INTO Wishlist (UserID, ProductID) VALUES (?, ?)',
+                [userId, productId]
+            );
+
+            res.json({ success: true, message: 'Đã thêm vào danh sách wishlist' });
+        } catch (error) {
+            res.status(500).json({ success: false, message: 'Lỗi server khi thêm wishlist', error: error.message });
+        }
+    }
+
+    // DELETE /wishlist/:uid - Xóa khỏi wishlist
     async removeWishlist(req, res) {
         try {
             const userId = req.user?.UserID || req.user?.id;
-            const { productId } = req.params;
+            const { uid } = req.params;
 
             if (!userId) {
-                return res.status(401).json({ 
-                    success: false, 
-                    message: 'Unauthorized' 
-                });
+                return res.status(401).json({ success: false, message: 'Unauthorized' });
             }
+
+            // Tra cứu ProductID từ UID
+            const [productRows] = await pool.query('SELECT ProductID FROM Products WHERE UID = ?', [uid]);
+            if (productRows.length === 0) {
+                return res.status(404).json({ success: false, message: 'Sản phẩm không tồn tại' });
+            }
+            const productId = productRows[0].ProductID;
 
             const [result] = await pool.query(
                 'DELETE FROM Wishlist WHERE UserID = ? AND ProductID = ?',
@@ -89,69 +121,12 @@ class WishlistController {
             );
 
             if (result.affectedRows === 0) {
-                return res.status(404).json({ 
-                    success: false, 
-                    message: 'Không tìm thấy sản phẩm trong danh sách wishlist' 
-                });
+                return res.status(404).json({ success: false, message: 'Không tìm thấy sản phẩm trong danh sách wishlist' });
             }
 
-            res.json({ 
-                success: true, 
-                message: 'Đã xóa khỏi danh sách wishlist' 
-            });
+            res.json({ success: true, message: 'Đã xóa khỏi danh sách wishlist' });
         } catch (error) {
-            console.error('removeWishlist error:', error);
-            res.status(500).json({ 
-                success: false, 
-                message: 'Lỗi server khi xóa wishlist',
-                error: error.message 
-            });
-        }
-    }
-
-    // POST /wishlist/:productId - Thêm vào wishlist
-    async addWishlist(req, res) {
-        try {
-            const userId = req.user?.UserID || req.user?.id;
-            const { productId } = req.params;
-
-            if (!userId) {
-                return res.status(401).json({ 
-                    success: false, 
-                    message: 'Unauthorized' 
-                });
-            }
-
-            // Kiểm tra sản phẩm có tồn tại không
-            const [product] = await pool.query(
-                'SELECT ProductID FROM Products WHERE ProductID = ?',
-                [productId]
-            );
-
-            if (product.length === 0) {
-                return res.status(404).json({ 
-                    success: false, 
-                    message: 'Sản phẩm không tồn tại' 
-                });
-            }
-
-            // Thêm vào wishlist (ignore nếu đã tồn tại)
-            await pool.query(`
-                INSERT IGNORE INTO Wishlist (UserID, ProductID) 
-                VALUES (?, ?)
-            `, [userId, productId]);
-
-            res.json({ 
-                success: true, 
-                message: 'Đã thêm vào danh sách wishlist' 
-            });
-        } catch (error) {
-            console.error('addWishlist error:', error);
-            res.status(500).json({ 
-                success: false, 
-                message: 'Lỗi server khi thêm wishlist',
-                error: error.message 
-            });
+            res.status(500).json({ success: false, message: 'Lỗi server khi xóa wishlist', error: error.message });
         }
     }
 }

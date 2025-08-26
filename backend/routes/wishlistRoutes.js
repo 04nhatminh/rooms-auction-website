@@ -7,9 +7,9 @@ const { verifyToken } = require('../middleware/authMiddleware');
 router.get('/', verifyToken, WishlistController.getUserWishlist);
 
 // Thêm sản phẩm vào wishlist
-router.post('/:productId', verifyToken, WishlistController.addWishlist);
+router.post('/:uid', verifyToken, WishlistController.addWishlist);
 
 // Xóa sản phẩm khỏi wishlist
-router.delete('/:productId', verifyToken, WishlistController.removeWishlist);
+router.delete('/:uid', verifyToken, WishlistController.removeWishlist);
 
 module.exports = router;

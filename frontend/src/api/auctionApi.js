@@ -7,7 +7,7 @@ export const auctionApi = {
             const fetchOptions = {
                 method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
             };
 
@@ -40,7 +40,7 @@ export const auctionApi = {
             const fetchOptions = {
                 method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
             };
 
@@ -73,7 +73,7 @@ export const auctionApi = {
             const fetchOptions = {
                 method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
             };
 
@@ -106,7 +106,7 @@ export const auctionApi = {
             const fetchOptions = {
                 method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
             };
 
@@ -139,7 +139,7 @@ export const auctionApi = {
             const fetchOptions = {
                 method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
             };
 
@@ -172,7 +172,7 @@ export const auctionApi = {
             const fetchOptions = {
                 method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
             };
 
@@ -200,13 +200,13 @@ export const auctionApi = {
     },
 
     // Lấy danh sách tất cả auctions cho admin
-    getAllAuctionsForAdmin: async (page = 1, limit = 10, token) => {
+    getAllAuctionsForAdmin: async (page = 1, limit = 10) => {
         try {
             const fetchOptions = {
                 method: 'GET',
+                credentials: 'include',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Content-Type': 'application/json'
                 },
             };
 
@@ -229,13 +229,13 @@ export const auctionApi = {
     },
 
     // Lấy danh sách tất cả auctions theo status cho admin
-    getAllAuctionsByStatusForAdmin: async (status, page, limit, token, abortSignal = null) => {
+    getAllAuctionsByStatusForAdmin: async (status, page, limit, abortSignal = null) => {
         try {
             const fetchOptions = {
                 method: 'GET',
+                credentials: 'include',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Content-Type': 'application/json'
                 },
             };
 
@@ -263,13 +263,13 @@ export const auctionApi = {
     },
 
     // Tìm kiếm auction theo UID
-    searchAuctionsByUID: async (uid, token, abortSignal = null) => {
+    searchAuctionsByUID: async (uid, abortSignal = null) => {
         try {
             const fetchOptions = {
                 method: 'GET',
+                credentials: 'include',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Content-Type': 'application/json'
                 },
             };
 
@@ -297,13 +297,13 @@ export const auctionApi = {
     },
 
     // Xóa auction
-    deleteAuction: async (auctionId, token, abortSignal = null) => {
+    deleteAuction: async (auctionId, abortSignal = null) => {
         try {
             const fetchOptions = {
                 method: 'DELETE',
+                credentials: 'include',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Content-Type': 'application/json'
                 },
             };
 

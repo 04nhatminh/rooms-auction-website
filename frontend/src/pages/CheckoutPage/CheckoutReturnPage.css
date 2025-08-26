@@ -1,0 +1,41 @@
+/* Giữ layout giống CheckoutPage */
+.checkout-page {
+  display: flex;
+  flex-direction: column;
+}
+
+.checkout-content {
+  flex: 1;
+  margin: 0 64px;
+}
+
+.return-card {
+  margin-top: 24px;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 16px;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+  max-width: 560px;
+}
+
+.return-status {
+  margin: 8px 0;
+  font-weight: 600;
+}
+
+.return-sub {
+  margin: 4px 0 16px 0;
+  color: #6B7280;
+}
+
+.return-close {
+  display: inline-block;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 10px;
+  background: #111827;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}

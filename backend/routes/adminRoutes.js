@@ -26,6 +26,9 @@ router.get('/auctions/status/:status', verifyToken, isAdmin, auctionController.g
 router.get('/auctions/search/:uid', verifyToken, isAdmin, auctionController.searchAuctionsByUID);
 
 
+// Cấu hình hệ thống
+
+
 // Data scraping routes
 // Chạy script thu thập dữ liệu listing info
 router.post('/scraping/listing', verifyToken, isAdmin, scrapingController.runListingInfoScraping);

@@ -22,11 +22,21 @@ import WishlistBox from '../../components/WishlistBox/WishlistBox';
 import './HomePage.css';
 
 
+const API_BASE_URL = (process.env.REACT_APP_API_BASE_URL?.replace(/\/$/, '')) || 'http://localhost:3000';
+
 const HomePage = () => {
   const { popularLocations, isLoading: isLoadingLocations, error: locationError, getPopularLocations } = useLocation();
-  const { user, isAuthenticated } = useUser();
+  const [user, setUser] = React.useState(null);
   const navigate = useNavigate();
-  
+
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem('userData');
+      if (stored) setUser(JSON.parse(stored));
+      else setUser(null);
+    } catch (_) {}
+  }, []);
+
   // State for search data to pass to catalog dropdowns
   const [searchData, setSearchData] = useState({
     checkinDate: '',
@@ -90,7 +100,7 @@ const HomePage = () => {
             <span className="home-logo-text">bidstay</span>
           </div>
 
-          {isAuthenticated() ? (
+          {user ? (
             <HeaderUserMenu />
           ) : (
             <SignInUpAction type="home" />
