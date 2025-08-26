@@ -6,8 +6,11 @@ const routes = require('./routes/index');
 const path = require('path');
 
 const app = express();
-const PORT = process.env.APP_PORT || 3000;
-const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:3001';
+const PORT = process.env.APP_PORT || 3000;const CLIENT_ORIGIN = [
+  process.env.CLIENT_ORIGIN || 'http://localhost:3001',
+  'https://7b0b38392154.ngrok-free.app'
+];
+
 
 // ✅ CORS cho cookie: URL nằm trong options, KHÔNG nằm ở path
 const corsOptions = {

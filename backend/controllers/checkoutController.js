@@ -1,8 +1,12 @@
 // src/controllers/checkout.controller.js
+const BASE_URL = process.env.BASE_URL || 'https://7b0b38392154.ngrok-free.app'; //frontend
+const BACKEND_URL = process.env.BACKEND_URL || 'https://7a59e9a85500.ngrok-free.app'; //backend
 const PaypalService = require('../services/paypalService');
+const ZaloPayService = require('../services/zalopayService');
 const BookingModel = require('../models/bookingModel');
 const PaymentMethodModel = require('../models/paymentMethodModel');
 const PaymentModel = require('../models/paymentModel.js');
+
 
 class CheckoutController {
   /**
@@ -12,6 +16,13 @@ class CheckoutController {
    */  
 
   static async getBookingDetails(req, res) {
+      console.log(
+      '[getBookingDetails] URL=%s  method=%s',
+      req.originalUrl,
+      req.method
+    );
+    console.log('[getBookingDetails] params=%o  query=%o', req.params, req.query);
+
     const bookingId = req.params.bookingId;
     if(!bookingId) {
       return res.status(400).json({error: 'bookingId is required'});
@@ -84,7 +95,8 @@ class CheckoutController {
           booking.BookingID,
           booking.UserID,
           amount,
-          process.env.CURRENCY || 'USD'
+          process.env.CURRENCY || 'USD',
+          'Paypal',
         );
 
         // 2) Tạo order (KHÔNG gửi payment_source ở bước create)
@@ -184,23 +196,219 @@ class CheckoutController {
     }
   }
 
-  static async createOrderZaloPay(req, res) {
-    try {
-      console.log('Creating zalopay order for booking:', req.body.bookingId);
+  /**
+   * POST /api/payments/zalopay/create
+   * body: { bookingId, amount }
+   * Tạo đơn trên ZaloPay và tạo "initiated payment" (provider=ZALOPAY)
+   */
+
+  // controllers/... createOrderZaloPay
+    static async createOrderZaloPay(req, res) {
+      try {
+        const {bookingId} = req.body;
+        if (!bookingId) return res.status(400).json({ ok:false, error:'Missing bookingId' });
+
+        // 0) Lấy booking để kiểm tra và lấy userId
+        const booking = await BookingModel.findBookingById(bookingId);
+        if (!booking) return res.status(404).json({ ok:false, error:'Booking not found' });
+        if (booking.BookingStatus !== 'pending') {
+          return res.status(400).json({ ok:false, error:'Invalid booking status' });
+        }
+
+        const amount = (req.body?.amount != null)     
+        ? Number(req.body.amount)                      // USD từ FE (đã convert)
+        : Number(booking.WinningPrice + booking.ServiceFee || 0);  
+        if (amount <= 0) return res.status(400).json({ error: 'Invalid amount' });
+
+        // 1) Tạo/đọc sẵn method ZaloPay cho user này (idempotent)
+        const methodId = await PaymentMethodModel.upsertZaloPayMethod(booking.UserID);
+
+        // 2) Ghi initiated cho đúng provider = ZALOPAY
+        // Nếu bạn có hàm này:
+        // await PaymentModel.insertInitiatedForProvider(bookingId, booking.UserID, amount, 'VND', 'ZALOPAY');
+        // Nếu chưa có, sửa insertInitiated để nhận thêm provider; tạm thời:
+        await PaymentModel.insertInitiated(bookingId, booking.UserID, amount, 'VND', 'ZaloPay');
+
+        // 3) Tạo đơn trên ZaloPay
+        const returnUrl = `${BASE_URL}/checkout/zalopay/return?bookingId=${bookingId}`;
+        const callbackUrl = `${BACKEND_URL}/api/checkout/webhooks/zalopay`;
+
+        console.log('[ZP createOrder] returnUrl =', returnUrl);
+        console.log('[ZP createOrder] callbackUrl =', callbackUrl);
+
+        const zaloOrder = await ZaloPayService.createOrder({
+          bookingId,
+          amount,
+          description: `Payment for booking #${bookingId}`,
+          returnUrl,
+          callbackUrl,
+          // lồng methodId để tham khảo khi cần
+          // service sẽ JSON.stringify embed_data, ở đó có {redirecturl, bookingId, methodId}
+          methodId
+        });
+
+        console.log('[ZP createOrder] created:', zaloOrder);
+
+        return res.json({ ok:true, zalo: zaloOrder });
+      } catch (err) {
+        console.error('[ZaloPayController] createOrder error:', err.message);
+        try { await PaymentModel.updateFailedLatestByBooking(req.body?.bookingId, err.message); } catch {}
+        return res.status(500).json({ ok:false, error:'Cannot create ZaloPay order' });
+      }
     }
-    catch (error) {
-      console.error('Error creating ZaloPay order:', error);
+
+
+  /**
+   * GET /api/payments/zalopay/return
+   * ZaloPay redirect về sau khi user thanh toán (client-side có thể gọi để confirm)
+   * ZaloPay thường trả về app_trans_id, status…
+   */
+  static async handleReturnZaloPay(req, res) {
+    try {
+      const { app_trans_id, status } = req.query || {};
+      const bookingId = app_trans_id?.split('_')?.[1]; // embed bookingId vào app_trans_id: yymmdd_<bookingId>_<rand>
+
+      if (!bookingId) return res.redirect(`${BASE_URL}/checkout?error=invalid_return`);
+
+      if (status === '1' || status === 'success') {
+        // Trường hợp này chỉ là trang return cho user, kết quả cuối cùng vẫn trông vào webhook.
+        return res.redirect(`${BASE_URL}/checkout/return?provider=ZALOPAY&status=${success ? '1' : '0'}&bookingId=${bookingId}`);
+      }
+      return res.redirect(`${BASE_URL}/checkout?result=cancelled&booking=${bookingId}`);
+    } catch (err) {
+      return res.redirect(`${BASE_URL}/checkout?result=error`);
     }
   }
 
-  static async captureOrderZaloPay(req,res) {
+  /**
+   * POST /api/webhooks/zalopay
+   * Webhook do ZaloPay gọi -> xác nhận thanh toán thành công/thất bại
+   */
+    static async webhookZaloPay(req, res) {
     try {
-      console.log('Capturing zalopay order for booking:', req.body.bookingId);
-    }
-    catch (error) {
-      console.error('Error capturing ZaloPay order:', error);
+      console.log('[ZP webhook] CT=', req.headers['content-type']);
+      console.log('[ZP webhook] BODY=', req.body);
+
+      // 1) Verify MAC bằng KEY2
+      const { verified, data } = ZaloPayService.verifyCallback(req.body);
+      console.log('[ZP webhook] verified =', verified);
+      if (!verified) {
+        return res.json({ return_code: -1, return_message: 'mac not matched' });
+      }
+
+      // 2) Lấy thông tin cần thiết
+      const type = Number(req.body?.type || 0);           // 1 = interim
+      const appTransId = data?.app_trans_id || '';        // <-- THÊM: lưu app_trans_id gốc
+      const parts = appTransId.split('_');
+      const bookingId = parts.length >= 2 ? parts[1] : undefined; // yymmdd_<bookingId>_<rand>
+      const captureId = data?.zp_trans_id || undefined;
+
+      if (!bookingId) {
+        return res.json({ return_code: 2, return_message: 'booking not found in app_trans_id' });
+      }
+
+      const hasFinal = typeof data?.return_code !== 'undefined';
+
+      // --- INTERIM: ACK NGAY, rồi xử lý nền ---
+      if (type === 1 || !hasFinal) {
+        res.json({ return_code: 1, return_message: 'noted' }); // trả ngay để ZP không retry
+
+        setImmediate(async () => {
+          try {
+            // Query trạng thái bằng KEY1
+            const q = await ZaloPayService.queryOrder(appTransId);
+            console.log('[ZP post-ack query]', q);
+
+            const ok = Number(q?.return_code) === 1 || q?.is_success === true;
+            const zpTid = captureId || q?.zp_trans_id;
+
+            const booking = await BookingModel.findBookingById(bookingId);
+            if (!booking) return;
+
+            if (ok) {
+              await finalizePaid(bookingId, zpTid); // idempotent
+            } else if (Number(q?.return_code) !== 2) {
+              // 2 = đang xử lý; còn lại coi như fail
+              await PaymentModel.updateFailedLatestByBooking(
+                bookingId,
+                q?.return_message || 'ZP_failed'
+              );
+            }
+          } catch (e) {
+            console.error('[ZP post-ack query] error:', e);
+          }
+        });
+
+        return; // kết thúc nhánh interim
+      }
+
+      // --- FINAL IPN: có return_code ---
+      console.log('Final callback');
+      const success = Number(data.return_code) === 1 || data?.is_success === true;
+      console.log('[ZP webhook] final callback: return_code=%s success=%s', data.return_code, success);
+
+      console.log('BookingId in webhook:', bookingId);
+      const booking = await BookingModel.findBookingById(bookingId);
+      if (!booking) {
+        return res.json({ return_code: 2, return_message: 'booking not found' });
+      }
+
+      if (success) {
+        await finalizePaid(bookingId, captureId); 
+        return res.json({ return_code: 1, return_message: 'success' });
+      } else {
+        await PaymentModel.updateFailedLatestByBooking(
+          bookingId,
+          data?.return_message || 'ZP_failed'
+        );
+        return res.json({ return_code: 1, return_message: 'fail-noted' });
+      }
+    } catch (err) {
+      console.error('[ZaloPay webhook] error:', err);
+      return res.json({ return_code: 0, return_message: 'server error' });
     }
   }
+
+  // POST /api/checkout/zalopay/query
+  static async queryZaloPay(req, res) {
+    try {
+      const appTransId = req.body?.app_trans_id || req.query?.app_trans_id;
+      if (!appTransId) return res.status(400).json({ ok:false, error:'Missing app_trans_id' });
+
+      // 1) Hỏi trạng thái từ ZaloPay
+      const qr = await ZaloPayService.queryOrder(appTransId); // { return_code, zp_trans_id, ... }
+
+      // 2) Rút bookingId từ app_trans_id: yymmdd_<bookingId>_<rand>
+      const bookingId = appTransId.split('_')[1];
+
+      console.log('[ZP query] result for bookingId=%s :', bookingId, qr);
+
+      // 3) Nếu thanh toán thành công -> cập nhật DB (idempotent theo zp_trans_id)
+      if (Number(qr.return_code) === 1) {
+        const r = await finalizePaid(bookingId, qr.zp_trans_id);
+        return res.json({ ok:true, status:'paid', bookingId, data:qr });
+      }
+
+      // 4) Chưa thành công hoặc đang xử lý
+      return res.json({ ok:true, status:'pending', bookingId, data:qr });
+    } catch (e) {
+      console.error('[ZP query] error:', e);
+      return res.status(500).json({ ok:false, error:e.message });
+    }
+  };
+}
+
+async function finalizePaid(bookingId, captureId) {
+  const booking = await BookingModel.findBookingById(bookingId);
+  if (!booking) return { ok:false, reason:'booking_not_found' };
+
+  // Idempotent: nếu đã paid rồi thì thôi
+  if (booking.BookingStatus === 'paid') return { ok:true, already:true };
+
+  await PaymentModel.updateCapturedByBooking(bookingId, captureId); // nên idempotent theo captureId
+  const methodId = await PaymentMethodModel.upsertZaloPayMethod(booking.UserID);
+  await BookingModel.updateBookingPaid(bookingId, methodId);
+  return { ok:true };
 }
 
 module.exports = CheckoutController;

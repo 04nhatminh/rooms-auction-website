@@ -40,6 +40,8 @@ import CheckoutPage from './pages/CheckoutPage/CheckoutPage';
 import CheckoutReturnPage from './pages/CheckoutPage/CheckoutReturnPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage/ResetPasswordPage';
+import FailedCheckoutPage from './pages/CheckoutPage/FailedCheckoutPage';
+import SuccessfulCheckoutPage from './pages/CheckoutPage/SuccessfulCheckoutPage';
 
 function App() {
   return (
@@ -57,8 +59,12 @@ function App() {
             <Route path="/search" element={<SearchResult />} />
             <Route path="/profile" element={<UserProfilePage />} />
             <Route path="/favorite" element={<FavoritePage />} />
-            <Route path="/checkout/:bookingId" element={<CheckoutPage />} />
+            <Route path="/checkout/success" element={<SuccessfulCheckoutPage />} />
+            <Route path="/checkout/failed" element={<FailedCheckoutPage />} />
+            <Route path="/checkout/booking/:bookingId" element={<CheckoutPage />} />
             <Route path="/checkout/paypal/return" element={<CheckoutReturnPage />} />
+            <Route path="/checkout/zalopay/return" element={<CheckoutReturnPage />} />
+            <Route path="/checkout/vnpay/return" element={<CheckoutReturnPage />} />            
             <Route path="/auction-history" element={<AuctionHistoryPage />} />
             <Route path="/transaction-history" element={<TransactionHistoryPage />} />
             <Route path="/auction/:UID" element={<AuctionPage />} />

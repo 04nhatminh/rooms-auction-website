@@ -55,10 +55,10 @@ class BookingModel {
     //     return { ok: true };
     // }
 
-    async findBookingById(bookingID)
+    static async findBookingById(bookingID)
     {
         try {
-            const query = `SELECT b.BookingID, b.BidID, b.UserID, p.Name, b.UnitPrice, b.Amount, b.StartDate, b.EndDate, b.BookingStatus
+            const query = `SELECT b.BookingID, b.BidID, p.UID, b.UserID, p.Name, b.UnitPrice, b.Amount, b.ServiceFee, b.StartDate, b.EndDate, b.BookingStatus
                            FROM Booking b
                            JOIN Products p ON b.ProductID = p.ProductID
                           WHERE b.BookingID = ?`;
@@ -73,7 +73,7 @@ class BookingModel {
         }
     }
 
-    async updateBookingPaid(bookingID, methodID)
+    static async updateBookingPaid(bookingID, methodID)
     {
         try {
             const [booking] = await db.query('SELECT 1 FROM Booking WHERE BookingID=? AND BookingStatus = "pending"', [bookingID])
@@ -99,4 +99,4 @@ class BookingModel {
     }
 }
 
-module.exports = new BookingModel();
+module.exports = BookingModel;

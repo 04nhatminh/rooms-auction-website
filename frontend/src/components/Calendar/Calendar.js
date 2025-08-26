@@ -6,6 +6,13 @@ import chevronRightGrayIcon from '../../assets/chevron_right_gray.png';
 import chevronLeftBlackIcon from '../../assets/chevron_left_black.png';
 import chevronRightBlackIcon from '../../assets/chevron_right_black.png';
 
+const pad = (n) => String(n).padStart(2, '0');
+const ymdLocal = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const parseYmdLocal = (s) => {
+  const [y, m, dd] = s.split('-').map(Number);
+  return new Date(y, m - 1, dd); // local date
+};
+
 const Calendar = () => {
   const { checkinDate, checkoutDate, setRange } = useDateRange();
 
@@ -40,7 +47,7 @@ const Calendar = () => {
   };
 
   const isSelected = (dateObj) => {
-    const d = dateObj.toISOString().slice(0, 10);
+    const d = ymdLocal(dateObj);
     return d === checkinDate || d === checkoutDate;
   };
 
@@ -53,7 +60,7 @@ const Calendar = () => {
   };
 
   const selectDate = (dateObj) => {
-    const d = dateObj.toISOString().slice(0, 10);
+    const d = ymdLocal(dateObj);
     if (!checkinDate || (checkinDate && checkoutDate)) {
       setRange({ checkin: d, checkout: '' });
     } else {
