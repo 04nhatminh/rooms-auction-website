@@ -56,16 +56,11 @@ async function createSystemParametersTable() {
 
     const [rows] = await pool.query(`SELECT COUNT(*) AS cnt FROM SystemParameters`);
     if (rows[0].cnt == 0) {
-        await pool.query(`
-        INSERT INTO SystemParameters (ParamName, ParamValue) VALUES
-            ('StartPriceFactor', '0.7'),
-            ('BidIncrementFactor', '0.05'),
-            ('AuctionDurationDays', '5'),
-            ('BidLeadTimeDays', '15'),
-            ('PaymentDeadlineTime', '30'),
-            ('ServiceFeeFactor', '0.15')
-        `);
-        console.log("✅ Seeded default SystemParameters");
+        const sqlFile = path.join(__dirname, 'data/systemparameters_data.sql');
+        const sqlContent = fs.readFileSync(sqlFile, 'utf8');
+
+        await pool.query(sqlContent);
+        console.log("✅ Seeded SystemParameters from regions_data.sql");
     } else {
         console.log("ℹ️ SystemParameters already have data");
     }
@@ -274,6 +269,22 @@ async function createUsersTable() {
     } catch (error) {
         if (error.code !== 'ER_DUP_KEYNAME') throw error;
     }
+
+    const defaultEmail = 'bidstayec11@gmail.com';
+    const defaultPassword = 'BidStayEC11';
+
+    const bcrypt = require('bcrypt');
+    const saltRounds = 10;
+    const hash = await bcrypt.hash(defaultPassword, saltRounds);
+
+    await pool.execute(`
+        INSERT INTO Users (FullName, Email, HashPassword, Role, IsVerified, Status)
+        SELECT 'Default Admin', ?, ?, 'admin', TRUE, 'active'
+        WHERE NOT EXISTS (
+            SELECT 1 FROM Users 
+            WHERE Email = ?
+        )
+    `, [defaultEmail, hash, defaultEmail]);
 }
 
 async function createOAuthAccountsTable() {
@@ -330,6 +341,17 @@ async function createRoomTypesTable() {
             RoomTypeImageURL VARCHAR(255)
         )
     `);
+
+    const [rows] = await pool.query(`SELECT COUNT(*) AS cnt FROM RoomTypes`);
+    if (rows[0].cnt == 0) {
+        const sqlFile = path.join(__dirname, 'data/roomtypes_data.sql');
+        const sqlContent = fs.readFileSync(sqlFile, 'utf8');
+
+        await pool.query(sqlContent);
+        console.log("✅ Seeded RoomTypes from regions_data.sql");
+    } else {
+        console.log("ℹ️ RoomTypes already have data");
+    }
 }
 
 async function createProductsTable() {
@@ -490,6 +512,7 @@ async function createAuctionTable() {
             StartTime TIMESTAMP NULL DEFAULT NULL,
             EndTime TIMESTAMP NULL DEFAULT NULL,
             MaxBidID INT UNSIGNED,
+            CurrentPrice DECIMAL(10,2) NOT NULL DEFAULT 0.0,
             StartPrice DECIMAL(10, 2),
             BidIncrement DECIMAL(10, 2),
             Status ENUM('active','ended','cancelled') DEFAULT 'active',
@@ -497,6 +520,54 @@ async function createAuctionTable() {
             FOREIGN KEY (ProductID) REFERENCES Products(ProductID)
         )
     `);
+
+    const dbname = dbConfig.database;
+    const triggerNames = ['trg_Update_Auction_CurrentPrice'];
+
+    // Kiểm tra tồn tại trong INFORMATION_SCHEMA rồi DROP từng cái
+    const [trgRows] = await pool.query(
+        `SELECT TRIGGER_NAME 
+        FROM INFORMATION_SCHEMA.TRIGGERS 
+        WHERE TRIGGER_SCHEMA = ? 
+            AND TRIGGER_NAME IN (?)`,
+        [dbname, ...triggerNames]
+    );
+
+    for (const r of trgRows) {
+        // schema-qualified DROP
+        await pool.query(`DROP TRIGGER IF EXISTS \`${r.TRIGGER_NAME}\``);
+    }
+
+    // Trigger check tại cùng 1 thời điểm không có nhiều hơn 2 user !deleted với cùng email
+    await pool.query(`
+        CREATE TRIGGER \`${dbname}\`.\`trg_Update_Auction_CurrentPrice\`
+        BEFORE UPDATE ON \`${dbname}\`.\`Auction\`
+        FOR EACH ROW
+        BEGIN
+            DECLARE cur_price DECIMAL(10,2);
+
+            -- Chỉ xử lý khi MaxBidID đổi và không NULL
+            IF NEW.MaxBidID IS NOT NULL 
+            AND (OLD.MaxBidID IS NULL OR NEW.MaxBidID <> OLD.MaxBidID) THEN
+
+                -- Lấy giá bid mới; thêm điều kiện AuctionID nếu bảng Bids có cột này
+                SELECT b.Amount
+                INTO cur_price
+                FROM Bids b
+                WHERE b.BidID = NEW.MaxBidID
+                AND b.AuctionID = NEW.AuctionID
+                LIMIT 1;
+
+                -- Nếu tìm thấy amount thì cập nhật CurrentPrice
+                IF cur_price IS NOT NULL THEN
+                    SET NEW.CurrentPrice = cur_price;
+                ELSE
+                    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'MaxBidID không hợp lệ';
+                END IF;
+            END IF;
+        END
+    `);
+
 
     try {
         await pool.execute(`CREATE UNIQUE INDEX idx_Auction_UID ON Auction(AuctionUID)`);

@@ -151,8 +151,6 @@ const BookingCard = () => {
         message = data.hasAuction ? 'Đang có đấu giá cho các ngày đã chọn.' : 'Đang trống toàn bộ khoảng thời gian.';
       }
 
-      console.log(data.auction?.auctionUid);
-
       if ((blockedByAuction || data.hasAuction) && data.auction?.auctionUid) {
         try {
           const detail = await auctionApi.getByUid(data.auction.auctionUid);
@@ -234,7 +232,7 @@ const BookingCard = () => {
       setShowConfirm(false);
 
       const params = buildQuery?.() || '';
-      navigate(`/checkout/${r.bookingId}${params ? `?${params}` : ''}`, {
+      navigate(`/checkout/booking/${r.bookingId}${params ? `?${params}` : ''}`, {
         state: {
           guests,
           totalGuests,

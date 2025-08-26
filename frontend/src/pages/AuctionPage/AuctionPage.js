@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import './AuctionPage.css';
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
@@ -141,6 +141,7 @@ async function loadAuction(auctionUid, currentUserId, signal) {
 
 const AuctionPage = () => {
     const params = useParams();
+    const navigate = useNavigate();
     const auctionUid =
         params.UID ||
         (typeof window !== 'undefined'
@@ -149,6 +150,12 @@ const AuctionPage = () => {
     const qs = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
     const qsCheckin  = qs?.get('checkin')  || '';
     const qsCheckout = qs?.get('checkout') || '';
+    const buildQuery = (ci, co) => {
+        const search = new URLSearchParams();
+        if (ci) search.set('checkin', ci);
+        if (co) search.set('checkout', co);
+        return search.toString();
+    };
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [viewData, setViewData] = useState(null);
@@ -253,10 +260,22 @@ const AuctionPage = () => {
                             onBuyNow={async ({ checkin, checkout }) => {
                                 try {
                                     if (!currentUserId) throw new Error('Bạn cần đăng nhập để thuê ngay');
-                                    await auctionApi.buyNow(auctionUid, {
+                                    const r = await auctionApi.buyNow(auctionUid, {
                                         userId: currentUserId,
                                         checkin: checkin  || userCheckin,
                                         checkout: checkout || userCheckout,
+                                    });
+                                    // Điều hướng sang trang Checkout như BookingCard
+                                    const paramsQ = buildQuery(checkin || userCheckin, checkout || userCheckout);
+                                    navigate(`/checkout/${r.bookingId}${paramsQ ? `?${paramsQ}` : ''}`, {
+                                        state: {
+                                            // nếu bạn có state khách trên trang này thì truyền đúng số; tạm thời để mặc định 1
+                                            guests: { adults: 1, children: 0, infants: 0 },
+                                            totalGuests: 1,
+                                            bookingId: r.bookingId,
+                                            holdExpiresAt: r.holdExpiresAt,
+                                            source: 'auction_buy_now',
+                                        },
                                     });
                                     // Reload phiên để reflect: status=ended, currentPrice có thể thay đổi, lịch sử cập nhật, v.v.
                                     const mapped = await loadAuction(auctionUid, currentUserId);
