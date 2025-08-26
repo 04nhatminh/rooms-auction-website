@@ -15,7 +15,7 @@ const HeaderUserMenu = () => {
       // gọi BE để xóa cookie bidstay_token
       await fetch(`${API_BASE_URL}/user/logout`, {
         method: 'POST',
-        credentials: 'include',     // gửi kèm cookie
+        credentials: 'include'
       });
     } catch (e) {
       // không cần chặn UI nếu request fail
@@ -27,6 +27,10 @@ const HeaderUserMenu = () => {
       localStorage.removeItem('userData');
       localStorage.removeItem('token');
       setUser(null);
+
+      // Gửi event để thông báo các component khác về sự thay đổi user data
+      window.dispatchEvent(new CustomEvent('userDataChanged'));
+      
       // navigate('/login');
     }
   };

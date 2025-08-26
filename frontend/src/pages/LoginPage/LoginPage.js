@@ -44,6 +44,7 @@ const Login = () => {
       _ts: Date.now(),
     };
     stash.setItem('userData', JSON.stringify(userData));
+    window.dispatchEvent(new CustomEvent('userDataChanged'));
   };
 
   // Google Login init
@@ -202,15 +203,6 @@ const Login = () => {
               </div>
 
               <div className="options">
-                <div className="remember-me">
-                  <input
-                    type="checkbox"
-                    id="remember"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                  />
-                  <label htmlFor="remember">Ghi nhớ đăng nhập</label>
-                </div>
                 <button
                   type="button"
                   className="forgot-password"

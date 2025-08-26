@@ -14,12 +14,47 @@ const Header = ({ searchData: propSearchData, onSearchSubmit }) => {
   const navigate = useNavigate();
   const [user, setUser] = React.useState(null);
 
-  React.useEffect(() => {
+  // Function to check and update user state from sessionStorage
+  const updateUserFromStorage = React.useCallback(() => {
     try {
       const stored = sessionStorage.getItem('userData');
-      if (stored) setUser(JSON.parse(stored));
-    } catch (_) {}
+      if (stored) {
+        setUser(JSON.parse(stored));
+      } else {
+        setUser(null);
+      }
+    } catch (_) {
+      setUser(null);
+    }
   }, []);
+
+  // Initial check on mount
+  React.useEffect(() => {
+    updateUserFromStorage();
+  }, [updateUserFromStorage]);
+
+  // Listen for storage changes (including sessionStorage)
+  React.useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === 'userData' || e.key === null) {
+        updateUserFromStorage();
+      }
+    };
+
+    // Listen for storage events from other tabs/windows
+    window.addEventListener('storage', handleStorageChange);
+
+    // Custom event for same-tab sessionStorage changes
+    const handleCustomStorageChange = () => {
+      updateUserFromStorage();
+    };
+    window.addEventListener('userDataChanged', handleCustomStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('userDataChanged', handleCustomStorageChange);
+    };
+  }, [updateUserFromStorage]);
 
   // Shared search state
   const [searchData, setSearchData] = useState({

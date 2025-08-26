@@ -168,32 +168,10 @@
 
 .options {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   margin-bottom: 24px;
   font-size: 13px;
-}
-
-.remember-me {
-  display: flex;
-  align-items: center;
-}
-
-.remember-me input[type="checkbox"] {
-  cursor: pointer;
-  accent-color: #30a5bc;
-}
-
-.remember-me input {
-  margin-right: 8px;
-}
-
-.remember-me label {
-  font-family: Montserrat;
-  font-size: 13px;
-  font-style: normal;
-  font-weight: 500;
-  line-height: normal;
 }
 
 .forgot-password {
@@ -203,8 +181,9 @@
   font-family: Montserrat;
   font-size: 13px;
   font-style: normal;
-  font-weight: 550;
+  font-weight: 600;
   line-height: normal;
+  margin-left: auto;
 }
 
 .signup-login-link {

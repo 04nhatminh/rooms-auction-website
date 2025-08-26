@@ -29,13 +29,46 @@ const HomePage = () => {
   const [user, setUser] = React.useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
+  const updateUserFromStorage = React.useCallback(() => {
     try {
       const stored = sessionStorage.getItem('userData');
-      if (stored) setUser(JSON.parse(stored));
-      else setUser(null);
-    } catch (_) {}
+      if (stored) {
+        setUser(JSON.parse(stored));
+      } else {
+        setUser(null);
+      }
+    } catch (_) {
+      setUser(null);
+    }
   }, []);
+
+  // Check lần đầu khi mount
+  useEffect(() => {
+    updateUserFromStorage();
+  }, [updateUserFromStorage]);
+
+  // Lắng nghe storage changes
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === 'userData' || e.key === null) {
+        updateUserFromStorage();
+      }
+    };
+
+    // Lắng nghe storage events từ các tab/window khác
+    window.addEventListener('storage', handleStorageChange);
+
+    // Custom event cho các thay đổi sessionStorage trong cùng một tab
+    const handleCustomStorageChange = () => {
+      updateUserFromStorage();
+    };
+    window.addEventListener('userDataChanged', handleCustomStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('userDataChanged', handleCustomStorageChange);
+    };
+  }, [updateUserFromStorage]);
 
   // State for search data to pass to catalog dropdowns
   const [searchData, setSearchData] = useState({
