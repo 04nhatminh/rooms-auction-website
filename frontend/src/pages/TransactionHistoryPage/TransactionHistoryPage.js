@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import Header from '../../components/Header/Header';
 import bookingApi from '../../api/bookingApi';
 import Footer from '../../components/Footer/Footer';
-import bookingApi from '../../api/bookingApi';
 import './TransactionHistoryPage.css';
 
 const TransactionHistoryPage = () => {
