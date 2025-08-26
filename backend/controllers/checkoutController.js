@@ -1,5 +1,5 @@
 // src/controllers/checkout.controller.js
-const BASE_URL = process.env.BASE_URL || 'https://7b0b38392154.ngrok-free.app'; //frontend
+const BASE_URL = process.env.FRONTEND_URL || 'https://7b0b38392154.ngrok-free.app'; //frontend
 const BACKEND_URL = process.env.BACKEND_URL || 'https://7a59e9a85500.ngrok-free.app'; //backend
 const PaypalService = require('../services/paypalService');
 const ZaloPayService = require('../services/zalopayService');
@@ -216,9 +216,16 @@ class CheckoutController {
         }
 
         const amount = (req.body?.amount != null)     
-        ? Number(req.body.amount)                      // USD từ FE (đã convert)
+        ? Number(req.body.amount)                      // VND từ FE (đã convert)
         : Number(booking.Amount + booking.ServiceFee || 0);  
         if (amount <= 0) return res.status(400).json({ error: 'Invalid amount' });
+
+        // Ensure amount is an integer for VND (no decimal places)
+        const amountVND = Math.round(amount);
+        
+        console.log('[ZP createOrder] bookingId:', bookingId);
+        console.log('[ZP createOrder] amount:', amountVND);
+        console.log('[ZP createOrder] userId:', booking.UserID);
 
         // 1) Tạo/đọc sẵn method ZaloPay cho user này (idempotent)
         const methodId = await PaymentMethodModel.upsertZaloPayMethod(booking.UserID);
@@ -227,7 +234,7 @@ class CheckoutController {
         // Nếu bạn có hàm này:
         // await PaymentModel.insertInitiatedForProvider(bookingId, booking.UserID, amount, 'VND', 'ZALOPAY');
         // Nếu chưa có, sửa insertInitiated để nhận thêm provider; tạm thời:
-        await PaymentModel.insertInitiated(bookingId, booking.UserID, amount, 'VND', 'ZaloPay');
+        await PaymentModel.insertInitiated(bookingId, booking.UserID, amountVND, 'VND', 'ZaloPay');
 
         // 3) Tạo đơn trên ZaloPay
         const returnUrl = `${BASE_URL}/checkout/zalopay/return?bookingId=${bookingId}`;
@@ -238,10 +245,11 @@ class CheckoutController {
 
         const zaloOrder = await ZaloPayService.createOrder({
           bookingId,
-          amount,
+          amount: amountVND,
           description: `Payment for booking #${bookingId}`,
           returnUrl,
           callbackUrl,
+          userId: booking.UserID,
           // lồng methodId để tham khảo khi cần
           // service sẽ JSON.stringify embed_data, ở đó có {redirecturl, bookingId, methodId}
           methodId

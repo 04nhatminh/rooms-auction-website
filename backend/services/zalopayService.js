@@ -47,12 +47,20 @@ class ZaloPayService {
     // Món hàng tối giản; bạn có thể thay đổi tuỳ ý
     const item = JSON.stringify([{ bookingId, amount }]);
 
+    // Validate required fields
+    if (!this.appId || !this.key1) {
+      throw new Error('ZaloPay configuration incomplete: missing app_id or key1');
+    }
+
+    // Ensure amount is an integer (VND doesn't have decimal places)
+    const amountInt = Math.round(Number(amount));
+
     // Theo spec ZP: dữ liệu ký = app_id|app_trans_id|app_user|amount|app_time|embed_data|item
     const dataToSign = [
-      Number(this.appId),
+      this.appId,           // Keep as string to avoid number parsing issues
       app_trans_id,
       app_user,
-      Number(amount),
+      amountInt,
       app_time,
       embed_data,
       item,
@@ -61,10 +69,10 @@ class ZaloPayService {
     const mac = crypto.createHmac('sha256', this.key1).update(dataToSign).digest('hex');
 
     const body = {
-      app_id: Number(this.appId),
+      app_id: parseInt(this.appId),
       app_trans_id,
       app_time,
-      amount: Number(amount),
+      amount: amountInt,
       app_user,
       description: description || `Payment for booking #${bookingId}`,
       embed_data,
@@ -77,11 +85,41 @@ class ZaloPayService {
     // Ghi log để tự kiểm callback_url & endpoint
     console.log('[ZP endpoint] =', JSON.stringify(this.endpointCreate));
     console.log('[ZP request] body =', { ...body, mac: '<hidden>' });
+    console.log('[ZP debug] dataToSign =', dataToSign);
+    console.log('[ZP debug] mac length =', mac.length);
+
+    // Validate critical fields before sending
+    if (!body.app_id || !body.app_trans_id || !body.callback_url) {
+      throw new Error('Missing required fields for ZaloPay API');
+    }
+
+    if (body.amount <= 0 || !Number.isInteger(body.amount)) {
+      throw new Error('Amount must be a positive integer');
+    }
 
     const { data } = await axios.post(this.endpointCreate, body, {
       headers: { 'Content-Type': 'application/json' },
       timeout: 15000,
     });
+
+    console.log('[ZP createOrder] response:', data);
+
+    // Check for error response
+    if (data.return_code !== 1) {
+      console.error('[ZP createOrder] Error response:', {
+        return_code: data.return_code,
+        return_message: data.return_message,
+        sub_return_code: data.sub_return_code,
+        sub_return_message: data.sub_return_message
+      });
+      
+      // Provide more specific error information
+      let errorMsg = data.return_message || 'ZaloPay order creation failed';
+      if (data.sub_return_code === -401) {
+        errorMsg = 'Invalid request data - check amount, app_id, or MAC signature';
+      }
+      throw new Error(`ZaloPay API Error: ${errorMsg}`);
+    }
 
     // Thường có: order_url, zp_trans_token, return_code, return_message...
     return data;
@@ -139,11 +177,18 @@ class ZaloPayService {
 
   _buildAppTransId(bookingId) {
     const d = new Date();
-    const yymmdd = String(d.getFullYear()).slice(-2)
-      + String(d.getMonth() + 1).padStart(2, '0')
-      + String(d.getDate()).padStart(2, '0');
+    const year = String(d.getFullYear()).slice(-2);
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const yymmdd = year + month + day;
+    
     const rand = Math.random().toString(36).slice(2, 7).toUpperCase();
-    return `${yymmdd}_${bookingId}_${rand}`;
+    const result = `${yymmdd}_${bookingId}_${rand}`;
+    
+    console.log('[ZP _buildAppTransId] date parts:', { year, month, day, yymmdd });
+    console.log('[ZP _buildAppTransId] result:', result);
+    
+    return result;
   }
 }
 
