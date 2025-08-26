@@ -403,14 +403,6 @@ const AdminAuctionsManagementPage = () => {
                           >
                             <img src={EditIcon} alt="Chỉnh sửa" />
                           </button>
-
-                          <button
-                            className={styles.btnDelete}
-                            onClick={() => handleDeleteAuction(auctionId)}
-                            title="Xóa"
-                          >
-                            <img src={DeleteIcon} alt="Xóa" />
-                          </button>
                         </div>
                       </td>
                     </tr>

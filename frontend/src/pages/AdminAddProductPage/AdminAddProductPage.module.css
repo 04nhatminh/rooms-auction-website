@@ -40,7 +40,7 @@
 
 .section:has(+ .actionButtons) {
   border-bottom: none;
-  padding-bottom: 0;
+  padding-bottom: 12px;
   margin-bottom: 0;
 }
 
