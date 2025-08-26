@@ -10,7 +10,7 @@
 
 .main { 
   flex: 1; 
-  padding: 24px; 
+
   overflow-y: auto;
   height: 100vh;
   transition: all 0.3s ease;

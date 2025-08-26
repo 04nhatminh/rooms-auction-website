@@ -4,6 +4,7 @@
   color: #374151;
   background-color: #f9fafb;
   min-height: 100vh;
+  padding: 24px; 
 }
 
 .layout {

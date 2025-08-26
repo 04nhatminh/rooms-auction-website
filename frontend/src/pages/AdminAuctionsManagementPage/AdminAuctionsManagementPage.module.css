@@ -1,6 +1,7 @@
 .page {
   font-family: 'Montserrat';
   color: #000000;
+  padding: 24px; 
 }
 
 .layout { display: block; }
