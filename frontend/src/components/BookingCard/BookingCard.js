@@ -39,7 +39,6 @@ const BookingCard = () => {
   const { UID } = useParams();
   const { data } = useContext(ProductContext); // data đã được load ở RoomDetailPage
   const { checkinDate, checkoutDate, setCheckinDate, setCheckoutDate } = useDateRange();
-
   const [showGuestDropdown, setShowGuestDropdown] = useState(false);
   const [guests, setGuests] = useState({ adults: 1, children: 0, infants: 0 });
 
@@ -54,9 +53,7 @@ const BookingCard = () => {
   const eligibleCount = guests.adults + guests.children;
   const totalGuests = eligibleCount + guests.infants;
   const reachedLimit = eligibleCount >= maxGuests;
-
   const guestText = totalGuests === 1 ? '1 khách' : `${totalGuests} khách`;
-
   const todayStr = new Date().toISOString().slice(0, 10);
   const minCheckout = checkinDate
     ? new Date(new Date(checkinDate).getTime() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
@@ -66,6 +63,8 @@ const BookingCard = () => {
   const [status, setStatus] = useState(null); // { level: 'ok'|'warn'|'error', message: string }
   const [showConfirm, setShowConfirm] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
+  const [, setAvailData] = useState(null);
+  const [, setAuctionInfo] = useState(null);
   const unitPrice = Number(data?.details?.Price || 0);
   const nights = checkinDate && checkoutDate ? Math.max(1, Math.floor((new Date(checkoutDate) - new Date(checkinDate)) / 86400000)) : 0;
 
@@ -110,14 +109,24 @@ const BookingCard = () => {
         checkout: checkoutDate,
         userId: currentUserId,
       });
+      setAvailData(data);
 
       let tag = 'available';
       let level = 'ok';
       let message = 'Đang trống.';
 
-      // BE sẽ trả: { available:boolean, reason:'booked'|'blocked'|'reserved'|null, reservedBySelf?:boolean, hasAuction?:boolean, days:[...] }
+      // BE nên trả: { available, reason, reservedBySelf?, hasAuction?, lockReason?, auction?, days? }
+      const blockedByAuction =
+        !!data?.hasAuction ||
+        data?.lockReason === 'auction' ||
+        (Array.isArray(data?.days) && data.days.some(d => d.lockReason === 'auction'));
+
       if (!data.available) {
-        if (data.reason === 'reserved') {
+        if (blockedByAuction) {
+          tag = 'auction';
+          level = 'ok';
+          message = 'Đang có đấu giá cho các ngày đã chọn.';
+        } else if (data.reason === 'reserved') {
           if (data.reservedBySelf) {
             tag = 'reserved'; level = 'warn'; message = 'Đang giữ chỗ tạm thời (của bạn).';
           } else {
@@ -136,13 +145,21 @@ const BookingCard = () => {
         message = data.hasAuction ? 'Đang có đấu giá cho các ngày đã chọn.' : 'Đang trống toàn bộ khoảng thời gian.';
       }
 
-      if (data.hasAuction && data.auction?.auctionUid) {
+      console.log(data.auction?.auctionUid);
+
+      if ((blockedByAuction || data.hasAuction) && data.auction?.auctionUid) {
         try {
           const detail = await auctionApi.getByUid(data.auction.auctionUid);
           const a = detail?.data?.auction;
           const remainMs = new Date(a.endTime) - new Date();
           const remainH = Math.max(0, Math.floor(remainMs/3600000));
           message = `Đang có đấu giá. Còn ~${remainH} giờ • Giá hiện tại: ${a.currentPrice.toLocaleString()} ${data?.details?.Currency || ''}`;
+          setAuctionInfo({
+            auctionUid: a.auctionUid,
+            endTime: a.endTime,
+            currentPrice: a.currentPrice,
+            bidIncrement: a.bidIncrement
+          });
         } catch(_) {}
       }
       setStatus({ tag, level, message });
@@ -154,53 +171,84 @@ const BookingCard = () => {
     }
   };
 
-  const onRentNow = () => {
-    if (!checkinDate || !checkoutDate) return alert('Vui lòng chọn ngày nhận phòng và trả phòng');
-    setShowConfirm(true);
-  };
+  function getAuctionUidFromAvailability(avail) {
+    return (
+      avail?.auction?.auctionUid ||
+      avail?.auctionUid ||
+      (avail?.hasAuction ? avail?.auction?.auctionUid : null)
+    );
+  }
 
   const doPlace = async () => {
-    const userData = JSON.parse(sessionStorage.getItem('userData') || 'null') || JSON.parse(localStorage.getItem('userData') || 'null');
-    const currentUserId = userData?.id;
-    if (!currentUserId) {
-      console.log("showLogin");
-      setShowLogin(true);
-      return;
-    }
-
-    const payload = {
-      uid: UID,
-      userId: currentUserId,
-      checkin: checkinDate,
-      checkout: checkoutDate,
-    };
-
     try {
-      const r = await bookingApi.place(payload);
+      if (!checkinDate || !checkoutDate) {
+        setStatus({
+          tag: 'soldout',
+          level: 'error',
+          message: 'Vui lòng chọn ngày nhận/trả phòng.',
+        });
+        return;
+      }
+      // 1) Kiểm tra phiên đấu giá đang diễn ra cho khoảng ngày
+      const avail = await calendarApi.checkAvailability(UID, {
+        checkin: checkinDate,
+        checkout: checkoutDate,
+        userId: currentUserId || undefined,
+      });
+      const auctionUid = getAuctionUidFromAvailability(avail);
+
+      if (auctionUid) {
+        // 2) Có phiên -> KHÔNG cho đặt trực tiếp
+        const ok = window.confirm(
+          'Khoảng ngày này đang có phiên đấu giá nên không thể tạo booking trực tiếp.\n' +
+          'Bạn có muốn chuyển đến TRANG ĐẤU GIÁ để THUÊ NGAY ở đó không?'
+        );
+        if (ok) {
+          // Chỉ navigate, không yêu cầu đăng nhập, không tạo bid/booking ở đây
+          navigate(`/auction/${auctionUid}?checkin=${checkinDate}&checkout=${checkoutDate}`);
+        }
+        return; // kết thúc flow Thuê ngay khi trùng đấu giá
+      }
+
+      // 3) Không có phiên -> đặt phòng như bình thường
+      if (!currentUserId) {
+        setShowLogin(true);
+        return;
+      }
+
+      const r = await bookingApi.place({
+        uid: UID,
+        userId: currentUserId,
+        checkin: checkinDate,
+        checkout: checkoutDate,
+        holdMinutes: 30,
+        source: 'direct',
+      });
+
       setShowConfirm(false);
 
       const params = buildQuery?.() || '';
       navigate(`/checkout/${r.bookingId}${params ? `?${params}` : ''}`, {
-        state: { guests, totalGuests, bookingId: r.bookingId, holdExpiresAt: r.holdExpiresAt }
+        state: {
+          guests,
+          totalGuests,
+          bookingId: r.bookingId,
+          holdExpiresAt: r.holdExpiresAt,
+          source: 'direct',
+        },
       });
     } catch (e) {
-        const r = await bookingApi.place(payload);   // để lỗi ném ra ngoài
-        setShowConfirm(false);
-        return;
+      console.error(e);
+      setStatus({
+        tag: 'soldout',
+        level: 'error',
+        message: 'Khoảng thời gian bạn chọn hiện không khả dụng. Vui lòng chọn ngày khác.',
+      });
     }
   };
 
   const onConfirmPlace = async () => {
-    try {
-      await doPlace();
-    } catch (e) {
-      setShowConfirm(false);
-      setStatus({
-        tag: 'soldout',
-        level: 'error',
-        message: translateBookingError(e),
-      });
-    }
+    await doPlace();
   };
 
   const onGoAuction = async () => {
@@ -212,27 +260,40 @@ const BookingCard = () => {
     if (!currentUserId) { setShowLogin(true); return; }
 
     try {
-      // 1) Kiểm tra lại lịch để biết có phiên đang diễn ra không
+      // 1) Kiểm tra xem có phiên đang diễn ra không (không yêu cầu đăng nhập ở bước này)
       const avail = await calendarApi.checkAvailability(UID, {
-        checkin: checkinDate, checkout: checkoutDate, userId: currentUserId,
+        checkin: checkinDate,
+        checkout: checkoutDate,
+        userId: currentUserId || undefined,
       });
- 
-      // Backend nên trả kèm auction { auctionUid, endTime, currentPrice } khi hasAuction=true
-      if (avail?.hasAuction && avail?.auction?.auctionUid) {
-        navigate(`/auction/${avail.auction.auctionUid}`);
+
+      const existingUid = getAuctionUidFromAvailability(avail);
+
+      if (existingUid) {
+        // ĐÃ CÓ PHIÊN → chỉ điều hướng sang trang chi tiết có kèm query ngày
+        navigate(`/auction/${existingUid}?checkin=${checkinDate}&checkout=${checkoutDate}`);
         return;
       }
- 
-      // 2) Chưa có phiên → preview thông số để hiển thị cho user xác nhận
+
+      // 2) CHƯA CÓ PHIÊN → cần đăng nhập để tạo phiên mới
+      if (!currentUserId) {
+        setShowLogin(true);
+        return;
+      }
+
+      // 3) Preview thông số phiên trước khi tạo
       const preview = await auctionApi.previewCreate({
-        productUid: UID, checkin: checkinDate, checkout: checkoutDate,
+        productUid: UID,
+        checkin: checkinDate,
+        checkout: checkoutDate,
       });
       const p = preview?.data || {};
+
       if (!p.eligible) {
         alert(p.reason || 'Khoảng thời gian không đủ điều kiện mở đấu giá');
         return;
       }
- 
+
       const ok = window.confirm(
         `Mở phiên đấu giá trong ${p.durationDays} ngày?\n` +
         `Giá khởi điểm: ${p.startingPrice.toLocaleString()} ${data?.details?.Currency || 'VND'}\n` +
@@ -240,16 +301,20 @@ const BookingCard = () => {
       );
       if (!ok) return;
 
-      // 3) Tạo phiên
+      // 4) Tạo phiên rồi điều hướng
       const created = await auctionApi.createAuction({
-        productUid: UID, userId: currentUserId, checkin: checkinDate, checkout: checkoutDate,
+        productUid: UID,
+        userId: currentUserId,
+        checkin: checkinDate,
+        checkout: checkoutDate,
       });
       const a = created?.data;
       if (!a?.auctionUid) throw new Error('Tạo phiên thất bại');
-      navigate(`/auction/${a.auctionUid}`);
+
+      navigate(`/auction/${a.auctionUid}?checkin=${checkinDate}&checkout=${checkoutDate}`);
     } catch (e) {
       console.error(e);
-      alert(e.message || 'Không thể mở/đi đến phiên đấu giá.');
+      alert(e?.message || 'Không thể mở/đi đến phiên đấu giá.');
     }
   };
 
@@ -391,12 +456,12 @@ const BookingCard = () => {
 
         {status?.level === 'ok' && (
           <div className="action-buttons">
-            <button className="check-calendar-button rent-now-button" type="button" onClick={onRentNow}>
-              Thuê ngay
-            </button>
-            <button className="check-calendar-button go-auction-button" type="button" onClick={onGoAuction}>
-              Đấu giá
-            </button>
+                <button className="check-calendar-button rent-now-button" type="button" onClick={doPlace}>
+                  Thuê ngay
+                </button>
+                <button className="check-calendar-button go-auction-button" type="button" onClick={onGoAuction}>
+                  Đấu giá
+                </button>
           </div>
         )}
 

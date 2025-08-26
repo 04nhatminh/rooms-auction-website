@@ -16,6 +16,18 @@ export const bookingApi = {
     }
     return data; // { ok, bookingId, holdExpiresAt }
   },
+  
+  buyNow: async ({ uid, userId, checkin, checkout }) => {
+    const r = await fetch(`${API_BASE_URL}/api/booking/buy-now`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ uid, userId, checkin, checkout }),
+    });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(data.message || 'Thuê ngay thất bại');
+    // kỳ vọng: { success:true, bookingId, holdExpiresAt? }
+    return data;
+  },
 };
 
 export default bookingApi;

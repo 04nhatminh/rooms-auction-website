@@ -300,7 +300,6 @@ class AuctionModel {
         if (!rows.length) return null;
 
         const a = rows[0];
-        console.log(a);
 
         const [fullHistory] = await pool.query(`
             SELECT B.BidID, B.Amount, B.BidTime, U.FullName
@@ -308,6 +307,8 @@ class AuctionModel {
             LEFT JOIN Users U ON U.UserID = B.UserID
             WHERE B.AuctionID = ? 
             ORDER BY B.BidTime DESC`, [a.AuctionID]);
+
+        console.log([fullHistory]);
 
         return {
             auction: {

@@ -9,46 +9,55 @@ class CalendarController {
         try {
             const { uid, checkin, checkout, userId } = req.query;
             if (!uid || !checkin || !checkout) {
-                return res.status(400).json({ message: 'Thiếu tham số: uid, checkin, checkout' });
+            return res.status(400).json({ message: 'Thiếu tham số: uid, checkin, checkout' });
             }
 
             const productId = await productModel.findProductIdByUID(uid);
-            if (!productId) {
-                return res.status(404).json({ message: 'Không tìm thấy sản phẩm' });
-            }
+            if (!productId) return res.status(404).json({ message: 'Không tìm thấy sản phẩm' });
 
-            // dọn reserved hết hạn (nếu bạn đã đổi sang NOW()/UTC_TIMESTAMP() thì gọi hàm tương ứng)
             await calendarModel.releaseExpiredHolds(new Date());
 
-            // kiểm tra xung đột trong khoảng (booked/blocked/reserved)
             const conflict = await calendarModel.isRangeAvailable(productId, checkin, checkout);
             const days = await calendarModel.getRange(productId, checkin, checkout);
 
+            console.log(days);
+
             // phát hiện auction trong khoảng
-            const hasAuction = Array.isArray(days) && days.some(d => d.AuctionID);
+            const dayHasAuction = Array.isArray(days) && days.find(d => d.AuctionID);
+            // ưu tiên lấy từ conflict.auction (nếu model có trả), fallback từ days[]
+            const auction =
+            conflict?.auction ||
+            (dayHasAuction
+                ? {
+                    auctionId: dayHasAuction.AuctionID,
+                    auctionUid: dayHasAuction.AuctionUID || null, // <-- cần getRange đã JOIN để có trường này
+                }
+                : undefined);
+
+            const hasAuction = !!(conflict?.hasAuction || auction);
 
             // xác định giữ chỗ thuộc về user này không
             let reservedBySelf = false;
             if (userId && Array.isArray(days)) {
-                const holdBookingIds = [...new Set(days
-                    .filter(d => d.Status === 'reserved' && d.BookingID)
-                    .map(d => d.BookingID))];
-                if (holdBookingIds.length) {
-                    const [rows] = await db.query(
-                        `SELECT COUNT(*) AS cnt FROM Booking WHERE BookingID IN (?) AND UserID = ?`,
-                        [holdBookingIds, Number(userId)]
-                    );
-                    reservedBySelf = rows[0]?.cnt > 0;
-                }
+            const holdBookingIds = [...new Set(
+                days.filter(d => d.Status === 'reserved' && d.BookingID).map(d => d.BookingID)
+            )];
+            if (holdBookingIds.length) {
+                const [rows] = await db.query(
+                `SELECT COUNT(*) AS cnt FROM Booking WHERE BookingID IN (?) AND UserID = ?`,
+                [holdBookingIds, Number(userId)]
+                );
+                reservedBySelf = rows[0]?.cnt > 0;
+            }
             }
 
             if (conflict && conflict.available === false) {
-                    const reason = (conflict.reason === 'booked' || conflict.reason === 'blocked') ? conflict.reason : 'reserved';
-                    return res.json({ available: false, reason, reservedBySelf, hasAuction, days });
-                }
+            const reason = (conflict.reason === 'booked' || conflict.reason === 'blocked')
+                ? conflict.reason : 'reserved';
+            return res.json({ available: false, reason, reservedBySelf, hasAuction, auction, days });
+            }
 
-            // nếu không có xung đột
-            return res.json({ available: true, reason: null, reservedBySelf: false, hasAuction, days });
+            return res.json({ available: true, reason: null, reservedBySelf: false, hasAuction, auction, days });
         } catch (error) {
             console.error('[CalendarController.checkAvailability]', error);
             return res.status(500).json({ message: 'Lỗi server', error: error.message });

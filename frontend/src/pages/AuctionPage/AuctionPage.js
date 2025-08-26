@@ -91,10 +91,10 @@ function mapApiToView(payload, currentUserId) {
     // Lịch sử đấu giá
     const full = (fullHistory || []).map((b, i) => ({
         id: b.id || b.BidID || i + 1,
-        time: fmtDate(b.time || b.CreatedAt || b.createdAt).dmy,
-        bidder: maskBidder(b.userName || b.UserName || b.userId || b.UserID),
-        price: b.amount || b.Amount || b.BidAmount || 0,
-        status: b.status || b.Status || '',
+        time: fmtDate(b.BidTime || b.time || b.CreatedAt || b.createdAt).hms_dmy, // dùng BidTime
+        bidder: maskBidder(b.FullName || b.userName || b.UserName || b.userId || b.UserID),
+        price: Number(b.Amount ?? b.amount ?? b.BidAmount ?? 0),
+        status: i === 0 ? 'Đang dẫn đầu' : 'Đã bị vượt',
     }));
     const personal = full.filter((b) => {
         const rawUser = fullHistory.find((h) => (h.userId ?? h.UserID) === currentUserId);
@@ -119,9 +119,14 @@ const AuctionPage = () => {
         (typeof window !== 'undefined'
             ? window.location.pathname.split('/').filter(Boolean).pop()
             : '');
+    const qs = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+    const qsCheckin  = qs?.get('checkin')  || '';
+    const qsCheckout = qs?.get('checkout') || '';
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [viewData, setViewData] = useState(null);
+    const [userCheckin, setUserCheckin] = useState(qsCheckin);
+    const [userCheckout, setUserCheckout] = useState(qsCheckout);
 
     const currentUserId = useMemo(() => {
         try {
@@ -141,6 +146,11 @@ const AuctionPage = () => {
             .then((resp) => {
                 if (!alive || !resp) return;
                 setViewData(mapApiToView(resp, currentUserId));
+                // Nếu chưa có từ query thì fallback từ dữ liệu phiên
+                const raw = resp?.data?.auction || {};
+                const toYMD = (d) => (d ? new Date(d).toISOString().slice(0,10) : '');
+                if (!qsCheckin  && !userCheckin)  setUserCheckin(toYMD(raw.Checkin  || raw.checkin));
+                if (!qsCheckout && !userCheckout) setUserCheckout(toYMD(raw.Checkout || raw.checkout));
             })
             .catch((e) => {
                 if (!alive) return;
@@ -180,7 +190,7 @@ const AuctionPage = () => {
 
     const { images, auctionDetails, roomInfo, fullHistory, personalHistory, title } = viewData;
 
-    console.log(auctionDetails);
+    console.log('images',images);
 
     return (
         <div className="auction-page-container">
@@ -199,15 +209,18 @@ const AuctionPage = () => {
                         <BiddingForm
                             currentPrice={auctionDetails.currentPrice}
                             bidIncrement={auctionDetails.bidIncrement}
+                            checkin={userCheckin}
+                            checkout={userCheckout}
+                            onChangeDates={(ci, co) => { setUserCheckin(ci); setUserCheckout(co); }}
                             // Truyền thêm thông tin cần thiết cho submit bid
-                            onSubmit={async (amount) => {
+                            oonSubmit={async (amount, { checkin, checkout }) => {
                                 try {
                                     if (!currentUserId) throw new Error('Bạn cần đăng nhập để đặt giá');
                                     await auctionApi.bid(auctionUid, {
                                         userId: currentUserId,
                                         amount,
-                                        checkin: viewData.__raw?.auction?.Checkin || viewData.__raw?.auction?.checkin,
-                                        checkout: viewData.__raw?.auction?.Checkout || viewData.__raw?.auction?.checkout,
+                                        checkin: checkin  || userCheckin,
+                                        checkout: checkout || userCheckout,
                                     });
                                     // Sau khi bid thành công, refresh dữ liệu
                                     const refreshed = await auctionApi.getByUid(auctionUid);
