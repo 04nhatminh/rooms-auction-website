@@ -18,6 +18,7 @@ import VerificationSuccessPage from './pages/VerificationSuccessPage/Verificatio
 import AdminLayout from './layouts/AdminLayout';
 import UsersManagementPage from './pages/UsersManagementPage/UsersManagementPage';
 import UsersManagementDetailPage from './pages/UsersManagementDetailPage/UsersManagementDetailPage';
+import AdminDashboard from './pages/AdminDashboard/AdminDashboard';
 import AdminProductsManagementPage from './pages/AdminProductsManagementPage/AdminProductsManagementPage';
 import AdminAddProductPage from './pages/AdminAddProductPage/AdminAddProductPage';
 import AdminViewProductPage from './pages/AdminViewProductPage/AdminViewProductPage';
@@ -52,6 +53,7 @@ function App() {
             <Route path="/auction-history" element={<AuctionHistoryPage />} />
             <Route path="/transaction-history" element={<TransactionHistoryPage />} />
             <Route path="/admin" element={<AdminLayout />}>
+              <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="users-management" element={<UsersManagementPage />} />
               <Route path="users-management/:id" element={<UsersManagementDetailPage />} />
               <Route path="products-management" element={<AdminProductsManagementPage />} />

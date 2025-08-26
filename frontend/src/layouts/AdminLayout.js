@@ -5,7 +5,7 @@ import styles from './AdminLayout.module.css';
 
 export default function AdminLayout() {
   const navigate = useNavigate();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   
   const onLogout = () => {
     localStorage.removeItem('userData');
