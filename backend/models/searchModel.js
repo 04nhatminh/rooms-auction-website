@@ -217,7 +217,7 @@ exports.searchAuctions = async (params) => {
         SELECT a.AuctionUID,
                 p.UID as ProductUID,
                 a.StartPrice,
-                a.CurrentPrice,
+                b.Amount,
                 a.StayPeriodStart,
                 a.StayPeriodEnd,
                 a.StartTime,
@@ -244,6 +244,7 @@ exports.searchAuctions = async (params) => {
         LEFT JOIN Provinces prov ON p.ProvinceCode = prov.ProvinceCode
         LEFT JOIN Districts dist ON p.DistrictCode = dist.DistrictCode
         LEFT JOIN RoomTypes rt ON p.RoomType = rt.RoomTypeID
+        LEFT JOIN Bids b ON b.BidID = a.MaxBidID
         LEFT JOIN (
             SELECT AuctionID, COUNT(*) AS BidCount
             FROM Bids
@@ -271,11 +272,11 @@ exports.searchAuctions = async (params) => {
 
     // Price range filter (based on current bid or start price)
     if (price_min) {
-        sql += " AND a.CurrentPrice >= ? ";
+        sql += " AND b.Amount >= ? ";
         values.push(price_min);
     }
     if (price_max) {
-        sql += " AND a.CurrentPrice <= ? ";
+        sql += " AND b.Amount <= ? ";
         values.push(price_max);
     }
 
@@ -323,10 +324,10 @@ exports.searchAuctions = async (params) => {
             orderClause = " ORDER BY a.StartTime DESC ";
         } else if (sort === "price_asc") {
             // Giá tăng dần
-            orderClause = " ORDER BY a.CurrentPrice ASC ";
+            orderClause = " ORDER BY b.Amount ASC ";
         } else if (sort === "price_desc") {
             // Giá giảm dần
-            orderClause = " ORDER BY a.CurrentPrice DESC";
+            orderClause = " ORDER BY b.Amount DESC";
         } else {
             // Mặc định: popular
             orderClause = " ORDER BY AverageRating DESC ";
@@ -355,7 +356,7 @@ exports.countSearchAuctions = async (params) => {
 
     let sql = `
         SELECT COUNT(*) as total FROM (
-            SELECT a.AuctionUID,
+            SELECT a.AuctionUID, b.Amount,
                 ROUND((
                     COALESCE(p.CleanlinessPoint, 0) + 
                     COALESCE(p.LocationPoint, 0) + 
@@ -369,6 +370,7 @@ exports.countSearchAuctions = async (params) => {
             LEFT JOIN Provinces prov ON p.ProvinceCode = prov.ProvinceCode
             LEFT JOIN Districts dist ON p.DistrictCode = dist.DistrictCode
             LEFT JOIN RoomTypes rt ON p.RoomType = rt.RoomTypeID
+            LEFT JOIN Bids b ON b.BidID = a.MaxBidID
             WHERE 1=1
     `;
 
@@ -392,11 +394,11 @@ exports.countSearchAuctions = async (params) => {
 
     // Price range filter
     if (price_min) {
-        sql += " AND a.CurrentPrice >= ? ";
+        sql += " AND b.Amount >= ? ";
         values.push(price_min);
     }
     if (price_max) {
-        sql += " AND a.CurrentPrice <= ? ";
+        sql += " AND b.Amount <= ? ";
         values.push(price_max);
     }
 

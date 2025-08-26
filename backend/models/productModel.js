@@ -55,9 +55,9 @@ class ProductModel {
     {
         try {
             const query = `SELECT p.*, pr.FullName AS ProvinceFullName, d.FullName AS DistrictFullName
-                            FROM products p 
-                            JOIN provinces pr ON p.ProvinceCode = pr.ProvinceCode
-                            JOIN districts d ON p.DistrictCode = d.DistrictCode
+                            FROM Products p 
+                            JOIN Provinces pr ON p.ProvinceCode = pr.ProvinceCode
+                            JOIN Districts d ON p.DistrictCode = d.DistrictCode
                             WHERE p.UID = ?`;
             const [products] = await pool.execute(query, [productUID]);
             console.log(`Fetched product details for ProductID ${productUID}:`, products);

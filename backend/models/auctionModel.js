@@ -13,7 +13,7 @@ class AuctionModel {
                         a.InstantPrice,
                         a.StartPrice,
                         a.BidIncrement,
-                        a.CurrentPrice,
+                        b.Amount,
                         a.Status,
                         P.Name as ProductName,
                         p.UID as ProductUID,
@@ -37,6 +37,7 @@ class AuctionModel {
                 JOIN Products p ON a.ProductID = p.ProductID
                 JOIN Provinces pr ON p.ProvinceCode = pr.ProvinceCode
                 JOIN Districts d ON p.DistrictCode = d.DistrictCode
+                LEFT JOIN Bids b ON b.BidID = a.MaxBidID
                 WHERE a.AuctionID = ?
             `;
             const [auctions] = await pool.execute(query, [auctionID]);
@@ -58,7 +59,7 @@ class AuctionModel {
                        a.StartTime,
                        a.EndTime,
                        a.StartPrice,
-                       a.CurrentPrice,
+                       b.Amount,
                        pr.Name AS ProvinceName,
                        d.Name AS DistrictName,
                        a.Status,
@@ -74,6 +75,7 @@ class AuctionModel {
                 JOIN Products p ON a.ProductID = p.ProductID
                 JOIN Provinces pr ON p.ProvinceCode = pr.ProvinceCode
                 JOIN Districts d ON p.DistrictCode = d.DistrictCode
+                LEFT JOIN Bids b ON b.BidID = a.MaxBidID
                 WHERE p.ProvinceCode = ? AND a.Status = ?
                 LIMIT ${limit}
             `;
@@ -96,7 +98,7 @@ class AuctionModel {
                        a.StartTime,
                        a.EndTime,
                        a.StartPrice,
-                       a.CurrentPrice,
+                       b.Amount,
                        a.Status,
                        pr.Name AS ProvinceName,
                        d.Name AS DistrictName,
@@ -112,6 +114,7 @@ class AuctionModel {
                 JOIN Products p ON a.ProductID = p.ProductID
                 JOIN Provinces pr ON p.ProvinceCode = pr.ProvinceCode
                 JOIN Districts d ON p.DistrictCode = d.DistrictCode
+                LEFT JOIN Bids b ON b.BidID = a.MaxBidID
                 WHERE p.DistrictCode = ? AND a.Status = ?
                 LIMIT ${limit}
             `;
@@ -131,7 +134,7 @@ class AuctionModel {
                 SELECT a.AuctionUID,
                         p.UID as ProductUID,
                         a.StartPrice,
-                        a.CurrentPrice,
+                        a.Amount,
                         a.StayPeriodStart,
                         a.StayPeriodEnd,
                         a.StartTime,
@@ -157,6 +160,7 @@ class AuctionModel {
                 LEFT JOIN Provinces prov ON p.ProvinceCode = prov.ProvinceCode
                 LEFT JOIN Districts dist ON p.DistrictCode = dist.DistrictCode
                 LEFT JOIN RoomTypes rt ON p.RoomType = rt.RoomTypeID
+                LEFT JOIN Bids b ON b.BidID = a.MaxBidID
                 WHERE a.Status = 'active'
                 ORDER BY a.EndTime ASC
                 LIMIT ${safeLimit}
@@ -177,7 +181,7 @@ class AuctionModel {
                 SELECT a.AuctionUID,
                         p.UID as ProductUID,
                         a.StartPrice,
-                        a.CurrentPrice,
+                        b.Amount,
                         a.StayPeriodStart,
                         a.StayPeriodEnd,
                         a.StartTime,
@@ -204,6 +208,7 @@ class AuctionModel {
                 LEFT JOIN Provinces prov ON p.ProvinceCode = prov.ProvinceCode
                 LEFT JOIN Districts dist ON p.DistrictCode = dist.DistrictCode
                 LEFT JOIN RoomTypes rt ON p.RoomType = rt.RoomTypeID
+                LEFT JOIN Bids b ON b.BidID = a.MaxBidID
                 LEFT JOIN (
                     SELECT AuctionID, COUNT(*) AS BidCount
                     FROM Bids
@@ -229,7 +234,7 @@ class AuctionModel {
                 SELECT a.AuctionUID,
                         p.UID as ProductUID,
                         a.StartPrice,
-                        a.CurrentPrice,
+                        b.Amount,
                         a.StayPeriodStart,
                         a.StayPeriodEnd,
                         a.StartTime,
@@ -255,6 +260,7 @@ class AuctionModel {
                 LEFT JOIN Provinces prov ON p.ProvinceCode = prov.ProvinceCode
                 LEFT JOIN Districts dist ON p.DistrictCode = dist.DistrictCode
                 LEFT JOIN RoomTypes rt ON p.RoomType = rt.RoomTypeID
+                LEFT JOIN Bids b ON b.BidID = a.MaxBidID
                 WHERE a.Status = 'active'
                 ORDER BY a.StartTime DESC
                 LIMIT ${safeLimit}
@@ -283,8 +289,9 @@ class AuctionModel {
                     a.StartTime,
                     a.EndTime,
                     a.Status,
-                    a.CurrentPrice
+                    b.Amount
                 FROM Auction a
+                LEFT JOIN Bids b ON b.BidID = a.MaxBidID
                 ORDER BY 
                     CASE a.Status
                         WHEN 'active'    THEN 1
@@ -316,8 +323,9 @@ class AuctionModel {
                     a.StartTime,
                     a.EndTime,
                     a.Status,
-                    a.CurrentPrice
+                    b.Amount
                 FROM Auction a
+                LEFT JOIN Bids b ON b.BidID = a.MaxBidID
                 WHERE a.Status = ?
                 ORDER BY 
                     CASE a.Status
@@ -347,8 +355,9 @@ class AuctionModel {
                 a.StartTime,
                 a.EndTime,
                 a.Status,
-                a.CurrentPrice
+                b.Amount
             FROM Auction a
+            LEFT JOIN Bids b ON b.BidID = a.MaxBidID
             WHERE a.AuctionUID = ?
         `;
         const [auctions] = await pool.execute(query, [uid]);
