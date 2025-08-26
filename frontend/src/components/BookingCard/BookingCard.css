@@ -193,7 +193,7 @@
 
 .check-calendar-button {
   width: 100%;
-  background: #278C9F;
+  background: linear-gradient(135deg, #278C9F, #53B0BC);
   color: #fff;
   border: none;
   border-radius: 8px;

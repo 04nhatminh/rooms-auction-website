@@ -8,7 +8,7 @@ const API_BASE_URL =
 
 export default function AdminLayout() {
   const navigate = useNavigate();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const onLogout = async () => {
     try {
       // gọi BE để xóa cookie bidstay_token

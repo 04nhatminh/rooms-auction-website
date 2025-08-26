@@ -14,6 +14,8 @@ const favoriteRoutes = require('./favoriteRoutes');
 const wishlistRoutes = require('./wishlistRoutes');
 const searchRoutes = require('./searchRoutes');
 const systemParametersRoutes = require('./systemParametersRoutes');
+const uploadImagesRoutes = require('./uploadImagesRoutes')
+const geocodeRoutes = require('./geocodeRoutes');
 const calendarRoutes = require('./calendarRoutes');
 const bookingRoutes = require('./bookingRoutes');
 const checkoutRoutes = require('./checkoutRoutes');
@@ -33,6 +35,8 @@ router.use('/favorite', favoriteRoutes);
 router.use('/wishlist', wishlistRoutes);
 router.use('/api/search', searchRoutes);
 router.use('/api/system-parameters', systemParametersRoutes);
+router.use('/api/uploads', uploadImagesRoutes);
+router.use('/api/geocode', geocodeRoutes);
 router.use('/calendar', calendarRoutes);
 router.use('/booking', bookingRoutes);
 router.use('/api/checkout', checkoutRoutes);

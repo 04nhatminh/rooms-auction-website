@@ -6,7 +6,7 @@ let db = null;
 async function connectToMongoDB() {
     if (!db) {
         try {
-            const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/a2airbnb';
+            const mongoUri = process.env.MONGODB_URI || 'mongodb+srv://11_a2airbnb:anhmanminhnhu@cluster0.cyihew1.mongodb.net/';
             const client = new MongoClient(mongoUri);
             await client.connect();
             db = client.db('a2airbnb');
@@ -20,10 +20,32 @@ async function connectToMongoDB() {
 }
 
 class ImageModel {
+    // Upsert ảnh vào collections images
+    static async upsertProductImages(ProductID, Source = 'bidstay', Images) {
+        const database = await connectToMongoDB();
+        const col = database.collection('images');
+        await col.updateOne(
+            { ProductID, Source },
+            { $set: { Images, updated_at: new Date() }, $setOnInsert: { ProductID, Source } },
+            { upsert: true }
+        );
+    }
+
+    // Upsert room tour images
+    static async upsertRoomTour(ProductID, Source = 'user', RoomTourItems) {
+        const database = await connectToMongoDB();
+        const col = database.collection('room_tour_images');
+        await col.updateOne(
+            { ProductID, Source },
+            { $set: { RoomTourItems, updated_at: new Date() }, $setOnInsert: { ProductID, Source } },
+            { upsert: true }
+        );
+    }
+
     // Lấy ảnh đầu tiên cho nhiều ProductID
     static async getBatchFirstImages(productIds) {
         try {
-            console.log(`🔍 Fetching batch images for ${productIds.length} ProductIDs`);
+            console.log(`\nFetching batch images for ${productIds.length} ProductIDs`);
             
             const database = await connectToMongoDB();
             const collection = database.collection('images');
@@ -47,7 +69,7 @@ class ImageModel {
                 }
             });
             
-            console.log(`✅ Found images for ${Object.keys(imageMap).length}/${productIds.length} ProductIDs`);
+            console.log(`Found images for ${Object.keys(imageMap).length}/${productIds.length} ProductIDs`);
             return imageMap;
             
         } catch (error) {

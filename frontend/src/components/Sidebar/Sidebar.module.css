@@ -1,9 +1,9 @@
 :root{
-  --sidebar:#0f1a2b;
-  --sidebar2:#111d31;
+  --sidebar:#111d31;
+  --sidebar2:#000000;
   --text:#e5e7eb;
   --text-strong:#fff;
-  --hover: rgba(255,255,255,.08);
+  --hover: rgba(255, 255, 255, 0.264);
   --active: rgba(16,185,129,.18);
   --border: rgba(255,255,255,.15);
   --sidebar-padding: 12px;
@@ -124,12 +124,12 @@
 
 .logout{
   margin-top: auto;
-  padding: 12px var(--sidebar-padding);
-  border-radius: 8px;
+  padding: 8px var(--sidebar-padding);
+  border-radius: 16px;
   cursor: pointer;
   background: transparent;
   color: #FFF;
-  border: 1px solid var(--border);
+  /* border: 1px solid var(--border); */
   display: flex;
   align-items: center;
   justify-content: flex-start;

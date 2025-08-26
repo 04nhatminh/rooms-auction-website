@@ -7,15 +7,15 @@ export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load user from localStorage when context initializes
+  // Load user from sessionStorage when context initializes
   useEffect(() => {
     try {
-      const stored = localStorage.getItem('userData');
+      const stored = sessionStorage.getItem('userData');
       if (stored) {
         setUser(JSON.parse(stored));
       }
     } catch (error) {
-      console.error('Error loading user from localStorage:', error);
+      console.error('Error loading user from sessionStorage:', error);
     } finally {
       setIsLoading(false);
     }
@@ -24,14 +24,14 @@ export const UserProvider = ({ children }) => {
   // Login function
   const login = (userData) => {
     setUser(userData);
-    localStorage.setItem('userData', JSON.stringify(userData));
+    sessionStorage.setItem('userData', JSON.stringify(userData));
   };
 
   // Logout function
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('userData');
-    localStorage.removeItem('token');
+    sessionStorage.removeItem('userData');
+    sessionStorage.removeItem('token');
   };
 
   // Check if user is authenticated

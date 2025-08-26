@@ -6,6 +6,9 @@ import './App.css';
 import { LocationProvider } from './contexts/LocationContext';
 import { UserProvider } from './contexts/UserContext';
 
+// Import components
+import SimpleAdminGuard from './components/SimpleAdminGuard/SimpleAdminGuard';
+
 // Import pages
 import HomePage from './pages/HomePage/HomePage';
 import AuctionHistoryPage from './pages/AuctionHistoryPage/AuctionHistoryPage';
@@ -18,8 +21,12 @@ import VerificationSuccessPage from './pages/VerificationSuccessPage/Verificatio
 import AdminLayout from './layouts/AdminLayout';
 import UsersManagementPage from './pages/UsersManagementPage/UsersManagementPage';
 import UsersManagementDetailPage from './pages/UsersManagementDetailPage/UsersManagementDetailPage';
+import AdminDashboard from './pages/AdminDashboard/AdminDashboard';
 import AdminProductsManagementPage from './pages/AdminProductsManagementPage/AdminProductsManagementPage';
 import AdminAddProductPage from './pages/AdminAddProductPage/AdminAddProductPage';
+import AdminViewProductPage from './pages/AdminViewProductPage/AdminViewProductPage';
+import AdminEditProductPage from './pages/AdminEditProductPage/AdminEditProductPage';
+import AdminAuctionsManagementPage from './pages/AdminAuctionsManagementPage/AdminAuctionsManagementPage';
 import SystemConfigPage from './pages/SystemConfigPage/SystemConfigPage';
 import DataScrapingPage from './pages/DataScrapingPage/DataScrapingPage';
 import AuctionPage from './pages/AuctionPage/AuctionPage';
@@ -54,19 +61,27 @@ function App() {
             <Route path="/checkout/paypal/return" element={<CheckoutReturnPage />} />
             <Route path="/auction-history" element={<AuctionHistoryPage />} />
             <Route path="/transaction-history" element={<TransactionHistoryPage />} />
-            <Route path="/admin" element={<AdminLayout />}>
+            <Route path="/auction/:UID" element={<AuctionPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/admin" element={
+              <SimpleAdminGuard>
+                <AdminLayout />
+              </SimpleAdminGuard>
+            }>
+              <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="users-management" element={<UsersManagementPage />} />
               <Route path="users-management/:id" element={<UsersManagementDetailPage />} />
               <Route path="products-management" element={<AdminProductsManagementPage />} />
-              <Route path="add-product" element={<AdminAddProductPage />} />
+              <Route path="products-management/add" element={<AdminAddProductPage />} />
+              <Route path="products-management/edit/:id" element={<AdminEditProductPage />} />
+              <Route path="products-management/view/:id" element={<AdminViewProductPage />} />
+              <Route path="auctions-management" element={<AdminAuctionsManagementPage />} />
               <Route path="system-config" element={<SystemConfigPage />} />
               <Route path="data-scraping" element={<DataScrapingPage />} />
               {/* <Route path="edit-product/:id" element={<AdminEditProductPage />} /> */}
               {/* <Route path="bookings-management" element={<BookingsManagementPage />} /> */}
             </Route>
-            <Route path="/auction/:UID" element={<AuctionPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="/reset-password" element={<ResetPasswordPage />} />
           </Routes>
         </div>
       </Router>

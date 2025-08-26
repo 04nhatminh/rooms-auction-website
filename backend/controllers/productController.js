@@ -160,7 +160,7 @@ class ProductController {
         }
     }
 
-    // GET /api/properties/types - Lấy danh sách property types
+    // GET /api/room/properties/types - Lấy danh sách property types
     static async getAllPropertyTypes(req, res) {
         try {
             const types = await ProductModel.getAllPropertyTypes();
@@ -170,6 +170,60 @@ class ProductController {
             });
         } catch (error) {
             console.error('Error in getAllPropertyTypes:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Internal server error',
+                error: error.message
+            });
+        }
+    }
+
+    // GET /api/room/room-types - Lấy danh sách room types
+    static async getAllRoomTypes(req, res) {
+        try {
+            const types = await ProductModel.getAllRoomTypes();
+            return res.status(200).json({
+                success: true,
+                data: types
+            });
+        } catch (error) {
+            console.error('Error in getAllRoomTypes:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Internal server error',
+                error: error.message
+            });
+        }
+    }
+
+    // GET /api/room/amenity-groups - Lấy danh sách amenity groups
+    static async getAllAmenityGroups(req, res) {
+        try {
+            const types = await ProductModel.getAllAmenityGroups();
+            return res.status(200).json({
+                success: true,
+                data: types
+            });
+        } catch (error) {
+            console.error('Error in getAllAmenityGroups:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Internal server error',
+                error: error.message
+            });
+        }
+    }
+
+    // GET /api/room/amenities - Lấy danh sách amenities
+    static async getAllAmenities(req, res) {
+        try {
+            const types = await ProductModel.getAllAmenities();
+            return res.status(200).json({
+                success: true,
+                data: types
+            });
+        } catch (error) {
+            console.error('Error in getAllAmenities:', error);
             return res.status(500).json({
                 success: false,
                 message: 'Internal server error',
@@ -221,25 +275,17 @@ class ProductController {
         }
     }
 
-    // POST /api/room/admin/create - Tạo sản phẩm mới
-    static async createProduct(req, res) {
+    // POST /api/room/admin/add-product - Tạo sản phẩm mới
+    static async addProduct(req, res) {
         try {
-            // Validation cơ bản
-            const { name, region, provinceCode, price } = req.body;
-            if (!name || !region || !provinceCode || !price) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Tên sản phẩm, vùng miền, tỉnh và giá là bắt buộc'
-                });
-            }
-            const result = await ProductModel.createProduct(req.body);
+            const result = await ProductModel.addProduct(req.body);
             return res.status(201).json({
                 success: true,
                 message: 'Tạo sản phẩm thành công',
                 data: result
             });
         } catch (error) {
-            console.error('Error in createProduct:', error);
+            console.error('Error in addProduct:', error);
             return res.status(500).json({
                 success: false,
                 message: 'Internal server error',

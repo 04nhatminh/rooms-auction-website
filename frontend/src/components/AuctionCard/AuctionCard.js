@@ -103,6 +103,7 @@ const AuctionCard = ({ auction }) => {
       const auctionId = auction.AuctionUID;
       if (auctionId) {
         navigate(`/auction/${auctionId}`);
+        window.scrollTo(0, 0);
       }
     }
   };

@@ -1110,76 +1110,51 @@ async function createRatingTable() {
     }
 }
 
-// Procedure
-async function dropUpdateRoomTypesProcedureIfExists() {
+// Trigger
+async function dropUpdateRoomTypesTriggerIfExists() {
     await pool.query(`
-        DROP PROCEDURE IF EXISTS UpdateRoomTypes;
+        DROP TRIGGER IF EXISTS before_insert_products;
     `);
 }
 
-async function createUpdateRoomTypesProcedure() {
+async function createUpdateRoomTypesTrigger() {
     await pool.query(`
-        CREATE PROCEDURE UpdateRoomTypes()
+        CREATE TRIGGER before_insert_products
+        BEFORE INSERT ON Products
+        FOR EACH ROW
         BEGIN
-            DECLARE done INT DEFAULT FALSE;
-            DECLARE p_id INT;
-            DECLARE p_name VARCHAR(255);
-            DECLARE new_type INT;
+            DECLARE new_type INT DEFAULT 2; -- mặc định Căn hộ
+            DECLARE pname VARCHAR(255);
 
-            -- Cursor để duyệt qua tất cả product
-            DECLARE cur CURSOR FOR
-                SELECT ProductID, Name FROM Products WHERE RoomType IS NULL;
+            -- chuẩn hóa tên (lowercase)
+            SET pname = LOWER(NEW.Name);
 
-            DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+            -- check các keyword
+            IF pname LIKE '%resort%' THEN
+                SET new_type = 4; -- Resort
+            ELSEIF pname LIKE '%studio%' THEN
+                SET new_type = 6; -- Studio
+            ELSEIF pname LIKE '%khách sạn%' OR pname LIKE '%khach san%' OR pname LIKE '%hotel%' THEN
+                SET new_type = 1; -- Khách sạn
+            ELSEIF pname LIKE '%biệt thự%' OR pname LIKE '%biet thu%' OR pname LIKE '%villa%' THEN
+                SET new_type = 5; -- Biệt thự
+            ELSEIF pname LIKE '%căn hộ%' OR pname LIKE '%can ho%' OR pname LIKE '%apartment%' THEN
+                SET new_type = 2; -- Căn hộ
+            ELSEIF pname LIKE '%nhà nghỉ%' OR pname LIKE '%nha nghi%' OR pname LIKE '%motel%' THEN
+                SET new_type = 7; -- Nhà nghỉ
+            ELSEIF pname LIKE '%nhà%' OR pname LIKE '%nha%' OR pname LIKE '%homestay%' THEN
+                SET new_type = 3; -- Homestay
+            END IF;
 
-            OPEN cur;
-
-            read_loop: LOOP
-                FETCH cur INTO p_id, p_name;
-                IF done THEN
-                    LEAVE read_loop;
-                END IF;
-
-                SET new_type = 2; -- mặc định Căn hộ
-
-                -- chuẩn hóa tên (lowercase)
-                SET p_name = LOWER(p_name);
-
-                -- check các keyword
-                IF p_name LIKE '%resort%' THEN
-                    SET new_type = 4; -- Resort
-                ELSEIF p_name LIKE '%studio%' THEN
-                    SET new_type = 6; -- Studio
-                ELSEIF p_name LIKE '%khách sạn%' OR p_name LIKE '%khach san%' OR p_name LIKE '%hotel%' THEN
-                    SET new_type = 1; -- Khách sạn
-                ELSEIF p_name LIKE '%biệt thự%' OR p_name LIKE '%biet thu%' OR p_name LIKE '%villa%' THEN
-                    SET new_type = 5; -- Biệt thự
-                ELSEIF p_name LIKE '%căn hộ%' OR p_name LIKE '%can ho%' OR p_name LIKE '%apartment%' THEN
-                    SET new_type = 2; -- Căn hộ
-                ELSEIF p_name LIKE '%nhà nghỉ%' OR p_name LIKE '%nha nghi%' OR p_name LIKE '%motel%' THEN
-                    SET new_type = 7; -- Nhà nghỉ
-                ELSEIF p_name LIKE '%nhà%' OR p_name LIKE '%nha%' OR p_name LIKE '%homestay%' THEN
-                    SET new_type = 3; -- Homestay
-                END IF;
-
-                -- update lại RoomType
-                UPDATE Products
-                SET RoomType = new_type
-                WHERE ProductID = p_id;
-
-            END LOOP;
-
-            CLOSE cur;
+            -- chỉ gán RoomType nếu chưa được set khi insert
+            IF NEW.RoomType IS NULL THEN
+                SET NEW.RoomType = new_type;
+            END IF;
         END;
     `);
-
-    try {
-        await pool.execute(`CALL UpdateRoomTypes();`);
-    } catch (error) {
-        console.error('Error calling UpdateRoomTypes:', error);
-    }
 }
 
+// Procedure
 async function dropUpsertPropertyProcedureIfExists() {
     await pool.query(`
         DROP PROCEDURE IF EXISTS UpsertProperty;
@@ -1767,6 +1742,7 @@ async function createGetPopularProvincesProcedure() {
                 prov.ProvinceCode AS code,
                 prov.Name,
                 prov.NameEn,
+                prov.FullName,
                 prov.CodeName,
                 COUNT(p.ProductID) AS ProductCount,
                 'province' AS type
@@ -1803,6 +1779,7 @@ async function createGetPopularDistrictsProcedure() {
                 disct.DistrictCode AS code,
                 disct.Name,
                 disct.NameEn,
+                disct.FullName,
                 disct.CodeName,
                 COUNT(p.ProductID) AS ProductCount,
                 'district' AS type
@@ -1813,6 +1790,7 @@ async function createGetPopularDistrictsProcedure() {
                 disct.DistrictCode, 
                 disct.Name, 
                 disct.NameEn, 
+                disct.FullName,
                 disct.CodeName
             HAVING ProductCount > 0
             ORDER BY 
@@ -1939,6 +1917,7 @@ async function createGetAllProvincesProcedure() {
                 ProvinceCode AS code,
                 Name,
                 NameEn,
+                FullName,
                 'province' AS type
             FROM Provinces;
         END;
@@ -1959,6 +1938,7 @@ async function createGetAllDistrictsProcedure() {
                 DistrictCode AS code,
                 Name,
                 NameEn,
+                FullName,
                 'district' AS type,
                 ProvinceCode AS provinceCode
             FROM Districts;
@@ -2740,11 +2720,13 @@ async function initSchema() {
         await createRatingTable();
         console.log('✅ Rating table ready');
 
-        console.log('\n📋 Creating procedures...');
+        console.log('\n📋 Creating triggers...');
 
-        await dropUpdateRoomTypesProcedureIfExists();
-        await createUpdateRoomTypesProcedure();
-        console.log('✅ UpdateRoomTypes procedure ready');
+        await dropUpdateRoomTypesTriggerIfExists();
+        await createUpdateRoomTypesTrigger();
+        console.log('✅ UpdateRoomTypes trigger ready');
+
+        console.log('\n📋 Creating procedures...');
 
         await dropUpsertPropertyProcedureIfExists();
         await createUpsertPropertyProcedure();

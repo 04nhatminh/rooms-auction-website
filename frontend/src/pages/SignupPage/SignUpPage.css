@@ -8,7 +8,7 @@
 .signup-content {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 48px;
+  gap: 0px;
   height: 100vh;
   width: 100%;
   max-width: none;
@@ -19,7 +19,7 @@
   justify-content: center;
   align-items: center;
   height: 100vh;
-  padding: 32px;
+  padding: 32px 64px 32px 32px;
   box-sizing: border-box;
 }
 
@@ -42,19 +42,7 @@
   padding: 16px 100px 0px 128px;
 }
 
-@media screen and (max-width: 768px) {
-  .signup-content {
-    grid-template-columns: 1fr;
-  }
 
-  .signup-header {
-    padding: 0px 0px 32px 0px;
-  }
-
-  .signup-form {
-    padding-left: 32px;
-  }
-}
 
 .logo {
   display: flex;
@@ -64,9 +52,8 @@
 }
 
 .logo-image {
-  width: clamp(48px, 6vw, 64px);
-  height: clamp(48px, 6vw, 64px);
-  margin-right: 8px;
+  width: clamp(48px, 6vw, 56px);
+  height: clamp(48px, 6vw, 56px);
 }
 
 .logo-text {
@@ -74,7 +61,7 @@
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  margin-top: 10px;
+  padding-top: 10px;
   font-family: Montserrat;
   font-size: 24px;
   font-style: normal;
@@ -89,6 +76,7 @@
   flex-direction: column;
   justify-content: center;
   padding-left: 128px;
+  padding-right: 32px;
 }
 
 .title {
@@ -121,7 +109,7 @@
     font-family: Montserrat;
     font-size: 13px;
     font-style: normal;
-    font-weight: 400;
+    font-weight: 500;
     line-height: normal;
 }
 
@@ -164,7 +152,7 @@
     font-family: Montserrat;
     font-size: 13px;
     font-style: normal;
-    font-weight: 400;
+    font-weight: 500;
     line-height: normal;
 }
 
@@ -311,7 +299,7 @@
   line-height: normal;
 }
 
-.signup-button:hover {
+.signup-login-button:hover {
   background-color: #278C9F;
 }
 
@@ -337,30 +325,43 @@
   line-height: normal;
 }
 
-@media (max-width: 768px) {
-  .signup-content {
-    grid-template-columns: 1fr;
-    height: auto;
-
-  }
-  
-  .signup-left-column {
-    padding: 24px 32px;
+@media screen and (max-width: 1050px) {
+  .signup-header {
+    padding: 16px 0px 0px 32px;
   }
 
   .signup-form {
-    padding-left: 0px;
+    padding: 0px 0px 0px 32px;
   }
-  
+
   .signup-image {
-    height: 300px;
-    padding: 16px;
+    padding: 32px 32px 32px 32px;
   }
-  
-  .signup-background {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 16px;
+
+  .signup-content {
+    gap: 0px;
+  }
+
+  .logo-text {
+    font-size: 24px;
+  }
+}
+
+@media screen and (max-width: 680px) {
+  .signup-header {
+    padding: 16px 32px 0px 32px;
+  }
+
+  .signup-form {
+    padding: 0px 32px 0px 32px;
+  }
+
+  .signup-content {
+    grid-template-columns: 1fr;
+    gap: 0px;
+  }
+
+  .signup-image {
+    display: none;
   }
 }

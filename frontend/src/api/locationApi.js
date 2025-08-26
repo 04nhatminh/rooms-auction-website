@@ -87,6 +87,17 @@ class LocationAPI {
     if (!res.ok) throw new Error((await res.json()).message || 'Failed to fetch district details');
     return res.json();
   }
+
+  // Lấy latitude, longitude từ geocode
+  static async geocodeAddress(q) {
+    const res = await fetch(`${API_BASE_URL}/api/geocode?q=${encodeURIComponent(q)}`);
+    const json = await res.json();
+    if (json.success && json.found) {
+      return { lat: json.lat, lng: json.lng, label: json.display_name || q };
+    } else {
+      return { lat: null, lng: null, label: q };
+    }
+  }
 }
 
 export default LocationAPI;

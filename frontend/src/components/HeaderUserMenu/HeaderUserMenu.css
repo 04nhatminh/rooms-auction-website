@@ -25,7 +25,7 @@
 
 .circle-btn {
   background: none;
-  border: none;
+  border: none !important;
   width: 42px !important;
   height: 42px !important;
   border-radius: 50% !important;

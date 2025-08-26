@@ -1,34 +1,48 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from '../../contexts/LocationContext';
+import { useUser } from '../../contexts/UserContext';
+import auctionApi from '../../api/auctionApi';
 import SearchBar from '../../components/SearchBar/SearchBar';
 import CardSection from '../../components/CardSection/CardSection';
 import RoomSection from '../../components/RoomSection/RoomSection';
+import AuctionSection from '../../components/AuctionSection/AuctionSection';
 import SignInUpAction from '../../components/SignInUpAction/SignInUpAction';
 import HeaderUserMenu from '../../components/HeaderUserMenu/HeaderUserMenu';
+import ProductsCatalog from '../../components/ProductsCatalog/ProductsCatalog';
 import Footer from '../../components/Footer/Footer';
 import logo from '../../assets/logo.png';
 import HomeBackground from '../../assets/home_background.jpg';
-import KhachSanImg from '../../assets/khach_san.png';
-import CanHoImg from '../../assets/can_ho.jpg';
-import HomestayImg from '../../assets/homestay.jpg';
-import ResortImg from '../../assets/resort.jpg';
-import BietThuImg from '../../assets/biet_thu.jpg';
 import HoChiMinhImg from '../../assets/ho_chi_minh.jpg';
 import HaNoiImg from '../../assets/ha_noi.png';
 import VungTauImg from '../../assets/vung_tau.jpg';
 import DaLatImg from '../../assets/da_lat.jpg';
-import NhaTrangImg from '../../assets/nha_trang.jpg';
+import NhaTrangImg from '../../assets/nha_trang.png';
 import WishlistBox from '../../components/WishlistBox/WishlistBox';
 import './HomePage.css';
 
 
-const API_BASE_URL =
-  (process.env.REACT_APP_API_BASE_URL?.replace(/\/$/, '')) || 'http://localhost:3000';
+const API_BASE_URL = (process.env.REACT_APP_API_BASE_URL?.replace(/\/$/, '')) || 'http://localhost:3000';
 
 const HomePage = () => {
   const { popularLocations, isLoading: isLoadingLocations, error: locationError, getPopularLocations } = useLocation();
-  
+  const [user, setUser] = React.useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem('userData');
+      if (stored) setUser(JSON.parse(stored));
+      else setUser(null);
+    } catch (_) {}
+  }, []);
+
+  // State for search data to pass to catalog dropdowns
+  const [searchData, setSearchData] = useState({
+    checkinDate: '',
+    checkoutDate: ''
+  });
+
   // Load popular locations khi component mount (chỉ khi chưa có data)
   useEffect(() => {
     if (popularLocations.length === 0 && !isLoadingLocations) {
@@ -38,18 +52,6 @@ const HomePage = () => {
       console.log('HomePage: Popular locations already available:', popularLocations.length);
     }
   }, []);
-
-  // Handler for accommodation type click
-  const handleAccommodationTypeClick = (item) => {
-    if (item.roomTypeId) {
-      // Navigate đến trang search với filter roomType
-      const searchParams = new URLSearchParams({
-        accommodationTypes: item.roomTypeId
-      });
-      navigate(`/search?${searchParams.toString()}`);
-      window.scrollTo(0, 0);
-    }
-  };
 
   // Handler for destination click
   const handleDestinationClick = (item) => {
@@ -65,14 +67,7 @@ const HomePage = () => {
     }
   };
   
-  const accommodationTypes = useMemo(() => [
-    { image: KhachSanImg, title: 'Khách sạn', roomTypeId: '1' },
-    { image: CanHoImg, title: 'Căn hộ', roomTypeId: '2' },
-    { image: HomestayImg, title: 'Homestay', roomTypeId: '3' },
-    { image: ResortImg, title: 'Resort', roomTypeId: '4' },
-    { image: BietThuImg, title: 'Biệt thự', roomTypeId: '5' },
-  ], []);
-
+  // Memoize các props để tránh tạo object mới mỗi lần render
   const destinations = useMemo(() => [
     { image: HoChiMinhImg, title: 'Hồ Chí Minh', provinceCode: '79' },
     { image: HaNoiImg, title: 'Hà Nội', provinceCode: '01' },
@@ -81,42 +76,17 @@ const HomePage = () => {
     { image: NhaTrangImg, title: 'Nha Trang', provinceCode: '56' },
   ], []);
 
-  // Memoize các props cho RoomSection để tránh tạo object mới mỗi lần render
+  const auctionSectionConfigs = useMemo(() => [
+    { type: "ending-soon", title: "Nhanh tay kẻo lỡ – Đấu giá sắp đóng!", limit: 15 },
+    { type: "featured", title: "Đấu giá đang cháy, tham gia ngay!", limit: 15 },
+    { type: "newest",title: "Vừa cập nhật – Phiên đấu giá mới tinh!", limit: 15 }
+  ], []);
+
   const roomSectionConfigs = useMemo(() => [
     { title: "Nơi lưu trú được ưa chuộng tại Hà Nội", provinceCode: "01", limit: 15 },
     { title: "Chỗ ở còn phòng tại Đà Lạt", provinceCode: "68", limit: 15 },
     { title: "Khám phá nơi lưu trú tại Đà Nẵng", provinceCode: "48", limit: 15 }
   ], []);
-
-  const [user, setUser] = React.useState(null);
-  const navigate = useNavigate();
-
-  React.useEffect(() => {
-    try {
-      const stored = sessionStorage.getItem('userData');
-      if (stored) setUser(JSON.parse(stored));
-    } catch (_) {}
-  }, []);
-
-  const handleLogout = async () => {
-    try {
-      // gọi BE để xóa cookie bidstay_token
-      await fetch(`${API_BASE_URL}/user/logout`, {
-        method: 'POST',
-        credentials: 'include',     // gửi kèm cookie
-      });
-    } catch (e) {
-      // không cần chặn UI nếu request fail
-      console.warn('Logout call failed:', e);
-    } finally {
-      // dọn cache UI
-      sessionStorage.removeItem('userData');
-      sessionStorage.removeItem('token');
-      localStorage.removeItem('userData');
-      localStorage.removeItem('token');
-      navigate('/login');
-    }
-  }
 
   return (
     <div className="homepage-wrapper">
@@ -143,19 +113,25 @@ const HomePage = () => {
           <p className="banner-subtitle">Ưu đãi linh hoạt cho mọi hành trình</p>
         </div>
       </div>
-      <SearchBar />
+      <SearchBar 
+        onSearchDataUpdate={setSearchData}
+      />
       
       <div className='home-content'>
-        <CardSection 
-          title="Tìm theo loại chỗ nghỉ" 
-          items={accommodationTypes} 
-          onItemClick={handleAccommodationTypeClick}
-        />
+        <ProductsCatalog />
         <CardSection 
           title="Điểm đến nổi bật tại Việt Nam" 
           items={destinations} 
           onItemClick={handleDestinationClick}
         />
+        {auctionSectionConfigs.map((config, index) => (
+          <AuctionSection 
+            key={`${config.type}-${config.limit}`}
+            type={config.type}
+            title={config.title}
+            limit={config.limit}
+          />
+        ))}
         {roomSectionConfigs.map((config, index) => (
           <RoomSection 
             key={`${config.provinceCode}-${config.limit}`}

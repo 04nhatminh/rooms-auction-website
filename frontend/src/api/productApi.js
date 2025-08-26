@@ -66,18 +66,15 @@ export const productApi = {
         }
     },
 
-    // Tạo sản phẩm mới (Admin)
-    createProduct: async (productData, token) => {
+    // Lấy danh sách loại hình chỗ ở
+    getPropertyTypes: async () => {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/room/admin/create`, {
-                method: 'POST',
-                credentials: 'include',
+            const response = await fetch(`${API_BASE_URL}/api/room/properties/types`, {
+                method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(productData)
+                }
             });
-
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
@@ -85,11 +82,75 @@ export const productApi = {
             const data = await response.json();
             return data;
         } catch (error) {
-            console.error('Error creating product:', error);
+            console.error('Error fetching property types:', error);
             throw error;
         }
     },
 
+    // Lấy danh sách loại phòng
+    getRoomTypes: async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/room/room-types`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error fetching room types:', error);
+            throw error;
+        }
+    },
+
+    // Lấy danh sách amenity groups
+    getAmenityGroups: async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/room/amenity-groups`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error fetching amenity groups:', error);
+            throw error;
+        }
+    },
+
+    // Lấy danh sách amenities
+    getAmenities: async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/room/amenities`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error fetching amenities:', error);
+            throw error;
+        }
+    },
+
+    // Admin
     // Lấy danh sách sản phẩm (Admin)
     getProducts: async (page = 1, limit = 10) => {
         try {
@@ -114,7 +175,8 @@ export const productApi = {
     },
 
     // Tìm kiếm sản phẩm theo UID (Admin)
-    searchProductsByUID: async (uid, page = 1, limit = 10, token) => {
+    // searchProductsByUID: async (uid, page = 1, limit = 10, token) => {
+    searchProductsByUID: async (uid, page = 1, limit = 10) => {
         try {
             const response = await fetch(`${API_BASE_URL}/api/room/admin/search?uid=${uid}&page=${page}&limit=${limit}`, {
                 method: 'GET',
@@ -136,8 +198,57 @@ export const productApi = {
         }
     },
 
+    // Upload image lên cloudinary
+    uploadImage: async (formData) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/uploads/images`, {
+                method: 'POST',
+                credentials: 'include',
+                body: formData
+            });
+
+            const result = await response.json();
+            if (!result.success) {
+                throw new Error(result.message || 'Upload failed');
+            }
+
+            return result;
+        } catch (error) {
+            console.error('Error uploading images:', error);
+            throw error;
+        }
+    },
+
+    // Tạo sản phẩm mới (Admin)
+    // addProduct: async (productData, token) => {
+    addProduct: async (productData) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/room/admin/add-product`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                    // 'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(productData)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error creating product:', error);
+            throw error;
+        }
+    },
+
+
+
     // Cập nhật sản phẩm (Admin)
-    updateProduct: async (productId, productData, token) => {
+    updateProduct: async (productId, productData) => {
         try {
             const response = await fetch(`${API_BASE_URL}/api/room/admin/${productId}`, {
                 method: 'PUT',
@@ -183,15 +294,16 @@ export const productApi = {
         }
     },
 
-    // Lấy danh sách loại bất động sản
-    getPropertyTypes: async () => {
+    // Lấy full dữ liệu room
+    getFullProductDataByProductId: async (productId) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/room/properties/types`, {
+            const response = await fetch(`${API_BASE_URL}/api/room/${productId}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
                 }
             });
+
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
@@ -199,7 +311,7 @@ export const productApi = {
             const data = await response.json();
             return data;
         } catch (error) {
-            console.error('Error fetching property types:', error);
+            console.error('Error fetching full product data:', error);
             throw error;
         }
     },

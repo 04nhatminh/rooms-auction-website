@@ -1,11 +1,24 @@
 const pool = require('../config/database');
 const { MongoClient } = require('mongodb');
 
+function sanitizeString(s) {
+  return (typeof s === 'string') ? s.trim() : s;
+}
+function toInt(n, def = 0) {
+  const x = Number(n);
+  return Number.isFinite(x) ? x : def;
+}
+function toPrice(n) {
+  const x = Number(n);
+  return Number.isFinite(x) ? x : 0;
+}
+
 class ProductModel {
     // Initialize MongoDB connection when class is loaded
     static async initMongo() {
         try {
-            const client = await MongoClient.connect('mongodb+srv://11_a2airbnb:anhmanminhnhu@cluster0.cyihew1.mongodb.net/');
+            const mongoUri = process.env.MONGODB_URI || 'mongodb+srv://11_a2airbnb:anhmanminhnhu@cluster0.cyihew1.mongodb.net/';
+            const client = await MongoClient.connect(mongoUri);
             this.mongoDb = client.db('a2airbnb');
             console.log('MongoDB connected successfully');
         } catch (err) {
@@ -13,10 +26,39 @@ class ProductModel {
         }
     }
 
+    static generateSnowflakeKey() {
+        if (!this.lastTimestamp) this.lastTimestamp = 0;
+        if (!this.sequence) this.sequence = 0;
+
+        const machineId = 1; // 10 bits
+        let timestamp = Date.now();
+
+        if (timestamp === this.lastTimestamp) {
+            this.sequence = (this.sequence + 1) & 0xfff; // 12 bits
+            if (this.sequence === 0) {
+            while (Date.now() <= this.lastTimestamp) {}
+            timestamp = Date.now();
+            }
+        } else {
+            this.sequence = 0;
+        }
+
+        this.lastTimestamp = timestamp;
+
+        const snowflake = (BigInt(timestamp) << 22n) |
+                            (BigInt(machineId) << 12n) |
+                            BigInt(this.sequence);
+        return snowflake.toString();
+    }
+
     static async getProductDetails(productUID) 
     {
         try {
-            const query = 'SELECT * FROM Products WHERE UID = ?';
+            const query = `SELECT p.*, pr.FullName AS ProvinceFullName, d.FullName AS DistrictFullName
+                            FROM products p 
+                            JOIN provinces pr ON p.ProvinceCode = pr.ProvinceCode
+                            JOIN districts d ON p.DistrictCode = d.DistrictCode
+                            WHERE p.UID = ?`;
             const [products] = await pool.execute(query, [productUID]);
             console.log(`Fetched product details for ProductID ${productUID}:`, products);
             return products[0]; // Trả về sản phẩm đầu tiên
@@ -253,6 +295,55 @@ class ProductModel {
         }
     }
 
+    // Lấy danh sách property types từ bảng Properties
+    static async getAllPropertyTypes() {
+        try {
+            const query = 'SELECT PropertyID, PropertyName FROM Properties ORDER BY PropertyID ASC';
+            const [rows] = await pool.execute(query);
+            return rows;
+        } catch (error) {
+            console.error('Error fetching property types:', error);
+            throw error;
+        }
+    }
+
+    // Lấy danh sách room types từ bảng RoomTypes
+    static async getAllRoomTypes() {
+        try {
+            const query = 'SELECT RoomTypeID, RoomTypeName FROM RoomTypes ORDER BY RoomTypeID ASC';
+            const [rows] = await pool.execute(query);
+            return rows;
+        } catch (error) {
+            console.error('Error fetching room types:', error);
+            throw error;
+        }
+    }
+
+    // Lấy danh sách amenity groups từ bảng AmenityGroups
+    static async getAllAmenityGroups() {
+        try {
+            const query = 'SELECT AmenityGroupID, AmenityGroupName FROM AmenityGroups ORDER BY AmenityGroupID ASC';
+            const [rows] = await pool.execute(query);
+            return rows;
+        } catch (error) {
+            console.error('Error fetching amenity groups:', error);
+            throw error;
+        }
+    }
+
+    // Lấy danh sách amenities từ bảng Amenities
+    static async getAllAmenities() {
+        try {
+            const query = 'SELECT AmenityID, AmenityName, AmenityGroupID FROM Amenities ORDER BY AmenityID ASC';
+            const [rows] = await pool.execute(query);
+            return rows;
+        } catch (error) {
+            console.error('Error fetching amenities:', error);
+            throw error;
+        }
+    }
+
+    // ==================================================================================
     // Lấy danh sách tất cả sản phẩm cho admin
     static async getAllProductsForAdmin(limit, offset) 
     {
@@ -281,73 +372,6 @@ class ProductModel {
             console.error('Error fetching all products for admin:', error);
             throw error;
         }
-    }
-
-    // Tạo sản phẩm mới
-    static async createProduct(data) {
-        const {
-            name, roomNumber, bedrooms, bathrooms, description,
-            region, provinceCode, districtCode, propertyType, amenities, images, price, currency
-        } = data;
-        const pool = require('../config/database');
-        const uid = parseInt(Date.now().toString() + Math.floor(Math.random() * 1000).toString().padStart(3, '0'));
-        const insertQuery = `
-            INSERT INTO Products (
-                UID, 
-                Name, 
-                Address, 
-                ProvinceCode, 
-                DistrictCode,
-                NumBedrooms, 
-                NumBathrooms, 
-                PropertyType, 
-                Price,
-                Currency,
-                CreatedAt
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
-        `;
-        const [result] = await pool.execute(insertQuery, [
-            uid, 
-            name, 
-            roomNumber || '', 
-            provinceCode, 
-            districtCode || null,
-            bedrooms || 1, 
-            bathrooms || 1, 
-            propertyType || 1,
-            price || 0,
-            currency || 'VND'
-        ]);
-        return { id: result.insertId, uid };
-    }
-
-    // Cập nhật sản phẩm
-    static async updateProduct(id, updateData) {
-        // Ví dụ chỉ update tên, có thể mở rộng thêm các trường khác
-        const pool = require('../config/database');
-        const updateQuery = 'UPDATE Products SET Name = ? WHERE ProductID = ?';
-        await pool.execute(updateQuery, [updateData.name, id]);
-        return { id };
-    }
-
-    // Xóa sản phẩm (xóa mềm)
-    static async softDeleteProduct(productId) {
-        if (!productId) {
-            throw new Error('Thiếu ProductID khi xóa sản phẩm');
-        }
-        // Kiểm tra phòng có nằm trong auction đang active không
-        const [activeAuctions] = await pool.execute(
-            `SELECT AuctionID FROM Auction WHERE ProductID = ? AND Status = 'active'`,
-            [productId]
-        );
-        if (activeAuctions.length > 0) {
-            return { success: false, message: 'Phòng đang nằm trong phiên đấu giá đang hoạt động, không thể xóa.' };
-        }
-        await pool.execute(
-            `UPDATE Products SET is_deleted = 1 WHERE ProductID = ?`,
-            [productId]
-        );
-        return { success: true, message: 'Xóa phòng thành công (soft delete).' };
     }
 
     // Tìm kiếm sản phẩm theo UID cho admin
@@ -398,16 +422,147 @@ class ProductModel {
         }
     }
 
-    // Lấy danh sách property types từ bảng Properties
-    static async getAllPropertyTypes() {
-        try {
-            const query = 'SELECT PropertyID, PropertyName FROM Properties ORDER BY PropertyID ASC';
-            const [rows] = await pool.execute(query);
-            return rows;
-        } catch (error) {
-            console.error('Error fetching property types:', error);
-            throw error;
+    //===========================================================================
+    // Tạo sản phẩm mới
+    static async addProduct(data) {
+        // 1) Chuẩn hoá / ép kiểu
+        const name           = sanitizeString(data.name);
+        const roomType       = toInt(data.roomType, null);
+        const propertyType   = toInt(data.propertyType, null);
+        const bedrooms       = toInt(data.bedrooms, 0);
+        const beds           = toInt(data.beds, 0);
+        const bathrooms      = toInt(data.bathrooms, 0);
+        const maxGuests      = toInt(data.maxGuests, 1);
+        const price          = toPrice(data.price);
+        const provinceCode   = sanitizeString(data.provinceCode);
+        const districtCode   = sanitizeString(data.districtCode);
+        const address        = sanitizeString(data.address);
+        const latitude       = parseFloat(data.latitude);
+        const longitude      = parseFloat(data.longitude);
+        const amenities      = Array.isArray(data.amenities) ? data.amenities.map(a => toInt(a)).filter(Number.isFinite) : [];
+        const descriptions   = Array.isArray(data.descriptions) ? data.descriptions : [];
+        const houseRules     = Array.isArray(data.houseRules) ? data.houseRules.filter(x => x && x.trim()) : [];
+        const safetyProps    = Array.isArray(data.safetyProperties) ? data.safetyProperties.filter(x => x && x.trim()) : [];
+
+        // Validate tối thiểu
+        if (!name || !address || !provinceCode || !districtCode || !propertyType || !roomType || !Number.isFinite(price)) {
+            throw new Error('Thiếu hoặc dữ liệu không hợp lệ cho trường bắt buộc');
         }
+
+        const uid = this.generateSnowflakeKey();
+        console.log('Generated UID:', uid);
+        const now = new Date();
+
+        const insertQuery = `
+        INSERT INTO Products
+        (
+            UID, Source, ExternalID, Name, Address, ProvinceCode, DistrictCode,
+            Latitude, Longitude, PropertyType, RoomType, MaxGuests, NumBedrooms, NumBeds, NumBathrooms,
+            Price, Currency, CleanlinessPoint, LocationPoint, ServicePoint, ValuePoint,
+            CommunicationPoint, ConveniencePoint, CreatedAt, LastSyncedAt
+        )
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        `;
+
+        const insertParams = [
+            uid,
+            'bidstay',           // Source mặc định
+            null,                // ExternalID
+            name,
+            address,
+            provinceCode,
+            districtCode,
+            latitude,
+            longitude,
+            propertyType,
+            roomType,
+            maxGuests,
+            bedrooms,
+            beds,
+            bathrooms,
+            price,
+            'VND',               // Currency mặc định
+            0, 0, 0, 0, 0, 0,    // *Point = 0
+            now,                 // CreatedAt
+            now                  // LastSyncedAt
+        ];
+
+        let conn;
+        let productId;
+
+        try {
+        conn = await pool.getConnection();
+        await conn.beginTransaction();
+
+        // 2) Insert Products
+        const [result] = await conn.execute(insertQuery, insertParams);
+        productId = result.insertId;
+
+        // 3) Bulk insert amenities (nếu có)
+        if (amenities.length > 0) {
+            const placeholders = amenities.map(() => '(?, ?)').join(', ');
+            const flatParams = amenities.flatMap(aid => [productId, aid]);
+            const sqlAmen = `INSERT INTO ProductAmenities (ProductID, AmenityID) VALUES ${placeholders}`;
+            await conn.execute(sqlAmen, flatParams);
+        }
+
+        // OK -> commit MySQL
+        await conn.commit();
+        } catch (err) {
+        if (conn) await conn.rollback();
+        throw err;
+        } finally {
+        if (conn) conn.release();
+        }
+
+        // 4) Ghi Mongo sau commit (không để chặn transaction MySQL)
+        try {
+            if (descriptions.length) {
+                await this.mongoDb.collection('descriptions').insertOne({
+                ProductID: productId,
+                Source: 'bidstay',
+                Descriptions: descriptions.map(d => ({
+                    title: d.title ?? null,
+                    htmlText: d.htmlText ?? ''
+                })),
+                updated_at: new Date()
+                });
+            }
+
+            if (houseRules.length || safetyProps.length) {
+                await this.mongoDb.collection('policies').insertOne({
+                ProductID: productId,
+                Source: 'bidstay',
+                Policies: {
+                    house_rules: houseRules,
+                    safety_properties: safetyProps,
+                    house_rules_subtitle: 'Vui lòng tuân thủ nội quy của chủ nhà.'
+                },
+                updated_at: new Date()
+                });
+            }
+        } catch (mongoErr) {
+        console.error('[Mongo insert error]', mongoErr);
+        }
+
+        return productId;
+    }
+
+    // Cập nhật sản phẩm
+    static async updateProduct(id, updateData) {
+        // Ví dụ chỉ update tên, có thể mở rộng thêm các trường khác
+        const pool = require('../config/database');
+        const updateQuery = 'UPDATE Products SET Name = ? WHERE ProductID = ?';
+        await pool.execute(updateQuery, [updateData.name, id]);
+        return { id };
+    }
+
+    // Xóa sản phẩm (xóa mềm)
+    static async deleteProduct(id) {
+        const pool = require('../config/database');
+        const softDeleteQuery = `UPDATE Products SET is_deleted = 1 WHERE ProductID = ?`;
+        const [result] = await pool.execute(softDeleteQuery, [id]);
+        return result.affectedRows;
     }
 
     static async findProductIdByUID(uid) {

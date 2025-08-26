@@ -16,6 +16,7 @@
   background:var(--bg);
   min-height:100%;
   color:var(--text);
+  padding: 24px; 
 }
 
 /* grid 2 cột: thông tin | trạng thái */

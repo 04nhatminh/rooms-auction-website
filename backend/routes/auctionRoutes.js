@@ -11,6 +11,15 @@ router.get('/district/:districtCode', AuctionController.getAuctionsByDistrictByS
 // PUT /api/auction/:auctionUid/end - cập nhật trạng thái ended
 router.put('/:auctionUid/end', AuctionController.setAuctionEnded);
 
+// GET /api/auction/ending-soon
+router.get('/ending-soon', AuctionController.getEndingSoonAuctions);
+
+// GET /api/auction/featured
+router.get('/featured', AuctionController.getFeaturedAuctions);
+
+// GET /api/auction/newest
+router.get('/newest', AuctionController.getNewestAuctions);
+
 // GET /api/auction/:auctionId
 router.get('/:auctionUid', AuctionController.getAuctionById);
 

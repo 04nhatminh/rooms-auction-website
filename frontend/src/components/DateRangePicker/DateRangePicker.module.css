@@ -1,0 +1,107 @@
+.dateRangePicker {
+    margin: 16px 0;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.dateRangeContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: end;
+}
+
+.dateGroup {
+    display: flex;
+    flex-direction: column;
+    min-width: 150px;
+}
+
+.monthYearGroup {
+    display: flex;
+    gap: 12px;
+    align-items: end;
+    padding: 8px 12px;
+    background: #f9fafb;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+}
+
+.dateLabel {
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 6px;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.dateInput,
+.selectInput {
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: 'Montserrat', sans-serif;
+    background: #fff;
+    transition: all 0.2s ease;
+    min-width: 140px;
+}
+
+.dateInput:focus,
+.selectInput:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.dateInput:hover,
+.selectInput:hover {
+    border-color: #9ca3af;
+}
+
+.selectInput {
+    cursor: pointer;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .dateRangeContainer {
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .monthYearGroup {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+    }
+    
+    .dateGroup {
+        min-width: auto;
+        width: 100%;
+    }
+    
+    .dateInput,
+    .selectInput {
+        width: 100%;
+        min-width: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .dateRangePicker {
+        padding: 16px;
+        margin: 12px 0;
+    }
+    
+    .dateRangeContainer {
+        gap: 12px;
+    }
+    
+    .monthYearGroup {
+        padding: 12px;
+    }
+}

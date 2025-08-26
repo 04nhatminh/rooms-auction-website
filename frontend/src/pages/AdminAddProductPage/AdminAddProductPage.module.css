@@ -4,6 +4,7 @@
   color: #374151;
   background-color: #f9fafb;
   min-height: 100vh;
+  padding: 24px; 
 }
 
 .layout {
@@ -47,7 +48,7 @@
   color: #111827;
   margin-bottom: 1.5rem;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid #008489;
+  border-bottom: 2px solid #278C9F;
 }
 
 /* --- Form Layout --- */
@@ -55,18 +56,18 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
-  margin-bottom: 1.5rem;
 }
 
 .formGroup {
   display: flex;
   flex-direction: column;
+  margin-bottom: 1.5rem;
 }
 
 .label {
   font-weight: 500;
   color: #374151;
-  margin-bottom: 0.5rem;
+  margin-top: 0 !important;
   font-size: 0.875rem;
 }
 
@@ -74,23 +75,79 @@
   color: #ef4444;
 }
 
+
+/* Container bọc mỗi ô policy để đặt nút x bên trong */
+.policyItem {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+/* Input dành riêng cho policy để không ảnh hưởng các input khác */
+.policyInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 40px 10px 12px;   /* chừa 40px bên phải cho nút x */
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-size: 14px;
+}
+
+.policyInput:focus {
+  border-color: #278C9F;
+  box-shadow: 0 0 0 3px rgba(39,140,159,0.12);
+}
+
+/* Nút x nằm bên phải, chồng lên trong ô */
+.policyClearBtn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+/* Vẽ ký tự × bằng pseudo-element để không bị trùng chữ */
+.policyClearBtn::before {
+  content: '×';
+  display: block;
+  text-align: center;
+  font-size: 18px;
+  color: #777;
+}
+
+.policyClearBtn:hover::before {
+  color: #d32f2f;
+}
+
+
 /* --- Form Controls --- */
 .input,
 .select,
 .textarea {
+  width: 100%;
   padding: 0.75rem;
   border: 1px solid #d1d5db;
   border-radius: 6px;
   font-size: 0.875rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   background-color: #fff;
+  margin-top: 4px;
+  margin-bottom: 4px;
 }
 
 .input:focus,
 .select:focus,
 .textarea:focus {
   outline: none;
-  border-color: #008489;
+  border-color: #278C9F;
   box-shadow: 0 0 0 3px rgba(0, 132, 137, 0.1);
 }
 
@@ -106,17 +163,83 @@
   min-height: 100px;
 }
 
+.descriptionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.descriptionHeader button{
+  margin-left: auto;
+  width: 24px;
+  height: 24px;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.addDescBtn, .addPolicyBtn {
+  font-family: Montserrat;
+  font-size: 14px;
+  font-weight: 500;
+  margin-left: auto;
+}
+
+.removePolicyBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  justify-content: flex-end;
+}
+
 /* --- Amenities Grid --- */
+.amenityGroup {
+  margin-bottom: 1.5rem;
+}
+
+.amenityGroupHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background-color: #f9fafb;
+  transition: background-color 0.2s ease;
+}
+
+.amenityGroupHeader:hover {
+  background-color: #f3f4f6;
+}
+
+.chevronIcon {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.2s ease;
+}
+
 .amenitiesGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 0.75rem;
-  margin-top: 1rem;
+  margin-top: 0.5rem;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  background-color: #fff;
 }
 
 .checkboxLabel {
   display: flex;
-  align-items: center;
+  align-items: start;
   cursor: pointer;
   padding: 0.5rem;
   border-radius: 6px;
@@ -131,12 +254,14 @@
   margin-right: 0.5rem;
   width: 16px;
   height: 16px;
-  accent-color: #008489;
+  accent-color: #278C9F;
 }
 
 .checkboxText {
-  font-size: 0.875rem;
-  color: #374151;
+  justify-content: center;
+  font-family: Montserrat;
+  font-size: 13px;
+  color: #333;
 }
 
 /* --- File Input --- */
@@ -150,7 +275,7 @@
 }
 
 .fileInput:hover {
-  border-color: #008489;
+  border-color: #278C9F;
   background-color: #f0fdfa;
 }
 
@@ -172,6 +297,70 @@
   margin-bottom: 1rem;
 }
 
+/* --- Image Groups --- */
+.imageGroupContainer {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background-color: #f9fafb;
+}
+
+.imageGroupHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.imageGroupHeader .formGroup {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.removeGroupBtn {
+  background-color: #ef4444;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+  margin-top: 1.5rem;
+  flex-shrink: 0;
+}
+
+.removeGroupBtn:hover {
+  background-color: #dc2626;
+}
+
+.addGroupBtn {
+  background: none;
+  border: 2px dashed #278C9F;
+  color: #278C9F;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  margin-top: 1rem;
+  width: 100%;
+  text-decoration: none;
+}
+
+.addGroupBtn:hover {
+  background-color: #f0fdfa;
+  border-color: rgb(1, 109, 113);
+  color: rgb(1, 109, 113);
+}
+
 .imageList {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -181,6 +370,7 @@
 .imageItem {
   display: flex;
   align-items: center;
+  overflow: hidden;
   justify-content: space-between;
   padding: 0.75rem;
   background-color: #f3f4f6;
@@ -224,8 +414,6 @@
   justify-content: flex-end;
   gap: 1rem;
   margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 1px solid #e5e7eb;
 }
 
 .cancelBtn,
@@ -251,12 +439,12 @@
 }
 
 .submitBtn {
-  background-color: #008489;
+  background-color: #278C9F;
   color: #fff;
 }
 
 .submitBtn:hover:not(:disabled) {
-  background-color: #006b6f;
+  background-color: rgb(1, 109, 113);
 }
 
 .cancelBtn:disabled,
@@ -266,14 +454,14 @@
 }
 
 /* --- Responsive Design --- */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .form {
-    padding: 1.5rem;
+    padding: 4rem 2rem 4rem 2rem;
   }
 
   .formRow {
     grid-template-columns: 1fr;
-    gap: 1rem;
+    gap: 0rem;
   }
 
   .amenitiesGrid {
@@ -296,7 +484,7 @@
 
 @media (max-width: 480px) {
   .form {
-    padding: 1rem;
+    padding: 0.5rem;
   }
 
   .section {

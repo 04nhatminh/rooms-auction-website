@@ -1,13 +1,14 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../contexts/UserContext';
 import menuIcon from '../../assets/menu.png';
+import UserAvatar from '../UserAvatar/UserAvatar';
 import './HeaderUserMenu.css';
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000';
 
 const HeaderUserMenu = () => {
   const navigate = useNavigate();
-  const { user, logout } = useUser();
+  const [user, setUser] = useState(null);
 
   const handleLogout = async () => {
     try {
@@ -25,13 +26,14 @@ const HeaderUserMenu = () => {
       sessionStorage.removeItem('token');
       localStorage.removeItem('userData');
       localStorage.removeItem('token');
-      navigate('/login');
+      setUser(null);
+      // navigate('/login');
     }
   };
 
   return (
     <div className="dropdown-user-info" >
-      <button className="circle-btn user-btn">U</button>
+      <UserAvatar size="medium" />
       <button
         className="circle-btn menu-btn btn"
         type="button"

@@ -75,7 +75,11 @@ const RoomDetailPage = () => {
               <hr />
               <Reviews />
               <hr />
-              <Location />
+              <div className="location-section">
+                <h3>Nơi bạn sẽ đến</h3>
+                <Location />
+              </div>
+
               <hr />
               <HouseRules />
             </main>

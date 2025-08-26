@@ -20,8 +20,9 @@ console.log('token:', process.env.REACT_APP_MAPBOX_TOKEN);
 const Location = ({ lat: latProp, lng: lngProp, label: labelProp, zoom = 14 }) => {
   const { data } = useProduct() || {};
 
-  const district = getName(data?.districtName);
-  const province = getName(data?.provinceName);
+  const address = data?.details?.Address != 'N/A' ? data?.details?.Address || '' : '';
+  const district = data?.details?.DistrictFullName || '';
+  const province = data?.details?.ProvinceFullName || '';
 
   // Pull coords from props first, then context (support multiple field names)
   const latRaw = latProp ?? data?.details?.Latitude ?? data?.Latitude ?? null;
@@ -35,7 +36,7 @@ const Location = ({ lat: latProp, lng: lngProp, label: labelProp, zoom = 14 }) =
   const lat = Number(latRaw);
   const lng = Number(lngRaw);
 
-  const location = [district, province].filter(Boolean).join(', ');
+  const location = [address, district, province].filter(Boolean).join(', ');
   const label = labelProp ?? (location || 'Vị trí');
 
   const containerRef = useRef(null);
@@ -84,11 +85,13 @@ const Location = ({ lat: latProp, lng: lngProp, label: labelProp, zoom = 14 }) =
   }, [lat, lng, label]);
 
   return (
-    <div className="location-section">
-      <h3>Nơi bạn sẽ đến</h3>
+    // <div className="location-section">
+    //   <h3>Nơi bạn sẽ đến</h3>
+    <>
       <span>{label}</span>
       <div className="location-map" ref={containerRef}/>
-    </div>
+    </>
+    // </div>
   );
 };
 

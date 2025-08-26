@@ -399,6 +399,237 @@ class AuctionModel {
         );
         return result.affectedRows > 0;
     }
+    
+    static async getEndingSoonAuctions(limit = 15) {
+        try {
+            const safeLimit = parseInt(limit, 10);
+            const query = `
+                SELECT a.AuctionUID,
+                        p.UID as ProductUID,
+                        a.StartPrice,
+                        a.CurrentPrice,
+                        a.StayPeriodStart,
+                        a.StayPeriodEnd,
+                        a.StartTime,
+                        a.EndTime,
+                        a.Status,
+                        p.Name as ProductName,
+                        rt.RoomTypeName,
+                        p.Address,
+                        p.ProvinceCode,
+                        p.DistrictCode,
+                        prov.Name AS ProvinceName,
+                        dist.Name AS DistrictName,
+                        ROUND((
+                            COALESCE(p.CleanlinessPoint, 0) + 
+                            COALESCE(p.LocationPoint, 0) + 
+                            COALESCE(p.ServicePoint, 0) + 
+                            COALESCE(p.ValuePoint, 0) + 
+                            COALESCE(p.CommunicationPoint, 0) + 
+                            COALESCE(p.ConveniencePoint, 0)
+                        ) / 6, 2) AS AverageRating
+                FROM Auction a
+                JOIN Products p ON a.ProductID = p.ProductID
+                LEFT JOIN Provinces prov ON p.ProvinceCode = prov.ProvinceCode
+                LEFT JOIN Districts dist ON p.DistrictCode = dist.DistrictCode
+                LEFT JOIN RoomTypes rt ON p.RoomType = rt.RoomTypeID
+                WHERE a.Status = 'active'
+                ORDER BY a.EndTime ASC
+                LIMIT ${safeLimit}
+            `;
+            const [auctions] = await pool.execute(query);
+            console.log(`Fetched ending soon auctions:`, auctions);
+            return auctions;
+        } catch (error) {
+            console.error('Error fetching ending soon auctions:', error);
+            throw error;
+        }
+    }
+
+    static async getFeaturedAuctions(limit = 15) {
+        try {
+            const safeLimit = parseInt(limit, 10);
+            const query = `
+                SELECT a.AuctionUID,
+                        p.UID as ProductUID,
+                        a.StartPrice,
+                        a.CurrentPrice,
+                        a.StayPeriodStart,
+                        a.StayPeriodEnd,
+                        a.StartTime,
+                        a.EndTime,
+                        a.Status,
+                        p.Name as ProductName,
+                        rt.RoomTypeName,
+                        p.Address,
+                        p.ProvinceCode,
+                        p.DistrictCode,
+                        prov.Name AS ProvinceName,
+                        dist.Name AS DistrictName,
+                        ROUND((
+                            COALESCE(p.CleanlinessPoint, 0) + 
+                            COALESCE(p.LocationPoint, 0) + 
+                            COALESCE(p.ServicePoint, 0) + 
+                            COALESCE(p.ValuePoint, 0) + 
+                            COALESCE(p.CommunicationPoint, 0) + 
+                            COALESCE(p.ConveniencePoint, 0)
+                        ) / 6, 2) AS AverageRating,
+                        COALESCE(bid_count.BidCount, 0) AS BidCount
+                FROM Auction a
+                JOIN Products p ON a.ProductID = p.ProductID
+                LEFT JOIN Provinces prov ON p.ProvinceCode = prov.ProvinceCode
+                LEFT JOIN Districts dist ON p.DistrictCode = dist.DistrictCode
+                LEFT JOIN RoomTypes rt ON p.RoomType = rt.RoomTypeID
+                LEFT JOIN (
+                    SELECT AuctionID, COUNT(*) AS BidCount
+                    FROM Bids
+                    GROUP BY AuctionID
+                ) bid_count ON a.AuctionID = bid_count.AuctionID
+                WHERE a.Status = 'active'
+                ORDER BY BidCount DESC
+                LIMIT ${safeLimit}
+            `;
+            const [auctions] = await pool.execute(query);
+            console.log(`Fetched featured auctions:`, auctions);
+            return auctions;
+        } catch (error) {
+            console.error('Error fetching featured auctions:', error);
+            throw error;
+        }
+    }
+
+    static async getNewestAuctions(limit = 15) {
+        try {
+            const safeLimit = parseInt(limit, 10);
+            const query = `
+                SELECT a.AuctionUID,
+                        p.UID as ProductUID,
+                        a.StartPrice,
+                        a.CurrentPrice,
+                        a.StayPeriodStart,
+                        a.StayPeriodEnd,
+                        a.StartTime,
+                        a.EndTime,
+                        a.Status,
+                        p.Name as ProductName,
+                        rt.RoomTypeName,
+                        p.Address,
+                        p.ProvinceCode,
+                        p.DistrictCode,
+                        prov.Name AS ProvinceName,
+                        dist.Name AS DistrictName,
+                        ROUND((
+                            COALESCE(p.CleanlinessPoint, 0) + 
+                            COALESCE(p.LocationPoint, 0) + 
+                            COALESCE(p.ServicePoint, 0) + 
+                            COALESCE(p.ValuePoint, 0) + 
+                            COALESCE(p.CommunicationPoint, 0) + 
+                            COALESCE(p.ConveniencePoint, 0)
+                        ) / 6, 2) AS AverageRating
+                FROM Auction a
+                JOIN Products p ON a.ProductID = p.ProductID
+                LEFT JOIN Provinces prov ON p.ProvinceCode = prov.ProvinceCode
+                LEFT JOIN Districts dist ON p.DistrictCode = dist.DistrictCode
+                LEFT JOIN RoomTypes rt ON p.RoomType = rt.RoomTypeID
+                WHERE a.Status = 'active'
+                ORDER BY a.StartTime DESC
+                LIMIT ${safeLimit}
+            `;
+            const [auctions] = await pool.execute(query);
+            console.log(`Fetched newest auctions:`, auctions);
+            return auctions;
+        } catch (error) {
+            console.error('Error fetching newest auctions:', error);
+            throw error;
+        }
+    }
+
+    // Admin
+    static async getAllAuctionsForAdmin(limit, offset) {
+        const safeLimit = parseInt(limit, 10);
+        const safeOffset = parseInt(offset, 10);
+        try {
+            const query = `
+                SELECT 
+                    a.AuctionID,
+                    a.AuctionUID,
+                    a.ProductID,
+                    a.StayPeriodStart,
+                    a.StayPeriodEnd,
+                    a.StartTime,
+                    a.EndTime,
+                    a.Status,
+                    a.CurrentPrice
+                FROM Auction a
+                ORDER BY 
+                    CASE a.Status
+                        WHEN 'active'    THEN 1
+                        WHEN 'ended'     THEN 2
+                        WHEN 'cancelled' THEN 3
+                    END,
+                    a.StartTime DESC
+                LIMIT ${safeLimit} OFFSET ${safeOffset}
+            `;
+            const [auctions] = await pool.execute(query);
+            return auctions;
+        } catch (error) {
+            console.error('Error fetching all auctions for admin:', error);
+            throw error;
+        }
+    }
+
+    static async getAllAuctionsByStatusForAdmin(status, limit, offset) {
+        const safeLimit = parseInt(limit, 10);
+        const safeOffset = parseInt(offset, 10);
+        try {
+            const query = `
+                SELECT 
+                    a.AuctionID,
+                    a.AuctionUID,
+                    a.ProductID,
+                    a.StayPeriodStart,
+                    a.StayPeriodEnd,
+                    a.StartTime,
+                    a.EndTime,
+                    a.Status,
+                    a.CurrentPrice
+                FROM Auction a
+                WHERE a.Status = ?
+                ORDER BY 
+                    CASE a.Status
+                        WHEN 'active'    THEN 1
+                        WHEN 'ended'     THEN 2
+                        WHEN 'cancelled' THEN 3
+                    END,
+                    a.StartTime DESC
+                LIMIT ${safeLimit} OFFSET ${safeOffset}
+            `;
+            const [auctions] = await pool.execute(query, [status]);
+            return auctions;
+        } catch (error) {
+            console.error('Error fetching all auctions by status for admin:', error);
+            throw error;
+        }
+    }
+
+    static async searchAuctionsByUID(uid) {
+        const query = `
+            SELECT 
+                a.AuctionID,
+                a.AuctionUID,
+                a.ProductID,
+                a.StayPeriodStart,
+                a.StayPeriodEnd,
+                a.StartTime,
+                a.EndTime,
+                a.Status,
+                a.CurrentPrice
+            FROM Auction a
+            WHERE a.AuctionUID = ?
+        `;
+        const [auctions] = await pool.execute(query, [uid]);
+        return auctions;
+    }
 }
 
 module.exports = AuctionModel;

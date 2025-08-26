@@ -12,7 +12,14 @@ import './Header.css';
 const Header = ({ searchData: propSearchData, onSearchSubmit }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useUser();
+  const [user, setUser] = React.useState(null);
+
+  React.useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem('userData');
+      if (stored) setUser(JSON.parse(stored));
+    } catch (_) {}
+  }, []);
 
   // Shared search state
   const [searchData, setSearchData] = useState({
@@ -188,7 +195,7 @@ const Header = ({ searchData: propSearchData, onSearchSubmit }) => {
         )} */}
 
         <div className="header-user-actions">
-          {isAuthenticated() ? (
+          {user ? (
             <HeaderUserMenu />
           ) : (
             <SignInUpAction type="others" />

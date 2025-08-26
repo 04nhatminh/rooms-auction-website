@@ -64,6 +64,7 @@ const RoomCard = ({ product, durationDays = 1, isFavorite: initialIsFavorite = f
       const roomId = product.UID;
       if (roomId) {
         navigate(`/room/${roomId}`);
+        window.scrollTo(0, 0);
       }
     }
   };

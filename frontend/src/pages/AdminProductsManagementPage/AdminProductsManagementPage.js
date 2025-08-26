@@ -20,13 +20,11 @@ const AdminProductsManagementPage = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [pagination, setPagination] = useState(null);
 
-  useEffect(() => {
-    if (!isSearching) {
-      loadProducts();
-    }
-  }, [currentPage, isSearching]);
-
   const loadProducts = async () => {
+    // const token = localStorage.getItem('token');
+    // console.log('Loading products with token:', token);
+    // if (!token) { alert('Vui lòng đăng nhập lại.'); navigate('/login'); return; }
+
     try {
         setLoading(true);
         const response = await productApi.getProducts(currentPage, 10);
@@ -61,13 +59,19 @@ const AdminProductsManagementPage = () => {
       }
   };
 
-  const searchProductsByUID = async (uid, page = 1) => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      alert('Vui lòng đăng nhập lại.');
-      navigate('/login');
-      return;
+  useEffect(() => {
+    if (!isSearching) {
+      loadProducts();
     }
+  }, [currentPage, isSearching]);
+
+  const searchProductsByUID = async (uid, page = 1) => {
+    // const token = localStorage.getItem('token');
+    // if (!token) {
+    //   alert('Vui lòng đăng nhập lại.');
+    //   navigate('/login');
+    //   return;
+    // }
 
     if (!uid || uid.trim() === '') {
       // If UID is empty, return to normal list
@@ -79,7 +83,8 @@ const AdminProductsManagementPage = () => {
 
     try {
       setLoading(true);
-      const response = await productApi.searchProductsByUID(uid, page, 10, token);
+      // const response = await productApi.searchProductsByUID(uid, page, 10, token);
+      const response = await productApi.searchProductsByUID(uid, page, 10);
       
       if (response.success) {
         setSearchResults(response.data?.items || []);
@@ -166,11 +171,33 @@ const AdminProductsManagementPage = () => {
   };
 
   const handleAddProduct = () => {
-    navigate('/admin/add-product');
+    // const token = localStorage.getItem('token');
+    // if (!token) {
+    //   alert('Vui lòng đăng nhập lại.');
+    //   navigate('/login');
+    //   return;
+    // }
+    navigate('/admin/products-management/add');
   };
 
-  const handleEditProduct = (productId) => {
-    navigate(`/admin/edit-product/${productId}`);
+  const handleViewProduct = async (productUID) => {
+    // const token = localStorage.getItem('token');
+    // if (!token) {
+    //   alert('Vui lòng đăng nhập lại.');
+    //   navigate('/login');
+    //   return;
+    // }
+    navigate(`/admin/products-management/view/${productUID}`);
+  };
+
+  const handleEditProduct = async (productUID) => {
+    // const token = localStorage.getItem('token');
+    // if (!token) {
+    //   alert('Vui lòng đăng nhập lại.');
+    //   navigate('/login');
+    //   return;
+    // }
+    navigate(`/admin/products-management/edit/${productUID}`);
   };
 
   const formatCurrency = (price) => {
@@ -268,6 +295,7 @@ const AdminProductsManagementPage = () => {
               <tbody>
                 {displayProducts.map((product) => {
                   const productId = product.ProductID;
+                  const UID = product.UID;
                   return (
                     <tr key={productId} className={styles.row}>
                       <td className={styles.colId}>{productId}</td>
@@ -309,7 +337,7 @@ const AdminProductsManagementPage = () => {
                       <td className={styles.colActions}>
                         <div className={styles.actions}>
                           <button className={styles.btnView}
-                            onClick={() => navigate(`/product/${productId}`)}
+                            onClick={() => handleViewProduct(UID)}
                             title="Xem chi tiết"
                           >
                             <img src={ViewIcon} alt="Xem chi tiết" />
@@ -317,7 +345,7 @@ const AdminProductsManagementPage = () => {
 
                           <button
                             className={styles.btnEdit}
-                            onClick={() => handleEditProduct(productId)}
+                            onClick={() => handleEditProduct(UID)}
                             title="Chỉnh sửa"
                           >
                             <img src={EditIcon} alt="Chỉnh sửa" />
