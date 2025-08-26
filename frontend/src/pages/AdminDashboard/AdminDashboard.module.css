@@ -186,15 +186,21 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #278C9F;
+    background: #e4faff;
     border-radius: 12px;
     color: white;
     flex-shrink: 0;
 }
 
+.statIcon img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
 .statInfo h3 {
     font-family: Montserrat;
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 700;
     color: #1e293b;
     margin: 0 0 4px 0;

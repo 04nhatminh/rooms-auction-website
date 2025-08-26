@@ -5,6 +5,10 @@ import LineChart from '../../components/Charts/LineChart';
 import ColumnChart from '../../components/Charts/ColumnChart';
 import styles from './AdminDashboard.module.css';
 import AdminDashboardBg from '../../assets/admin_dashboard_bg.avif';
+import UserIcon from '../../assets/user_icon.png';
+import RevenueIcon from '../../assets/revenue.png';
+import AuctionIcon from '../../assets/auction.png';
+import BookingIcon from '../../assets/booking.png';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -233,7 +237,9 @@ const AdminDashboard = () => {
             
             <div className={styles.statsCards}>
               <div className={styles.statCard}>
-                <div className={styles.statIcon}>👥</div>
+                <div className={styles.statIcon}>
+                  <img src={UserIcon} alt="User Icon" />
+                </div>
                 <div className={styles.statInfo}>
                   <h3>{dashboardData.totalStats.totalUsers || 0}</h3>
                   <p>Tổng khách hàng</p>
@@ -241,7 +247,9 @@ const AdminDashboard = () => {
               </div>
 
               <div className={styles.statCard}>
-                <div className={styles.statIcon}>⚡</div>
+                <div className={styles.statIcon}>
+                  <img src={AuctionIcon} alt="Auction Icon" />
+                </div>
                 <div className={styles.statInfo}>
                   <h3>{dashboardData.totalStats.totalAuctions || 0}</h3>
                   <p>Tổng đấu giá</p>
@@ -249,7 +257,9 @@ const AdminDashboard = () => {
               </div>
 
               <div className={styles.statCard}>
-                <div className={styles.statIcon}>📊</div>
+                <div className={styles.statIcon}>
+                  <img src={BookingIcon} alt="Booking Icon" />
+                </div>
                 <div className={styles.statInfo}>
                   <h3>{dashboardData.totalStats.totalBookings || 0}</h3>
                   <p>Tổng booking</p>
@@ -257,7 +267,9 @@ const AdminDashboard = () => {
               </div>
 
               <div className={styles.statCard}>
-                <div className={styles.statIcon}>💰</div>
+                <div className={styles.statIcon}>
+                  <img src={RevenueIcon} alt="Revenue Icon" />
+                </div>
                 <div className={styles.statInfo}>
                   <h3>{formatCurrency(dashboardData.totalStats.totalRevenue || 0)}</h3>
                   <p>Tổng doanh thu</p>
