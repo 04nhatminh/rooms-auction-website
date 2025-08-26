@@ -267,7 +267,7 @@ const AuctionPage = () => {
                                     });
                                     // Điều hướng sang trang Checkout như BookingCard
                                     const paramsQ = buildQuery(checkin || userCheckin, checkout || userCheckout);
-                                    navigate(`/checkout/${r.bookingId}${paramsQ ? `?${paramsQ}` : ''}`, {
+                                    navigate(`/checkout/booking/${r.bookingId}${paramsQ ? `?${paramsQ}` : ''}`, {
                                         state: {
                                             // nếu bạn có state khách trên trang này thì truyền đúng số; tạm thời để mặc định 1
                                             guests: { adults: 1, children: 0, infants: 0 },
