@@ -163,10 +163,15 @@ const RoomSection = memo(({ title, provinceCode = '01', limit = 15 }) => {
   }, [provinceCode, limit]);
 
   useEffect(() => {
-    // Chỉ gọi 1 lần khi mount
-    FavoritesApi.getUserFavorites().then(data => {
-      setFavoriteIds((data.favorites || []).map(f => f.UID));
-    });
+  // Chỉ gọi getUserFavorites nếu đã đăng nhập
+  const userData = sessionStorage.getItem('userData');
+    if (userData) {
+      FavoritesApi.getUserFavorites().then(data => {
+        setFavoriteIds((data.favorites || []).map(f => f.UID));
+      }).catch(() => setFavoriteIds([]));
+    } else {
+      setFavoriteIds([]);
+    }
   }, []);
 
   if (loading) {
