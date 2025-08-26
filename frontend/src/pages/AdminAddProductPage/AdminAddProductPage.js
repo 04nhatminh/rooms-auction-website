@@ -524,7 +524,7 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
 
   // Trigger khi đổi address/province/district
   useEffect(() => {
-    if (formData.address && formData.provinceCode && formData.districtCode) {
+    if (type === 'add' && formData.address && formData.provinceCode && formData.districtCode) {
       // Tạo debounce function mới cho mỗi lần thay đổi
       const debouncedGeocode = debounce(geocodeNow, 800);
       debouncedGeocode();
@@ -596,21 +596,14 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
       }
     }
 
-    const token = localStorage.getItem('token');
-    if (!token) {
-      alert('Vui lòng đăng nhập lại.');
-      navigate('/login');
-      return;
-    }
-
     if (type === 'add') {
-      await handleAdd(token);
+      await handleAdd();
     } else if (type === 'edit') {
-      await handleUpdate(token);
+      await handleUpdate();
     }
   };
 
-  const handleAdd = async (token) => {
+  const handleAdd = async () => {
     setLoading(true);
     try {
       // Prepare data for API
@@ -638,7 +631,7 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
       console.log('Product data to submit:', productDataToSubmit);
 
       // Bước 1: Tạo sản phẩm trước
-      const createResponse = await productApi.addProduct(productDataToSubmit, token);
+      const createResponse = await productApi.addProduct(productDataToSubmit);
       console.log('Product created:', createResponse);
       
       // Lấy ProductID từ response
@@ -679,7 +672,7 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
     }
   };
 
-  const handleUpdate = async (token) => {
+  const handleUpdate = async () => {
     setUpdating(true);
     try {
       // Prepare data for API
@@ -706,8 +699,8 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
 
       console.log('Product data to update:', productDataToSubmit);
 
-      // Call update API (productId, productData, token)
-      const updateResponse = await productApi.updateProduct(product.id, productDataToSubmit, token);
+      // Call update API (productId, productData)
+      const updateResponse = await productApi.updateProduct(product.id, productDataToSubmit);
       console.log('Product updated:', updateResponse);
 
       // Handle image uploads if there are new images
@@ -1095,7 +1088,7 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
                 </div>
 
                 {/* Hiển thị map dựa trên địa chỉ đã nhập -> latitude, longitude với mapboxgl */}
-                {(formData.provinceCode && formData.districtCode && formData.address && formData.latitude && formData.longitude) && (
+                {(formData.provinceCode && formData.districtCode && formData.address) && (
                   <div className={styles.mapContainer}>
                     <Location
                       lat={formData.latitude}
