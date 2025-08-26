@@ -10,11 +10,11 @@ const BiddingForm = ({
   checkin,
   checkout,
   status,
+  isEnded, // thêm prop này
   onChangeDates,
   onSubmit,
   onBuyNow,
 }) => {
-  const isEnded = status === 'ended';
   const [bidValue, setBidValue] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [ci, setCi] = useState(checkin || '');
