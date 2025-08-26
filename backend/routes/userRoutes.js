@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
+const auctionController = require('../controllers/auctionController');
+const bookingController = require('../controllers/bookingController');
 const { verifyToken } = require('../middleware/authMiddleware');
 
 router.post('/register', userController.register);
@@ -15,5 +17,7 @@ router.post('/reset-password', userController.resetPassword);
 router.get('/me', verifyToken, userController.getProfile);
 router.put('/me', verifyToken, userController.updateProfile);
 router.put('/me/password', verifyToken, userController.changePassword);
+router.get('/auction-history', verifyToken, auctionController.getUserAuctionHistory);
+router.get('/transaction-history', verifyToken, bookingController.getUserTransactionHistory);
 
 module.exports = router;

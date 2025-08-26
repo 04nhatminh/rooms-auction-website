@@ -69,7 +69,7 @@ const HeaderUserMenu = () => {
         <li><hr className="dropdown-divider" /></li>
 
         <li>
-          <button className="dropdown-item" type="button">
+          <button className="dropdown-item" type="button" onClick={() => navigate('/notifications')}>
             <i className="fa-solid fa-bell me-2"></i>Thông báo
           </button>
         </li>

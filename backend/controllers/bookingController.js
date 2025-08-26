@@ -71,7 +71,24 @@ class BookingController {
     }
   }
 
-  // POST /api/payments/confirm
+  // GET /user/transaction-history
+  static async getUserTransactionHistory(req, res) {
+    try {
+        const userId = req.user.id;
+        const [rows] = await pool.execute(`
+            SELECT bk.BookingID, r.Name as room, bk.CreatedAt as date, bk.PaymentMethod as method,
+                   bk.Amount as amount, bk.BookingStatus as status
+            FROM Booking bk
+            JOIN Products r ON bk.ProductID = r.ProductID
+            WHERE bk.UserID = ?
+            ORDER BY bk.CreatedAt DESC
+        `, [userId]);
+        res.json({ success: true, items: rows });
+    } catch (e) {
+        res.status(500).json({ success: false, message: e.message });
+    }
+}
+
 //   async confirmPayment(req, res) {
 //     try {
 //       const { uid, bookingId, providerTxn } = req.body || {};

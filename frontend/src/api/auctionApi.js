@@ -399,8 +399,22 @@ export const auctionApi = {
             console.error('Error deleting auction:', error);
             throw error;
         }
-    }
+    },
 
+    getUserAuctionHistory: async () => {
+        return apiCall('/user/auction-history');
+    }
 };
+
+// Helper cho các API đơn giản kiểu GET
+async function apiCall(path) {
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'API call failed');
+  return data;
+}
 
 export default auctionApi;

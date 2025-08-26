@@ -1,0 +1,68 @@
+.notification-page {
+  min-height: 100vh;
+  background: #f7f8fa;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.notification-page main {
+  max-width: 600px;
+  margin: 40px auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+  padding: 32px 24px;
+}
+
+.notification-page h2 {
+  font-size: 2rem;
+  margin-bottom: 24px;
+  color: #2d3748;
+  text-align: center;
+}
+
+.notification-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.notification-item {
+  padding: 18px 16px;
+  border-bottom: 1px solid #e2e8f0;
+  transition: background 0.2s;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  background: #f9fafb;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+.notification-item strong {
+  color: #3182ce;
+  font-size: 1.1rem;
+}
+
+.notification-item .notification-time {
+  font-size: 0.95rem;
+  color: #718096;
+  margin-top: 6px;
+}
+
+.notification-item.success {
+  border-left: 4px solid #38a169;
+}
+
+.notification-item.failed {
+  border-left: 4px solid #e53e3e;
+}
+
+.notification-item.ended {
+  border-left: 4px solid #805ad5;
+}
+
+.notification-item:hover {
+  background: #edf2f7;
+}

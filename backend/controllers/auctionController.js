@@ -466,6 +466,28 @@ class AuctionController {
             });
         }
     }
+
+    // GET /user/auction-history
+    static async getUserAuctionHistory(req, res) {
+        try {
+            const userId = req.user.id;
+            const [rows] = await pool.execute(`
+                SELECT a.AuctionID, a.AuctionUID, r.Name as room, a.EndTime as date, 
+                       CASE WHEN b.UserID = ? THEN 'Thắng' ELSE 'Thua' END as status,
+                       a.CurrentPrice as price
+                FROM Auction a
+                JOIN Products r ON a.ProductID = r.ProductID
+                LEFT JOIN Bids b ON b.AuctionID = a.AuctionID AND b.UserID = ?
+                WHERE a.Status = 'ended' AND (b.UserID = ? OR EXISTS (
+                    SELECT 1 FROM Bids WHERE AuctionID = a.AuctionID AND UserID = ?
+                ))
+                ORDER BY a.EndTime DESC
+            `, [userId, userId, userId, userId]);
+            res.json({ success: true, items: rows });
+        } catch (e) {
+            res.status(500).json({ success: false, message: e.message });
+        }
+    }
 }
 
-module.exports = AuctionController;
+module.exports = new AuctionController();

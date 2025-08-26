@@ -28,6 +28,21 @@ export const bookingApi = {
     // kỳ vọng: { success:true, bookingId, holdExpiresAt? }
     return data;
   },
+
+  getUserTransactionHistory: async () => {
+    return apiCall('/user/transaction-history');
+  },
 };
+
+// Helper cho các API đơn giản kiểu GET
+async function apiCall(path) {
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'API call failed');
+  return data;
+}
 
 export default bookingApi;
