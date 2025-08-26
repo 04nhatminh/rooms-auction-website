@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import React, { useEffect, useState } from 'react';
 import Header from '../../components/Header/Header';
 import bookingApi from '../../api/bookingApi';
 import Footer from '../../components/Footer/Footer';
@@ -8,17 +7,7 @@ import './TransactionHistoryPage.css';
 const TransactionHistoryPage = () => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    bookingApi.getUserTransactionHistory()
-      .then(res => setTransactions(res.items || []))
-      .catch(() => setTransactions([]))
-      .finally(() => setLoading(false));
-  }, []);
-
-  const [transactions, setTransactions] = useState([]);
-  const [loading, setLoading] = useState(true);
-
+  
   useEffect(() => {
     bookingApi.getUserTransactionHistory()
       .then(res => setTransactions(res.items || []))

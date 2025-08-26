@@ -488,4 +488,4 @@ class AuctionController {
 }
 }
 
-module.exports = new AuctionController();
+module.exports = AuctionController;
