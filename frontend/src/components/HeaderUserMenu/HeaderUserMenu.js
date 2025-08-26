@@ -57,7 +57,7 @@ const HeaderUserMenu = () => {
         </li>
         <li>
           <button className="dropdown-item" type="button" onClick={() => navigate('/transaction-history')}>
-            <i className="fa-solid fa-clock-rotate-left me-2"></i>Lịch sử mua hàng
+            <i className="fa-solid fa-clock-rotate-left me-2"></i>Lịch sử giao dịch
           </button>
         </li>
         <li>

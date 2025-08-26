@@ -72,13 +72,13 @@ class BookingController {
   }
 
   async getUserTransactionHistory(req, res) {
-    try {
-      const userId = req.user.id;
-      const rows = await bookingModel.getUserTransactionHistory(userId);
-      res.json({ success: true, items: rows });
-    } catch (e) {
-      res.status(500).json({ success: false, message: e.message });
-    }
+      try {
+          const userId = req.user.id;
+          const items = await bookingModel.getUserTransactionHistory(userId);
+          res.json({ success: true, items });
+      } catch (e) {
+          res.status(500).json({ success: false, message: e.message });
+      }
   }
 
   // POST /api/payments/confirm
