@@ -2,7 +2,10 @@ import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Header from '../../components/Header/Header';
 import './CheckoutPage.css';
-import checkoutApi from '../../api/checkoutApi'; // ✅ add missing import
+import BookingSummary from '../../components/BookingSummary/BookingSummary';
+import checkoutApi from '../../api/checkoutApi'; 
+import zaloIcon from '../../assets/zalopay.png';
+import paypalIcon from '../../assets/paypal.png';
 
 /**
  * Trang Checkout đơn giản:
@@ -10,10 +13,6 @@ import checkoutApi from '../../api/checkoutApi'; // ✅ add missing import
  * - Chọn phương thức thanh toán: PayPal / ZaloPay
  * - Nhấn "Pay now": gọi BE tạo order và mở popup approve (PayPal) hoặc order_url (ZaloPay)
  *
- * API (mặc định):
- *  - GET  /api/bookings/:bookingId         -> { ok, data: { roomName, checkIn, checkOut, WinningPrice } }
- *  - POST /api/payments/paypal/create      -> { ok, approveUrl, orderId }
- *  - POST /api/payments/zalopay/create     -> { ok, zalo: { order_url, app_trans_id, ... } }
  */
 
 // --- Simple currency helper: VND -> USD ---
@@ -25,7 +24,7 @@ const CheckoutPage = () => {
   const { bookingId } = useParams(); // route: /checkout/:bookingId
   
   const navigate = useNavigate();
-
+  const [grandTotal, setGrandTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [booking, setBooking] = useState(null);
   const [error, setError] = useState(null);
@@ -46,6 +45,11 @@ const CheckoutPage = () => {
        }
      }, 400);
    };
+   
+ const productUidFromBooking = () =>
+   booking?.UID ?? booking?.Uid ??
+   booking?.ProductUID ?? booking?.ProductUid ??
+   booking?.RoomUID ?? booking?.RoomUid ?? '';
   //load booking ban đầu
   useEffect(() => {
     const ac = new AbortController();
@@ -64,35 +68,51 @@ const CheckoutPage = () => {
   //lắng nghe message từ popup
   useEffect(() => {
     const onMsg = (e) => {
-      if (e?.data?.type === 'paypal-captured') {
-        // Refetch để cập nhật trạng thái sau capture
+      // if (e?.data?.type === 'paypal-captured' || e?.data?.type === 'zalopay-return') {
+      //   // Refetch để cập nhật trạng thái sau capture
+      //   const ac = new AbortController();
+      //   checkoutApi.getBooking(bookingId, ac.signal).then(setBooking).catch(() => {});
+      //   // đóng watcher nếu còn
+      //   if (closeTimerRef.current) { clearInterval(closeTimerRef.current); closeTimerRef.current = null; }
+      //   // Nếu popup vẫn mở thì đóng lại
+      //   try { if (popupRef.current && !popupRef.current.closed) popupRef.current.close(); } catch {}
+      //   navigate('/'); // <-- về Home
+      // }
+      const t = e?.data?.type;
+      const st = e?.data?.status;
+      const bid = e?.data?.bookingId || bookingId;
+      if (t === 'paypal-captured' || t === 'zalopay-return' || t === 'vnpay-return') {
+        // làm tươi booking
         const ac = new AbortController();
-        checkoutApi.getBooking(bookingId, ac.signal).then(setBooking).catch(() => {});
-        // đóng watcher nếu còn
+        checkoutApi.getBooking(bid, ac.signal).then(setBooking).catch(() => {});
+        // đóng watcher/popup
         if (closeTimerRef.current) { clearInterval(closeTimerRef.current); closeTimerRef.current = null; }
-        // Nếu popup vẫn mở thì đóng lại
         try { if (popupRef.current && !popupRef.current.closed) popupRef.current.close(); } catch {}
-        navigate('/'); // <-- về Home
+        // điều hướng
+        if (st === 'success') {
+          console.log('Navigate to success page');
+          navigate('/checkout/success');
+        } else {
+          const pid = productUidFromBooking();
+          navigate(`/checkout/failed${pid ? `?productUID=${pid}` : ''}${bid ? `${pid ? '&' : '?'}bookingId=${bid}` : ''}`);
+        }
       }
     };
     window.addEventListener('message', onMsg);
     return () => window.removeEventListener('message', onMsg);
   }, [bookingId, navigate]);
 
-  const formatDate = (iso) => {
-    if (!iso) return '--';
-    try {
-      const d = new Date(iso);
-      return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    } catch {
-      return iso;
-    }
-  };
-
-  const priceVND = useMemo(() => {
-    const v = Number(booking?.WinningPrice || 0); // consider standardizing to one casing
-    return v.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
-  }, [booking]);
+  const nights = useMemo(() => {
+  try {
+    const s = new Date(booking?.StartDate);
+    const e = new Date(booking?.EndDate);
+    // set giờ 12:00 để tránh lệch múi giờ
+    const ms = e.setHours(12,0,0,0) - s.setHours(12,0,0,0);
+    return Math.max(1, Math.round(ms / (1000*60*60*24)));
+  } catch { 
+    return 1; 
+  }
+}, [booking?.StartDate, booking?.EndDate]);
 
   const openPopup = (url) => {
     const w = 520;
@@ -102,27 +122,47 @@ const CheckoutPage = () => {
     return window.open(url, 'payment_popup', `width=${w},height=${h},left=${left},top=${top}`);
   };
 
+  const onCancel = () => {
+    const pid = productUidFromBooking();
+    if (pid) navigate(`/room/${pid}`);  // đổi path nếu trang sản phẩm của bạn khác
+    else navigate(-1);                  // fallback
+  };
+
   const onPay = async () => {
     if (!booking) return;
     setPaying(true);
     try {
-      const amountVND = Number(booking.WinningPrice || 0);
+      const amountVND = Number(grandTotal || booking.WinningPrice || 0);
 
       if (method === 'ZALOPAY') {
-        // ZaloPay expects VND
-        const res = await fetch('/api/checkout/zalopay/create', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ bookingId, amount: amountVND }),
-        });
-        const json = await res.json();
-        if (!json?.ok || !json?.zalo?.order_url)
-          throw new Error(json?.error || 'Create ZaloPay order failed');
-        const popup = openPopup(json.zalo.order_url);
+        // ZaloPay expects VND (dùng helper từ checkoutApi)
+        const zalo = await checkoutApi.createZaloPayOrder({ bookingId, amount: amountVND });
+        if (!zalo?.order_url) throw new Error('Create ZaloPay order failed');
+        const popup = openPopup(zalo.order_url);
         if (!popup) alert('Popup blocked. Hãy cho phép popup cho trang này.');
-      } else {
+      } 
+      else if (method === 'VNPAY') {
+        // const resp = await checkoutApi.createVNPayOrder({ bookingId, amount: grandTotal });
+        // if (!resp?.ok) throw new Error(resp?.error || 'Cannot create VNPay order');
+        // const payUrl = resp?.vnpay?.url;
+        // window.open(payUrl, 'vnpayPopup', 'width=480,height=720');
+        // return;
+
+        const resp = await checkoutApi.createVNPayOrder({
+          bookingId,
+          amount: grandTotal,         // số tiền VNĐ (BE sẽ *100)
+          // bankCode: 'NCB'          // optional, dùng code hợp lệ của VNPay
+        });
+        if (!resp?.ok) throw new Error(resp?.error || 'Cannot create VNPay order');
+
+        const payUrl = resp?.vnpay?.url;
+        const win = window.open(payUrl, 'vnpayPopup', 'width=480,height=720');
+        if (!win) alert('Hãy cho phép popup để tiếp tục thanh toán.');
+        return;
+      }
+      else {
         // PAYPAL expects USD -> convert from VND simply
-        const amountUSD = vndToUsd(amountVND); // simple conversion here
+        const amountUSD = vndToUsd(amountVND);
         const { approveUrl } = await checkoutApi.createPayPalOrder({ bookingId, amount: amountUSD });
         if (!approveUrl)
           throw new Error(error || 'Create PayPal order failed');
@@ -131,7 +171,12 @@ const CheckoutPage = () => {
         popupRef.current = openPopup(approveUrl);
         if (!popupRef.current) alert('Popup blocked. Hãy cho phép popup cho trang này.');
         // Về Home khi popup đóng (fallback nếu user tự đóng không thanh toán)
-        startPopupWatcher(() => navigate('/'));
+        //startPopupWatcher(() => navigate('/'));
+        // Nếu user đóng popup mà không có message -> coi như thất bại
+        startPopupWatcher(() => {
+          const pid = productUidFromBooking();
+          navigate(`/checkout/failed${pid ? `?productUID=${pid}` : ''}${bookingId ? `${pid ? '&' : '?'}bookingId=${bookingId}` : ''}`);
+        });
       }
     } catch (e) {
       alert(e.message || 'Payment error');
@@ -168,70 +213,73 @@ const CheckoutPage = () => {
     <div className="checkout-page">
       {/* Header giữ nguyên phong cách như RoomDetailPage */}
       <Header />
-
       <main className="checkout-content">
-        <h2 style={{ marginTop: 16 }}>Checkout</h2>
         <div className="checkout-main">
           {/* LEFT: Booking summary */}
           <section className="checkout-left">
-            <div className="summary-card">
-              <h3 style={{ marginTop: 0, marginBottom: 8 }}>Booking Summary</h3>
-              <div className="summary-row">
-                <span className="summary-label">Phòng</span>
-                <span className="summary-value">{booking.Name || '--'}</span>
-              </div>
-              <div className="summary-row">
-                <span className="summary-label">Check-in</span>
-                <span className="summary-value">{formatDate(booking.StartDate)}</span>
-              </div>
-              <div className="summary-row">
-                <span className="summary-label">Check-out</span>
-                <span className="summary-value">{formatDate(booking.EndDate)}</span>
-              </div>
-              <hr />
-              <div className="summary-row">
-                <span className="summary-label">Winning Price</span>
-                <span className="summary-value">{priceVND}</span>
-              </div>
-            </div>
-          </section>
+            <h2 style={{ marginTop: 16 }}>Đặt phòng</h2>
+            <BookingSummary
+              unitPrice={Number(booking?.WinningPrice || 0)}
+              nights={nights}
+              currency="VND"
+              checkin={booking?.StartDate}
+              checkout={booking?.EndDate}
+              guests={{
+                adults: booking?.Adults ?? 1,
+                children: booking?.Children ?? 0,
+                infants: booking?.Infants ?? 0,
+              }}
+              onTotalChange={setGrandTotal}
+              showActions={false}  // không hiển thị nút
+              style={{ boxShadow: '0 0px 0px rgba(0,0,0,.18)'}}
+            />
+        </section>
 
           {/* RIGHT: Payment */}
           <aside className="checkout-right">
             <div className="payment-card">
-              <h3 style={{ marginTop: 0, marginBottom: 12 }}>Payment</h3>
+              <h3 style={{ marginTop: 0, marginBottom: 12 }}>Chọn phương thức thanh toán</h3>
 
               <div className="method-group">
-                <label className="method-option">
-                  <input
-                    type="radio"
-                    name="method"
-                    value="ZALOPAY"
-                    checked={method === 'ZALOPAY'}
-                    onChange={() => setMethod('ZALOPAY')}
+                <button
+                  type="button"
+                  className={`method-option method-btn ${method === 'ZALOPAY' ? 'active' : ''}`}
+                  onClick={() => setMethod('ZALOPAY')}
+                  aria-pressed={method === 'ZALOPAY'}
+                >
+                  <img
+                    className="method-icon"
+                    alt="ZaloPay"
+                    src={zaloIcon} /* bạn sẽ tự đổi src */
                   />
                   <span>ZaloPay</span>
-                </label>
+                </button>
 
-                <label className="method-option">
-                  <input
-                    type="radio"
-                    name="method"
-                    value="PAYPAL"
-                    checked={method === 'PAYPAL'}
-                    onChange={() => setMethod('PAYPAL')}
+                <button
+                  type="button"
+                  className={`method-option method-btn ${method === 'PAYPAL' ? 'active' : ''}`}
+                  onClick={() => setMethod('PAYPAL')}
+                  aria-pressed={method === 'PAYPAL'}
+                >
+                  <img
+                    className="method-icon"
+                    alt="PayPal"
+                    src={paypalIcon}   /* bạn sẽ tự đổi src */
                   />
                   <span>PayPal</span>
-                </label>
+                </button>
               </div>
 
               <button className="pay-btn" onClick={onPay} disabled={paying}>
-                {paying ? 'Processing...' : 'Pay now'}
+                {paying ? 'Đang xử lý...' : 'Thanh toán ngay'}
+              </button>
+
+              <button className="cancel-btn" onClick={onCancel} disabled={paying}>
+                Hủy
               </button>
 
               <p className="note">
                 Thanh toán sẽ mở trong popup của {method === 'ZALOPAY' ? 'ZaloPay' : 'PayPal'}.<br />
-                Sau khi xác nhận, hệ thống sẽ cập nhật trạng thái booking tự động qua webhook.
               </p>
             </div>
           </aside>

@@ -15,7 +15,7 @@ export const checkoutApi = {
       };
       if (abortSignal) fetchOptions.signal = abortSignal;
 
-      const res = await fetch(`${API_BASE_URL}/api/checkout/${bookingId}`, fetchOptions);
+      const res = await fetch(`${API_BASE_URL}/api/checkout/booking/${bookingId}`, fetchOptions);
 
       if (!res.ok) {
         let message = `HTTP error! status: ${res.status}`;
@@ -154,6 +154,16 @@ export const checkoutApi = {
     const json = await res.json(); // kỳ vọng { ok: true, ... }
     if (!res.ok || !json?.ok) throw new Error(json?.error || 'Capture failed');
     return json; // nếu cần có thể trả { ok, captureId, ... }
+  },
+
+  zpQuery: async (body, abortSignal = null) => {
+    const r = await fetch('/api/checkout/zalopay/query', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: abortSignal ?? undefined,
+    });
+    return r.json();
   },
 };
 

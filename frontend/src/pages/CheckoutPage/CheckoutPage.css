@@ -1,37 +1,51 @@
-/* Giữ tinh thần bố cục của RoomDetailPage (margin, hr...) */
-.checkout-page {
-  display: flex;
-  flex-direction: column;
-}
+/* === Center layout chỉ cho trang Checkout === */
+.checkout-main{
+  /* đặt bề rộng 2 cột co giãn theo màn hình, rồi căn giữa toàn bộ grid */
+  --leftW:  clamp(360px, 46vw, 640px);
+  --rightW: clamp(300px, 30vw, 420px);
 
-.checkout-content {
-  flex: 1;
-  margin: 0 64px; /* đồng bộ cảm giác với RoomDetailPage */
-}
-
-.checkout-main {
+  --payOffset: clamp(16px, 17vh, 160px);
   display: grid;
-  grid-template-columns: 60% 35%;
-  gap: 5%;
-  justify-content: space-between;
+  grid-template-columns: var(--leftW) var(--rightW);
+  gap: clamp(10px, 5vw, 20px);
+  justify-content: center;      /* đưa cả 2 cột vào gần giữa */
   margin-top: 16px;
 }
 
-.checkout-left {
-  width: 60% !important;
-  max-width: 60% !important;
+.checkout-right{
+  margin-top: var(--payOffset);
 }
 
-.checkout-right {
-  width: 35% !important;
-  max-width: 35% !important;
+/* bỏ ép width 60%/35% để grid mới quyết định kích thước */
+.checkout-page .checkout-left,
+.checkout-page .checkout-right{
+  width: auto !important;
+  max-width: none !important;
 }
 
-.checkout-content hr {
-  border: 0;
-  border-top: 1px solid #DDDDDD;
-  margin: 24px 0;
-  padding: 0 64px;
+/* Tinh chỉnh theo các ngưỡng */
+@media (max-width: 1280px){
+  .checkout-main{ --payOffset: clamp(8px, 7vh, 120px); }
+}
+
+@media (max-width: 1160px){
+  .checkout-main{ --payOffset: clamp(0px, 5vh, 80px); }
+}
+
+/* Mobile về 1 cột: không cần đẩy xuống nữa */
+@media (max-width: 1024px){
+  .checkout-right{ margin-top: 0; }
+}
+
+/* card tóm tắt dùng trọn bề rộng cột trái */
+.checkout-left .cbm-card{ width: 100%; }
+
+/* Responsive: về 1 cột khi màn hình hẹp */
+@media (max-width: 1024px){
+  .checkout-main{
+    grid-template-columns: 1fr;
+    justify-content: stretch;
+  }
 }
 
 .summary-card, .payment-card {
@@ -59,8 +73,8 @@
 
 .method-group {
   display: flex;
-  gap: 16px;
-  margin: 12px 0;
+  gap: clamp(8px, 2vw, 16px);
+  width: 100%;
 }
 
 .method-option {
@@ -73,6 +87,47 @@
   cursor: pointer;
 }
 
+/* Nút chọn phương thức dạng icon */
+.method-btn {
+  appearance: none;
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 0;
+  min-width: 0;
+  cursor: pointer;        /* giữ cân bằng 2 nút */
+  justify-content: center;
+  box-sizing: border-box;
+  transition: border-color .15s ease, box-shadow .15s ease, transform .02s ease;
+}
+
+.method-btn:hover { border-color: #a2a6a7; }
+.method-btn:active { transform: translateY(0.5px); }
+
+.method-btn.active {
+  border-color: #111827;
+  box-shadow: 0 0 0 3px rgba(17,24,39,.06);
+}
+
+.method-icon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  display: block;
+}
+
+/* Giữ khoảng cách 2 nút như hiện tại */
+/* Mobile: nếu muốn xếp dọc khi quá hẹp */
+@media (max-width: 420px){
+  .method-group{
+    flex-direction: column;
+  }
+}
+
 .pay-btn {
   display: inline-block;
   width: 100%;
@@ -83,9 +138,28 @@
   color: #fff;
   font-weight: 600;
   cursor: pointer;
+  margin-top: clamp(8px, 10vh, 16px);;
 }
 
 .pay-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cancel-btn {
+  display: inline-block;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 10px;
+  background: red;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: clamp(8px, 10vh, 16px);;
+}
+
+.cancel-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
@@ -96,3 +170,21 @@
   margin-top: 8px;
   line-height: 1.4;
 }
+
+.result-wrap{
+  min-height: calc(100vh - 80px); /* trừ header */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.result-card{
+  width: 100%;
+  max-width: 560px;
+  background: #fff;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 6px 24px rgba(0,0,0,.08);
+  text-align: center;
+}
+

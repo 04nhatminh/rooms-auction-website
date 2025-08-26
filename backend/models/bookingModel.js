@@ -2,7 +2,7 @@
 const db = require('../config/database');
 
 class BookingModel {
-    async placeDraft({ userId, productId, start, end, nights, unitPrice, currency, provider, holdMinutes = 30 }) {
+    static async placeDraft({ userId, productId, start, end, nights, unitPrice, currency, provider, holdMinutes = 30 }) {
         const conn = await db.getConnection();   // dùng cùng 1 connection cho @variables
         try {
         // 1) khai báo biến OUT
@@ -26,20 +26,20 @@ class BookingModel {
         }
     }
 
-    async confirmPaymentSuccess({ productId, bookingId, providerTxn }) {
+    static async confirmPaymentSuccess({ productId, bookingId, providerTxn }) {
         await db.query('CALL sp_confirm_payment_success(?,?,?)', [productId, bookingId, providerTxn || null]);
         return { ok: true };
     }
 
-    async paymentFailedOrExpired({ productId, bookingId, note }) {
+    static async paymentFailedOrExpired({ productId, bookingId, note }) {
         await db.query('CALL sp_payment_failed_or_expired(?,?,?)', [productId, bookingId, note || null]);
         return { ok: true };
     }
 
-    async findBookingById(bookingID)
+    static async findBookingById(bookingID)
     {
         try {
-            const query = `SELECT b.BookingID, b.BidID, b.UserID, p.Name, b.WinningPrice, b.StartDate, b.EndDate, b.BookingStatus
+            const query = `SELECT b.BookingID, b.BidID, p.UID, b.UserID, p.Name, b.WinningPrice, b.ServiceFee, b.StartDate, b.EndDate, b.BookingStatus
                            FROM Booking b
                            JOIN Products p ON b.ProductID = p.ProductID
                           WHERE b.BookingID = ?`;
@@ -54,7 +54,7 @@ class BookingModel {
         }
     }
 
-    async updateBookingPaid(bookingID, methodID)
+    static async updateBookingPaid(bookingID, methodID)
     {
         try {
             const [booking] = await db.query('SELECT 1 FROM Booking WHERE BookingID=? AND BookingStatus = "pending"', [bookingID])

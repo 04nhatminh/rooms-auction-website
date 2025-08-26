@@ -5,13 +5,13 @@ class PaymentModel {
    * Create an initiated payment row (no ProviderTxnID yet).
    * Returns only a success flag; never leaks PaymentID.
    */
-  static async insertInitiated(bookingID, userID, amount, currency) {
+  static async insertInitiated(bookingID, userID, amount, currency, provider) {
     try {
       await pool.query(
         `INSERT INTO Payments
            (BookingID, UserID, Amount, Currency, Provider, ProviderTxnID, Status)
-         VALUES (?, ?, ?, ?, 'PayPal', NULL, 'initiated')`,
-        [bookingID, userID, amount, currency]
+         VALUES (?, ?, ?, ?, ?, NULL, 'initiated')`,
+        [bookingID, userID, amount, currency, provider]
       );
       console.log(`Inserted initiated payment for BookingID: ${bookingID}, UserID: ${userID}`);
       return { success: true };
