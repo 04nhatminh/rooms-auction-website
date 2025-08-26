@@ -359,6 +359,15 @@ class AuctionModel {
             conn.release();
         }
     }
+
+    // === UPDATE STATUS ===
+    static async setAuctionEnded(auctionUid) {
+        const [result] = await pool.query(
+            'UPDATE Auction SET Status = ? WHERE AuctionUID = ?',
+            ['ended', auctionUid]
+        );
+        return result.affectedRows > 0;
+    }
 }
 
 module.exports = AuctionModel;

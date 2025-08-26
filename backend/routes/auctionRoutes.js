@@ -8,8 +8,11 @@ router.get('/province/:provinceCode', AuctionController.getAuctionsByProvinceByS
 // GET /api/auction/district/:districtCode?status=<status>&limit=<limit>
 router.get('/district/:districtCode', AuctionController.getAuctionsByDistrictByStatus);
 
+// PUT /api/auction/:auctionUid/end - cập nhật trạng thái ended
+router.put('/:auctionUid/end', AuctionController.setAuctionEnded);
+
 // GET /api/auction/:auctionId
-router.get('/:auctionId', AuctionController.getAuctionById);
+router.get('/:auctionUid', AuctionController.getAuctionById);
 
 router.post('/preview', AuctionController.previewCreateForGuest);
 router.post('/create',  AuctionController.createFromGuest);

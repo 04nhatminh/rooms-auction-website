@@ -146,6 +146,16 @@ export const auctionApi = {
         if (!r.ok) throw new Error(data.message || 'Đặt giá thất bại');
         return data;
     },
+
+    // Kết thúc phiên đấu giá
+    endAuction: async (auctionUid) => {
+        const r = await fetch(`${API_BASE_URL}/api/auction/${auctionUid}/end`, {
+            method: 'PUT', headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(data.message || 'Không thể kết thúc phiên');
+        return data;
+    },
 };
 
 export default auctionApi;

@@ -1,6 +1,19 @@
 const AuctionModel = require('../models/auctionModel');
 
 class AuctionController {
+    // PUT /api/auction/:auctionUid/end
+    static async setAuctionEnded(req, res) {
+        const auctionUid = req.params.auctionUid;
+        try {
+            const ok = await AuctionModel.setAuctionEnded(auctionUid);
+            if (!ok) {
+                return res.status(404).json({ success: false, message: 'Auction not found or already ended' });
+            }
+            return res.status(200).json({ success: true, message: 'Auction ended successfully' });
+        } catch (error) {
+            return res.status(500).json({ success: false, message: error.message });
+        }
+    }
     // GET /api/auction/:auctionId
     static async getAuctionById(req, res) {
         const auctionId = req.params.auctionId;

@@ -76,6 +76,7 @@ function mapApiToView(payload, currentUserId) {
         startingPrice: auction.StartingPrice || auction.startingPrice || 0,
         currentPrice: auction.CurrentPrice || auction.currentPrice || auction.lastPrice || auction.startingPrice || 0,
         currency: auction.Currency || auction.currency || 'VND',
+        status: auction.Status || auction.status || 'active',
     };
 
     // Thông tin phòng
@@ -127,6 +128,7 @@ const AuctionPage = () => {
     const [viewData, setViewData] = useState(null);
     const [userCheckin, setUserCheckin] = useState(qsCheckin);
     const [userCheckout, setUserCheckout] = useState(qsCheckout);
+    const [auctionDetailsState, setAuctionDetails] = useState(null);
 
     const currentUserId = useMemo(() => {
         try {
@@ -145,7 +147,9 @@ const AuctionPage = () => {
         auctionApi.getByUid(auctionUid, aborter.signal)
             .then((resp) => {
                 if (!alive || !resp) return;
-                setViewData(mapApiToView(resp, currentUserId));
+                const mapped = mapApiToView(resp, currentUserId);
+                setViewData(mapped);
+                setAuctionDetails(mapped.auctionDetails); // cập nhật state auctionDetailsState
                 // Nếu chưa có từ query thì fallback từ dữ liệu phiên
                 const raw = resp?.data?.auction || {};
                 const toYMD = (d) => (d ? new Date(d).toISOString().slice(0,10) : '');
@@ -204,18 +208,31 @@ const AuctionPage = () => {
                     </div>
 
                     <div className="right-column auction-info-card">
-                        <CountdownTimer details={auctionDetails} />
-                        <AuctionInfo details={auctionDetails} />
-                        <BiddingForm
-                            currentPrice={auctionDetails.currentPrice}
-                            bidIncrement={auctionDetails.bidIncrement}
-                            checkin={userCheckin}
-                            checkout={userCheckout}
-                            onChangeDates={(ci, co) => { setUserCheckin(ci); setUserCheckout(co); }}
-                            // Truyền thêm thông tin cần thiết cho submit bid
-                            oonSubmit={async (amount, { checkin, checkout }) => {
-                                try {
-                                    if (!currentUserId) throw new Error('Bạn cần đăng nhập để đặt giá');
+                            <CountdownTimer
+                                details={auctionDetailsState}
+                                onEnded={async () => {
+                                    if (auctionDetailsState?.status !== 'ended' && auctionUid) {
+                                        try {
+                                            await auctionApi.endAuction(auctionUid);
+                                            setAuctionDetails(prev => ({ ...prev, status: 'ended' }));
+                                        } catch (e) {
+                                            // Có thể log hoặc báo lỗi nếu cần
+                                        }
+                                    }
+                                }}
+                            />
+                            <AuctionInfo details={auctionDetailsState} />
+                            <BiddingForm
+                                    currentPrice={auctionDetailsState?.currentPrice}
+                                    bidIncrement={auctionDetailsState?.bidIncrement}
+                                    checkin={userCheckin}
+                                    checkout={userCheckout}
+                                    status={auctionDetailsState?.status}
+                                    onChangeDates={(ci, co) => { setUserCheckin(ci); setUserCheckout(co); }}
+                                    // Truyền thêm thông tin cần thiết cho submit bid
+                                    oonSubmit={async (amount, { checkin, checkout }) => {
+                                            try {
+                                                    if (!currentUserId) throw new Error('Bạn cần đăng nhập để đặt giá');
                                     await auctionApi.bid(auctionUid, {
                                         userId: currentUserId,
                                         amount,
