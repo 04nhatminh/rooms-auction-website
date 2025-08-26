@@ -24,6 +24,8 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
   
   // Form state
   const [formData, setFormData] = useState({
+    uid: '',
+    productId: '',
     name: '',
     roomType: '',
     propertyType: '',
@@ -181,6 +183,8 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
 
     // 8) Gán vào formData
     const loadedFormData = {
+      uid:         details.UID          || details.uid          || '',
+      productId:   details.ProductID    || details.productId    || '',
       name:        details.Name        || details.name        || '',
       roomType:    details.RoomType    || details.roomType    || '',
       propertyType:details.PropertyType|| details.propertyType|| '',
@@ -561,7 +565,7 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
 
   // Trigger khi đổi address/province/district
   useEffect(() => {
-    if (type === 'add' && formData.address && formData.provinceCode && formData.districtCode) {
+    if ((type === 'add' || type === 'edit') && formData.address && formData.provinceCode && formData.districtCode) {
       // Tạo debounce function mới cho mỗi lần thay đổi
       const debouncedGeocode = debounce(geocodeNow, 800);
       debouncedGeocode();
@@ -734,10 +738,8 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
         imageGroups: formData.imageGroups.filter(group => group.title.trim() || group.images.length > 0)
       };
 
-      console.log('Product data to update:', productDataToSubmit);
-
       // Call update API (productId, productData)
-      const updateResponse = await productApi.updateProduct(product.id, productDataToSubmit);
+      const updateResponse = await productApi.updateProduct(formData.uid, productDataToSubmit);
       console.log('Product updated:', updateResponse);
 
       // Handle image uploads if there are new images
@@ -748,8 +750,7 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
       if (hasNewImages) {
         setUploadingImages(true);
         try {
-          console.log('Uploading new images for product:', product.id);
-          const uploadResult = await uploadAllProductImages(product.id, formData.imageGroups);
+          const uploadResult = await uploadAllProductImages(formData.productId, formData.imageGroups);
           console.log('Upload result:', uploadResult);
         } catch (imageError) {
           console.error('Image upload error:', imageError);
@@ -770,15 +771,19 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
   };
 
   const handleCancel = () => {
-    const confirmMessage = type === 'add' 
-      ? 'Bạn có chắc muốn hủy? Dữ liệu đã nhập sẽ bị mất.'
-      : type === 'edit'
-      ? 'Bạn có chắc muốn hủy? Các thay đổi sẽ không được lưu.'
-      : 'Bạn có chắc muốn thoát?';
-      
-    if (window.confirm(confirmMessage)) {
-      navigate('/admin/products-management');
+    let confirmMessage;
+    if (type === 'add') {
+      confirmMessage = 'Bạn có chắc muốn hủy? Dữ liệu đã nhập sẽ bị mất.';
+      if (window.confirm(confirmMessage)) {
+        navigate('/admin/products-management');
+      }
+    } else if (type === 'edit') {
+      confirmMessage = 'Bạn có chắc muốn hủy? Các thay đổi sẽ không được lưu.';
+      if (window.confirm(confirmMessage)) {
+        navigate('/admin/products-management');
+      }
     }
+    else navigate('/admin/products-management');
   };
 
   // Get page title based on type

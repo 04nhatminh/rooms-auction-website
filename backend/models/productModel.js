@@ -1,3 +1,4 @@
+const e = require('express');
 const pool = require('../config/database');
 const { MongoClient } = require('mongodb');
 
@@ -565,20 +566,173 @@ class ProductModel {
     }
 
     // Cập nhật sản phẩm
-    static async updateProduct(id, updateData) {
-        // Ví dụ chỉ update tên, có thể mở rộng thêm các trường khác
-        const pool = require('../config/database');
-        const updateQuery = 'UPDATE Products SET Name = ? WHERE ProductID = ?';
-        await pool.execute(updateQuery, [updateData.name, id]);
-        return { id };
-    }
+    static async updateProduct(uid, updateData) {
+        // CREATE PROCEDURE UpsertProduct(
+        //     IN p_UID BIGINT UNSIGNED,
+        //     IN p_ExternalID VARCHAR(30),
+        //     IN p_Source VARCHAR(20),
+        //     IN p_Name VARCHAR(255),
+        //     IN p_Address VARCHAR(255),
+        //     IN p_ProvinceCode VARCHAR(20),
+        //     IN p_DistrictCode VARCHAR(20),
+        //     IN p_Latitude FLOAT,
+        //     IN p_Longitude FLOAT,
+        //     IN p_PropertyType INT,
+        //     IN p_RoomType INT,
+        //     IN p_MaxGuests SMALLINT,
+        //     IN p_NumBedrooms SMALLINT,
+        //     IN p_NumBeds SMALLINT,
+        //     IN p_NumBathrooms SMALLINT,
+        //     IN p_Price DECIMAL(10,2),
+        //     IN p_Currency VARCHAR(20),
+        //     IN p_Cleanliness FLOAT,
+        //     IN p_Location FLOAT,
+        //     IN p_Service FLOAT,
+        //     IN p_Value FLOAT,
+        //     IN p_Communication FLOAT,
+        //     IN p_Convenience FLOAT,
+        //     IN p_CreatedAt TIMESTAMP,
+        //     IN p_LastSyncedAt TIMESTAMP
+        // )
+        // BEGIN
+        //     DECLARE v_ProductID INT;
 
-    // Xóa sản phẩm (xóa mềm)
-    static async deleteProduct(id) {
-        const pool = require('../config/database');
-        const softDeleteQuery = `UPDATE Products SET is_deleted = 1 WHERE ProductID = ?`;
-        const [result] = await pool.execute(softDeleteQuery, [id]);
-        return result.affectedRows;
+        //     SELECT ProductID INTO v_ProductID
+        //     FROM Products
+        //     WHERE ExternalID = p_ExternalID
+        //     LIMIT 1;
+
+        // -- Chỉ update nếu có sự khác biệt
+        // IF EXISTS (
+        //     SELECT 1 FROM Products
+        //     WHERE ProductID = v_ProductID
+        //     AND (
+        //         Source <> p_Source OR
+        //         Name <> p_Name OR
+        //         Address <> p_Address OR
+        //         ProvinceCode <> p_ProvinceCode OR
+        //         DistrictCode <> p_DistrictCode OR
+        //         Latitude <> p_Latitude OR
+        //         Longitude <> p_Longitude OR
+        //         PropertyType <> p_PropertyType OR
+        //         RoomType <> p_RoomType OR
+        //         MaxGuests <> p_MaxGuests OR
+        //         NumBedrooms <> p_NumBedrooms OR
+        //         NumBeds <> p_NumBeds OR
+        //         NumBathrooms <> p_NumBathrooms OR
+        //         Price <> p_Price OR
+        //         Currency <> p_Currency OR
+        //         CleanlinessPoint <> p_Cleanliness OR
+        //         LocationPoint <> p_Location OR
+        //         ServicePoint <> p_Service OR
+        //         ValuePoint <> p_Value OR
+        //         CommunicationPoint <> p_Communication OR
+        //         ConveniencePoint <> p_Convenience
+        //     )
+        // ) THEN
+        //     UPDATE Products
+        //     SET 
+        //         Source = p_Source,
+        //         Name = p_Name,
+        //         Address = p_Address,
+        //         ProvinceCode = p_ProvinceCode,
+        //         DistrictCode = p_DistrictCode,
+        //         Latitude = p_Latitude,
+        //         Longitude = p_Longitude,
+        //         PropertyType = p_PropertyType,
+        //         RoomType = p_RoomType,
+        //         MaxGuests = p_MaxGuests,
+        //         NumBedrooms = p_NumBedrooms,
+        //         NumBeds = p_NumBeds,
+        //         NumBathrooms = p_NumBathrooms,
+        //         Price = p_Price,
+        //         Currency = p_Currency,
+        //         CleanlinessPoint = p_Cleanliness,
+        //         LocationPoint = p_Location,
+        //         ServicePoint = p_Service,
+        //         ValuePoint = p_Value,
+        //         CommunicationPoint = p_Communication,
+        //         ConveniencePoint = p_Convenience,
+        //         CreatedAt = p_CreatedAt,
+        //         LastSyncedAt = p_LastSyncedAt
+        //     WHERE ProductID = v_ProductID;
+        // ELSE
+        //     -- Chỉ cập nhật thời gian đồng bộ nếu không thay đổi gì khác
+        //     UPDATE Products
+        //     SET LastSyncedAt = p_LastSyncedAt
+        //     WHERE ProductID = v_ProductID;
+        // END IF;
+    // END $$
+        // 1) Chuẩn hoá / ép kiểu
+        const name           = sanitizeString(updateData.name);
+        const roomType       = toInt(updateData.roomType, null);
+        const propertyType   = toInt(updateData.propertyType, null);
+        const bedrooms       = toInt(updateData.bedrooms, 0);
+        const beds           = toInt(updateData.beds, 0);
+        const bathrooms      = toInt(updateData.bathrooms, 0);
+        const maxGuests      = toInt(updateData.maxGuests, 1);
+        const price          = toPrice(updateData.price);
+        const provinceCode   = sanitizeString(updateData.provinceCode);
+        const districtCode   = sanitizeString(updateData.districtCode);
+        const address        = sanitizeString(updateData.address);
+        const latitude       = parseFloat(updateData.latitude);
+        const longitude      = parseFloat(updateData.longitude);
+        const amenities      = Array.isArray(updateData.amenities) ? updateData.amenities.map(a => toInt(a)).filter(Number.isFinite) : [];
+        const descriptions   = Array.isArray(updateData.descriptions) ? updateData.descriptions : [];
+        const houseRules     = Array.isArray(updateData.houseRules) ? updateData.houseRules.filter(x => x && x.trim()) : [];
+        const safetyProps    = Array.isArray(updateData.safetyProperties) ? updateData.safetyProperties.filter(x => x && x.trim()) : [];
+
+        // Validate tối thiểu
+        if (!name || !address || !provinceCode || !districtCode || !propertyType || !roomType || !Number.isFinite(price)) {
+            throw new Error('Thiếu hoặc dữ liệu không hợp lệ cho trường bắt buộc');
+        }
+
+        const now = new Date();
+
+        const updateQuery = `
+        UPDATE Products
+        SET
+            Name = ?,
+            Address = ?,
+            ProvinceCode = ?,
+            DistrictCode = ?,
+            Latitude = ?,
+            Longitude = ?,
+            PropertyType = ?,
+            RoomType = ?,
+            MaxGuests = ?,
+            NumBedrooms = ?,
+            NumBeds = ?,
+            NumBathrooms = ?,
+            Price = ?,
+            Currency = ?,
+            LastSyncedAt = ?
+        WHERE UID = ?
+        `;
+
+        const updateParams = [
+            name,
+            address,
+            provinceCode,
+            districtCode,
+            latitude,
+            longitude,
+            propertyType,
+            roomType,
+            maxGuests,
+            bedrooms,
+            beds,
+            bathrooms,
+            price,
+            'VND',               // Currency mặc định
+            now,                 // LastSyncedAt
+            uid
+        ];
+
+        const [result] = await pool.query(updateQuery, updateParams);
+        if (result.affectedRows === 0) {
+            throw new Error('Cập nhật sản phẩm không thành công');
+        }
     }
 
     static async findProductIdByUID(uid) {
