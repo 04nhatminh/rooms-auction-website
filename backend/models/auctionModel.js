@@ -293,9 +293,14 @@ class AuctionModel {
     // === GET BY UID ===
     static async getByUID(auctionUid) {
         const [rows] = await pool.query(`
-            SELECT A.*, P.UID AS ProductUID, P.Name AS ProductName, P.Price AS BasePrice, P.Currency
+            SELECT A.*, P.UID AS ProductUID, P.Name AS ProductName, P.MaxGuests, R.RoomTypeName, PR.PropertyName,
+                D.Name AS DistrictName, PRV.Name AS ProvinceName, P.Price AS BasePrice, P.Currency
             FROM Auction A
             JOIN Products P ON P.ProductID = A.ProductID
+            LEFT JOIN Properties PR ON PR.PropertyID = P.PropertyType
+            LEFT JOIN RoomTypes R ON R.RoomTypeID = P.RoomType
+            LEFT JOIN Districts D ON D.DistrictCode = P.DistrictCode
+            LEFT JOIN Provinces PRV ON PRV.ProvinceCode = P.ProvinceCode
             WHERE A.AuctionUID = ?`, [auctionUid]);
         if (!rows.length) return null;
 
@@ -321,7 +326,15 @@ class AuctionModel {
                 currentPrice: currentPrice ?? a.StartPrice,
                 status: a.Status
             },
-            room: { name: a.ProductName, basePrice: a.BasePrice, currency: a.Currency },
+            room: {
+                roomUID: a.ProductUID,
+                name: a.ProductName,
+                maxGuests: a.MaxGuests,
+                roomType: a.RoomTypeName,
+                property: a.PropertyName,
+                location: { district: a.DistrictName, province: a.ProvinceName},
+                basePrice: a.BasePrice,
+                currency: a.Currency },
             fullHistory
         };
     }

@@ -40,6 +40,8 @@ function maskBidder(nameOrId) {
 function mapApiToView(payload, currentUserId) {
     const { auction = {}, room = {}, fullHistory = [] } = payload?.data || {};
 
+    console.log('room', room);
+
     // Ảnh
     const imagesArr = Array.isArray(room?.Images ?? room?.images)
         ? (room.Images ?? room.images)
@@ -50,8 +52,8 @@ function mapApiToView(payload, currentUserId) {
     // Chi tiết phiên
     const start = auction.StartTime || auction.startTime || auction.start || auction.start_date || auction.Checkin || auction.checkin;
     const end = auction.EndTime || auction.endTime || auction.end || auction.end_date;
-    const stayStart = auction.Checkin || auction.checkin || auction.StayStart || auction.stayStart;
-    const stayEnd = auction.Checkout || auction.checkout || auction.StayEnd || auction.stayEnd;
+    const stayStart = auction.stayPeriod.start || auction.checkin || auction.StayStart || auction.stayStart;
+    const stayEnd = auction.stayPeriod.end || auction.checkout || auction.StayEnd || auction.stayEnd;
     const { dmy: stayStartDMY } = fmtDate(stayStart);
     const { dmy: stayEndDMY } = fmtDate(stayEnd);
     const { hms_dmy: startFmt } = fmtDate(start);
@@ -77,13 +79,17 @@ function mapApiToView(payload, currentUserId) {
         status: auction.Status || auction.status || 'active',
     };
 
+    const province = room?.location.province || 'Tỉnh/Thành';
+    const district = room?.location.district || 'Quận/Huyện';
+
     // Thông tin phòng
     const roomInfo = {
-        type: room?.PropertyTypeLabel || room?.type || 'Phòng/ căn hộ',
-        capacity:
-        room?.CapacityLabel ||
-        `${room?.livingRooms || 0} phòng khách - ${room?.bedrooms || 0} phòng ngủ - ${room?.beds || 0} giường - ${room?.bathrooms || 0} phòng tắm`,
-        location: room?.LocationLabel || room?.location || [room?.DistrictName, room?.ProvinceName, room?.CountryName].filter(Boolean).join(', '),
+        roomUID: room?.roomUID || null,
+        stayPeriod: stayStartDMY && stayEndDMY ? `${stayStartDMY} - ${stayEndDMY}` : '',
+        roomType: room?.roomType || room?.type || 'Phòng/ căn hộ',
+        propertyType: room?.property || 'Phòng/ căn hộ',
+        maxGuests: room?.maxGuests || '1',
+        location: `${province}, ${district}`,
         title: room?.Title || room?.name || auction?.Title || '',
     };
 
@@ -228,7 +234,7 @@ const AuctionPage = () => {
     const { imagesArr, auctionDetails, roomInfo, fullHistory, personalHistory, title } = viewData;
     const images = imagesArr; // alias cho dễ đọc ở dưới
 
-    console.log('auctioninfo', auctionDetails);
+    console.log('auctioninfo', roomInfo);
 
     return (
         <div className="auction-page-container">

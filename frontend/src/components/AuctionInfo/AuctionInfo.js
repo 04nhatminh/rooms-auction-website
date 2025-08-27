@@ -11,7 +11,7 @@ const AuctionInfo = ({ details }) => {
             </div>
 
             <ul>
-                <li>Thời gian lưu trú áp dụng: <strong>{details.stayPeriod}</strong></li>
+                <li>Thời gian lưu trú của phiên hiện tại: <strong>{details.stayPeriod}</strong></li>
                 <li>Bắt đầu đấu giá: <strong>{details.startTime}</strong></li>
                 <li>Kết thúc đấu giá: <strong>{details.endTime}</strong></li>
                 <li>Thời lượng đấu giá: <strong>{details.duration}</strong></li>
