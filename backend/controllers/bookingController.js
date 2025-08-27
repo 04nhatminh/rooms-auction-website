@@ -104,6 +104,153 @@ class BookingController {
 //       return res.status(409).json({ ok: false, message: e.message || 'Xử lý thất bại/thời hạn hết hiệu lực lỗi' });
 //     }
 //   }
+
+  // ADMIN APIs
+
+  // GET /admin/bookings - Lấy tất cả bookings cho admin
+  async getAllBookingsForAdmin(req, res) {
+    try {
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const offset = (page - 1) * limit;
+
+      const bookings = await bookingModel.getAllBookingsForAdmin(offset, limit);
+      const totalCount = await bookingModel.getTotalBookingsCount();
+      
+      return res.json({
+        success: true,
+        data: {
+          items: bookings,
+          currentPage: page,
+          totalPages: Math.ceil(totalCount / limit),
+          totalItems: totalCount,
+          itemsPerPage: limit
+        }
+      });
+    } catch (error) {
+      console.error('Error in getAllBookingsForAdmin:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Internal server error',
+        error: error.message
+      });
+    }
+  }
+
+  // GET /admin/bookings/status/:status - Lấy bookings theo status
+  async getBookingsByStatusForAdmin(req, res) {
+    try {
+      const { status } = req.params;
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const offset = (page - 1) * limit;
+
+      const bookings = await bookingModel.getBookingsByStatusForAdmin(status, offset, limit);
+      const totalCount = await bookingModel.getTotalBookingsCountByStatus(status);
+      
+      return res.json({
+        success: true,
+        data: {
+          items: bookings,
+          currentPage: page,
+          totalPages: Math.ceil(totalCount / limit),
+          totalItems: totalCount,
+          itemsPerPage: limit
+        }
+      });
+    } catch (error) {
+      console.error('Error in getBookingsByStatusForAdmin:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Internal server error',
+        error: error.message
+      });
+    }
+  }
+
+  // GET /admin/bookings/search/:bookingId - Tìm kiếm booking theo ID
+  async searchBookingsByIdForAdmin(req, res) {
+    try {
+      const { bookingId } = req.params;
+      
+      const bookings = await bookingModel.searchBookingsByIdForAdmin(bookingId);
+      
+      return res.json({
+        success: true,
+        data: {
+          items: bookings,
+          currentPage: 1,
+          totalPages: 1,
+          totalItems: bookings.length,
+          itemsPerPage: bookings.length
+        }
+      });
+    } catch (error) {
+      console.error('Error in searchBookingsByIdForAdmin:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Internal server error',
+        error: error.message
+      });
+    }
+  }
+
+  // GET /admin/bookings/:bookingId - Lấy chi tiết booking
+  async getBookingDetailsForAdmin(req, res) {
+    try {
+      const { bookingId } = req.params;
+      
+      const booking = await bookingModel.getBookingDetailsForAdmin(bookingId);
+      
+      if (!booking) {
+        return res.status(404).json({
+          success: false,
+          message: 'Booking not found'
+        });
+      }
+      
+      return res.json({
+        success: true,
+        data: booking
+      });
+    } catch (error) {
+      console.error('Error in getBookingDetailsForAdmin:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Internal server error',
+        error: error.message
+      });
+    }
+  }
+
+  // PUT /admin/bookings/:bookingId - Cập nhật booking
+  async updateBookingForAdmin(req, res) {
+    try {
+      const { bookingId } = req.params;
+      const updateData = req.body;
+      
+      const result = await bookingModel.updateBookingForAdmin(bookingId, updateData);
+      
+      if (!result) {
+        return res.status(404).json({
+          success: false,
+          message: 'Booking not found'
+        });
+      }
+      
+      return res.json({
+        success: true,
+        message: 'Booking updated successfully'
+      });
+    } catch (error) {
+      console.error('Error in updateBookingForAdmin:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Internal server error',
+        error: error.message
+      });
+    }
+  }
 }
 
 module.exports = new BookingController();

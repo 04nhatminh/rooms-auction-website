@@ -314,6 +314,35 @@ class ProductController {
         }
     }
 
+    // DELETE /api/room/admin/:id/images - Xóa tất cả ảnh của sản phẩm
+    static async deleteProductImages(req, res) {
+        try {
+            const { id } = req.params;
+            
+            // Lấy ProductID từ UID
+            const productId = await ProductModel.findProductIdByUID(id);
+            if (!productId) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Không tìm thấy sản phẩm'
+                });
+            }
+            
+            await ProductModel.deleteProductImages(productId);
+            return res.status(200).json({
+                success: true,
+                message: 'Xóa ảnh thành công'
+            });
+        } catch (error) {
+            console.error('Error in deleteProductImages:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Internal server error',
+                error: error.message
+            });
+        }
+    }
+
     // GET /api/room/admin/search - Tìm kiếm sản phẩm theo UID cho admin
     static async searchProductsByUID(req, res) {
         try {

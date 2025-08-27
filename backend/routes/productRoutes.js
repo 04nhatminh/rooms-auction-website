@@ -16,6 +16,7 @@ router.get('/admin/search', verifyToken, ProductController.searchProductsByUID);
 router.post('/admin/add', verifyToken, ProductController.addProduct);
 router.put('/admin/update/:id', verifyToken, ProductController.updateProduct);
 router.delete('/admin/delete/:id', verifyToken, ProductController.deleteProduct);
+router.delete('/admin/:id/images', verifyToken, ProductController.deleteProductImages);
 
 // GET /api/room/properties/types - Lấy danh sách property types
 router.get('/properties/types', ProductController.getAllPropertyTypes);

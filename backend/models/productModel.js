@@ -677,6 +677,7 @@ class ProductModel {
         const address        = sanitizeString(updateData.address);
         const latitude       = parseFloat(updateData.latitude);
         const longitude      = parseFloat(updateData.longitude);
+        // updateData.amenities = [24, 47, 48]
         const amenities      = Array.isArray(updateData.amenities) ? updateData.amenities.map(a => toInt(a)).filter(Number.isFinite) : [];
         const descriptions   = Array.isArray(updateData.descriptions) ? updateData.descriptions : [];
         const houseRules     = Array.isArray(updateData.houseRules) ? updateData.houseRules.filter(x => x && x.trim()) : [];
@@ -733,6 +734,29 @@ class ProductModel {
         if (result.affectedRows === 0) {
             throw new Error('Cập nhật sản phẩm không thành công');
         }
+
+        // Lấy ProductID để cập nhật các collections khác
+        const productId = await this.findProductIdByUID(uid);
+        if (!productId) {
+            throw new Error('Không tìm thấy ProductID cho UID này');
+        }
+
+        // Cập nhật amenities (MySQL)
+        if (amenities && amenities.length >= 0) {
+            await this.updateProductAmenities(productId, amenities);
+        }
+
+        // Cập nhật descriptions (MongoDB)
+        if (descriptions && descriptions.length > 0) {
+            await this.updateProductDescriptions(productId, descriptions);
+        }
+
+        // Cập nhật policies (MongoDB) 
+        if (houseRules.length > 0 || safetyProps.length > 0) {
+            await this.updateProductPolicies(productId, houseRules, safetyProps);
+        }
+
+        console.log(`Product ${uid} updated successfully`);
     }
 
     static async findProductIdByUID(uid) {
@@ -741,6 +765,143 @@ class ProductModel {
         [uid]
         );
         return rows[0]?.ProductID || null;
+    }
+
+    // Cập nhật amenities cho sản phẩm (MySQL)
+    static async updateProductAmenities(productId, amenityIds) {
+        try {
+            // Xóa tất cả amenities cũ
+            await pool.query('DELETE FROM ProductAmenities WHERE ProductID = ?', [productId]);
+            
+            // Thêm amenities mới
+            if (amenityIds && amenityIds.length > 0) {
+                const insertValues = amenityIds.map(amenityId => [productId, amenityId]);
+                const insertQuery = 'INSERT INTO ProductAmenities (ProductID, AmenityID) VALUES ?';
+                await pool.query(insertQuery, [insertValues]);
+            }
+            
+            console.log(`Updated amenities for ProductID ${productId}: ${amenityIds.length} items`);
+        } catch (error) {
+            console.error('Error updating product amenities:', error);
+            throw error;
+        }
+    }
+
+    // Cập nhật descriptions cho sản phẩm (MongoDB)
+    static async updateProductDescriptions(productId, descriptions) {
+        try {
+            if (!this.mongoDb) {
+                throw new Error('MongoDB connection not available');
+            }
+
+            const collection = this.mongoDb.collection('product_descriptions');
+            
+            // Xóa descriptions cũ
+            await collection.deleteOne({ ProductID: productId, Source: 'bidstay' });
+            
+            // Thêm descriptions mới nếu có
+            if (descriptions && descriptions.length > 0) {
+                const descriptionsData = {
+                    ProductID: productId,
+                    Source: 'bidstay',
+                    descriptions: descriptions.map(desc => ({
+                        title: desc.title || null,
+                        htmlText: desc.htmlText || ''
+                    })),
+                    updatedAt: new Date()
+                };
+                
+                await collection.insertOne(descriptionsData);
+            }
+            
+            console.log(`Updated descriptions for ProductID ${productId}: ${descriptions.length} items`);
+        } catch (error) {
+            console.error('Error updating product descriptions:', error);
+            throw error;
+        }
+    }
+
+    // Cập nhật policies cho sản phẩm (MongoDB)
+    static async updateProductPolicies(productId, houseRules, safetyProperties) {
+        try {
+            if (!this.mongoDb) {
+                throw new Error('MongoDB connection not available');
+            }
+
+            const collection = this.mongoDb.collection('product_policies');
+            
+            // Xóa policies cũ
+            await collection.deleteOne({ ProductID: productId, Source: 'bidstay' });
+            
+            // Thêm policies mới
+            const policiesData = {
+                ProductID: productId,
+                Source: 'bidstay',
+                house_rules: houseRules || [],
+                safety_properties: safetyProperties || [],
+                updatedAt: new Date()
+            };
+            
+            await collection.insertOne(policiesData);
+            
+            console.log(`Updated policies for ProductID ${productId}: ${houseRules.length} house rules, ${safetyProperties.length} safety properties`);
+        } catch (error) {
+            console.error('Error updating product policies:', error);
+            throw error;
+        }
+    }
+
+    // Cập nhật room tour images (MongoDB) 
+    static async updateRoomTourImages(productId, roomTourData) {
+        try {
+            if (!this.mongoDb) {
+                throw new Error('MongoDB connection not available');
+            }
+
+            const collection = this.mongoDb.collection('room_tour_images');
+            
+            // Xóa room tour cũ
+            await collection.deleteOne({ ProductID: productId, Source: 'bidstay' });
+            
+            // Thêm room tour mới nếu có
+            if (roomTourData && roomTourData.length > 0) {
+                const tourData = {
+                    ProductID: productId,
+                    Source: 'bidstay',
+                    RoomTourItems: roomTourData,
+                    updatedAt: new Date()
+                };
+                
+                await collection.insertOne(tourData);
+            }
+            
+            console.log(`Updated room tour for ProductID ${productId}: ${roomTourData?.length || 0} items`);
+        } catch (error) {
+            console.error('Error updating room tour images:', error);
+            throw error;
+        }
+    }
+
+    // Xóa tất cả ảnh cũ của sản phẩm (MongoDB)
+    static async deleteProductImages(productId) {
+        try {
+            if (!this.mongoDb) {
+                throw new Error('MongoDB connection not available');
+            }
+
+            // Xóa từ collection images
+            const imagesCollection = this.mongoDb.collection('images');
+            await imagesCollection.deleteOne({ ProductID: productId, Source: 'bidstay' });
+            
+            // Xóa từ collection room_tour_images
+            const roomTourCollection = this.mongoDb.collection('room_tour_images');
+            await roomTourCollection.deleteOne({ ProductID: productId, Source: 'bidstay' });
+            
+            console.log(`Deleted all images for ProductID ${productId}`);
+        } catch (error) {
+            console.error('Error deleting product images:', error);
+            throw error;
+        }
     }
 }
 

@@ -294,6 +294,29 @@ export const productApi = {
         }
     },
 
+    // Xóa tất cả ảnh của sản phẩm (Admin)
+    deleteProductImages: async (productUid) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/room/admin/${productUid}/images`, {
+                method: 'DELETE',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error deleting product images:', error);
+            throw error;
+        }
+    },
+
     // Lấy full dữ liệu room
     getFullProductDataByProductId: async (productId) => {
         try {

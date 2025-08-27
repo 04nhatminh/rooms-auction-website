@@ -43,7 +43,7 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
     amenities: [],
     houseRules: [''],
     safetyProperties: [''],
-    imageGroups: [{ title: '', images: [], files: [] }]
+    imageGroups: [{ title: '', images: [], files: [], hasExistingImages: false }]
   });
 
   // Data for dropdowns
@@ -75,6 +75,9 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
 
   // Loading states for update
   const [updating, setUpdating] = useState(false);
+
+  // Image replacement option
+  const [replaceImages, setReplaceImages] = useState(false);
 
   // Determine if fields should be disabled
   const isDisabled = type === 'view';
@@ -158,7 +161,8 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
         return {
           title: rt.title || '',
           images: urls,   // chứa URL ảnh để hiển thị trực tiếp
-          files: []       // rỗng vì ảnh này là ảnh đã có sẵn trên server (không phải file upload mới)
+          files: [],      // rỗng vì ảnh này là ảnh đã có sẵn trên server (không phải file upload mới)
+          hasExistingImages: urls.length > 0  // track việc có ảnh cũ
         };
       });
 
@@ -169,7 +173,8 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
         imageGroups = [{
           title: 'Hình ảnh sản phẩm',
           images: imagesData.map(img => img.baseUrl || img.url || img.src).filter(Boolean),
-          files: []
+          files: [],
+          hasExistingImages: true
         }];
       }
     } else if (imagesData.length > 0) {
@@ -177,7 +182,8 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
       imageGroups = [{
         title: 'Hình ảnh sản phẩm',
         images: imagesData.map(img => img.baseUrl || img.url || img.src || (typeof img === 'string' ? img : '')).filter(Boolean),
-        files: []
+        files: [],
+        hasExistingImages: true
       }];
     }
 
@@ -473,7 +479,7 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
   const addImageGroup = () => {
     setFormData(prev => ({
       ...prev,
-      imageGroups: [...prev.imageGroups, { title: '', images: [], files: [] }]
+      imageGroups: [...prev.imageGroups, { title: '', images: [], files: [], hasExistingImages: false }]
     }));
   };
 
@@ -738,6 +744,11 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
         imageGroups: formData.imageGroups.filter(group => group.title.trim() || group.images.length > 0)
       };
 
+      console.log('🔍 Updating with UID:', formData.uid);
+      console.log('🔍 Will replace images:', replaceImages);
+      console.log('🔍 Amenities:', formData.amenities);
+
+
       // Call update API (productId, productData)
       const updateResponse = await productApi.updateProduct(formData.uid, productDataToSubmit);
       console.log('Product updated:', updateResponse);
@@ -750,11 +761,19 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
       if (hasNewImages) {
         setUploadingImages(true);
         try {
+          // Nếu user chọn thay thế ảnh, xóa tất cả ảnh cũ trước
+          if (replaceImages) {
+            console.log('Deleting old images...');
+            await productApi.deleteProductImages(formData.uid);
+          }
+          
+          // Upload ảnh mới
+          console.log('Uploading new images...');
           const uploadResult = await uploadAllProductImages(formData.productId, formData.imageGroups);
           console.log('Upload result:', uploadResult);
         } catch (imageError) {
           console.error('Image upload error:', imageError);
-          alert('Sản phẩm đã được cập nhật nhưng có lỗi khi upload ảnh: ' + imageError.message);
+          alert('Sản phẩm đã được cập nhật nhưng có lỗi khi xử lý ảnh: ' + imageError.message);
         } finally {
           setUploadingImages(false);
         }
@@ -1263,6 +1282,23 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
               {/* Images */}
               <div className={styles.section}>
                 <h3 className={styles.sectionTitle}>Hình ảnh</h3>
+                
+                {/* Option to replace images in edit mode */}
+                {type === 'edit' && formData.imageGroups.some(group => group.hasExistingImages) && (
+                  <div className={styles.formGroup}>
+                    <label className={styles.checkboxLabel}>
+                      <input
+                        type="checkbox"
+                        checked={replaceImages}
+                        onChange={(e) => setReplaceImages(e.target.checked)}
+                        className={styles.checkbox}
+                      />
+                      <span className={styles.checkboxText}>
+                        Thay thế tất cả ảnh cũ bằng ảnh mới (nếu không chọn, ảnh mới sẽ được thêm vào)
+                      </span>
+                    </label>
+                  </div>
+                )}
                 
                 {formData.imageGroups.map((group, groupIndex) => (
                   <div key={groupIndex} className={styles.imageGroupContainer}>

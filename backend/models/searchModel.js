@@ -217,7 +217,7 @@ exports.searchAuctions = async (params) => {
         SELECT a.AuctionUID,
                 p.UID as ProductUID,
                 a.StartPrice,
-                a.CurrentPrice,
+                b.Amount as CurrentPrice,
                 a.StayPeriodStart,
                 a.StayPeriodEnd,
                 a.StartTime,
@@ -240,6 +240,7 @@ exports.searchAuctions = async (params) => {
                 ) / 6, 2) AS AverageRating,
                 COALESCE(bid_count.BidCount, 0) AS BidCount
         FROM Auction a
+        JOIN Bids b ON b.BidID = a.MaxBidID 
         JOIN Products p ON a.ProductID = p.ProductID
         LEFT JOIN Provinces prov ON p.ProvinceCode = prov.ProvinceCode
         LEFT JOIN Districts dist ON p.DistrictCode = dist.DistrictCode

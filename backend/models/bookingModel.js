@@ -97,6 +97,214 @@ class BookingModel {
             throw error;
         }
     }
+
+    // ADMIN methods
+
+    static async getAllBookingsForAdmin(offset = 0, limit = 10) {
+        try {
+            const query = `
+                SELECT 
+                    b.BookingID,
+                    b.BidID,
+                    b.UserID,
+                    u.FullName as UserName,
+                    u.Email as UserEmail,
+                    b.ProductID,
+                    p.Name as ProductName,
+                    p.UID as ProductUID,
+                    b.StartDate,
+                    b.EndDate,
+                    b.BookingStatus,
+                    b.UnitPrice,
+                    b.Amount,
+                    b.ServiceFee,
+                    b.PaymentMethodID,
+                    b.PaidAt,
+                    b.Source,
+                    b.CreatedAt,
+                    b.UpdatedAt
+                FROM Booking b
+                LEFT JOIN Users u ON b.UserID = u.UserID
+                LEFT JOIN Products p ON b.ProductID = p.ProductID
+                ORDER BY b.CreatedAt DESC
+                LIMIT ? OFFSET ?
+            `;
+            
+            const [bookings] = await db.query(query, [limit, offset]);
+            return bookings;
+        } catch (error) {
+            console.error('Error fetching all bookings for admin:', error);
+            throw error;
+        }
+    }
+
+    static async getTotalBookingsCount() {
+        try {
+            const [result] = await db.query('SELECT COUNT(*) as total FROM Booking');
+            return result[0].total;
+        } catch (error) {
+            console.error('Error getting total bookings count:', error);
+            throw error;
+        }
+    }
+
+    static async getBookingsByStatusForAdmin(status, offset = 0, limit = 10) {
+        try {
+            const query = `
+                SELECT 
+                    b.BookingID,
+                    b.BidID,
+                    b.UserID,
+                    u.FullName as UserName,
+                    u.Email as UserEmail,
+                    b.ProductID,
+                    p.Name as ProductName,
+                    p.UID as ProductUID,
+                    b.StartDate,
+                    b.EndDate,
+                    b.BookingStatus,
+                    b.UnitPrice,
+                    b.Amount,
+                    b.ServiceFee,
+                    b.PaymentMethodID,
+                    b.PaidAt,
+                    b.Source,
+                    b.CreatedAt,
+                    b.UpdatedAt
+                FROM Booking b
+                LEFT JOIN Users u ON b.UserID = u.UserID
+                LEFT JOIN Products p ON b.ProductID = p.ProductID
+                WHERE b.BookingStatus = ?
+                ORDER BY b.CreatedAt DESC
+                LIMIT ? OFFSET ?
+            `;
+            
+            const [bookings] = await db.query(query, [status, limit, offset]);
+            return bookings;
+        } catch (error) {
+            console.error('Error fetching bookings by status for admin:', error);
+            throw error;
+        }
+    }
+
+    static async getTotalBookingsCountByStatus(status) {
+        try {
+            const [result] = await db.query('SELECT COUNT(*) as total FROM Booking WHERE BookingStatus = ?', [status]);
+            return result[0].total;
+        } catch (error) {
+            console.error('Error getting total bookings count by status:', error);
+            throw error;
+        }
+    }
+
+    static async searchBookingsByIdForAdmin(bookingId) {
+        try {
+            const query = `
+                SELECT 
+                    b.BookingID,
+                    b.BidID,
+                    b.UserID,
+                    u.FullName as UserName,
+                    u.Email as UserEmail,
+                    b.ProductID,
+                    p.Name as ProductName,
+                    p.UID as ProductUID,
+                    b.StartDate,
+                    b.EndDate,
+                    b.BookingStatus,
+                    b.UnitPrice,
+                    b.Amount,
+                    b.ServiceFee,
+                    b.PaymentMethodID,
+                    b.PaidAt,
+                    b.Source,
+                    b.CreatedAt,
+                    b.UpdatedAt
+                FROM Booking b
+                LEFT JOIN Users u ON b.UserID = u.UserID
+                LEFT JOIN Products p ON b.ProductID = p.ProductID
+                WHERE b.BookingID LIKE ?
+                ORDER BY b.CreatedAt DESC
+            `;
+            
+            const [bookings] = await db.query(query, [`%${bookingId}%`]);
+            return bookings;
+        } catch (error) {
+            console.error('Error searching bookings by ID for admin:', error);
+            throw error;
+        }
+    }
+
+    static async getBookingDetailsForAdmin(bookingId) {
+        try {
+            const query = `
+                SELECT 
+                    b.BookingID,
+                    b.BidID,
+                    b.UserID,
+                    u.FullName as UserName,
+                    u.Email as UserEmail,
+                    u.Phone as UserPhone,
+                    b.ProductID,
+                    p.Name as ProductName,
+                    p.UID as ProductUID,
+                    p.Description as ProductDescription,
+                    b.StartDate,
+                    b.EndDate,
+                    b.BookingStatus,
+                    b.UnitPrice,
+                    b.Amount,
+                    b.ServiceFee,
+                    b.PaymentMethodID,
+                    pm.MethodName as PaymentMethodName,
+                    b.PaidAt,
+                    b.Source,
+                    b.CreatedAt,
+                    b.UpdatedAt
+                FROM Booking b
+                LEFT JOIN Users u ON b.UserID = u.UserID
+                LEFT JOIN Products p ON b.ProductID = p.ProductID
+                LEFT JOIN PaymentMethods pm ON b.PaymentMethodID = pm.MethodID
+                WHERE b.BookingID = ?
+            `;
+            
+            const [bookings] = await db.query(query, [bookingId]);
+            return bookings[0] || null;
+        } catch (error) {
+            console.error('Error getting booking details for admin:', error);
+            throw error;
+        }
+    }
+
+    static async updateBookingForAdmin(bookingId, updateData) {
+        try {
+            const allowedFields = ['BookingStatus', 'UnitPrice', 'Amount', 'ServiceFee', 'PaymentMethodID'];
+            const updateFields = [];
+            const updateValues = [];
+
+            for (const [key, value] of Object.entries(updateData)) {
+                if (allowedFields.includes(key)) {
+                    updateFields.push(`${key} = ?`);
+                    updateValues.push(value);
+                }
+            }
+
+            if (updateFields.length === 0) {
+                throw new Error('No valid fields to update');
+            }
+
+            updateFields.push('UpdatedAt = NOW()');
+            updateValues.push(bookingId);
+
+            const query = `UPDATE Booking SET ${updateFields.join(', ')} WHERE BookingID = ?`;
+            
+            const [result] = await db.query(query, updateValues);
+            return result.affectedRows > 0;
+        } catch (error) {
+            console.error('Error updating booking for admin:', error);
+            throw error;
+        }
+    }
 }
 
 module.exports = BookingModel;

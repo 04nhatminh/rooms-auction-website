@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
 const auctionController = require('../controllers/auctionController');
+const bookingController = require('../controllers/bookingController');
 const scrapingController = require('../controllers/scrapingController');
 const statisticsController = require('../controllers/statisticsController');
 const { verifyToken, isAdmin } = require('../middleware/authMiddleware');
@@ -25,6 +26,18 @@ router.get('/auctions/status/:status', verifyToken, isAdmin, auctionController.g
 // router.patch('/auctions/:id/status', verifyToken, isAdmin, auctionController.updateAuctionStatus);
 // Tìm kiếm auction theo UID
 router.get('/auctions/search/:uid', verifyToken, isAdmin, auctionController.searchAuctionsByUID);
+
+// Booking management routes
+// Lấy danh sách tất cả booking
+router.get('/bookings', verifyToken, isAdmin, bookingController.getAllBookingsForAdmin);
+// Lấy danh sách booking theo status
+router.get('/bookings/status/:status', verifyToken, isAdmin, bookingController.getBookingsByStatusForAdmin);
+// Tìm kiếm booking theo ID
+router.get('/bookings/search/:bookingId', verifyToken, isAdmin, bookingController.searchBookingsByIdForAdmin);
+// Lấy chi tiết booking
+router.get('/bookings/:bookingId', verifyToken, isAdmin, bookingController.getBookingDetailsForAdmin);
+// Cập nhật booking
+router.put('/bookings/:bookingId', verifyToken, isAdmin, bookingController.updateBookingForAdmin);
 
 
 // Cấu hình hệ thống
