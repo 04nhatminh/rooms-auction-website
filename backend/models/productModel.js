@@ -796,7 +796,7 @@ class ProductModel {
                 throw new Error('MongoDB connection not available');
             }
 
-            const collection = this.mongoDb.collection('product_descriptions');
+            const collection = this.mongoDb.collection('descriptions');
             
             // Xóa descriptions cũ
             await collection.deleteOne({ ProductID: productId, Source: 'bidstay' });
@@ -830,7 +830,7 @@ class ProductModel {
                 throw new Error('MongoDB connection not available');
             }
 
-            const collection = this.mongoDb.collection('product_policies');
+            const collection = this.mongoDb.collection('policies');
             
             // Xóa policies cũ
             await collection.deleteOne({ ProductID: productId, Source: 'bidstay' });

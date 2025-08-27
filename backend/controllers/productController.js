@@ -421,7 +421,7 @@ class ProductController {
                 productPropertyName,
                 productAmenities,
                 productDescription,
-                productReviewsRaw,
+                productReviews,
                 productImages,
                 productRoomTourImages,
                 productPolicies
@@ -437,19 +437,6 @@ class ProductController {
                 ProductModel.getRoomTourImages(productID),
                 ProductModel.getProductPolicies(productID)
             ]);
-
-            // Remove unwanted fields from reviews
-            let productReviews = productReviewsRaw;
-            if (productReviewsRaw && typeof productReviewsRaw === 'object') {
-                const { _id, ProductID: reviewProductID, Source, ...reviewsWithoutUnwantedFields } = productReviewsRaw;
-                
-                // Remove externalId from each review in the reviews array
-                if (reviewsWithoutUnwantedFields.reviews && Array.isArray(reviewsWithoutUnwantedFields.reviews)) {
-                    reviewsWithoutUnwantedFields.reviews = reviewsWithoutUnwantedFields.reviews.map(({ externalId, ...review }) => review);
-                }
-                
-                productReviews = reviewsWithoutUnwantedFields;
-            }
 
             const averageRating = calculateRating(productReviews);
 

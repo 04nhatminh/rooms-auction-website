@@ -140,14 +140,12 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
     // 6) Chuẩn hoá ảnh: tạo map { id -> baseUrl } để tra nhanh
     //    Đồng thời hỗ trợ trường hợp image có field khác (url/src) hoặc đã là string URL.
     const imageMap = {};
-    if (imagesData) {
-      imagesData.forEach(img => {
-        if (!img) return;
-        const id = img.id || img.imageId || img.ImageID;
-        const url = img.baseUrl || img.url || img.src || (typeof img === 'string' ? img : '');
-        if (id && url) imageMap[id] = url;
-      });
-    }
+    imagesData.forEach(img => {
+      if (!img) return;
+      const id = img.id || img.imageId || img.ImageID;
+      const url = img.baseUrl || img.url || img.src || (typeof img === 'string' ? img : '');
+      if (id && url) imageMap[id] = url;
+    });
     
     // 7) Tạo imageGroups theo roomTourImages (title + imageIds). Nếu không có thì fallback gom tất cả ảnh vào 1 group.
     let imageGroups = [{ title: '', images: [], files: [] }];
