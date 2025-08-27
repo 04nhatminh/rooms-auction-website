@@ -389,7 +389,7 @@ class ProductController {
             const productID = productDetails.ProductID;
             
             // Remove ProductID, ExternalID, Source, CreatedAt, LastSyncedAt, from details before sending response
-            const { ProductID: _, ExternalID: __, Source: ___, CreatedAt: ____, LastSyncedAt: _____, 
+            const { ExternalID: __, Source: ___, CreatedAt: ____, LastSyncedAt: _____, 
                 ...detailsWithoutProductID } = productDetails;
 
             const [

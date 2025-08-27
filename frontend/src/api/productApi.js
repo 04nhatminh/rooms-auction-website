@@ -248,9 +248,9 @@ export const productApi = {
 
 
     // Cập nhật sản phẩm (Admin)
-    updateProduct: async (productId, productData) => {
+    updateProduct: async (productUid, productData) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/room/admin/update/${productId}`, {
+            const response = await fetch(`${API_BASE_URL}/api/room/admin/update/${productUid}`, {
                 method: 'PUT',
                 credentials: 'include',
                 headers: {
