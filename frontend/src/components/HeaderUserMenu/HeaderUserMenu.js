@@ -61,7 +61,7 @@ const HeaderUserMenu = () => {
         </li>
         <li>
           <button className="dropdown-item" type="button" onClick={() => navigate('/transaction-history')}>
-            <i className="fa-solid fa-clock-rotate-left me-2"></i>Lịch sử mua hàng
+            <i className="fa-solid fa-clock-rotate-left me-2"></i>Lịch sử giao dịch
           </button>
         </li>
         <li>
@@ -73,23 +73,8 @@ const HeaderUserMenu = () => {
         <li><hr className="dropdown-divider" /></li>
 
         <li>
-          <button className="dropdown-item" type="button">
+          <button className="dropdown-item" type="button" onClick={() => navigate('/notifications')}>
             <i className="fa-solid fa-bell me-2"></i>Thông báo
-          </button>
-        </li>
-        <li>
-          <button className="dropdown-item" type="button">
-            <i className="fa-solid fa-gear me-2"></i>Cài đặt tài khoản
-          </button>
-        </li>
-        <li>
-          <button className="dropdown-item" type="button">
-            <i className="fa-solid fa-language me-2"></i>Ngôn ngữ & Tiền tệ
-          </button>
-        </li>
-        <li>
-          <button className="dropdown-item" type="button">
-            <i className="fa-solid fa-circle-info me-2"></i>Trung tâm trợ giúp
           </button>
         </li>
 

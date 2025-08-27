@@ -636,6 +636,76 @@ class AuctionModel {
         const [auctions] = await pool.execute(query, [uid]);
         return auctions;
     }
+
+    static async getUserAuctionHistory(userId) {
+        const [rows] = await pool.execute(`
+            SELECT
+                a.AuctionID,
+                a.AuctionUID,
+                a.Status,
+                a.EndTime,
+                a.CurrentPrice,
+                a.MaxBidID,
+                r.Name as room,
+                ub.BidID as userBidId,
+                mb.Amount as winAmount -- lấy Amount của bid thắng
+            FROM auction a
+            JOIN Products r ON a.ProductID = r.ProductID
+            JOIN (
+                SELECT AuctionID, MAX(BidID) as BidID
+                FROM bids
+                WHERE UserID = ?
+                GROUP BY AuctionID
+            ) ub ON ub.AuctionID = a.AuctionID
+            LEFT JOIN bids mb ON mb.BidID = a.MaxBidID -- lấy bid thắng
+            ORDER BY a.EndTime DESC
+        `, [userId]);
+        // Format ngày và số tiền thắng
+        return rows.map(row => ({
+            auctionUid: row.AuctionUID,
+            room: row.room,
+            date: toDateStr(row.EndTime),
+            status: row.Status,
+            result: row.Status === 'ended'
+                ? (row.MaxBidID === row.userBidId ? 'Thắng' : 'Thua')
+                : (row.Status === 'active' ? 'Đang diễn ra' : ''),
+            winAmount: (row.Status === 'ended' && row.MaxBidID === row.userBidId)
+                ? row.winAmount
+                : null
+        }));
+    }
+
+    static async notifyAuctionResult(auctionUid) {
+        console.log('notifyAuctionResult called for auctionUid:', auctionUid);
+        // Lấy MaxBidID và user thắng
+        const [[auction]] = await pool.query(
+        `SELECT AuctionID, MaxBidID FROM Auction WHERE AuctionUID = ?`, [auctionUid]
+        );
+        if (!auction) return;
+
+        const [[winnerBid]] = await pool.query(
+        `SELECT UserID FROM Bids WHERE BidID = ?`, [auction.MaxBidID]
+        );
+        const winnerId = winnerBid?.UserID;
+
+        // Lấy tất cả user đã bid
+        const [bidders] = await pool.query(
+        `SELECT DISTINCT UserID FROM Bids WHERE AuctionID = ?`, [auction.AuctionID]
+        );
+
+        console.log('Bidders:', bidders);
+        // Gửi thông báo cho từng user
+        for (const b of bidders) {
+        const type = b.UserID === winnerId ? 'win' : 'lose';
+        const msg = type === 'win'
+            ? 'Chúc mừng! Bạn đã thắng phiên đấu giá.'
+            : 'Rất tiếc! Bạn đã không thắng phiên đấu giá.';
+        await pool.query(
+            `INSERT INTO Notifications (UserID, AuctionID, Type, Message) VALUES (?, ?, ?, ?)`,
+            [b.UserID, auction.AuctionID, type, msg]
+        );
+        }
+    }
 }
 
 module.exports = AuctionModel;

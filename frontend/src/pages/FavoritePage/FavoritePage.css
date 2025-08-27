@@ -1,0 +1,27 @@
+.favorite-remove-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  z-index: 2;
+  padding: 0;
+}
+
+.icon-heart-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.icon-heart-wrap .icon-x {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  border-radius: 50%;
+  border: 1px solid #eee;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  pointer-events: none;
+}

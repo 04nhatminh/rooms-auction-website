@@ -1,5 +1,6 @@
 // models/bookingModel.js
 const db = require('../config/database');
+const pool = require('../config/database');
 
 function toDateStr(d) {
     if (!d) return null;
@@ -9,6 +10,7 @@ function toDateStr(d) {
 }
 
 class BookingModel {
+    static async placeDraft({ userId, productId, start, end }) {
     static async placeDraft({ userId, productId, start, end }) {
         const conn = await db.getConnection(); // dùng cùng 1 connection cho @variables
         try {
@@ -134,6 +136,52 @@ class BookingModel {
             console.error ('Error cancelling booking paid:', error)
             throw error;
         }
+    }
+
+    static async getUserTransactionHistory(userId) {
+        const [rows] = await pool.execute(`
+            SELECT 
+                pay.PaymentID,
+                pay.BookingID,
+                pay.Amount,
+                pay.Currency,
+                pay.Provider,
+                pay.ProviderTxnID,
+                pay.Status,
+                pay.FailureReason,
+                pay.CreatedAt,
+                pay.UpdatedAt,
+                bk.StartDate,
+                bk.EndDate,
+                bk.BookingStatus,
+                p.Name as room,
+                p.UID as roomUID,
+                prov.Name as provinceName
+            FROM Payments pay
+            JOIN Booking bk ON pay.BookingID = bk.BookingID
+            JOIN Products p ON bk.ProductID = p.ProductID
+            LEFT JOIN Provinces prov ON p.ProvinceCode = prov.ProvinceCode
+            WHERE pay.UserID = ?
+            ORDER BY pay.CreatedAt DESC
+        `, [userId]);
+        return rows.map(row => ({
+            paymentId: row.PaymentID,
+            bookingId: row.BookingID,
+            room: row.room,
+            roomUID: row.roomUID,
+            province: row.provinceName,
+            amount: row.Amount,
+            currency: row.Currency,
+            provider: row.Provider,
+            providerTxnId: row.ProviderTxnID,
+            status: row.Status,
+            failureReason: row.FailureReason,
+            createdAt: toDateStr(row.CreatedAt),
+            updatedAt: toDateStr(row.UpdatedAt),
+            bookingStatus: row.BookingStatus,
+            startDate: toDateStr(row.StartDate),
+            endDate: toDateStr(row.EndDate),
+        }));
     }
 }
 

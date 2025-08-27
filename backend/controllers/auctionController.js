@@ -9,6 +9,7 @@ class AuctionController {
             if (!ok) {
                 return res.status(404).json({ success: false, message: 'Auction not found or already ended' });
             }
+            await AuctionModel.notifyAuctionResult(auctionUid);
             return res.status(200).json({ success: true, message: 'Auction ended successfully' });
         } catch (error) {
             return res.status(500).json({ success: false, message: error.message });
@@ -466,6 +467,26 @@ class AuctionController {
             });
         }
     }
+
+    static async getUserAuctionHistory(req, res) {
+    try {
+        const userId = req.user.id;
+        const rows = await AuctionModel.getUserAuctionHistory(userId);
+
+        const items = rows.map(row => ({
+            auctionUid: row.auctionUid,
+            room: row.room,
+            date: row.date,
+            status: row.status,
+            result: row.result,
+            winAmount: row.winAmount 
+        }));
+
+        res.json({ success: true, items });
+    } catch (e) {
+        res.status(500).json({ success: false, message: e.message });
+    }
+}
 }
 
 module.exports = AuctionController;
