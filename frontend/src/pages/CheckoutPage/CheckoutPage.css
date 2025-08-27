@@ -4,7 +4,7 @@
   --leftW:  clamp(360px, 46vw, 640px);
   --rightW: clamp(300px, 30vw, 420px);
 
-  --payOffset: clamp(16px, 17vh, 160px);
+  --payOffset: clamp(16px, 15vh, 160px);
   display: grid;
   grid-template-columns: var(--leftW) var(--rightW);
   gap: clamp(10px, 5vw, 20px);
@@ -38,7 +38,9 @@
 }
 
 /* card tóm tắt dùng trọn bề rộng cột trái */
-.checkout-left .cbm-card{ width: 100%; }
+.checkout-left .cbm-card{ 
+  width: 100%; 
+}
 
 /* Responsive: về 1 cột khi màn hình hẹp */
 @media (max-width: 1024px){
@@ -188,3 +190,12 @@
   text-align: center;
 }
 
+.expired-alert{
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #FEE2E2;      /* đỏ nhạt */
+  border: 1px solid #FECACA;
+  color: #B91C1C;           /* đỏ đậm */
+  font-weight: 600;
+}

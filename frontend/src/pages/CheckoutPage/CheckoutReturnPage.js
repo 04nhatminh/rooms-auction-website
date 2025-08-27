@@ -39,7 +39,7 @@ export default function CheckoutReturnPage() {
         if (!bookingId) {
           window.opener?.postMessage({ type: 'paypal-captured', status: 'failed' }, '*');
           setMsg('Missing bookingId in return URL');
-          setTimeout(() => window.close(), 800);
+          setTimeout(() => window.close(), 500);
           return;
         }
 
@@ -54,6 +54,7 @@ export default function CheckoutReturnPage() {
           if (sessionStorage.getItem(guardKey)) {
             setMsg('Payment already processed. You may close this window.');
             try {
+              console.log('Capturing PayPal order', { bookingId, orderID: token });
               await checkoutApi.capturePayPalOrder({ bookingId, orderID: token }, ac.signal);
               window.opener?.postMessage({ type: 'paypal-captured', bookingId, status: 'success' }, '*');
               setMsg('Payment completed successfully.');
@@ -61,7 +62,7 @@ export default function CheckoutReturnPage() {
               window.opener?.postMessage({ type: 'paypal-captured', bookingId, status: 'failed' }, '*');
               setMsg('Payment failed.');
             }
-            setTimeout(() => window.close(), 700);
+            setTimeout(() => window.close(), 500);
             return;
           }
           sessionStorage.setItem(guardKey, '1');

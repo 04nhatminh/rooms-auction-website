@@ -97,6 +97,44 @@ class BookingModel {
             throw error;
         }
     }
+
+    static async updateBookingCancelled(bookingID)
+    {
+        try {
+            const [booking] = await db.query('SELECT 1 FROM Booking WHERE BookingID=? AND BookingStatus = "pending"', [bookingID])
+
+            if (!booking.length) {
+                console.error(`Booking ${bookingID} not found or already paid`);
+                throw new Error(`Booking ${bookingID} not found or already paid`);
+            }
+            console.log(`Updating booking paid status for ${bookingID}`);
+
+            const query =   `UPDATE Booking
+                            SET  BookingStatus = 'cancelled', UpdatedAt = NOW()
+                            WHERE BookingID = ?;
+
+                            UPDATE Calendar c
+                            JOIN Booking b ON b.BookingID = c.BookingID
+                            SET
+                                c.Status = 'available',
+                                c.LockReason = NULL,
+                                c.HoldExpiresAt = NULL,
+                                c.BookingID = NULL,
+                                c.AuctionID = NULL,
+                                c.UpdatedAt = NOW()
+                            WHERE b.BookingStatus IN ('cancelled', 'expired')
+                                AND c.Status IN ('booked','reserved')
+                                AND b.BookingID = ?;`;
+           
+            await db.query(query, [bookingID, bookingID]);
+
+            console.log(`Updated booking cancelled successfully`);
+
+        } catch (error) {
+            console.error ('Error cancelling booking paid:', error)
+            throw error;
+        }
+    }
 }
 
 module.exports = BookingModel;

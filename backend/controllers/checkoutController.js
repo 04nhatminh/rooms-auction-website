@@ -36,6 +36,21 @@ class CheckoutController {
     }
   };
 
+  static async cancelBooking(req, res) {
+
+    const bookingId = req.params.bookingId;
+    if(!bookingId) {
+      return res.status(400).json({error: 'bookingId is required'});
+    }
+    try {
+      const booking = await BookingModel.updateBookingCancelled(bookingId);
+      return res.json({ ok: true, data: booking });
+    } catch (error) {
+      console.error('Error fetching booking:', error);
+      return res.status(500).json({error: 'Failed to fetch booking details'});
+    }
+  };
+
   static async createOrderPaypal(req, res) {
       try {
         const { bookingId, methodId } = req.body;
@@ -212,7 +227,7 @@ class CheckoutController {
         const booking = await BookingModel.findBookingById(bookingId);
         if (!booking) return res.status(404).json({ ok:false, error:'Booking not found' });
         if (booking.BookingStatus !== 'pending') {
-          return res.status(400).json({ ok:false, error:'Invalid booking status' });
+          return res.status(400).json({ ok:false, error:'Phòng đã được thanh toán' });
         }
 
         const amount = (req.body?.amount != null)     
@@ -341,6 +356,8 @@ class CheckoutController {
                 bookingId,
                 q?.return_message || 'ZP_failed'
               );
+
+              await BookingModel.updateBookingPaid(bookingId, null, 'failed'); // cập nhật trạng thái booking = failed
             }
           } catch (e) {
             console.error('[ZP post-ack query] error:', e);

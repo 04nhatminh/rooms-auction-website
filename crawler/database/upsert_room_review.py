@@ -14,8 +14,8 @@ load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.dirname(os.path.abs
 MYSQL_CONFIG = {
     'host': os.getenv('DB_HOST', 'localhost'),
     'user': os.getenv('DB_USER', 'root'),
-    'port': int(os.getenv('DB_PORT', 3306)),
-    'password': os.getenv('DB_PASSWORD', ''),
+    'port': int(os.getenv('DB_PORT', 3308)),
+    'password': os.getenv('DB_PASSWORD', '22127007'),
     'database': os.getenv('DB_NAME', 'a2airbnb'),
     'charset': 'utf8mb4',
     'use_unicode': True,

@@ -18,5 +18,6 @@ router.post('/zalopay/query', (req, res) => CheckoutController.queryZaloPay(req,
 
 
 router.get('/booking/:bookingId', CheckoutController.getBookingDetails);
+router.get('/booking/cancel/:bookingId', CheckoutController.cancelBooking);
 
 module.exports = router;
