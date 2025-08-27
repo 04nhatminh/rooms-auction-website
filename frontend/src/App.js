@@ -50,7 +50,7 @@ function App() {
   return (
     <UserProvider>
       <LocationProvider>
-        <NotificationProvider></NotificationProvider>
+        <NotificationProvider>
           <Router>
           <div className="App">
             <Routes>
@@ -75,6 +75,8 @@ function App() {
               <Route path="/auction/:UID" element={<AuctionPage />} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
+              <Route path="/notifications" element={<NotificationPage />} />
+              
               <Route path="/admin" element={
                 <SimpleAdminGuard>
                   <AdminLayout />

@@ -34,7 +34,7 @@ class EmailService {
                         <div style="padding: 30px; background: #f8f9fa;">
                             <h2 style="color: #333;">Xin chào ${fullName}!</h2>
                             <p style="color: #666; line-height: 1.6;">
-                                Cảm ơn bạn đã đăng ký tài khoản A2BnB. Để hoàn tất quá trình đăng ký, 
+                                Cảm ơn bạn đã đăng ký tài khoản BidStay. Để hoàn tất quá trình đăng ký, 
                                 vui lòng click vào nút bên dưới để xác thực email của bạn:
                             </p>
                             
@@ -58,7 +58,7 @@ class EmailService {
                         </div>
                         
                         <div style="background: #333; color: white; padding: 20px; text-align: center; font-size: 12px;">
-                            <p>© 2025 A2BnB Platform. All rights reserved.</p>
+                            <p>© 2025 BidStay Platform. All rights reserved.</p>
                             <p>Nếu bạn không yêu cầu xác thực này, vui lòng bỏ qua email.</p>
                         </div>
                     </div>

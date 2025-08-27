@@ -11,7 +11,6 @@ function toDateStr(d) {
 
 class BookingModel {
     static async placeDraft({ userId, productId, start, end }) {
-    static async placeDraft({ userId, productId, start, end }) {
         const conn = await db.getConnection(); // dùng cùng 1 connection cho @variables
         try {
             const startDate = toDateStr(start);
