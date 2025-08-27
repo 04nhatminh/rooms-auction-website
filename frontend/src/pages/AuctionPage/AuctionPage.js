@@ -184,6 +184,19 @@ const AuctionPage = () => {
         return () => { alive = false; aborter.abort(); };
     }, [auctionUid, currentUserId]);
 
+    useEffect(() => {
+        let timer;
+        const fetchAuction = async () => {
+            try {
+                const mapped = await loadAuction(auctionUid, currentUserId);
+                setViewData(mapped);
+                if (mapped?.auctionDetails?.status === 'ended') setIsEnded(true);
+            } catch (e) {}
+        };
+        timer = setInterval(fetchAuction, 5000); // 5s
+        return () => clearInterval(timer);
+    }, [auctionUid, currentUserId]);
+
 
     if (loading) {
         return (
