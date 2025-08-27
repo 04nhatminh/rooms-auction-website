@@ -2519,6 +2519,8 @@ async function createPlaceBidProcedure() {
             DECLARE v_end TIMESTAMP;
             DECLARE v_sp_start DATE;
             DECLARE v_sp_end DATE;
+            DECLARE v_old_sp_start DATE;
+            DECLARE v_old_sp_end DATE;
             DECLARE v_prod INT;
             DECLARE v_lead INT;
 
@@ -2545,6 +2547,9 @@ async function createPlaceBidProcedure() {
             INTO v_status, v_cur, v_inc, v_end, v_sp_start, v_sp_end, v_prod
             FROM Auction a JOIN Bids b ON a.AuctionID=b.AuctionID AND a.MaxBidID=b.BidID
             WHERE a.AuctionID=p_AuctionID FOR UPDATE;
+
+            SET v_old_sp_start = v_sp_start;
+            SET v_old_sp_end   = v_sp_end;
 
             IF v_status <> 'active' OR v_end IS NULL OR v_end <= v_now THEN
                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Auction not active';
@@ -2600,7 +2605,7 @@ async function createPlaceBidProcedure() {
             END IF;
 
             -- 4) Cập nhật min/max phiên nếu thay đổi
-            IF p_Start <> v_sp_start OR p_End <> v_sp_end THEN
+            IF p_Start <> v_old_sp_start OR p_End <> v_old_sp_end THEN
             UPDATE Auction
                 SET StayPeriodStart=v_sp_start, StayPeriodEnd=v_sp_end
             WHERE AuctionID=p_AuctionID;
