@@ -200,82 +200,88 @@ const CheckoutPage = () => {
       <Header />
       <main className="checkout-content">
         <div className="checkout-main">
-          {/* LEFT: Booking summary */}
-          <section className="checkout-left">
-            <h2 style={{ marginTop: 16 }}>Thanh toán đặt phòng</h2>
-            <BookingSummary
-              unitPrice={Number(booking?.Amount || 0)}
-              nights={nights}
-              currency="VND"
-              checkin={booking?.StartDate}
-              checkout={booking?.EndDate}
-              guests={{
-                adults: booking?.Adults ?? 1,
-                children: booking?.Children ?? 0,
-                infants: booking?.Infants ?? 0,
-              }}
-              onTotalChange={setGrandTotal}
-              showActions={false}  // không hiển thị nút
-              style={{ boxShadow: '0 0px 0px rgba(0,0,0,.18)'}}
-            />
-        </section>
+          <h2 className="checkout-title">Thanh toán đặt phòng</h2>
+          <div className="checkout-body">
+            {/* LEFT */}
+            <section className="checkout-left">
+              <BookingSummary
+                unitPrice={Number(booking?.Amount || 0)}
+                nights={nights}
+                currency="VND"
+                checkin={booking?.StartDate}
+                checkout={booking?.EndDate}
+                guests={{
+                  adults: booking?.Adults ?? 1,
+                  children: booking?.Children ?? 0,
+                  infants: booking?.Infants ?? 0,
+                }}
+                onTotalChange={setGrandTotal}
+                showActions={false}
+                style={{ boxShadow: '0 0px 0px rgba(0,0,0,.18)' }}
+              />
+            </section>
 
-          {/* RIGHT: Payment */}
-          <aside className="checkout-right">
-            <div className="payment-card">
-              <h3 style={{ marginTop: 0, marginBottom: 12 }}>Chọn phương thức thanh toán</h3>
+            {/* RIGHT: Payment */}
+            <aside className="checkout-right">
+              <div className="payment-card">
+                <h3>Chọn phương thức thanh toán</h3>
 
-              <div className="method-group">
-                <button
-                  type="button"
-                  className={`method-option method-btn ${method === 'ZALOPAY' ? 'active' : ''}`}
-                  onClick={() => setMethod('ZALOPAY')}
-                  aria-pressed={method === 'ZALOPAY'}
-                >
-                  <img
-                    className="method-icon"
-                    alt="ZaloPay"
-                    src={zaloIcon} /* bạn sẽ tự đổi src */
-                  />
-                  <span>ZaloPay</span>
+                <div className="method-group">
+                  <button
+                    type="button"
+                    className={`method-option method-btn ${method === 'ZALOPAY' ? 'active' : ''}`}
+                    onClick={() => setMethod('ZALOPAY')}
+                    aria-pressed={method === 'ZALOPAY'}
+                  >
+                    <img
+                      className="method-icon"
+                      alt="ZaloPay"
+                      src={zaloIcon} /* bạn sẽ tự đổi src */
+                    />
+                    <span>ZaloPay</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`method-option method-btn ${method === 'PAYPAL' ? 'active' : ''}`}
+                    onClick={() => setMethod('PAYPAL')}
+                    aria-pressed={method === 'PAYPAL'}
+                  >
+                    <img
+                      className="method-icon"
+                      alt="PayPal"
+                      src={paypalIcon}   /* bạn sẽ tự đổi src */
+                    />
+                    <span>PayPal</span>
+                  </button>
+                </div>
+
+                <button className="pay-btn" onClick={onPay} disabled={paying || booking?.BookingStatus === 'expired' || booking?.BookingStatus === 'cancelled'}>
+                  {paying ? 'Đang xử lý...' : 'Thanh toán ngay'}
                 </button>
 
-                <button
-                  type="button"
-                  className={`method-option method-btn ${method === 'PAYPAL' ? 'active' : ''}`}
-                  onClick={() => setMethod('PAYPAL')}
-                  aria-pressed={method === 'PAYPAL'}
-                >
-                  <img
-                    className="method-icon"
-                    alt="PayPal"
-                    src={paypalIcon}   /* bạn sẽ tự đổi src */
-                  />
-                  <span>PayPal</span>
+                <button className="cancel-btn" onClick={onCancel} disabled={paying || booking?.BookingStatus === 'expired' || booking?.BookingStatus === 'cancelled'}>
+                  Hủy
                 </button>
+
+                <p className="note">
+                  Thanh toán sẽ mở trong popup của {method === 'ZALOPAY' ? 'ZaloPay' : 'PayPal'}.<br />
+                </p>
+                <p className="note"
+                  style={{ marginTop: '-16px' }}>
+                  Thanh toán sẽ hết hạn trong <strong>60 phút</strong>.<br />
+                </p>
+
+                {booking?.BookingStatus === 'expired' && (
+                  <p className="expired-alert">Booking đã hết hạn thanh toán</p>  // ⬅ dòng thông báo
+                )}
+
+                {booking?.BookingStatus === 'cancelled' && (
+                  <p className="expired-alert">Booking đã bị hủy</p>  // ⬅ dòng thông báo
+                )}
               </div>
-
-              <button className="pay-btn" onClick={onPay} disabled={paying || booking?.BookingStatus === 'expired' || booking?.BookingStatus === 'cancelled'}>
-                {paying ? 'Đang xử lý...' : 'Thanh toán ngay'}
-              </button>
-
-              <button className="cancel-btn" onClick={onCancel} disabled={paying || booking?.BookingStatus === 'expired' || booking?.BookingStatus === 'cancelled'}>
-                Hủy
-              </button>
-
-              <p className="note">
-                Thanh toán sẽ mở trong popup của {method === 'ZALOPAY' ? 'ZaloPay' : 'PayPal'}.<br />
-              </p>
-
-              {booking?.BookingStatus === 'expired' && (
-                <p className="expired-alert">Booking đã hết hạn thanh toán</p>  // ⬅ dòng thông báo
-              )}
-
-              {booking?.BookingStatus === 'cancelled' && (
-                <p className="expired-alert">Booking đã bị hủy</p>  // ⬅ dòng thông báo
-              )}
-            </div>
-          </aside>
+            </aside>
+          </div>
         </div>
       </main>
     </div>
