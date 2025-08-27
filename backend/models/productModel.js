@@ -569,102 +569,6 @@ class ProductModel {
 
     // Cập nhật sản phẩm
     static async updateProduct(uid, updateData) {
-        // CREATE PROCEDURE UpsertProduct(
-        //     IN p_UID BIGINT UNSIGNED,
-        //     IN p_ExternalID VARCHAR(30),
-        //     IN p_Source VARCHAR(20),
-        //     IN p_Name VARCHAR(255),
-        //     IN p_Address VARCHAR(255),
-        //     IN p_ProvinceCode VARCHAR(20),
-        //     IN p_DistrictCode VARCHAR(20),
-        //     IN p_Latitude FLOAT,
-        //     IN p_Longitude FLOAT,
-        //     IN p_PropertyType INT,
-        //     IN p_RoomType INT,
-        //     IN p_MaxGuests SMALLINT,
-        //     IN p_NumBedrooms SMALLINT,
-        //     IN p_NumBeds SMALLINT,
-        //     IN p_NumBathrooms SMALLINT,
-        //     IN p_Price DECIMAL(10,2),
-        //     IN p_Currency VARCHAR(20),
-        //     IN p_Cleanliness FLOAT,
-        //     IN p_Location FLOAT,
-        //     IN p_Service FLOAT,
-        //     IN p_Value FLOAT,
-        //     IN p_Communication FLOAT,
-        //     IN p_Convenience FLOAT,
-        //     IN p_CreatedAt TIMESTAMP,
-        //     IN p_LastSyncedAt TIMESTAMP
-        // )
-        // BEGIN
-        //     DECLARE v_ProductID INT;
-
-        //     SELECT ProductID INTO v_ProductID
-        //     FROM Products
-        //     WHERE ExternalID = p_ExternalID
-        //     LIMIT 1;
-
-        // -- Chỉ update nếu có sự khác biệt
-        // IF EXISTS (
-        //     SELECT 1 FROM Products
-        //     WHERE ProductID = v_ProductID
-        //     AND (
-        //         Source <> p_Source OR
-        //         Name <> p_Name OR
-        //         Address <> p_Address OR
-        //         ProvinceCode <> p_ProvinceCode OR
-        //         DistrictCode <> p_DistrictCode OR
-        //         Latitude <> p_Latitude OR
-        //         Longitude <> p_Longitude OR
-        //         PropertyType <> p_PropertyType OR
-        //         RoomType <> p_RoomType OR
-        //         MaxGuests <> p_MaxGuests OR
-        //         NumBedrooms <> p_NumBedrooms OR
-        //         NumBeds <> p_NumBeds OR
-        //         NumBathrooms <> p_NumBathrooms OR
-        //         Price <> p_Price OR
-        //         Currency <> p_Currency OR
-        //         CleanlinessPoint <> p_Cleanliness OR
-        //         LocationPoint <> p_Location OR
-        //         ServicePoint <> p_Service OR
-        //         ValuePoint <> p_Value OR
-        //         CommunicationPoint <> p_Communication OR
-        //         ConveniencePoint <> p_Convenience
-        //     )
-        // ) THEN
-        //     UPDATE Products
-        //     SET 
-        //         Source = p_Source,
-        //         Name = p_Name,
-        //         Address = p_Address,
-        //         ProvinceCode = p_ProvinceCode,
-        //         DistrictCode = p_DistrictCode,
-        //         Latitude = p_Latitude,
-        //         Longitude = p_Longitude,
-        //         PropertyType = p_PropertyType,
-        //         RoomType = p_RoomType,
-        //         MaxGuests = p_MaxGuests,
-        //         NumBedrooms = p_NumBedrooms,
-        //         NumBeds = p_NumBeds,
-        //         NumBathrooms = p_NumBathrooms,
-        //         Price = p_Price,
-        //         Currency = p_Currency,
-        //         CleanlinessPoint = p_Cleanliness,
-        //         LocationPoint = p_Location,
-        //         ServicePoint = p_Service,
-        //         ValuePoint = p_Value,
-        //         CommunicationPoint = p_Communication,
-        //         ConveniencePoint = p_Convenience,
-        //         CreatedAt = p_CreatedAt,
-        //         LastSyncedAt = p_LastSyncedAt
-        //     WHERE ProductID = v_ProductID;
-        // ELSE
-        //     -- Chỉ cập nhật thời gian đồng bộ nếu không thay đổi gì khác
-        //     UPDATE Products
-        //     SET LastSyncedAt = p_LastSyncedAt
-        //     WHERE ProductID = v_ProductID;
-        // END IF;
-    // END $$
         // 1) Chuẩn hoá / ép kiểu
         const name           = sanitizeString(updateData.name);
         const roomType       = toInt(updateData.roomType, null);
@@ -797,20 +701,21 @@ class ProductModel {
             }
 
             const collection = this.mongoDb.collection('descriptions');
-            
+            console.log(`Updating descriptions for ProductID ${productId}: ${descriptions.length} items`);
+
             // Xóa descriptions cũ
-            await collection.deleteOne({ ProductID: productId, Source: 'bidstay' });
+            await collection.deleteOne({ ProductID: productId });
             
             // Thêm descriptions mới nếu có
             if (descriptions && descriptions.length > 0) {
                 const descriptionsData = {
                     ProductID: productId,
                     Source: 'bidstay',
-                    descriptions: descriptions.map(desc => ({
+                    Descriptions: descriptions.map(desc => ({
                         title: desc.title || null,
                         htmlText: desc.htmlText || ''
                     })),
-                    updatedAt: new Date()
+                    updated_at: new Date()
                 };
                 
                 await collection.insertOne(descriptionsData);
@@ -833,15 +738,17 @@ class ProductModel {
             const collection = this.mongoDb.collection('policies');
             
             // Xóa policies cũ
-            await collection.deleteOne({ ProductID: productId, Source: 'bidstay' });
+            await collection.deleteOne({ ProductID: productId });
             
             // Thêm policies mới
             const policiesData = {
                 ProductID: productId,
                 Source: 'bidstay',
-                house_rules: houseRules || [],
-                safety_properties: safetyProperties || [],
-                updatedAt: new Date()
+                Policies: {
+                    house_rules: houseRules || [],
+                    safety_properties: safetyProperties || []
+                },
+                updated_at: new Date()
             };
             
             await collection.insertOne(policiesData);
@@ -863,7 +770,7 @@ class ProductModel {
             const collection = this.mongoDb.collection('room_tour_images');
             
             // Xóa room tour cũ
-            await collection.deleteOne({ ProductID: productId, Source: 'bidstay' });
+            await collection.deleteOne({ ProductID: productId });
             
             // Thêm room tour mới nếu có
             if (roomTourData && roomTourData.length > 0) {
@@ -871,7 +778,7 @@ class ProductModel {
                     ProductID: productId,
                     Source: 'bidstay',
                     RoomTourItems: roomTourData,
-                    updatedAt: new Date()
+                    updated_at: new Date()
                 };
                 
                 await collection.insertOne(tourData);
@@ -893,12 +800,12 @@ class ProductModel {
 
             // Xóa từ collection images
             const imagesCollection = this.mongoDb.collection('images');
-            await imagesCollection.deleteOne({ ProductID: productId, Source: 'bidstay' });
+            await imagesCollection.deleteOne({ ProductID: productId });
             
             // Xóa từ collection room_tour_images
             const roomTourCollection = this.mongoDb.collection('room_tour_images');
-            await roomTourCollection.deleteOne({ ProductID: productId, Source: 'bidstay' });
-            
+            await roomTourCollection.deleteOne({ ProductID: productId });
+
             console.log(`Deleted all images for ProductID ${productId}`);
         } catch (error) {
             console.error('Error deleting product images:', error);
