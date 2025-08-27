@@ -9,6 +9,7 @@ export function useNotification() {
 export function NotificationProvider({ children }) {
   const [noti, setNoti] = useState(null);
   const lastShownRef = useRef(new Set());
+  const mountedAtRef = useRef(Date.now()); // mốc thời gian khi Provider mount
 
   const showNoti = (message, type = 'info', duration = 4000) => {
     setNoti({ message, type });
@@ -23,16 +24,21 @@ export function NotificationProvider({ children }) {
         });
         const data = await res.json();
         const items = data.items || [];
-        // Chỉ hiện thông báo chưa từng hiện
         for (const n of items) {
-          if (!lastShownRef.current.has(n.NotificationID)) {
-            lastShownRef.current.add(n.NotificationID);
+          // Chỉ hiện popup cho thông báo chưa đọc
+          if (!n.IsRead) {
+            // Hiện popup
             if (n.Type === 'win') showNoti('Chúc mừng! Bạn đã thắng phiên đấu giá.', 'success');
             else if (n.Type === 'lose') showNoti('Rất tiếc! Bạn đã không thắng phiên đấu giá.', 'failed');
+            // Đánh dấu đã đọc (gọi API)
+            fetch(`${process.env.REACT_APP_API_BASE_URL}/user/notifications/${n.NotificationID}/read`, {
+              method: 'POST',
+              credentials: 'include'
+            });
           }
         }
       } catch (e) {}
-    }, 10000); // 10s
+    }, 10000);
 
     return () => clearInterval(interval);
   }, []);

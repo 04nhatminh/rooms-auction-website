@@ -1119,7 +1119,8 @@ async function createNotificationTable() {
             IsRead TINYINT(1) DEFAULT 0,
             CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (UserID) REFERENCES Users(UserID),
-            FOREIGN KEY (AuctionID) REFERENCES Auction(AuctionID)
+            FOREIGN KEY (AuctionID) REFERENCES Auction(AuctionID),
+            UNIQUE KEY uniq_user_auction (UserID, AuctionID)
         );
     `);
 }

@@ -25,6 +25,9 @@ router.post('/me/avatar', verifyToken, cloudinaryUpload.single('avatar'), upload
 // Auction and Booking History
 router.get('/auction-history', verifyToken, AuctionController.getUserAuctionHistory);
 router.get('/transaction-history', verifyToken, bookingController.getUserTransactionHistory);
+
+// Notification
 router.get('/notifications', verifyToken, NotificationController.getUserNotifications);
+router.post('/notifications/:id/read', verifyToken, NotificationController.markAsRead);
 
 module.exports = router;
