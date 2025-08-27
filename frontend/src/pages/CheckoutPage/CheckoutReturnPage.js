@@ -52,7 +52,7 @@ export default function CheckoutReturnPage() {
           }
           const guardKey = `pp-capture:${bookingId}:${token}`;
           if (sessionStorage.getItem(guardKey)) {
-            setMsg('Payment already processed. You may close this window.');
+            setMsg('Payment already processed. Please do not do anything. The window will close shortly.');
             try {
               console.log('Capturing PayPal order', { bookingId, orderID: token });
               await checkoutApi.capturePayPalOrder({ bookingId, orderID: token }, ac.signal);
@@ -136,7 +136,7 @@ export default function CheckoutReturnPage() {
           <h2 style={{ margin: 0, marginBottom: 4 }}>Trang phản hồi thanh toán</h2>
           <p className="return-status">{msg}</p>
           {sub && <p className="return-sub">{sub}</p>}
-          <button className="return-close" onClick={() => window.close()}>Close</button>
+          {/* <button className="return-close" onClick={() => window.close()}>Close</button> */}
         </div>
       </main>
     </div>

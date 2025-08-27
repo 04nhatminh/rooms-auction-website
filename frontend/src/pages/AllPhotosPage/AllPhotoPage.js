@@ -92,8 +92,13 @@ export default function AllPhotosPage() {
     <div className="all-photos">
         <div className="photos-title">
             <button type="button" className="back-btn" onClick={goBack} aria-label="Quay về trang sản phẩm">
-                <span className="back-icon">←</span>
-                Quay về trang sản phẩm
+                <svg
+                  className="back-icon"
+                  width="28" height="28" viewBox="0 0 24 24" aria-hidden="true"
+                  fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                >
+    <path d="M15 18l-6-6 6-6" />
+  </svg>
             </button>
             <h2>Tham quan qua ảnh</h2>
         </div>

@@ -1,6 +1,6 @@
 // src/controllers/checkout.controller.js
-const BASE_URL = process.env.FRONTEND_URL || 'https://7b0b38392154.ngrok-free.app'; //frontend
-const BACKEND_URL = process.env.BACKEND_URL || 'https://7a59e9a85500.ngrok-free.app'; //backend
+const BASE_URL = process.env.FRONTEND_URL || 'https://9652ce827ae8.ngrok-free.app '; //frontend
+const BACKEND_URL = process.env.BACKEND_URL || 'https://9c379e4a5fdc.ngrok-free.app'; //backend
 const PaypalService = require('../services/paypalService');
 const ZaloPayService = require('../services/zalopayService');
 const BookingModel = require('../models/bookingModel');
