@@ -308,35 +308,6 @@ class ProductController {
         }
     }
 
-    // DELETE /api/room/admin/:id/images - Xóa tất cả ảnh của sản phẩm
-    // static async deleteProductImages(req, res) {
-    //     try {
-    //         const { id } = req.params;
-            
-    //         // Lấy ProductID từ UID
-    //         const productId = await ProductModel.findProductIdByUID(id);
-    //         if (!productId) {
-    //             return res.status(404).json({
-    //                 success: false,
-    //                 message: 'Không tìm thấy sản phẩm'
-    //             });
-    //         }
-            
-    //         await ProductModel.deleteProductImages(productId);
-    //         return res.status(200).json({
-    //             success: true,
-    //             message: 'Xóa ảnh thành công'
-    //         });
-    //     } catch (error) {
-    //         console.error('Error in deleteProductImages:', error);
-    //         return res.status(500).json({
-    //             success: false,
-    //             message: 'Internal server error',
-    //             error: error.message
-    //         });
-    //     }
-    // }
-
     // GET /api/room/admin/search - Tìm kiếm sản phẩm theo UID cho admin
     static async searchProductsByUID(req, res) {
         try {
@@ -466,6 +437,45 @@ class ProductController {
             });
         }
     }
+
+    // POST /admin/:id/room-tours
+    // body: { items: [{title, imageIds}], newImages?: [{id, orientation, accessibilityLabel, baseUrl}] }
+    static async addRoomTours(req, res) {
+        try {
+            const { id: uid } = req.params;
+            const { items, newImages = [] } = req.body;
+            if (!Array.isArray(items) || !items.length) return res.status(400).json({ success:false, message:'items required' });
+
+            const productId = await ProductModel.findProductIdByUID(uid);
+            if (!productId) return res.status(404).json({ success:false, message:'Không tìm thấy sản phẩm' });
+
+            const result = await ProductModel.addRoomTourItems(productId, items, newImages);
+            return res.json({ success:true, data: result });
+        } catch (e) {
+            console.error('addRoomTours error:', e);
+            return res.status(500).json({ success:false, message:'Internal server error', error:e.message });
+        }
+    }
+
+    // PATCH /admin/:id/room-tours/update-images
+    // body: { updates: [{ title, addImageIds?, removeImageIds?, newTitle?, newImages? }, ...] }
+    static async patchRoomTours(req, res) {
+        try {
+            const { id: uid } = req.params;
+            const { updates } = req.body;
+            if (!Array.isArray(updates) || !updates.length) return res.status(400).json({ success:false, message:'updates required' });
+
+            const productId = await ProductModel.findProductIdByUID(uid);
+            if (!productId) return res.status(404).json({ success:false, message:'Không tìm thấy sản phẩm' });
+
+            const result = await ProductModel.batchUpdateRoomTours(productId, updates);
+            return res.json({ success:true, data: result });
+        } catch (e) {
+            console.error('patchRoomTours error:', e);
+            return res.status(500).json({ success:false, message:'Internal server error', error:e.message });
+        }
+    }
+
 
     // Xóa 1 ảnh - /admin/:id/images/remove
     static async removeOneImage(req, res) {

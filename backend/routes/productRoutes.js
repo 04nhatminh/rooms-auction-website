@@ -16,10 +16,9 @@ router.get('/admin/search', verifyToken, ProductController.searchProductsByUID);
 router.post('/admin/add', verifyToken, ProductController.addProduct);
 router.put('/admin/update/:id', verifyToken, ProductController.updateProduct);
 router.delete('/admin/delete/:id', verifyToken, ProductController.deleteProduct);
-// router.delete('/admin/:id/images', verifyToken, ProductController.deleteProductImages);
-// Xóa 1 ảnh (theo imageId) và gỡ nó khỏi mọi RoomTourItems
+router.post('/admin/:id/room-tours', verifyToken, ProductController.addRoomTours);
+router.patch('/admin/:id/room-tours/update-images', verifyToken, ProductController.patchRoomTours);
 router.patch('/admin/:id/images/remove', verifyToken, ProductController.removeOneImage);
-// Xóa 1 room-tour item (theo title hoặc index)
 router.patch('/admin/:id/room-tours/remove', verifyToken, ProductController.removeOneRoomTour);
 
 

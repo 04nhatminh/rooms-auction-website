@@ -761,57 +761,165 @@ class ProductModel {
     }
 
     // Cập nhật room tour images (MongoDB) 
-    static async updateRoomTourImages(productId, roomTourData) {
-        try {
-            if (!this.mongoDb) {
-                throw new Error('MongoDB connection not available');
-            }
-
-            const collection = this.mongoDb.collection('room_tour_images');
-            
-            // Xóa room tour cũ
-            await collection.deleteOne({ ProductID: productId });
-            
-            // Thêm room tour mới nếu có
-            if (roomTourData && roomTourData.length > 0) {
-                const tourData = {
-                    ProductID: productId,
-                    Source: 'bidstay',
-                    RoomTourItems: roomTourData,
-                    updated_at: new Date()
-                };
-                
-                await collection.insertOne(tourData);
-            }
-            
-            console.log(`Updated room tour for ProductID ${productId}: ${roomTourData?.length || 0} items`);
-        } catch (error) {
-            console.error('Error updating room tour images:', error);
-            throw error;
-        }
-    }
-
-    // Xóa tất cả ảnh cũ của sản phẩm (MongoDB)
-    // static async deleteProductImages(productId) {
+    // static async updateRoomTourImages(productId, roomTourData) {
     //     try {
     //         if (!this.mongoDb) {
     //             throw new Error('MongoDB connection not available');
     //         }
 
-    //         // Xóa từ collection images
-    //         const imagesCollection = this.mongoDb.collection('images');
-    //         await imagesCollection.deleteOne({ ProductID: productId });
+    //         const collection = this.mongoDb.collection('room_tour_images');
             
-    //         // Xóa từ collection room_tour_images
-    //         const roomTourCollection = this.mongoDb.collection('room_tour_images');
-    //         await roomTourCollection.deleteOne({ ProductID: productId });
-
-    //         console.log(`Deleted all images for ProductID ${productId}`);
+    //         // Xóa room tour cũ
+    //         await collection.deleteOne({ ProductID: productId });
+            
+    //         // Thêm room tour mới nếu có
+    //         if (roomTourData && roomTourData.length > 0) {
+    //             const tourData = {
+    //                 ProductID: productId,
+    //                 Source: 'bidstay',
+    //                 RoomTourItems: roomTourData,
+    //                 updated_at: new Date()
+    //             };
+                
+    //             await collection.insertOne(tourData);
+    //         }
+            
+    //         console.log(`Updated room tour for ProductID ${productId}: ${roomTourData?.length || 0} items`);
     //     } catch (error) {
-    //         console.error('Error deleting product images:', error);
+    //         console.error('Error updating room tour images:', error);
     //         throw error;
     //     }
     // }
+
+    static async ensureImagesDoc(productId) {
+        const col = this.mongoDb.collection('images');
+        await col.updateOne(
+            { ProductID: productId },
+            { $setOnInsert: { ProductID: productId, Source: 'bidstay', Images: [], updated_at: new Date() } },
+            { upsert: true }
+        );
+    }
+
+    static async ensureRoomToursDoc(productId) {
+        const col = this.mongoDb.collection('room_tour_images');
+        await col.updateOne(
+            { ProductID: productId },
+            { $setOnInsert: { ProductID: productId, Source: 'bidstay', RoomTourItems: [], updated_at: new Date() } },
+            { upsert: true }
+        );
+    }
+
+    // images = [{ id, orientation, accessibilityLabel, baseUrl }, ...]
+    static async addOrReplaceImages(productId, images = []) {
+        if (!this.mongoDb) throw new Error('MongoDB connection not available');
+        const col = this.mongoDb.collection('images');
+        await this.ensureImagesDoc(productId);
+
+        const ops = [];
+        for (const img of images) {
+            if (!img || !img.id) continue;
+            // thay thế object theo id (tránh trùng id, cập nhật metadata mới)
+            ops.push(
+            { updateOne: { filter: { ProductID: productId }, update: { $pull: { Images: { id: img.id } } } } },
+            { updateOne: { filter: { ProductID: productId }, update: { $push: { Images: img }, $set: { updated_at: new Date() } } } },
+            );
+        }
+        if (ops.length) await col.bulkWrite(ops, { ordered: false });
+        return { success: true, insertedOrReplaced: Math.ceil(ops.length / 2) };
+    }
+
+    // items: [{ title, imageIds: [...] }, ...]
+    // newImages (optional): [{ id, orientation, accessibilityLabel, baseUrl }, ...]
+    static async addRoomTourItems(productId, items = [], newImages = []) {
+        if (!this.mongoDb) throw new Error('MongoDB connection not available');
+        const toursCol = this.mongoDb.collection('room_tour_images');
+
+        // 1) nếu có ảnh mới -> ghi vào 'images' trước
+        if (Array.isArray(newImages) && newImages.length) {
+            await this.addOrReplaceImages(productId, newImages);
+        }
+
+        // 2) thêm room tours
+        await this.ensureRoomToursDoc(productId);
+        const toInsert = (items || [])
+            .filter(it => it && typeof it.title === 'string' && it.title.trim())
+            .map(it => ({ title: it.title.trim(), imageIds: Array.isArray(it.imageIds) ? it.imageIds.filter(Boolean) : [] }))
+            .filter(it => it.imageIds.length > 0);
+
+        if (!toInsert.length) return { success: true, inserted: 0 };
+
+        await toursCol.updateOne(
+            { ProductID: productId },
+            { $push: { RoomTourItems: { $each: toInsert } }, $set: { updated_at: new Date() } }
+        );
+        return { success: true, inserted: toInsert.length };
+    }
+
+    // update: { title, addImageIds?, removeImageIds?, newTitle?, newImages? }
+    static async updateRoomTourItem(productId, update) {
+        if (!this.mongoDb) throw new Error('MongoDB connection not available');
+        const col = this.mongoDb.collection('room_tour_images');
+        const { title, addImageIds = [], removeImageIds = [], newTitle = null, newImages = [] } = (update || {});
+        const titleFilter = (title || '').trim();
+        if (!titleFilter) throw new Error('title is required');
+
+        // 0) nếu có ảnh mới -> ghi vào 'images' trước
+        if (Array.isArray(newImages) && newImages.length) {
+            await this.addOrReplaceImages(productId, newImages);
+        }
+
+        // 1) add
+        if (addImageIds.length) {
+            await col.updateOne(
+            { ProductID: productId, "RoomTourItems.title": titleFilter },
+            { $addToSet: { "RoomTourItems.$.imageIds": { $each: addImageIds.filter(Boolean) } }, $set: { updated_at: new Date() } }
+            );
+        }
+        // 2) remove
+        if (removeImageIds.length) {
+            await col.updateOne(
+            { ProductID: productId, "RoomTourItems.title": titleFilter },
+            { $pullAll: { "RoomTourItems.$.imageIds": removeImageIds.filter(Boolean) }, $set: { updated_at: new Date() } }
+            );
+        }
+        // 3) rename
+        if (newTitle && newTitle.trim()) {
+            await col.updateOne(
+            { ProductID: productId, "RoomTourItems.title": titleFilter },
+            { $set: { "RoomTourItems.$.title": newTitle.trim(), updated_at: new Date() } }
+            );
+        }
+        // 4) cleanup: xoá group rỗng
+        await col.updateOne(
+            { ProductID: productId },
+            [
+            {
+                $set: {
+                RoomTourItems: {
+                    $filter: {
+                    input: "$RoomTourItems",
+                    as: "it",
+                    cond: { $gt: [ { $size: "$$it.imageIds" }, 0 ] }
+                    }
+                },
+                updated_at: "$$NOW"
+                }
+            }
+            ]
+        );
+
+        return { success: true };
+    }
+
+    static async batchUpdateRoomTours(productId, updates = []) {
+        for (const u of (updates || [])) await this.updateRoomTourItem(productId, u);
+        return { success: true, updated: (updates || []).length };
+    }
+
+
+
+
+
 
     // Gỡ 1 imageId: xóa object trong images.Images và pull imageId khỏi mọi RoomTourItems.imageIds
     static async removeImageIdEverywhere(productId, imageId) {

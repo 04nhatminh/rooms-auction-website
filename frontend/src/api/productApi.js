@@ -294,29 +294,6 @@ export const productApi = {
         }
     },
 
-    // Xóa tất cả ảnh của sản phẩm (Admin)
-    // deleteProductImages: async (productUid) => {
-    //     try {
-    //         const response = await fetch(`${API_BASE_URL}/api/room/admin/${productUid}/images`, {
-    //             method: 'DELETE',
-    //             credentials: 'include',
-    //             headers: {
-    //                 'Content-Type': 'application/json'
-    //             }
-    //         });
-
-    //         if (!response.ok) {
-    //             const errorData = await response.json();
-    //             throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-    //         }
-    //         const data = await response.json();
-    //         return data;
-    //     } catch (error) {
-    //         console.error('Error deleting product images:', error);
-    //         throw error;
-    //     }
-    // },
-
     // Lấy full dữ liệu room
     getFullProductDataByProductId: async (productId) => {
         try {
@@ -378,8 +355,33 @@ export const productApi = {
         const data = await res.json();
         if (!res.ok || !data.success) throw new Error(data.message || 'Remove room tour failed');
         return data;
-    }
+    },
 
+    // Thêm tour mới; nếu có ảnh mới vừa upload, gửi vào newImages
+    addRoomTours: async (productUid, items, newImages = []) => {
+        const res = await fetch(`${API_BASE_URL}/api/room/admin/${productUid}/room-tours`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items, newImages })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.message || 'Add room tours failed');
+        return data;
+    },
+
+    // Sửa tour đang có; nếu thêm ảnh mới → gửi newImages để ghi vào 'images' trước
+    patchRoomTours: async (productUid, updates /* array of { title, addImageIds?, removeImageIds?, newTitle?, newImages? } */) => {
+        const res = await fetch(`${API_BASE_URL}/api/room/admin/${productUid}/room-tours/update-images`, {
+            method: 'PATCH',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ updates })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.message || 'Update room tours failed');
+        return data;
+    }
 };
 
 export default productApi;
