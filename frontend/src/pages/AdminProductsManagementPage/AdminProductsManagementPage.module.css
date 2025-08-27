@@ -163,13 +163,13 @@
 }
 
 .colId { width: 5%; }
-.colUid { width: 15%; }
+.colUid { width: 20%; }
 .colName { width: 25%; }
-.colType { width: 15%; }
-.colDistrict { width: 15%; }
+.colType { width: 20%; }
+.colDistrict { width: 12%; }
 .colProvince { width: 12%; }
 .colPrice { width: 12%; }
-.colSource { width: 10%; }
+.colSource { width: 8%; }
 .colActions { width: 20%; }
 
 .uidText, .nameText, .districtText, .provinceText {

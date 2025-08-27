@@ -419,7 +419,7 @@ class ProductController {
                 productProvinceName,
                 productDistrictName,
                 productPropertyName,
-                productAmenitiesRaw,
+                productAmenities,
                 productDescription,
                 productReviewsRaw,
                 productImages,
@@ -437,9 +437,6 @@ class ProductController {
                 ProductModel.getRoomTourImages(productID),
                 ProductModel.getProductPolicies(productID)
             ]);
-
-            // Remove AmenityID from amenities
-            const productAmenities = productAmenitiesRaw.map(({ AmenityID, ...amenity }) => amenity);
 
             // Remove unwanted fields from reviews
             let productReviews = productReviewsRaw;
