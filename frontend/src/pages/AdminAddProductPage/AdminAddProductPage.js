@@ -75,9 +75,8 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
 
   // Loading states for update
   const [updating, setUpdating] = useState(false);
-
-  // Image replacement option
-  const [replaceImages, setReplaceImages] = useState(false);
+  const [deletingImage, setDeletingImage] = useState(false);
+  const [deletingRoomTour, setDeletingRoomTour] = useState(false);
 
   // Determine if fields should be disabled
   const isDisabled = type === 'view';
@@ -160,6 +159,7 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
 
         return {
           title: rt.title || '',
+          imageIds: rt.imageIds || [],
           images: urls,   // chứa URL ảnh để hiển thị trực tiếp
           files: [],      // rỗng vì ảnh này là ảnh đã có sẵn trên server (không phải file upload mới)
           hasExistingImages: urls.length > 0  // track việc có ảnh cũ
@@ -172,6 +172,7 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
       if (!anyHasImage && imagesData.length > 0) {
         imageGroups = [{
           title: 'Hình ảnh sản phẩm',
+          imageIds: [],
           images: imagesData.map(img => img.baseUrl || img.url || img.src).filter(Boolean),
           files: [],
           hasExistingImages: true
@@ -181,6 +182,7 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
       // Fallback: không có roomTourImages
       imageGroups = [{
         title: 'Hình ảnh sản phẩm',
+        imageIds: [],
         images: imagesData.map(img => img.baseUrl || img.url || img.src || (typeof img === 'string' ? img : '')).filter(Boolean),
         files: [],
         hasExistingImages: true
@@ -452,21 +454,6 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
     }
   };
 
-  const removeImage = (groupIndex, imageIndex) => {
-    setFormData(prev => ({
-      ...prev,
-      imageGroups: prev.imageGroups.map((group, index) => 
-        index === groupIndex 
-          ? { 
-              ...group, 
-              images: group.images.filter((_, i) => i !== imageIndex),
-              files: (group.files || []).filter((_, i) => i !== imageIndex)
-            }
-          : group
-      )
-    }));
-  };
-
   const handleImageGroupTitleChange = (groupIndex, title) => {
     setFormData(prev => ({
       ...prev,
@@ -481,15 +468,6 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
       ...prev,
       imageGroups: [...prev.imageGroups, { title: '', images: [], files: [], hasExistingImages: false }]
     }));
-  };
-
-  const removeImageGroup = (groupIndex) => {
-    if (formData.imageGroups.length > 1) {
-      setFormData(prev => ({
-        ...prev,
-        imageGroups: prev.imageGroups.filter((_, index) => index !== groupIndex)
-      }));
-    }
   };
 
   // Upload tất cả ảnh cho sản phẩm (tất cả đều phải có title - room tour)
@@ -534,6 +512,75 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
     });
 
     productApi.uploadImage(formData);
+  };
+
+  const removeImage = async (groupIndex, imageIndex) => {
+    if (deletingImage) return; // Prevent multiple clicks
+    
+    const group = formData.imageGroups[groupIndex];
+    const image = group.images[imageIndex];
+    
+    // Nếu đang ở chế độ edit/view và có ảnh existing
+    if ((type === 'edit' || type === 'view') && group.hasExistingImages && group.imageIds && group.imageIds[imageIndex]) {
+      setDeletingImage(true);
+      try {
+        const imageId = group.imageIds[imageIndex];
+        await productApi.removeImage(formData.uid, imageId);
+        console.log('Image removed from server:', imageId);
+      } catch (error) {
+        console.error('Error removing image from server:', error);
+        alert('Có lỗi khi xóa ảnh từ server: ' + error.message);
+        setDeletingImage(false);
+        return; // Không xóa khỏi UI nếu lỗi API
+      } finally {
+        setDeletingImage(false);
+      }
+    }
+
+    // Xóa khỏi UI
+    setFormData(prev => ({
+      ...prev,
+      imageGroups: prev.imageGroups.map((group, index) => 
+        index === groupIndex 
+          ? { 
+              ...group, 
+              images: group.images.filter((_, i) => i !== imageIndex),
+              files: (group.files || []).filter((_, i) => i !== imageIndex),
+              imageIds: (group.imageIds || []).filter((_, i) => i !== imageIndex)
+            }
+          : group
+      )
+    }));
+  };
+
+  const removeImageGroup = async (groupIndex) => {
+    if (formData.imageGroups.length > 1) {
+      if (deletingRoomTour) return; // Prevent multiple clicks
+      
+      const group = formData.imageGroups[groupIndex];
+      
+      // Nếu đang ở chế độ edit/view và có title để xóa room tour
+      if ((type === 'edit' || type === 'view') && group.title && group.title.trim()) {
+        setDeletingRoomTour(true);
+        try {
+          await productApi.removeRoomTour(formData.uid, { title: group.title.trim() });
+          console.log('Room tour removed from server:', group.title);
+        } catch (error) {
+          console.error('Error removing room tour from server:', error);
+          alert('Có lỗi khi xóa danh mục ảnh từ server: ' + error.message);
+          setDeletingRoomTour(false);
+          return; // Không xóa khỏi UI nếu lỗi API
+        } finally {
+          setDeletingRoomTour(false);
+        }
+      }
+
+      // Xóa khỏi UI
+      setFormData(prev => ({
+        ...prev,
+        imageGroups: prev.imageGroups.filter((_, index) => index !== groupIndex)
+      }));
+    }
   };
 
   // Lấy tên province, district từ code đã chọn
@@ -745,7 +792,6 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
       };
 
       console.log('🔍 Updating with UID:', formData.uid);
-      console.log('🔍 Will replace images:', replaceImages);
       console.log('🔍 Amenities:', formData.amenities);
 
 
@@ -762,10 +808,10 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
         setUploadingImages(true);
         try {
           // Nếu user chọn thay thế ảnh, xóa tất cả ảnh cũ trước
-          if (replaceImages) {
-            console.log('Deleting old images...');
-            await productApi.deleteProductImages(formData.uid);
-          }
+          // if (replaceImages) {
+          //   console.log('Deleting old images...');
+          //   await productApi.deleteProductImages(formData.uid);
+          // }
           
           // Upload ảnh mới
           console.log('Uploading new images...');
@@ -1281,25 +1327,7 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
 
               {/* Images */}
               <div className={styles.section}>
-                <h3 className={styles.sectionTitle}>Hình ảnh</h3>
-                
-                {/* Option to replace images in edit mode */}
-                {type === 'edit' && formData.imageGroups.some(group => group.hasExistingImages) && (
-                  <div className={styles.formGroup}>
-                    <label className={styles.checkboxLabel}>
-                      <input
-                        type="checkbox"
-                        checked={replaceImages}
-                        onChange={(e) => setReplaceImages(e.target.checked)}
-                        className={styles.checkbox}
-                      />
-                      <span className={styles.checkboxText}>
-                        Thay thế tất cả ảnh cũ bằng ảnh mới (nếu không chọn, ảnh mới sẽ được thêm vào)
-                      </span>
-                    </label>
-                  </div>
-                )}
-                
+                <h3 className={styles.sectionTitle}>Hình ảnh</h3>                
                 {formData.imageGroups.map((group, groupIndex) => (
                   <div key={groupIndex} className={styles.imageGroupContainer}>
                     <div className={styles.imageGroupHeader}>
@@ -1322,8 +1350,10 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
                           onClick={() => removeImageGroup(groupIndex)}
                           className={styles.removeGroupBtn}
                           aria-label="Xóa danh mục"
+                          disabled={deletingRoomTour}
+                          title={deletingRoomTour ? "Đang xóa..." : "Xóa danh mục này"}
                         >
-                          ×
+                          {deletingRoomTour ? "..." : "×"}
                         </button>
                       )}
                     </div>
@@ -1344,49 +1374,32 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
                       </div>
                     )}
 
-                    {/* {group.images.length > 0 && (
-                      <div className={styles.imagePreview}>
-                        <h4>Hình ảnh đã chọn:</h4>
-                        <div className={styles.imageList}>
-                          {group.images.map((image, imageIndex) => (
-                            <div key={imageIndex} className={styles.imageItem}>
-                              <span className={styles.imageName}>{image}</span>
-                              {!isDisabled && (
-                                <button
-                                  type="button"
-                                  onClick={() => removeImage(groupIndex, imageIndex)}
-                                  className={styles.removeImageBtn}
-                                >
-                                  ×
-                                </button>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )} */}
                     {group.images.length > 0 && (
                       <div className={styles.imagePreview}>
-                        <h4>Hình ảnh đã chọn:</h4>
+                        <h4>Hình ảnh đã chọn</h4>
                         <div className={styles.imageList}>
                           {group.images.map((image, imageIndex) => (
                             <div key={imageIndex} className={styles.imageItem}>
-                              {(type === 'view' || type === 'edit') ? (
+                              {(type === 'view' || type === 'edit') && group.hasExistingImages ? (
                                 <img
                                   src={image}
                                   alt={`Image ${imageIndex}`}
                                   className={styles.previewImg}
                                 />
                               ) : (
-                                <span className={styles.imageName}>{image}</span>
+                                <div className={styles.imageNameContainer}>
+                                  <span className={styles.imageName}>{image}</span>
+                                </div>
                               )}
                               {!isDisabled && (
                                 <button
                                   type="button"
                                   onClick={() => removeImage(groupIndex, imageIndex)}
                                   className={styles.removeImageBtn}
+                                  title={deletingImage ? "Đang xóa..." : "Xóa ảnh này"}
+                                  disabled={deletingImage}
                                 >
-                                  ×
+                                  {deletingImage ? "..." : "×"}
                                 </button>
                               )}
                             </div>

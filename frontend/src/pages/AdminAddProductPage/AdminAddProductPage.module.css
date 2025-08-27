@@ -371,6 +371,7 @@
 }
 
 .imageItem {
+  position: relative;
   display: flex;
   align-items: center;
   overflow: hidden;
@@ -379,6 +380,11 @@
   background-color: #f3f4f6;
   border-radius: 6px;
   border: 1px solid #e5e7eb;
+}
+
+.imageNameContainer {
+  flex: 1;
+  overflow: hidden;
 }
 
 .imageName {
@@ -390,13 +396,25 @@
   white-space: nowrap;
 }
 
+.previewImg {
+  max-width: 100%;
+  max-height: 150px;
+  object-fit: cover;
+  border-radius: 4px;
+  display: block;
+  margin: 0 auto;
+}
+
 .removeImageBtn {
-  background-color: #ef4444;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background-color: rgba(239, 68, 68, 0.9);
   color: #fff;
   border: none;
   border-radius: 50%;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -404,7 +422,21 @@
   font-size: 16px;
   font-weight: bold;
   transition: background-color 0.2s ease;
-  margin-left: 0.5rem;
+  z-index: 10;
+}
+
+.removeImageBtn:hover:not(:disabled) {
+  background-color: rgba(220, 38, 38, 0.9);
+}
+
+.removeImageBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.removeGroupBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .removeImageBtn:hover {

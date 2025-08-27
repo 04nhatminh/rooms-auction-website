@@ -309,33 +309,33 @@ class ProductController {
     }
 
     // DELETE /api/room/admin/:id/images - Xóa tất cả ảnh của sản phẩm
-    static async deleteProductImages(req, res) {
-        try {
-            const { id } = req.params;
+    // static async deleteProductImages(req, res) {
+    //     try {
+    //         const { id } = req.params;
             
-            // Lấy ProductID từ UID
-            const productId = await ProductModel.findProductIdByUID(id);
-            if (!productId) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Không tìm thấy sản phẩm'
-                });
-            }
+    //         // Lấy ProductID từ UID
+    //         const productId = await ProductModel.findProductIdByUID(id);
+    //         if (!productId) {
+    //             return res.status(404).json({
+    //                 success: false,
+    //                 message: 'Không tìm thấy sản phẩm'
+    //             });
+    //         }
             
-            await ProductModel.deleteProductImages(productId);
-            return res.status(200).json({
-                success: true,
-                message: 'Xóa ảnh thành công'
-            });
-        } catch (error) {
-            console.error('Error in deleteProductImages:', error);
-            return res.status(500).json({
-                success: false,
-                message: 'Internal server error',
-                error: error.message
-            });
-        }
-    }
+    //         await ProductModel.deleteProductImages(productId);
+    //         return res.status(200).json({
+    //             success: true,
+    //             message: 'Xóa ảnh thành công'
+    //         });
+    //     } catch (error) {
+    //         console.error('Error in deleteProductImages:', error);
+    //         return res.status(500).json({
+    //             success: false,
+    //             message: 'Internal server error',
+    //             error: error.message
+    //         });
+    //     }
+    // }
 
     // GET /api/room/admin/search - Tìm kiếm sản phẩm theo UID cho admin
     static async searchProductsByUID(req, res) {
@@ -466,6 +466,44 @@ class ProductController {
             });
         }
     }
+
+    // Xóa 1 ảnh - /admin/:id/images/remove
+    static async removeOneImage(req, res) {
+        try {
+            const { id: uid } = req.params;
+            const { imageId } = req.body;
+            if (!imageId) return res.status(400).json({ success:false, message:'imageId is required' });
+
+            const productId = await ProductModel.findProductIdByUID(uid);
+            if (!productId) return res.status(404).json({ success:false, message:'Không tìm thấy sản phẩm' });
+
+            await ProductModel.removeImageIdEverywhere(productId, imageId);
+            return res.json({ success:true, message:'Đã xóa ảnh và gỡ khỏi RoomTourItems' });
+        } catch (e) {
+            console.error('removeOneImage error:', e);
+            return res.status(500).json({ success:false, message:'Internal server error', error:e.message });
+        }
+    }
+
+    // Xóa 1 room tour item - /admin/:id/room-tours/remove
+    static async removeOneRoomTour(req, res) {
+        try {
+            const { id: uid } = req.params;
+            const { title, index } = req.body;
+            if (!title && typeof index !== 'number')
+            return res.status(400).json({ success:false, message:'title hoặc index là bắt buộc' });
+
+            const productId = await ProductModel.findProductIdByUID(uid);
+            if (!productId) return res.status(404).json({ success:false, message:'Không tìm thấy sản phẩm' });
+
+            await ProductModel.removeRoomTourItem(productId, { title, index });
+            return res.json({ success:true, message:'Đã xóa room tour item' });
+        } catch (e) {
+            console.error('removeOneRoomTour error:', e);
+            return res.status(500).json({ success:false, message:'Internal server error', error:e.message });
+        }
+    }
+
 }
 
 function calculateRating(productReviews) {

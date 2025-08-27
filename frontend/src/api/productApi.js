@@ -295,27 +295,27 @@ export const productApi = {
     },
 
     // Xóa tất cả ảnh của sản phẩm (Admin)
-    deleteProductImages: async (productUid) => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/room/admin/${productUid}/images`, {
-                method: 'DELETE',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
+    // deleteProductImages: async (productUid) => {
+    //     try {
+    //         const response = await fetch(`${API_BASE_URL}/api/room/admin/${productUid}/images`, {
+    //             method: 'DELETE',
+    //             credentials: 'include',
+    //             headers: {
+    //                 'Content-Type': 'application/json'
+    //             }
+    //         });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            return data;
-        } catch (error) {
-            console.error('Error deleting product images:', error);
-            throw error;
-        }
-    },
+    //         if (!response.ok) {
+    //             const errorData = await response.json();
+    //             throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    //         }
+    //         const data = await response.json();
+    //         return data;
+    //     } catch (error) {
+    //         console.error('Error deleting product images:', error);
+    //         throw error;
+    //     }
+    // },
 
     // Lấy full dữ liệu room
     getFullProductDataByProductId: async (productId) => {
@@ -340,6 +340,7 @@ export const productApi = {
         }
     },
 
+    // Lấy thông tin phòng theo UID
     getRoomByUID: async (uid, abortSignal = null) => {
         const opts = { method: 'GET', headers: { 'Content-Type': 'application/json' } };
         if (abortSignal) opts.signal = abortSignal;
@@ -352,6 +353,33 @@ export const productApi = {
         }
         return res.json(); // giả sử backend trả { data: {...} }
     },
+
+    // Gỡ 1 imageId: xóa object trong images.Images và pull imageId khỏi mọi RoomTourItems.imageIds
+    removeImage: async (productUid, imageId) => {
+        const res = await fetch(`${API_BASE_URL}/api/room/admin/${productUid}/images/remove`, {
+            method: 'PATCH',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ imageId })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.message || 'Remove image failed');
+        return data;
+    },
+
+    // Gỡ 1 RoomTourItem theo title (ưu tiên) hoặc index
+    removeRoomTour: async (productUid, payload /* { title } hoặc { index } */) => {
+        const res = await fetch(`${API_BASE_URL}/api/room/admin/${productUid}/room-tours/remove`, {
+            method: 'PATCH',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.message || 'Remove room tour failed');
+        return data;
+    }
+
 };
 
 export default productApi;
