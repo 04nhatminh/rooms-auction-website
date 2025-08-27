@@ -56,7 +56,7 @@
 .field span {
     font-size: 0.875rem;
     color: #000;
-    padding: 8px 0;
+    padding: 8px;
     border-bottom: 1px solid #f3f4f6;
 }
 
@@ -68,32 +68,38 @@
 
 .status-active {
     color: #086e3b !important;
-    padding: 4px 8px;
-    border-radius: 4px;
+    border: 1px solid transparent;
+    border-color: #a7f3d0 !important;
+    padding: 8px;
+    border-radius: 8px;
     font-size: 0.75rem;
     font-weight: 600;
     display: inline-block;
-    background-color: #dcfce7;
+    background-color: #ecfdf5;
 }
 
 .status-ended {
     color: #0891b2 !important;
-    padding: 4px 8px;
-    border-radius: 4px;
+    border: 1px solid transparent;
+    border-color: #a5f3fc !important;
+    padding: 8px;
+    border-radius: 8px;
     font-size: 0.75rem;
     font-weight: 600;
     display: inline-block;
-    background-color: #e0f2fe;
+    background-color: #ecfeff;
 }
 
 .status-cancelled {
     color: #dc2626 !important;
-    padding: 4px 8px;
-    border-radius: 4px;
+    border: 1px solid transparent;
+    border-color: #fecaca !important;
+    padding: 8px;
+    border-radius: 8px;
     font-size: 0.75rem;
     font-weight: 600;
     display: inline-block;
-    background-color: #fecaca;
+    background-color: #fef2f2;
 }
 
 .loading, .error {
@@ -181,8 +187,8 @@
 }
 
 .statusPill {
-    padding: 4px 8px;
-    border-radius: 4px;
+    padding: 16px 16px;
+    border-radius: 8px;
     font-size: 0.75rem;
     font-weight: 600;
     display: inline-block;

@@ -228,13 +228,13 @@ const AdminBookingEditPage = () => {
 
                                 {/* Preview pill theo trạng thái hiện chọn */}
                                 <span
-                                className={`${styles.statusPill} ${
-                                    formData.BookingStatus === 'pending' ? styles['status-pending'] :
-                                    formData.BookingStatus === 'confirmed' ? styles['status-confirmed'] :
-                                    formData.BookingStatus === 'cancelled' ? styles['status-cancelled'] :
-                                    formData.BookingStatus === 'completed' ? styles['status-completed'] :
-                                    styles['status-expired']
-                                }`}
+                                    className={`${styles.statusPill} ${
+                                        formData.BookingStatus === 'pending' ? styles['status-pending'] :
+                                        formData.BookingStatus === 'confirmed' ? styles['status-confirmed'] :
+                                        formData.BookingStatus === 'cancelled' ? styles['status-cancelled'] :
+                                        formData.BookingStatus === 'completed' ? styles['status-completed'] :
+                                        styles['status-expired']
+                                    }`}
                                 >
                                 {statusOptions.find(o => o.value === formData.BookingStatus)?.label || '—'}
                                 </span>
