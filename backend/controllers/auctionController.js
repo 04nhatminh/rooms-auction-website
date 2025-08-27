@@ -505,8 +505,6 @@ class AuctionController {
             const { auctionUID } = req.params;
             const { status, endReason } = req.body;
 
-            console.log(`\nupdateAuctionStatus - auctionUID: ${auctionUID}, status: ${status}, endReason: ${endReason}`);
-
             if (!status) {
                 return res.status(400).json({
                     success: false,

@@ -17,18 +17,12 @@ const AdminAuctionEditPage = () => {
         EndReason: ''
     });
 
+    // Kiểm tra xem có được phép edit hay không
+    const canEdit = auction?.Status === 'active';
+
     const statusOptions = [
         { value: 'active', label: 'Đang hoạt động' },
-        { value: 'ended', label: 'Đã kết thúc' },
         { value: 'cancelled', label: 'Đã hủy' }
-    ];
-
-    const endReasonOptions = [
-        { value: '', label: 'Không có' },
-        { value: 'natural_end', label: 'Kết thúc tự nhiên' },
-        { value: 'buy_now', label: 'Mua ngay' },
-        { value: 'cancelled', label: 'Bị hủy' },
-        { value: 'admin_force', label: 'Admin ép kết thúc' }
     ];
 
     const formatCurrency = (price) => {
@@ -71,16 +65,6 @@ const AdminAuctionEditPage = () => {
         }
     };
 
-    const getEndReasonText = (endReason) => {
-        switch (endReason) {
-            case 'natural_end': return 'Kết thúc tự nhiên';
-            case 'buy_now': return 'Mua ngay';
-            case 'cancelled': return 'Bị hủy';
-            case 'admin_force': return 'Admin ép kết thúc';
-            default: return endReason || '-';
-        }
-    };
-
     useEffect(() => {
         const fetchAuctionDetails = async () => {
             try {
@@ -112,14 +96,28 @@ const AdminAuctionEditPage = () => {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
+        setFormData(prev => {
+            const next = { ...prev, [name]: value };
+            if (name === 'Status' && value !== 'cancelled') next.EndReason = '';
+            return next;
+        });
     };
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        // Kiểm tra quyền edit
+        if (!canEdit) {
+            alert('Chỉ có thể chỉnh sửa đấu giá đang ở trạng thái "Đang hoạt động"');
+            return;
+        }
+
+        // Kiểm tra nếu chọn cancelled mà không có lý do
+        if (formData.Status === 'cancelled' && !formData.EndReason.trim()) {
+            alert('Vui lòng nhập lý do hủy đấu giá');
+            return;
+        }
         
         try {
             setSaving(true);
@@ -229,6 +227,7 @@ const AdminAuctionEditPage = () => {
                                     value={formData.Status}
                                     onChange={handleInputChange}
                                     className={`${styles.select} ${styles.statusSelect}`}
+                                    disabled={!canEdit}
                                 >
                                     {statusOptions.map(option => (
                                         <option key={option.value} value={option.value}>
@@ -246,28 +245,31 @@ const AdminAuctionEditPage = () => {
                                         ''
                                     }`}
                                 >
-                                    {statusOptions.find(o => o.value === formData.Status)?.label || '—'}
+                                    {statusOptions.find(o => o.value === formData.Status)?.label || getStatusText(formData.Status)}
                                 </span>
                             </div>
                         </div>
 
-                        <div className={styles.field}>
-                            <label>Lý do kết thúc:</label>
-                            <select
+                    </div>
+                    {formData.Status === 'cancelled' && (
+                        <div className={styles.field}
+                            style={{ gridColumn: '1 / -1', width: '100%', marginTop: 32 }}>
+                            <label>Lý do hủy:</label>
+                            {canEdit ? (
+                            <input
+                                type="text"
                                 id="EndReason"
                                 name="EndReason"
                                 value={formData.EndReason}
                                 onChange={handleInputChange}
-                                className={`${styles.select}`}
-                            >
-                                {endReasonOptions.map(option => (
-                                    <option key={option.value} value={option.value}>
-                                        {option.label}
-                                    </option>
-                                ))}
-                            </select>
+                                placeholder="Nhập lý do hủy đấu giá..."
+                                className={styles.input}
+                            />
+                            ) : (
+                            <span>{auction.EndReason || '-'}</span>
+                            )}
                         </div>
-                    </div>
+                    )}
                 </div>
 
                 <div className={styles.section}>
@@ -371,7 +373,7 @@ const AdminAuctionEditPage = () => {
                         type="submit"
                         onClick={handleSubmit}
                         className={styles.saveBtn}
-                        disabled={saving}
+                        disabled={saving || !canEdit}
                     >
                         {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
                     </button>

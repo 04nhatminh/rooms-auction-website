@@ -706,9 +706,10 @@ class AuctionModel {
 
             // Validate status transition
             const validTransitions = {
-                'active': ['ended', 'cancelled'],
-                'ended': [], // Không thể thay đổi từ ended
-                'cancelled': ['active'] // Có thể kích hoạt lại
+                'active': ['cancelled']
+                // 'active': ['ended', 'cancelled'],
+                // 'ended': [],
+                // 'cancelled': ['active']
             };
 
             if (!validTransitions[currentStatus] || !validTransitions[currentStatus].includes(newStatus)) {
@@ -719,7 +720,7 @@ class AuctionModel {
             let updateQuery = 'UPDATE Auction SET Status = ?';
             let params = [newStatus];
 
-            if (endReason && (newStatus === 'ended' || newStatus === 'cancelled')) {
+            if (endReason && (newStatus === 'cancelled')) {
                 updateQuery += ', EndReason = ?';
                 params.push(endReason);
             }

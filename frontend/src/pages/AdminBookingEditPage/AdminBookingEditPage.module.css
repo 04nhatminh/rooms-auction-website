@@ -187,7 +187,8 @@
 
 .statusSelect:focus {
     outline: none;
-    border-color: #f3f4f6;
+    border-color: #505050 !important;
+    box-shadow: 0 !important;
 }
 
 .statusSelect:disabled {
