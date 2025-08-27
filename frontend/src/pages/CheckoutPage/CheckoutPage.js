@@ -202,7 +202,7 @@ const CheckoutPage = () => {
         <div className="checkout-main">
           {/* LEFT: Booking summary */}
           <section className="checkout-left">
-            <h2 style={{ marginTop: 16 }}>Đặt phòng</h2>
+            <h2 style={{ marginTop: 16 }}>Thanh toán đặt phòng</h2>
             <BookingSummary
               unitPrice={Number(booking?.Amount || 0)}
               nights={nights}

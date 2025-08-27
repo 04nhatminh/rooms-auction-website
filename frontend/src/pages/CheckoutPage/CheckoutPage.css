@@ -23,6 +23,26 @@
   max-width: none !important;
 }
 
+.checkout-left h2 {
+  font-family: Montserrat;
+  font-size: 28px;
+  font-weight: 650;
+  margin-left: 22px;
+}
+
+.cbm-row span {
+  font-family: Montserrat;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.cbm-row b {
+  font-family: Montserrat;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+
 /* Tinh chỉnh theo các ngưỡng */
 @media (max-width: 1280px){
   .checkout-main{ --payOffset: clamp(8px, 7vh, 120px); }
@@ -42,6 +62,13 @@
   width: 100%; 
 }
 
+.cbm-title {
+  font-family: Montserrat;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
 /* Responsive: về 1 cột khi màn hình hẹp */
 @media (max-width: 1024px){
   .checkout-main{
@@ -56,6 +83,13 @@
   padding: 16px;
   background: #fff;
   box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+}
+
+.payment-card h3 {
+  font-family: Montserrat;
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 12px;
 }
 
 .summary-row {
@@ -138,7 +172,9 @@
   border-radius: 10px;
   background: #111827;
   color: #fff;
-  font-weight: 600;
+  font-family: Montserrat;
+  font-size: 14px;
+  font-weight: 550;
   cursor: pointer;
   margin-top: clamp(8px, 10vh, 16px);;
 }
@@ -156,6 +192,8 @@
   border-radius: 10px;
   background: red;
   color: #fff;
+  font-family: Montserrat;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   margin-top: clamp(8px, 10vh, 16px);;
