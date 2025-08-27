@@ -219,38 +219,58 @@ const AdminAuctionEditPage = () => {
 
                         <div className={styles.field}>
                             <label>Trạng thái đấu giá:</label>
-                            <div className={styles.statusRow}>
-                                <select
+                            {canEdit ? (
+                                <div className={styles.statusRow}>
+                                    <select
                                     id="Status"
                                     name="Status"
                                     value={formData.Status}
                                     onChange={handleInputChange}
                                     className={`${styles.select} ${styles.statusSelect}`}
-                                    disabled={!canEdit}
-                                >
+                                    >
                                     {statusOptions.map(option => (
                                         <option key={option.value} value={option.value}>
-                                            {option.label}
+                                        {option.label}
                                         </option>
                                     ))}
-                                </select>
+                                    </select>
 
-                                {/* Preview pill theo trạng thái hiện chọn */}
+                                    {/* Preview pill */}
+                                    <span
+                                    className={`${styles.statusPill} ${
+                                        formData.Status === 'active'
+                                        ? styles['status-active']
+                                        : formData.Status === 'ended'
+                                        ? styles['status-ended']
+                                        : formData.Status === 'cancelled'
+                                        ? styles['status-cancelled']
+                                        : ''
+                                    }`}
+                                    >
+                                    {statusOptions.find(o => o.value === formData.Status)?.label ||
+                                        getStatusText(formData.Status)}
+                                    </span>
+                                </div>
+                            ) : (
                                 <span
                                     className={`${styles.statusPill} ${
-                                        formData.Status === 'active' ? styles['status-active'] :
-                                        formData.Status === 'ended' ? styles['status-ended'] :
-                                        formData.Status === 'cancelled' ? styles['status-cancelled'] :
-                                        ''
+                                    auction.Status === 'active'
+                                        ? styles['status-active']
+                                        : auction.Status === 'ended'
+                                        ? styles['status-ended']
+                                        : auction.Status === 'cancelled'
+                                        ? styles['status-cancelled']
+                                        : ''
                                     }`}
                                 >
-                                    {statusOptions.find(o => o.value === formData.Status)?.label || getStatusText(formData.Status)}
+                                    {getStatusText(auction.Status)}
                                 </span>
-                            </div>
+                            )}
+
                             {formData.Status === 'cancelled' && (
                                 <div className={styles.statusNote}>
                                     <span className={styles.noteIcon}>ℹ️</span>
-                                    Lý do kết thúc sẽ được tự động ghi nhận là "Admin ép kết thúc"
+                                    Lý do kết thúc sẽ được tự động ghi nhận là "Admin kết thúc"
                                 </div>
                             )}
                         </div>
