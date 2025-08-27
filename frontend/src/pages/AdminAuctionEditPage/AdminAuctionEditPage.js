@@ -98,7 +98,12 @@ const AdminAuctionEditPage = () => {
         const { name, value } = e.target;
         setFormData(prev => {
             const next = { ...prev, [name]: value };
-            if (name === 'Status' && value !== 'cancelled') next.EndReason = '';
+            // Tự động set EndReason = "admin_force" khi chọn cancelled
+            if (name === 'Status' && value === 'cancelled') {
+                next.EndReason = 'admin_force';
+            } else if (name === 'Status' && value !== 'cancelled') {
+                next.EndReason = '';
+            }
             return next;
         });
     };
@@ -110,12 +115,6 @@ const AdminAuctionEditPage = () => {
         // Kiểm tra quyền edit
         if (!canEdit) {
             alert('Chỉ có thể chỉnh sửa đấu giá đang ở trạng thái "Đang hoạt động"');
-            return;
-        }
-
-        // Kiểm tra nếu chọn cancelled mà không có lý do
-        if (formData.Status === 'cancelled' && !formData.EndReason.trim()) {
-            alert('Vui lòng nhập lý do hủy đấu giá');
             return;
         }
         
@@ -248,28 +247,15 @@ const AdminAuctionEditPage = () => {
                                     {statusOptions.find(o => o.value === formData.Status)?.label || getStatusText(formData.Status)}
                                 </span>
                             </div>
+                            {formData.Status === 'cancelled' && (
+                                <div className={styles.statusNote}>
+                                    <span className={styles.noteIcon}>ℹ️</span>
+                                    Lý do kết thúc sẽ được tự động ghi nhận là "Admin ép kết thúc"
+                                </div>
+                            )}
                         </div>
 
                     </div>
-                    {formData.Status === 'cancelled' && (
-                        <div className={styles.field}
-                            style={{ gridColumn: '1 / -1', width: '100%', marginTop: 32 }}>
-                            <label>Lý do hủy:</label>
-                            {canEdit ? (
-                            <input
-                                type="text"
-                                id="EndReason"
-                                name="EndReason"
-                                value={formData.EndReason}
-                                onChange={handleInputChange}
-                                placeholder="Nhập lý do hủy đấu giá..."
-                                className={styles.input}
-                            />
-                            ) : (
-                            <span>{auction.EndReason || '-'}</span>
-                            )}
-                        </div>
-                    )}
                 </div>
 
                 <div className={styles.section}>

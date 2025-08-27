@@ -232,6 +232,23 @@
     white-space: nowrap;
 }
 
+.statusNote {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background-color: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    color: #1e40af;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.noteIcon {
+    font-size: 0.875rem;
+}
+
 .backBtn {
     margin-top: 1rem;
     padding: 0.75rem 1.5rem;

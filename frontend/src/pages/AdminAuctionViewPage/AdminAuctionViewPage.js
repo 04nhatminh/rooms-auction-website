@@ -56,7 +56,7 @@ const AdminAuctionViewPage = () => {
             case 'natural_end': return 'Kết thúc tự nhiên';
             case 'buy_now': return 'Mua ngay';
             case 'cancelled': return 'Bị hủy';
-            case 'admin_force': return 'Admin ép kết thúc';
+            case 'admin_force': return 'Admin kết thúc';
             default: return endReason || '-';
         }
     };
@@ -154,6 +154,10 @@ const AdminAuctionViewPage = () => {
                             <label>AuctionUID:</label>
                             <span>{auction.AuctionUID}</span>
                         </div>
+                    </div>
+                    <div className={styles.grid}
+                        style={{ marginTop: '32px' }}
+                    >
                         <div className={styles.field}>
                             <label>Trạng thái:</label>
                             <span className={styles[`status-${auction.Status}`]}>
