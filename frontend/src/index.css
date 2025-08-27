@@ -12,3 +12,22 @@ code {
 * {
   box-sizing: border-box;
 }
+
+.global-notification {
+  position: fixed;
+  top: 32px;
+  right: 32px;
+  z-index: 9999;
+  background: #fff;
+  color: #222;
+  padding: 16px 28px;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-left: 6px solid #278C9F;
+  transition: all 0.3s;
+}
+.global-notification.success { border-left-color: #10b981; }
+.global-notification.failed { border-left-color: #ef4444; }
+.global-notification.info { border-left-color: #278C9F; }

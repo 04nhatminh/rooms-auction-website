@@ -1108,6 +1108,22 @@ async function createRatingTable() {
     }
 }
 
+async function createNotificationTable() {
+    await pool.execute(`
+        CREATE TABLE IF NOT EXISTS Notifications (
+            NotificationID INT AUTO_INCREMENT PRIMARY KEY,
+            UserID INT NOT NULL,
+            AuctionID INT UNSIGNED NOT NULL,
+            Type ENUM('win','lose') NOT NULL,
+            Message TEXT,
+            IsRead TINYINT(1) DEFAULT 0,
+            CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (UserID) REFERENCES Users(UserID),
+            FOREIGN KEY (AuctionID) REFERENCES Auction(AuctionID)
+        );
+    `);
+}
+
 // Trigger
 async function dropUpdateRoomTypesTriggerIfExists() {
     await pool.query(`
@@ -2717,6 +2733,9 @@ async function initSchema() {
         
         await createRatingTable();
         console.log('✅ Rating table ready');
+
+        await createNotificationTable();
+        console.log('✅ Notification table ready');
 
         console.log('\n📋 Creating triggers...');
 

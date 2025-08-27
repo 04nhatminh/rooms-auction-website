@@ -3,6 +3,7 @@ const router = express.Router();
 const userController = require('../controllers/userController');
 const AuctionController = require('../controllers/auctionController');
 const bookingController = require('../controllers/bookingController');
+const NotificationController = require('../controllers/notificationController');
 const { verifyToken } = require('../middleware/authMiddleware');
 
 router.post('/register', userController.register);
@@ -21,5 +22,6 @@ router.put('/me/password', verifyToken, userController.changePassword);
 // Auction and Booking History
 router.get('/auction-history', verifyToken, AuctionController.getUserAuctionHistory);
 router.get('/transaction-history', verifyToken, bookingController.getUserTransactionHistory);
+router.get('/notifications', verifyToken, NotificationController.getUserNotifications);
 
 module.exports = router;

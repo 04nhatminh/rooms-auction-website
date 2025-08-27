@@ -668,6 +668,38 @@ class AuctionModel {
                 : null
         }));
     }
+
+    static async notifyAuctionResult(auctionUid) {
+        console.log('notifyAuctionResult called for auctionUid:', auctionUid);
+        // Lấy MaxBidID và user thắng
+        const [[auction]] = await pool.query(
+        `SELECT AuctionID, MaxBidID FROM Auction WHERE AuctionUID = ?`, [auctionUid]
+        );
+        if (!auction) return;
+
+        const [[winnerBid]] = await pool.query(
+        `SELECT UserID FROM Bids WHERE BidID = ?`, [auction.MaxBidID]
+        );
+        const winnerId = winnerBid?.UserID;
+
+        // Lấy tất cả user đã bid
+        const [bidders] = await pool.query(
+        `SELECT DISTINCT UserID FROM Bids WHERE AuctionID = ?`, [auction.AuctionID]
+        );
+
+        console.log('Bidders:', bidders);
+        // Gửi thông báo cho từng user
+        for (const b of bidders) {
+        const type = b.UserID === winnerId ? 'win' : 'lose';
+        const msg = type === 'win'
+            ? 'Chúc mừng! Bạn đã thắng phiên đấu giá.'
+            : 'Rất tiếc! Bạn đã không thắng phiên đấu giá.';
+        await pool.query(
+            `INSERT INTO Notifications (UserID, AuctionID, Type, Message) VALUES (?, ?, ?, ?)`,
+            [b.UserID, auction.AuctionID, type, msg]
+        );
+        }
+    }
 }
 
 module.exports = AuctionModel;

@@ -5,6 +5,7 @@ import './App.css';
 // Import contexts
 import { LocationProvider } from './contexts/LocationContext';
 import { UserProvider } from './contexts/UserContext';
+import { NotificationProvider } from './contexts/NotificationContext';
 
 // Import components
 import SimpleAdminGuard from './components/SimpleAdminGuard/SimpleAdminGuard';
@@ -48,53 +49,55 @@ function App() {
   return (
     <UserProvider>
       <LocationProvider>
-        <Router>
-        <div className="App">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<SignUpPage />} />
-            <Route path="/room/:UID" element={<RoomDetailPage />} />
-            <Route path="/auction-check/:UID" element={<AuctionCheckPage />} />
-            <Route path="/verification-success" element={<VerificationSuccessPage />} />
-            <Route path="/search" element={<SearchResult />} />
-            <Route path="/profile" element={<UserProfilePage />} />
-            <Route path="/favorite" element={<FavoritePage />} />
-            <Route path="/notifications" element={<NotificationPage />} />
-            <Route path="/checkout/success" element={<SuccessfulCheckoutPage />} />
-            <Route path="/checkout/failed" element={<FailedCheckoutPage />} />
-            <Route path="/checkout/booking/:bookingId" element={<CheckoutPage />} />
-            <Route path="/checkout/paypal/return" element={<CheckoutReturnPage />} />
-            <Route path="/checkout/zalopay/return" element={<CheckoutReturnPage />} />
-            <Route path="/checkout/vnpay/return" element={<CheckoutReturnPage />} />            
-            <Route path="/auction-history" element={<AuctionHistoryPage />} />
-            <Route path="/transaction-history" element={<TransactionHistoryPage />} />
-            <Route path="/auction/:UID" element={<AuctionPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="/reset-password" element={<ResetPasswordPage />} />
-            <Route path="/admin" element={
-              <SimpleAdminGuard>
-                <AdminLayout />
-              </SimpleAdminGuard>
-            }>
-              <Route path="dashboard" element={<AdminDashboard />} />
-              <Route path="users-management" element={<UsersManagementPage />} />
-              <Route path="users-management/:id" element={<UsersManagementDetailPage />} />
-              <Route path="products-management" element={<AdminProductsManagementPage />} />
-              <Route path="products-management/add" element={<AdminAddProductPage />} />
-              <Route path="products-management/edit/:id" element={<AdminEditProductPage />} />
-              <Route path="products-management/view/:id" element={<AdminViewProductPage />} />
-              <Route path="auctions-management" element={<AdminAuctionsManagementPage />} />
-              <Route path="system-config" element={<SystemConfigPage />} />
-              <Route path="data-scraping" element={<DataScrapingPage />} />
-              {/* <Route path="edit-product/:id" element={<AdminEditProductPage />} /> */}
-              {/* <Route path="bookings-management" element={<BookingsManagementPage />} /> */}
-            </Route>
-          </Routes>
-        </div>
-      </Router>
-    </LocationProvider>
-  </UserProvider>
+        <NotificationProvider>
+          <Router>
+          <div className="App">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<SignUpPage />} />
+              <Route path="/room/:UID" element={<RoomDetailPage />} />
+              <Route path="/auction-check/:UID" element={<AuctionCheckPage />} />
+              <Route path="/verification-success" element={<VerificationSuccessPage />} />
+              <Route path="/search" element={<SearchResult />} />
+              <Route path="/profile" element={<UserProfilePage />} />
+              <Route path="/favorite" element={<FavoritePage />} />
+              <Route path="/notifications" element={<NotificationPage />} />
+              <Route path="/checkout/success" element={<SuccessfulCheckoutPage />} />
+              <Route path="/checkout/failed" element={<FailedCheckoutPage />} />
+              <Route path="/checkout/booking/:bookingId" element={<CheckoutPage />} />
+              <Route path="/checkout/paypal/return" element={<CheckoutReturnPage />} />
+              <Route path="/checkout/zalopay/return" element={<CheckoutReturnPage />} />
+              <Route path="/checkout/vnpay/return" element={<CheckoutReturnPage />} />            
+              <Route path="/auction-history" element={<AuctionHistoryPage />} />
+              <Route path="/transaction-history" element={<TransactionHistoryPage />} />
+              <Route path="/auction/:UID" element={<AuctionPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
+              <Route path="/admin" element={
+                <SimpleAdminGuard>
+                  <AdminLayout />
+                </SimpleAdminGuard>
+              }>
+                <Route path="dashboard" element={<AdminDashboard />} />
+                <Route path="users-management" element={<UsersManagementPage />} />
+                <Route path="users-management/:id" element={<UsersManagementDetailPage />} />
+                <Route path="products-management" element={<AdminProductsManagementPage />} />
+                <Route path="products-management/add" element={<AdminAddProductPage />} />
+                <Route path="products-management/edit/:id" element={<AdminEditProductPage />} />
+                <Route path="products-management/view/:id" element={<AdminViewProductPage />} />
+                <Route path="auctions-management" element={<AdminAuctionsManagementPage />} />
+                <Route path="system-config" element={<SystemConfigPage />} />
+                <Route path="data-scraping" element={<DataScrapingPage />} />
+                {/* <Route path="edit-product/:id" element={<AdminEditProductPage />} /> */}
+                {/* <Route path="bookings-management" element={<BookingsManagementPage />} /> */}
+              </Route>
+            </Routes>
+          </div>
+        </Router>
+        </NotificationProvider>
+      </LocationProvider>
+    </UserProvider>
   );
 }
 

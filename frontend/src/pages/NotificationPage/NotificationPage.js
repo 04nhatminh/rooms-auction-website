@@ -8,17 +8,17 @@ const NotificationPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Lấy userId hiện tại từ sessionStorage
     const userData = JSON.parse(sessionStorage.getItem('userData') || 'null');
     const userId = userData?.id || userData?.userId;
 
     async function fetchNotifications() {
       setLoading(true);
       try {
-        // Giả sử có API /api/auction/notifications?userId=<id>
-        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/auction/notifications?userId=${userId}`);
+        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/user/notifications`, {
+          credentials: 'include'
+        });
         const data = await res.json();
-        setNotifications(data?.notifications || []);
+        setNotifications(data?.items || []);
       } catch (e) {
         setNotifications([]);
       } finally {
@@ -41,13 +41,19 @@ const NotificationPage = () => {
           <div className="notification-empty">Không có thông báo nào.</div>
         ) : (
           <ul className="notification-list">
-            {notifications.map((n, idx) => (
-              <li key={idx} className={`notification-item ${n.status}`}>
-                <strong>{n.title}</strong>
-                <div>{n.message}</div>
-                <div className="notification-time">{n.time}</div>
-              </li>
-            ))}
+            {notifications.map((n, idx) => {
+              // Map dữ liệu từ DB sang format UI
+              const status = n.Type === 'win' ? 'success' : n.Type === 'lose' ? 'failed' : 'ended';
+              const title = n.Type === 'win' ? 'Bạn đã thắng phiên!' : n.Type === 'lose' ? 'Bạn đã thua phiên.' : 'Kết thúc phiên';
+              const time = n.CreatedAt ? new Date(n.CreatedAt).toLocaleString('vi-VN') : '';
+              return (
+                <li key={n.NotificationID || idx} className={`notification-item ${status}`}>
+                  <strong>{title}</strong>
+                  <div>{n.Message}</div>
+                  <div className="notification-time">{time}</div>
+                </li>
+              );
+            })}
           </ul>
         )}
       </main>
