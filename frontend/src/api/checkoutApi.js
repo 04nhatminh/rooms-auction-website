@@ -40,6 +40,39 @@ export const checkoutApi = {
     }
   },
 
+  cancelBooking: async (bookingId, abortSignal = null) => {
+    if (!bookingId) throw new Error('bookingId is required');
+
+    try {
+      const fetchOptions = {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      };
+      if (abortSignal) fetchOptions.signal = abortSignal;
+
+      const res = await fetch(`${API_BASE_URL}/api/checkout/booking/cancel/${bookingId}`, fetchOptions);
+
+      if (!res.ok) {
+        let message = `HTTP error! status: ${res.status}`;
+        try {
+          const errJson = await res.json();
+          message = errJson?.message || errJson?.error || message;
+        } catch {}
+        throw new Error(message);
+      }
+
+      const json = await res.json(); // kỳ vọng { ok:true, data:{...} }
+      if (!json?.ok) throw new Error(json?.error || 'Cannot cancel booking');
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        console.log('Checkout API request was aborted');
+        throw error;
+      }
+      console.error('Error cancelling booking:', error);
+      throw error;
+    }
+  },
+
   /**
    * Tạo đơn ZaloPay (sandbox)
    * Backend endpoint: POST /api/payments/zalopay/create

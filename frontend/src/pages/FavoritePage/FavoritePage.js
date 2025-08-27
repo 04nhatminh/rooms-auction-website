@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import FavoritesApi from '../../api/favoritesApi';
 import Header from '../../components/Header/Header';
 import { imageApi } from '../../api/imageApi';
+import favoriteFilledIcon from '../../assets/favorite_filled.png';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000';
 
@@ -59,10 +60,8 @@ const FavoritePage = () => {
         if (!window.confirm(`Bạn có muốn bỏ yêu thích "${productName}"?`)) {
             return;
         }
-
         try {
-            await FavoritesApi.removeFavorite(uid);
-            // Cập nhật state local
+            await FavoritesApi.removeFavorite(uid); // Đảm bảo truyền đúng UID
             setFavorites(prev => prev.filter(item => item.UID !== uid));
             alert('Đã bỏ yêu thích thành công!');
         } catch (err) {
@@ -117,63 +116,79 @@ const FavoritePage = () => {
             // Favorites Grid
             !loading && !error && favorites.length > 0 && React.createElement('div', { className: "grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" },
                 favorites.map(item => {
-                    const id = item.ProductID;
-                    const uid = item.UID; // fallback nếu không có UID
+                    const uid = item.UID;
                     const name = item.ProductName || '—';
-                    const imageUrl = item.MainImageURL || null; // Sử dụng ảnh từ API
+                    const imageUrl = item.MainImageURL || null;
                     const price = item.Price;
                     const rating = item.AvgRating || 5.0;
                     const location = item.ProvinceName || '—';
                     
-                    return React.createElement('div', { 
-                        key: uid, // Sử dụng UID làm key nếu có
-                        className: "rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow flex flex-col"
-                    },
-                        // Image Container
-                        React.createElement('div', { className: "relative aspect-[4/3] bg-slate-200 overflow-hidden" },
-                            imageUrl ? React.createElement('img', {
-                                src: imageUrl,
-                                alt: name,
-                                className: "h-full w-full object-cover transition-transform duration-300 hover:scale-105",
-                                loading: "lazy"
-                            }) : React.createElement('div', { className: "flex h-full w-full items-center justify-center text-slate-400 text-xs" },
-                                React.createElement('i', { className: "fa-regular fa-image text-2xl" }),
-                                React.createElement('div', { className: "ml-2" }, "Không có hình ảnh")
-                            ),
-                            
-                            // Remove Heart Button
-                            React.createElement('button', {
-                                className: "absolute top-2 right-2 rounded-full bg-white/90 backdrop-blur p-2 text-rose-600 border border-white shadow-sm hover:bg-white transition-colors",
-                                title: "Bỏ yêu thích",
-                                onClick: () => handleRemoveFavorite(id, name)
-                            }, React.createElement('i', { className: "fa-solid fa-heart text-sm" }))
-                        ),
+                    return (
+                      <div key={uid} className="rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow flex flex-col relative">
+                        {/* Icon trái tim ở góc phải trên */}
+                        <button
+                          className="favorite-remove-btn"
+                          title="Bỏ yêu thích"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveFavorite(uid, name);
+                          }}
+                          style={{
+                            position: 'absolute',
+                            top: 12,
+                            right: 12,
+                            background: 'transparent',
+                            border: 'none',
+                            zIndex: 2,
+                            padding: 0,
+                          }}
+                        >
+                          <img src={favoriteFilledIcon} alt="Bỏ yêu thích" style={{ width: 28, height: 28 }} />
+                        </button>
 
-                        // Content
-                        React.createElement('div', { className: "p-4 flex flex-col gap-2 flex-1" },
-                            React.createElement('h3', { className: "text-sm font-semibold line-clamp-2 leading-5" }, name),
-                            
-                            React.createElement('div', { className: "text-xs text-slate-500 flex items-center gap-1" },
-                                React.createElement('i', { className: "fa-solid fa-location-dot" }),
-                                location
-                            ),
-                            
-                            React.createElement('div', { className: "flex items-center gap-2 text-xs" },
-                                React.createElement('span', { className: "flex items-center gap-1 font-medium" },
-                                    React.createElement('i', { className: "fa-solid fa-star text-amber-400" }),
-                                    Number(rating).toFixed(1)
-                                )
-                            ),
-                            
-                            price && React.createElement('div', { className: "text-sm font-semibold text-slate-900" },
-                                Number(price).toLocaleString('vi-VN') + ' đ'
-                            ),
-                            
-                            React.createElement('button', {
-                                className: "mt-auto w-full text-xs font-medium rounded-lg border border-slate-300 py-2 hover:bg-slate-50 transition-colors",
-                                onClick: () => handleViewProduct(uid)
-                            }, "Xem chi tiết")
-                        )
+                        {/* Image Container */}
+                        <div className="relative aspect-[4/3] bg-slate-200 overflow-hidden">
+                            {imageUrl ? (
+                                <img
+                                    src={imageUrl}
+                                    alt={name}
+                                    className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+                                    loading="lazy"
+                                />
+                            ) : (
+                                <div className="flex h-full w-full items-center justify-center text-slate-400 text-xs">
+                                    <i className="fa-regular fa-image text-2xl" />
+                                    <div className="ml-2">Không có hình ảnh</div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-4 flex flex-col gap-2 flex-1">
+                            <h3 className="text-sm font-semibold line-clamp-2 leading-5">{name}</h3>
+                            <div className="text-xs text-slate-500 flex items-center gap-1">
+                                <i className="fa-solid fa-location-dot" />
+                                {location}
+                            </div>
+                            <div className="flex items-center gap-2 text-xs">
+                                <span className="flex items-center gap-1 font-medium">
+                                    <i className="fa-solid fa-star text-amber-400" />
+                                    {Number(rating).toFixed(1)}
+                                </span>
+                            </div>
+                            {price && (
+                                <div className="text-sm font-semibold text-slate-900">
+                                    {Number(price).toLocaleString('vi-VN')} đ
+                                </div>
+                            )}
+                            <button
+                                className="mt-auto w-full text-xs font-medium rounded-lg border border-slate-300 py-2 hover:bg-slate-50 transition-colors"
+                                onClick={() => handleViewProduct(uid)}
+                            >
+                                Xem chi tiết
+                            </button>
+                        </div>
+                      </div>
                     );
                 })
             )

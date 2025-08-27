@@ -4,11 +4,12 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const routes = require('./routes/index');
 const path = require('path');
+const { autoEndAuctions } = require('./services/auctionScheduler');
 
 const app = express();
 const PORT = process.env.APP_PORT || 3000;const CLIENT_ORIGIN = [
   process.env.CLIENT_ORIGIN || 'http://localhost:3001',
-  'https://7b0b38392154.ngrok-free.app'
+  'https://9652ce827ae8.ngrok-free.app'
 ];
 
 
@@ -28,5 +29,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static(path.join(__dirname, '../frontend')));
 app.use('/', routes);                  // ✅ path là '/', không phải URL
+
+setInterval(autoEndAuctions, 30 * 1000); // Chạy mỗi 30s
 
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));

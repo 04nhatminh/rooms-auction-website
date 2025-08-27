@@ -194,6 +194,16 @@ export const bookingApi = {
       console.error('Error updating booking:', error);
       throw error;
     }
+  },
+  
+  getUserTransactionHistory: async () => {
+    const res = await fetch(`${API_BASE_URL}/user/transaction-history`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    if (!res.ok) throw new Error('Không lấy được lịch sử giao dịch');
+    return await res.json();
   }
 };
 

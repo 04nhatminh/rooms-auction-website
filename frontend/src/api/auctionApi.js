@@ -450,8 +450,17 @@ export const auctionApi = {
             console.error('Error updating auction status:', error);
             throw error;
         }
-    }
+    },
 
+    getUserAuctionHistory: async () => {
+        const res = await fetch(`${API_BASE_URL}/user/auction-history`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
+        });
+        if (!res.ok) throw new Error('Không lấy được lịch sử đấu giá');
+        return await res.json();
+    }
 };
 
 export default auctionApi;

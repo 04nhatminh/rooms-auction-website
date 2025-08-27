@@ -12,7 +12,6 @@ class UserApi {
 
   static async getProfile() {
     const res = await fetch(`${API_BASE_URL}/user/me`, {
-      headers: this.getHeaders(),
       credentials: 'include'
     });
     if (!res.ok) throw new Error((await res.json()).message || 'Failed to load profile');
@@ -22,7 +21,8 @@ class UserApi {
   static async updateProfile(payload) {
     const res = await fetch(`${API_BASE_URL}/user/me`, {
       method: 'PUT',
-      headers: this.getHeaders(),
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
     if (!res.ok) throw new Error((await res.json()).message || 'Failed to update profile');
@@ -114,6 +114,19 @@ class UserApi {
     });
     return this.handle(res, 'Không thể cập nhật trạng thái người dùng.');
   };
+
+  static async uploadAvatar(file) {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    const res = await fetch(`${API_BASE_URL}/user/me/avatar`, {
+        method: 'POST',
+        credentials: 'include',
+        body: formData
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message || 'Upload avatar failed');
+    return data.url;
+}
 }
 
 export default UserApi;

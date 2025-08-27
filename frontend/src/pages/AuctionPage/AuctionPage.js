@@ -162,6 +162,8 @@ const AuctionPage = () => {
     const [userCheckin, setUserCheckin] = useState(qsCheckin);
     const [userCheckout, setUserCheckout] = useState(qsCheckout);
     const [, setAuctionDetails] = useState(null);
+    const [isEnded, setIsEnded] = useState(false);
+    const [hasEndedCalled, setHasEndedCalled] = useState(false);
 
     const currentUserId = useMemo(() => {
         try {
@@ -176,11 +178,30 @@ const AuctionPage = () => {
         setLoading(true); setError('');
 
         loadAuction(auctionUid, currentUserId, aborter.signal)
-            .then(mapped => { if (alive) setViewData(mapped); })
+            .then(mapped => {
+                if (alive) {
+                    setViewData(mapped);
+                    // Nếu trạng thái phiên là ended thì disable nút Đặt giá
+                    if (mapped?.auctionDetails?.status === 'ended') setIsEnded(true);
+                }
+            })
             .catch(e => { if (alive && e.name !== 'AbortError') setError(e.message || 'Không tải được dữ liệu phiên'); })
             .finally(() => { if (alive) setLoading(false); });
 
         return () => { alive = false; aborter.abort(); };
+    }, [auctionUid, currentUserId]);
+
+    useEffect(() => {
+        let timer;
+        const fetchAuction = async () => {
+            try {
+                const mapped = await loadAuction(auctionUid, currentUserId);
+                setViewData(mapped);
+                if (mapped?.auctionDetails?.status === 'ended') setIsEnded(true);
+            } catch (e) {}
+        };
+        timer = setInterval(fetchAuction, 5000); // 5s
+        return () => clearInterval(timer);
     }, [auctionUid, currentUserId]);
 
 
@@ -224,15 +245,16 @@ const AuctionPage = () => {
                         <CountdownTimer
                             details={auctionDetails}
                             onEnded={async () => {
-                                if (auctionDetails?.status !== 'ended' && auctionUid) {
-                                    try {
-                                        await auctionApi.endAuction(auctionUid);
-                                        setAuctionDetails(prev => ({ ...prev, status: 'ended' }));
-                                    } catch (e) {
-                                        // Có thể log hoặc báo lỗi nếu cần
-                                    }
+                                if (hasEndedCalled) return; // Đã gọi rồi thì bỏ qua
+                                setHasEndedCalled(true);
+                                setIsEnded(true);
+                                setAuctionDetails(prev => ({ ...prev, status: 'ended' }));
+                                try {
+                                  await auctionApi.endAuction(auctionUid); // Gọi API chuyển trạng thái về ended
+                                } catch (e) {
+                                  console.error('Lỗi khi kết thúc phiên:', e);
                                 }
-                            }}
+                              }}
                         />
                         <AuctionInfo details={auctionDetails} />
                         <BiddingForm
@@ -241,6 +263,7 @@ const AuctionPage = () => {
                             checkin={userCheckin}
                             checkout={userCheckout}
                             status={auctionDetails?.status}
+                            isEnded={isEnded}
                             onChangeDates={(ci, co) => { setUserCheckin(ci); setUserCheckout(co); }}
                             onSubmit={async (amount, { checkin, checkout }) => {
                                 try {
@@ -297,8 +320,7 @@ const AuctionPage = () => {
 
                 <div className="bottom-sections">
                     <AuctionRoomDetails info={roomInfo} />
-                    <AuctionHistory title="Lịch sử đấu giá toàn phòng" bids={fullHistory} />
-                    <AuctionHistory title="Lịch sử đấu giá cá nhân" bids={personalHistory} />
+                    <AuctionHistory title="Lịch sử đấu giá toàn phòng" bids={fullHistory} />    
                     <PolicySections />
                 </div>
             </main>

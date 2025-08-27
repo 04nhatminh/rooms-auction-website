@@ -672,7 +672,7 @@ async function createBookingTable() {
             Amount DECIMAL(10, 2) DEFAULT 0.0,
             ServiceFee DECIMAL(10, 2) DEFAULT 0.0,
             PaymentMethodID INT DEFAULT NULL,
-            PaidAt TIMESTAMP DEFAULT NULL,
+            PaidAt DATETIME DEFAULT NULL,
             Source ENUM('direct','auction_win','auction_buy_now') NOT NULL DEFAULT 'direct',
             CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -1177,6 +1177,23 @@ async function createRatingTable() {
     } catch (error) {
         if (error.code !== 'ER_DUP_KEYNAME') throw error;
     }
+}
+
+async function createNotificationTable() {
+    await pool.execute(`
+        CREATE TABLE IF NOT EXISTS Notifications (
+            NotificationID INT AUTO_INCREMENT PRIMARY KEY,
+            UserID INT NOT NULL,
+            AuctionID INT UNSIGNED NOT NULL,
+            Type ENUM('win','lose') NOT NULL,
+            Message TEXT,
+            IsRead TINYINT(1) DEFAULT 0,
+            CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (UserID) REFERENCES Users(UserID),
+            FOREIGN KEY (AuctionID) REFERENCES Auction(AuctionID),
+            UNIQUE KEY uniq_user_auction (UserID, AuctionID)
+        );
+    `);
 }
 
 // Trigger
@@ -2707,10 +2724,43 @@ async function createPlaceBookingBuyNowProcedure() {
     `);
 }
 
+async function ensureBookingExpiryEvent() {
+  const dbname = dbConfig.database;
+  await pool.query(`DROP EVENT IF EXISTS \`${dbname}\`.ev_expire_pending_bookings`);
+  await pool.query(`
+    CREATE EVENT IF NOT EXISTS \`${dbname}\`.ev_expire_pending_bookings
+    ON SCHEDULE EVERY 1 MINUTE
+    DO
+    BEGIN
+      UPDATE \`${dbname}\`.Booking
+      SET BookingStatus = 'expired', UpdatedAt = NOW()
+      WHERE BookingStatus = 'pending'
+        AND TIMESTAMPDIFF(MINUTE, CreatedAt, NOW()) >= 30;
+
+      UPDATE \`${dbname}\`.Calendar c
+      JOIN \`${dbname}\`.Booking b ON b.BookingID = c.BookingID
+      SET
+        c.Status = 'available',
+        c.LockReason = NULL,
+        c.HoldExpiresAt = NULL,
+        c.BookingID = NULL,
+        c.AuctionID = NULL,
+        c.UpdatedAt = NOW()
+      WHERE b.BookingStatus = 'expired'
+        AND c.Status IN ('reserved','booked')
+        AND TIMESTAMPDIFF(MINUTE, b.CreatedAt, NOW()) >= 30;
+    END
+  `);
+}
+
 async function initSchema() {
     try {
         await testConnection();
         console.log('✅ Database connection established successfully!');
+        
+        await pool.query("SET GLOBAL event_scheduler = ON");
+        console.log('✅ Event scheduler enabled');
+
         
         console.log('\n📋 Creating tables...');
 
@@ -2788,6 +2838,9 @@ async function initSchema() {
         
         await createRatingTable();
         console.log('✅ Rating table ready');
+
+        await createNotificationTable();
+        console.log('✅ Notification table ready');
 
         console.log('\n📋 Creating triggers...');
 
@@ -2903,6 +2956,9 @@ async function initSchema() {
         await dropPlaceBookingBuyNowProcedureIfExists();
         await createPlaceBookingBuyNowProcedure();
         console.log('✅ PlaceBookingBuyNow procedure ready');
+
+        await ensureBookingExpiryEvent();
+        console.log('✅ Booking expiry event ready');
 
         console.log('\n🎉 Database schema initialization completed successfully!');
         

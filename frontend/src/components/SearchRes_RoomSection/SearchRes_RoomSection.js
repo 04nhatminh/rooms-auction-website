@@ -4,12 +4,14 @@ import { imageApi } from '../../api/imageApi';
 import { reviewApi } from '../../api/reviewApi';
 import RoomCard from '../RoomCard/RoomCard';
 import './SearchRes_RoomSection.css';
+import FavoritesApi from '../../api/favoritesApi';
 
 const SearchRes_RoomSection = ({ topRatedProducts, durationDays, currentFilters = {} }) => {
   const currentRequestRef = useRef(null);
   const [error, setError] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [favoriteIds, setFavoriteIds] = useState([]);
   const { 
     getCachedData, 
     setCachedData, 
@@ -124,6 +126,18 @@ const SearchRes_RoomSection = ({ topRatedProducts, durationDays, currentFilters 
         }
       };
     }, [topRatedProducts, currentFilters]);
+
+    useEffect(() => {
+      // Chỉ gọi getUserFavorites nếu đã đăng nhập
+      const userData = sessionStorage.getItem('userData');
+        if (userData) {
+          FavoritesApi.getUserFavorites().then(data => {
+            setFavoriteIds((data.favorites || []).map(f => f.UID));
+          }).catch(() => setFavoriteIds([]));
+        } else {
+          setFavoriteIds([]);
+        }
+    }, []);
   
     if (loading) {
       return (
@@ -149,7 +163,7 @@ const SearchRes_RoomSection = ({ topRatedProducts, durationDays, currentFilters 
     <section className="search-res-content-room-section">
       <div className="search-res-room-card-container">
         {(products || []).map((product, idx) => (
-          <RoomCard key={product.ProductID || idx} product={product} durationDays={durationDays} />
+          <RoomCard isFavorite={favoriteIds.includes(product.UID)} key={product.ProductID || idx} product={product} durationDays={durationDays} />
         ))}
       </div>
     </section>

@@ -128,7 +128,7 @@ const HomePage = () => {
         <img src={HomeBackground} alt="Home Banner" className="banner-image" />
         
         <div className="banner-header">
-          <div className="home-logo">
+          <div className="home-logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
             <img src={logo} alt="Logo" className="home-logo-image" />
             <span className="home-logo-text">bidstay</span>
           </div>

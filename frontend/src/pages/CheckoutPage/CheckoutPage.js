@@ -124,8 +124,14 @@ const CheckoutPage = () => {
 
   const onCancel = () => {
     const pid = productUidFromBooking();
-    if (pid) navigate(`/room/${pid}`);  // đổi path nếu trang sản phẩm của bạn khác
-    else navigate(-1);                  // fallback
+    const bookingID = booking?.BookingID ?? booking?.BookingId ?? bookingId;
+    if (!bookingID) return;
+
+    checkoutApi.cancelBooking(bookingID)
+      .catch(e => console.error('Cancel failed:', e))
+      .finally(() => {
+        if (pid) navigate(`/room/${pid}`); else navigate(-1);
+      });               // fallback
   };
 
   const onPay = async () => {
@@ -249,17 +255,25 @@ const CheckoutPage = () => {
                 </button>
               </div>
 
-              <button className="pay-btn" onClick={onPay} disabled={paying}>
+              <button className="pay-btn" onClick={onPay} disabled={paying || booking?.BookingStatus === 'expired' || booking?.BookingStatus === 'cancelled'}>
                 {paying ? 'Đang xử lý...' : 'Thanh toán ngay'}
               </button>
 
-              <button className="cancel-btn" onClick={onCancel} disabled={paying}>
+              <button className="cancel-btn" onClick={onCancel} disabled={paying || booking?.BookingStatus === 'expired' || booking?.BookingStatus === 'cancelled'}>
                 Hủy
               </button>
 
               <p className="note">
                 Thanh toán sẽ mở trong popup của {method === 'ZALOPAY' ? 'ZaloPay' : 'PayPal'}.<br />
               </p>
+
+              {booking?.BookingStatus === 'expired' && (
+                <p className="expired-alert">Booking đã hết hạn thanh toán</p>  // ⬅ dòng thông báo
+              )}
+
+              {booking?.BookingStatus === 'cancelled' && (
+                <p className="expired-alert">Booking đã bị hủy</p>  // ⬅ dòng thông báo
+              )}
             </div>
           </aside>
         </div>

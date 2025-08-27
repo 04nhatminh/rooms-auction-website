@@ -1,0 +1,98 @@
+.transaction-history {
+    max-width: 900px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 5px 5px 16px 16px rgba(0,0,0,0.08);
+    padding: 40px 32px;
+}
+.transaction-history {
+    width: 100%;
+    max-width: 1700px;
+    margin: 40px auto 0 auto;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+    padding: 40px 32px;
+}
+.transaction-history-title {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  justify-content: center;
+}
+.transaction-history-title img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    cursor: pointer;
+}
+.transaction-history-title h3 {
+    color: #278C9F;
+    font-family: Montserrat;
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0px;
+    text-align: center;
+}
+.transaction-history-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #f9fafb;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.04);
+}
+.transaction-history-table th, .transaction-history-table td {
+    padding: 16px 10px;
+    border-bottom: 1.5px solid #e2e8f0;
+    border-right: 1.5px solid #e2e8f0;
+    font-family: Montserrat;
+    font-size: 15px;
+}
+.transaction-history-table th {
+    background: #278C9F;
+    color: #fff;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.05em;
+    text-align: center;
+}
+.transaction-history-table th:last-child,
+.transaction-history-table td:last-child {
+    border-right: none;
+}
+.transaction-history-table td {
+    text-align: center;
+}
+.transaction-history-table tr {
+    transition: background 0.2s;
+}
+.transaction-history-table tbody tr:hover {
+    background: #e6f7ff;
+}
+.transaction-history-table tbody tr:last-child td {
+    border-bottom: none;
+}
+.transaction-history-table th:nth-child(1),
+.transaction-history-table td:nth-child(1) {
+  width: 200px;
+  max-width: 200px;
+  word-break: break-all;
+}
+
+.transaction-history-table th:nth-child(2),
+.transaction-history-table td:nth-child(2) {
+  width: 140px;
+  max-width: 140px;
+  word-break: break-word;
+}
+
+.transaction-history-table th,
+.transaction-history-table td {
+    width: 170px;
+    max-width: 170px;
+    word-break: break-word;
+}

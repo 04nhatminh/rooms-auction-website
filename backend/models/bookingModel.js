@@ -1,5 +1,6 @@
 // models/bookingModel.js
 const db = require('../config/database');
+const pool = require('../config/database');
 
 function toDateStr(d) {
     if (!d) return null;
@@ -134,6 +135,44 @@ class BookingModel {
             return bookings;
         } catch (error) {
             console.error('Error fetching all bookings for admin:', error);
+            throw error;
+        }
+    }
+
+    static async updateBookingCancelled(bookingID)
+    {
+        try {
+            const [booking] = await db.query('SELECT 1 FROM Booking WHERE BookingID=? AND BookingStatus = "pending"', [bookingID])
+
+            if (!booking.length) {
+                console.error(`Booking ${bookingID} not found or already paid`);
+                throw new Error(`Booking ${bookingID} not found or already paid`);
+            }
+            console.log(`Updating booking paid status for ${bookingID}`);
+
+            const query =   `UPDATE Booking
+                            SET  BookingStatus = 'cancelled', UpdatedAt = NOW()
+                            WHERE BookingID = ?;
+
+                            UPDATE Calendar c
+                            JOIN Booking b ON b.BookingID = c.BookingID
+                            SET
+                                c.Status = 'available',
+                                c.LockReason = NULL,
+                                c.HoldExpiresAt = NULL,
+                                c.BookingID = NULL,
+                                c.AuctionID = NULL,
+                                c.UpdatedAt = NOW()
+                            WHERE b.BookingStatus IN ('cancelled', 'expired')
+                                AND c.Status IN ('booked','reserved')
+                                AND b.BookingID = ?;`;
+           
+            await db.query(query, [bookingID, bookingID]);
+
+            console.log(`Updated booking cancelled successfully`);
+
+        } catch (error) {
+            console.error ('Error cancelling booking paid:', error)
             throw error;
         }
     }
@@ -300,6 +339,52 @@ class BookingModel {
             console.error('Error updating booking for admin:', error);
             throw error;
         }
+    }
+    
+    static async getUserTransactionHistory(userId) {
+        const [rows] = await pool.execute(`
+            SELECT 
+                pay.PaymentID,
+                pay.BookingID,
+                pay.Amount,
+                pay.Currency,
+                pay.Provider,
+                pay.ProviderTxnID,
+                pay.Status,
+                pay.FailureReason,
+                pay.CreatedAt,
+                pay.UpdatedAt,
+                bk.StartDate,
+                bk.EndDate,
+                bk.BookingStatus,
+                p.Name as room,
+                p.UID as roomUID,
+                prov.Name as provinceName
+            FROM Payments pay
+            JOIN Booking bk ON pay.BookingID = bk.BookingID
+            JOIN Products p ON bk.ProductID = p.ProductID
+            LEFT JOIN Provinces prov ON p.ProvinceCode = prov.ProvinceCode
+            WHERE pay.UserID = ?
+            ORDER BY pay.CreatedAt DESC
+        `, [userId]);
+        return rows.map(row => ({
+            paymentId: row.PaymentID,
+            bookingId: row.BookingID,
+            room: row.room,
+            roomUID: row.roomUID,
+            province: row.provinceName,
+            amount: row.Amount,
+            currency: row.Currency,
+            provider: row.Provider,
+            providerTxnId: row.ProviderTxnID,
+            status: row.Status,
+            failureReason: row.FailureReason,
+            createdAt: toDateStr(row.CreatedAt),
+            updatedAt: toDateStr(row.UpdatedAt),
+            bookingStatus: row.BookingStatus,
+            startDate: toDateStr(row.StartDate),
+            endDate: toDateStr(row.EndDate),
+        }));
     }
 }
 

@@ -3,5 +3,5 @@ INSERT INTO a2airbnb.SystemParameters (ParamName, ParamValue) VALUES
     ('BidIncrementFactor', '0.05'),
     ('AuctionDurationDays', '5'),
     ('BidLeadTimeDays', '15'),
-    ('PaymentDeadlineDays', '3'),
+    ('PaymentDeadlineTime', '30'),
     ('ServiceFeeFactor', '0.15');
