@@ -1,9 +1,18 @@
 import React from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import './AuctionRoomDetails.css';
 import DownIcon from '../../assets/down.png';
 
 const AuctionRoomDetails = ({ info }) => {
-    console.log(info);
+    const navigate = useNavigate();
+    const [loading, setLoading] = React.useState(false);
+    const [error, setError] = React.useState(null);
+
+    const handleSeeMore = async () => {
+        if (!info?.roomUID) return;
+        navigate(`/room/${info.roomUID}`);
+    };
+
     return (
         <div className="auction-room-details">
             <div className="auction-room-details-header">
@@ -11,7 +20,13 @@ const AuctionRoomDetails = ({ info }) => {
                     <img src={DownIcon} alt="Down Icon" className="down-icon" />
                     <h3>Thông tin phòng</h3>
                 </div>
-                <span className="auction-room-details-see-more">Xem thêm</span>
+                <button
+                    className="auction-room-details-see-more"
+                    onClick={handleSeeMore}
+                    type="button"
+                >
+                    Xem thêm
+                </button>
             </div>
 
             <div className="auction-room-details-content">
