@@ -239,19 +239,13 @@ class ProductController {
             const { page = 1, limit = 10 } = req.query;
             const offset = (parseInt(page) - 1) * parseInt(limit);
 
-            console.log(`\ngetAllProductsForAdmin - page: ${page}, limit: ${limit}, offset: ${offset}`);
-
             const pool = require('../config/database');
             const countQuery = `SELECT COUNT(*) as total FROM Products WHERE is_deleted = 0`;
 
-            console.log('Executing count query...');
             const [countResult] = await pool.execute(countQuery);
             const total = countResult[0].total;
-            console.log(`Total products: ${total}`);
 
-            console.log('Executing main query with params:', [parseInt(limit), offset]);
             const products = await ProductModel.getAllProductsForAdmin(parseInt(limit), parseInt(offset));
-            console.log(`Retrieved ${products.length} products`);
 
             const totalPages = Math.ceil(total / parseInt(limit));
 

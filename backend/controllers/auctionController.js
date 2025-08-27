@@ -398,19 +398,13 @@ class AuctionController {
             const { page = 1, limit = 10 } = req.query;
             const offset = (parseInt(page) - 1) * parseInt(limit);
 
-            console.log(`\ngetAllAuctionsByStatusForAdmin - status: ${status}, page: ${page}, limit: ${limit}, offset: ${offset}`);
-
             const pool = require('../config/database');
             const countQuery = `SELECT COUNT(*) as total FROM Auction WHERE status = ?`;
 
-            console.log('Executing count query...');
             const [countResult] = await pool.execute(countQuery, [status]);
             const total = countResult[0].total;
-            console.log(`Total auctions: ${total}`);
 
-            console.log('Executing main query with params:', [parseInt(limit), offset]);
             const auctions = await AuctionModel.getAllAuctionsByStatusForAdmin(status, parseInt(limit), parseInt(offset));
-            console.log(`Retrieved ${auctions.length} ${status} auctions`);
 
             const totalPages = Math.ceil(total / parseInt(limit));
 

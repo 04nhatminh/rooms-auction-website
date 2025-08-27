@@ -364,6 +364,8 @@ class ProductModel {
     // Lấy danh sách tất cả sản phẩm cho admin
     static async getAllProductsForAdmin(limit, offset) 
     {
+        const safeLimit = parseInt(limit, 10);
+        const safeOffset = parseInt(offset, 10);
         try {
             const query = `
                 SELECT 
@@ -376,14 +378,14 @@ class ProductModel {
                     p.Price,
                     p.Source
                 FROM Products p
-                JOIN Properties ppt ON p.PropertyType = ppt.PropertyID
-                JOIN Districts d ON p.DistrictCode = d.DistrictCode
-                JOIN Provinces pr ON p.ProvinceCode = pr.ProvinceCode
+                LEFT JOIN Properties ppt ON p.PropertyType = ppt.PropertyID
+                LEFT JOIN Districts d ON p.DistrictCode = d.DistrictCode
+                LEFT JOIN Provinces pr ON p.ProvinceCode = pr.ProvinceCode
                 WHERE p.is_deleted = 0
                 ORDER BY p.ProductID ASC
-                LIMIT ${limit} OFFSET ${offset}
+                LIMIT ${safeLimit} OFFSET ${safeOffset}
             `;
-            const [products] = await pool.execute(query, [limit, offset]);
+            const [products] = await pool.execute(query);
             return products;
         } catch (error) {
             console.error('Error fetching all products for admin:', error);
@@ -394,7 +396,7 @@ class ProductModel {
     // Tìm kiếm sản phẩm theo UID cho admin
     static async searchProductsByUID(uid, limit, offset) {
         try {
-            const safeLimit = Number.parseInt(limit, 10) || 20;
+            const safeLimit = Number.parseInt(limit, 10) || 10;
             const safeOffset = Number.parseInt(offset, 10) || 0;
 
             // Search for products with UID containing the search term
@@ -409,9 +411,9 @@ class ProductModel {
                     p.Price,
                     p.Source
                 FROM Products p
-                JOIN Properties ppt ON p.PropertyType = ppt.PropertyID
-                JOIN Districts d ON p.DistrictCode = d.DistrictCode
-                JOIN Provinces pr ON p.ProvinceCode = pr.ProvinceCode
+                LEFT JOIN Properties ppt ON p.PropertyType = ppt.PropertyID
+                LEFT JOIN Districts d ON p.DistrictCode = d.DistrictCode
+                LEFT JOIN Provinces pr ON p.ProvinceCode = pr.ProvinceCode
                 WHERE p.is_deleted = 0 AND p.UID LIKE ?
                 ORDER BY p.ProductID ASC
                 LIMIT ${safeLimit} OFFSET ${safeOffset}
