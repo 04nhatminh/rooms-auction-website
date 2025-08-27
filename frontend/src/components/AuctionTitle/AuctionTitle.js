@@ -3,10 +3,10 @@ import './AuctionTitle.css';
 import shareIcon from '../../assets/share.png';
 import saveIcon from '../../assets/save.png';
 
-const AuctionTitle = () => {
+const AuctionTitle = ({ title }) => {
   return (
     <div className="auction-title">
-      <h2>Leo House - The Song Building (Angia)</h2>
+      <h2>{title}</h2>
       <div className="user-actions">
         <button className="action-btn">
           <img src={shareIcon} alt="Share" className="action-icon" />

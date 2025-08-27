@@ -2,7 +2,10 @@ import React from 'react';
 import './AuctionRoomDetails.css';
 import DownIcon from '../../assets/down.png';
 
-const AuctionRoomDetails = ({ info }) => {
+const AuctionRoomDetails = ({ info = {} }) => {
+    const { title, type, capacity, location } = info;
+    const safe = (v) => (v && String(v).trim()) || '—';
+
     return (
         <div className="auction-room-details">
             <div className="auction-room-details-header">
@@ -15,10 +18,10 @@ const AuctionRoomDetails = ({ info }) => {
 
             <div className="auction-room-details-content">
                 <div className="auction-room-details-content-group">
-                    <p><strong>Tên phòng:</strong> {info.type}</p>
-                    <p><strong>Loại phòng:</strong> {info.type}</p>
-                    <p><strong>Số lượng phòng:</strong> {info.capacity}</p>
-                    <p><strong>Địa chỉ:</strong> {info.location}</p>
+                    <p><strong>Tên phòng:</strong> {title}</p>
+                    <p><strong>Loại phòng:</strong> {type}</p>
+                    <p><strong>Số lượng phòng:</strong> {capacity}</p>
+                    <p><strong>Địa chỉ:</strong> {location}</p>
                 </div>
                 <div className="auction-room-details-content-group">
                     <p><strong>Khoảng thời gian lưu trú áp dụng:</strong> {info.stayDuration}</p>

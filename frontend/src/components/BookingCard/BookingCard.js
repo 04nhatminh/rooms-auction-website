@@ -11,14 +11,14 @@ import auctionApi from '../../api/auctionApi';
 import ConfirmBookingPopup from '../ConfirmBookingPopup/ConfirmBookingPopup';
 import AuthPopup from '../AuthPopup/AuthPopup';
 
-const useCurrentUserId = () => useMemo(() => {
-    try {
-      const raw = sessionStorage.getItem('userData');
-      if (!raw) return null;
-      const obj = JSON.parse(raw);
-      return obj?.id ?? obj?.userId ?? null; // phòng trường hợp key là userId
-    } catch { return null; }
-}, []);
+function getCurrentUserIdNow() {
+  try {
+    const raw = sessionStorage.getItem('userData') || localStorage.getItem('userData');
+    if (!raw) return null;
+    const u = JSON.parse(raw);
+    return u?.id ?? u?.userId ?? null;
+  } catch { return null; }
+}
 
 function translateBookingError(e) {
   // Ưu tiên theo HTTP status:
@@ -97,8 +97,6 @@ const BookingCard = () => {
     });
   };
 
-  const currentUserId = useCurrentUserId();
-
   const onCheckAvailability = async () => {
     if (!checkinDate) return alert('Vui lòng chọn ngày nhận phòng');
     if (!checkoutDate) return alert('Vui lòng chọn ngày trả phòng');
@@ -110,10 +108,11 @@ const BookingCard = () => {
       setChecking(true);
       setStatus(null);
 
+      const freshUserId = getCurrentUserIdNow();
       const data = await calendarApi.checkAvailability(UID, {
         checkin: checkinDate,
         checkout: checkoutDate,
-        userId: currentUserId,
+        userId: freshUserId,
       });
       setAvailData(data);
 
@@ -194,10 +193,11 @@ const BookingCard = () => {
         return;
       }
       // 1) Kiểm tra phiên đấu giá đang diễn ra cho khoảng ngày
+      const freshUserId = getCurrentUserIdNow();
       const avail = await calendarApi.checkAvailability(UID, {
         checkin: checkinDate,
         checkout: checkoutDate,
-        userId: currentUserId || undefined,
+        userId: freshUserId || undefined,
       });
       const auctionUid = getAuctionUidFromAvailability(avail);
 
@@ -215,14 +215,14 @@ const BookingCard = () => {
       }
 
       // 3) Không có phiên -> đặt phòng như bình thường
-      if (!currentUserId) {
+      if (!freshUserId) {
         setShowLogin(true);
         return;
       }
 
       const r = await bookingApi.place({
         uid: UID,
-        userId: currentUserId,
+        userId: freshUserId,
         checkin: checkinDate,
         checkout: checkoutDate,
         holdMinutes: 30,

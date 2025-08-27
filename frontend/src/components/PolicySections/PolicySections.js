@@ -11,14 +11,14 @@ const PolicySections = () => {
                         <h3>Quy định đấu giá</h3>
                 </div>
                 <ul>
-                    <li>Phiên đấu giá áp dụng cho khoảng thuê <strong>01/09/2025 – 15/09/2025</strong>.</li>
-                    <li>Người thắng đấu giá được quyền chọn <strong>bất kỳ ngày lưu trú</strong> trong khoảng thời gian này.</li>
-                    <li>Số đêm lưu trú tối thiểu: <strong>1 đêm</strong>, tối đa: <strong>toàn bộ khoảng áp dụng</strong>.</li>
-                    <li>Phiên đấu giá kết thúc khi hết thời gian hoặc không có giá mới.</li>
+                    <li>Phiên đấu giá cho phép tham gia đấu giá nếu <strong>thời gian lưu trú mong muốn có ngày trùng với khoảng thời gian lưu trú hiện tại của phiên đấu giá</strong> và giá đặt phải lớn hơn hoặc bằng tổng giá hiện tại với giá của một bước nhảy.</li>
+                    <li>Người thắng đấu giá sẽ được thuê với <strong>thông tin đặt phòng giống với lượt đặt giá chiến thắng</strong> của mình.</li>
+                    <li>Số đêm lưu trú tối thiểu: <strong>1 đêm</strong></li>
+                    <li>Phiên đấu giá kết thúc khi hết thời gian hoặc có người thuê ngay phòng thành công trong phiên đấu giá.</li>
                     <li>Người trả giá cao nhất khi kết thúc sẽ thắng.</li>
                 </ul>
             </div>
-            <div className="policies-section">
+            {/* <div className="policies-section">
                 <div className='policies-section-title'>
                         <img src={DownIcon} alt="Down Icon" className="down-icon" />
                         <h3>Quy định thanh toán & hủy</h3>
@@ -28,7 +28,7 @@ const PolicySections = () => {
                     <li>Hủy đặt phòng sau khi thanh toán sẽ áp dụng theo chính sách hủy của khách sạn.</li>
                     <li>Trong trường hợp không thanh toán đúng hạn, quyền thắng đấu giá sẽ bị hủy.</li>
                 </ul>
-            </div>
+            </div> */}
             <div className="policies-section" style={{ paddingBottom: '0px' }}>
                 <div className='policies-section-title'>
                         <img src={DownIcon} alt="Down Icon" className="down-icon" />

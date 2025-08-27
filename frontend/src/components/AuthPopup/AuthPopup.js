@@ -60,7 +60,6 @@ const API_BASE_URL =
         _ts: Date.now(),
         };
         stash.setItem('userData', JSON.stringify(userData));
-        if (token) stash.setItem('token', token);
     };
 
     const handleSubmit = async (e) => {

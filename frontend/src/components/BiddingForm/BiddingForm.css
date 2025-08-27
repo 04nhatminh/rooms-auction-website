@@ -126,7 +126,7 @@
 .date-field {
   display: flex;
   align-items: center;   /* canh giữa theo chiều dọc */
-  width: 50%;           /* cho full width thay vì 51% */
+  width: 60%;           /* cho full width thay vì 51% */
   margin-bottom: 10px;
 }
 
