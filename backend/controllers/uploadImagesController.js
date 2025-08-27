@@ -1,4 +1,3 @@
-
 const cloudinary = require('../config/cloudinary.js');
 const { cloudinaryUpload } = require('../middleware/cloudinaryUpload.js');
 const ImageModel = require('../models/imageModel.js');
@@ -173,6 +172,30 @@ class uploadImagesController {
 
     static async uploadRoomTourImages(req, res) {
         return uploadImagesController.uploadAllProductImages(req, res);
+    }
+
+    // Upload avatar cho user
+    static async uploadUserAvatar(req, res) {
+        try {
+            const file = req.file;
+            if (!file) return res.status(400).json({ success: false, message: 'Không có file' });
+
+            // Upload lên Cloudinary
+            const streamUpload = (buf) => new Promise((resolve, reject) => {
+                const stream = cloudinary.uploader.upload_stream({
+                    folder: `a2airbnb/avatars/${req.user.id}`,
+                    resource_type: 'image',
+                    overwrite: true,
+                    exif: true
+                }, (error, result) => error ? reject(error) : resolve(result));
+                stream.end(buf);
+            });
+
+            const cloudinaryResult = await streamUpload(file.buffer);
+            return res.json({ success: true, url: cloudinaryResult.secure_url });
+        } catch (err) {
+            return res.status(500).json({ success: false, message: err.message });
+        }
     }
 }
 

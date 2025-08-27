@@ -90,21 +90,25 @@ const UserProfilePage = () => {
 
   const onChangeProfile = (key, val) => setProfile(p => ({ ...p, [key]: val }));
 
-  const onAvatarChange = (e) => {
+  const onAvatarChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 2 * 1024 * 1024) {
-      setStatus(s => ({ ...s, profile: '❌ Ảnh vượt quá 2MB.' }));
-      e.target.value = '';
-      return;
+        setStatus(s => ({ ...s, profile: '❌ Ảnh vượt quá 2MB.' }));
+        e.target.value = '';
+        return;
     }
-    const reader = new FileReader();
-    reader.onload = () => {
-      setAvatarPreview(reader.result);
-      setShowAvatarImg(true);
-      onChangeProfile('avatarURL', reader.result);
-    };
-    reader.readAsDataURL(file);
+    setStatus(s => ({ ...s, profile: 'Đang upload ảnh...' }));
+    try {
+        // Upload lên Cloudinary
+        const url = await UserAPI.uploadAvatar(file);
+        setAvatarPreview(url);
+        setShowAvatarImg(true);
+        onChangeProfile('avatarURL', url); // cập nhật vào form
+        setStatus(s => ({ ...s, profile: '✔️ Ảnh đã cập nhật.' }));
+    } catch (err) {
+        setStatus(s => ({ ...s, profile: '❌ Upload thất bại.' }));
+    }
   };
 
   const saveProfile = async (e) => {
