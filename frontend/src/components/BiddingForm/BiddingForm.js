@@ -30,66 +30,68 @@ function unformatForEdit(s) {
 }
 
 const BiddingForm = ({
-  currentPrice,
-  bidIncrement,
-  basePrice,
-  checkin,
-  checkout,
-  status,
-  isEnded, // thêm prop này
-  onChangeDates,
-  onSubmit,
-  onBuyNow,
+    currentPrice,
+    bidIncrement,
+    basePrice,
+    checkin,
+    checkout,
+    stayPeriodStart,
+    stayPeriodEnd,
+    status,
+    isEnded, // thêm prop này
+    onChangeDates,
+    onSubmit,
+    onBuyNow,
 }) => {
-  const [bidValue, setBidValue] = useState('');
-  const [focused, setFocused] = React.useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [ci, setCi] = useState(checkin || '');
-  const [co, setCo] = useState(checkout || '');
-  useEffect(() => { setCi(checkin || ''); }, [checkin]);
-  useEffect(() => { setCo(checkout || ''); }, [checkout]);
+    const [bidValue, setBidValue] = useState('');
+    const [focused, setFocused] = React.useState(false);
+    const [submitting, setSubmitting] = useState(false);
+    const [ci, setCi] = useState(checkin || '');
+    const [co, setCo] = useState(checkout || '');
+    useEffect(() => { setCi(checkin || ''); }, [checkin]);
+    useEffect(() => { setCo(checkout || ''); }, [checkout]);
 
-  // Lấy auctionUid từ URL (fallback nếu không có param đặt tên UID)
-  const { UID } = useParams();
-  const auctionUid =
-      UID || (typeof window !== 'undefined'
-      ? window.location.pathname.split('/').filter(Boolean).pop()
-      : '');
+    // Lấy auctionUid từ URL (fallback nếu không có param đặt tên UID)
+    const { UID } = useParams();
+    const auctionUid =
+        UID || (typeof window !== 'undefined'
+        ? window.location.pathname.split('/').filter(Boolean).pop()
+        : '');
 
-  const numPrice = Number(currentPrice) || 0;
-  const numInc   = Number(bidIncrement) || 0;
-  const suggestedBids = [1,2,3,4].map(k => numPrice + numInc * k);
+    const numPrice = Number(currentPrice) || 0;
+    const numInc   = Number(bidIncrement) || 0;
+    const suggestedBids = [1,2,3,4].map(k => numPrice + numInc * k);
 
-  const handleBidSubmit = async (e) => {
-      e?.preventDefault?.();
-      const amount = parseBid(bidValue);
-      const min = numPrice + numInc;
-      if (!Number.isFinite(amount) || amount <= 0) {
-          alert('Vui lòng nhập số hợp lệ.');
-          return;
-      }
-      if (amount < min) {
-          alert(`Giá của bạn phải ≥ ${min.toLocaleString('vi-VN')} đ`);
-          return;
-      }
-      if (!ci || !co) {
-          alert('Vui lòng chọn ngày nhận/trả phòng.');
-          return;
-      }
-      if (new Date(co) <= new Date(ci)) {
-          alert('Ngày trả phòng phải sau ngày nhận phòng.');
-          return;
-      }
+    const handleBidSubmit = async (e) => {
+        e?.preventDefault?.();
+        const amount = parseBid(bidValue);
+        const min = numPrice + numInc;
+        if (!Number.isFinite(amount) || amount <= 0) {
+            alert('Vui lòng nhập số hợp lệ.');
+            return;
+        }
+        if (amount < min) {
+            alert(`Giá của bạn phải ≥ ${min.toLocaleString('vi-VN')} đ`);
+            return;
+        }
+        if (!ci || !co) {
+            alert('Vui lòng chọn ngày nhận/trả phòng.');
+            return;
+        }
+        if (new Date(co) <= new Date(ci)) {
+            alert('Ngày trả phòng phải sau ngày nhận phòng.');
+            return;
+        }
 
-      // lấy userId
-      const userData = JSON.parse(sessionStorage.getItem('userData') || 'null');
-      const userId = userData?.id || userData?.userId;
-      if (!userId) {
-          alert('Bạn cần đăng nhập để đặt giá.');
-          return;
-      }
+        // lấy userId
+        const userData = JSON.parse(sessionStorage.getItem('userData') || 'null');
+        const userId = userData?.id || userData?.userId;
+        if (!userId) {
+            alert('Bạn cần đăng nhập để đặt giá.');
+            return;
+        }
 
-      try {
+        try {
             setSubmitting(true);
             // ưu tiên handler từ AuctionPage để refresh dữ liệu
             if (typeof onSubmit === 'function') {

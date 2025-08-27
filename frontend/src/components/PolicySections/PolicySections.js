@@ -1,8 +1,39 @@
 import React from 'react';
 import './PolicySections.css';
 import DownIcon from '../../assets/down.png';
+import systemParametersApi from '../../api/systemParametersApi';
+
+
+function humanizeMinutes(mins) {
+    if (!Number.isFinite(mins)) return '24h';
+    if (mins % 60 === 0) return `${mins / 60}h`;
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return h > 0 ? `${h} giờ ${m} phút` : `${m} phút`;
+}
 
 const PolicySections = () => {
+    const [deadlineMins, setDeadlineMins] = React.useState(null);
+
+    React.useEffect(() => {
+        let abort = false;
+        (async () => {
+        try {
+            const raw = await systemParametersApi.getPaymentDeadlineTime();
+            // chấp nhận nhiều kiểu payload: {ParamValue} | {paramValue} | {value} | số trực tiếp
+            const mins = Number(
+            raw?.data.ParamValue ?? raw?.data.paramValue ?? raw?.data.value ?? raw.data
+            );
+            if (!abort && Number.isFinite(mins)) setDeadlineMins(mins);
+        } catch (e) {
+            console.error('Load PaymentDeadlineTime failed:', e);
+        }
+        })();
+        return () => { abort = true; };
+    }, []);
+
+    const deadlineText = humanizeMinutes(deadlineMins);
+
     return (
         <>
             <div className="policies-section">
@@ -24,7 +55,7 @@ const PolicySections = () => {
                         <h3>Quy định thanh toán & hủy</h3>
                 </div>
                 <ul>
-                    <li>Thanh toán toàn bộ trong vòng <strong>24h</strong> sau khi kết thúc đấu giá.</li>
+                    <li>Thanh toán toàn bộ trong vòng <strong>{deadlineText}</strong> sau khi kết thúc đấu giá.</li>
                     <li>Hủy đặt phòng sau khi thanh toán sẽ áp dụng theo chính sách hủy của khách sạn.</li>
                     <li>Trong trường hợp không thanh toán đúng hạn, quyền thắng đấu giá sẽ bị hủy.</li>
                 </ul>

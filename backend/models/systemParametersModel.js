@@ -31,6 +31,25 @@ class SystemParametersModel {
             throw error;
         }
     }
+
+    static async getPaymentDeadlineTime() {
+        try {
+            const query = `
+                SELECT ParamValue
+                FROM SystemParameters
+                WHERE ParamName = 'PaymentDeadlineTime'
+                LIMIT 1
+            `;
+            const [rows] = await pool.execute(query);
+            if (rows.length > 0) {
+            return rows[0];
+            }
+            return null; // không có record
+        } catch (error) {
+            console.error('Error fetching PaymentDeadlineTime parameter:', error);
+            throw error;
+        }
+    }
 }
 
 module.exports = SystemParametersModel;

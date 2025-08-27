@@ -1,6 +1,15 @@
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000';
 
 export const systemParametersApi = {
+    getPaymentDeadlineTime: async (abortSignal = null) => {
+        const r = await fetch(`${API_BASE_URL}/api/system-parameters/get-payment-deadline-time`, {
+            method: 'GET', headers: { 'Content-Type': 'application/json' },
+        });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(data.message || 'Lấy thông tin quy định thời gian thanh toán thất bại.');
+        return data;
+    },
+
     // Lấy nhiều tham số hệ thống theo UIDs
     getAllParameters: async (abortSignal = null) => {
         try {
