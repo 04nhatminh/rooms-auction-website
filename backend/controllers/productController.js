@@ -3,7 +3,7 @@ const ProductModel = require('../models/productModel');
 class ProductController {
     static async getFullProductDataByProductId(req, res) {
         const productUID = req.params.UID;
-        console.log('GET /api/room/' + productUID);
+        // console.log('GET /api/room/' + productUID);
 
         try {
             // Fetch all in parallel
@@ -239,19 +239,19 @@ class ProductController {
             const { page = 1, limit = 10 } = req.query;
             const offset = (parseInt(page) - 1) * parseInt(limit);
 
-            console.log(`\ngetAllProductsForAdmin - page: ${page}, limit: ${limit}, offset: ${offset}`);
+            // console.log(`\ngetAllProductsForAdmin - page: ${page}, limit: ${limit}, offset: ${offset}`);
 
             const pool = require('../config/database');
             const countQuery = `SELECT COUNT(*) as total FROM Products WHERE is_deleted = 0`;
 
-            console.log('Executing count query...');
+            // console.log('Executing count query...');
             const [countResult] = await pool.execute(countQuery);
             const total = countResult[0].total;
-            console.log(`Total products: ${total}`);
+            // console.log(`Total products: ${total}`);
 
-            console.log('Executing main query with params:', [parseInt(limit), offset]);
+            // console.log('Executing main query with params:', [parseInt(limit), offset]);
             const products = await ProductModel.getAllProductsForAdmin(parseInt(limit), parseInt(offset));
-            console.log(`Retrieved ${products.length} products`);
+            // console.log(`Retrieved ${products.length} products`);
 
             const totalPages = Math.ceil(total / parseInt(limit));
 
@@ -328,12 +328,12 @@ class ProductController {
             
             const offset = (parseInt(page) - 1) * parseInt(limit);
             
-            console.log(`\nsearchProductsByUID - uid: ${uid}, page: ${page}, limit: ${limit}, offset: ${offset}`);
+            // console.log(`\nsearchProductsByUID - uid: ${uid}, page: ${page}, limit: ${limit}, offset: ${offset}`);
             
             const result = await ProductModel.searchProductsByUID(uid, parseInt(limit), offset);
             const { products, total } = result;
             
-            console.log(`Found ${products.length} products matching UID: ${uid}`);
+            // console.log(`Found ${products.length} products matching UID: ${uid}`);
             
             const totalPages = Math.ceil(total / parseInt(limit));
             
@@ -473,7 +473,7 @@ function calculateRating(productReviews) {
     const sumRatings = productReviews.reviews.reduce((sum, review) => sum + review.rating, 0);
     const averageRating = (sumRatings / totalReviews).toFixed(2);
 
-    console.log(`Calculated average rating: ${averageRating} based on ${totalReviews} reviews`);
+    // console.log(`Calculated average rating: ${averageRating} based on ${totalReviews} reviews`);
 
     return averageRating;
 }

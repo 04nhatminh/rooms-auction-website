@@ -234,8 +234,6 @@ const AuctionPage = () => {
     const { imagesArr, auctionDetails, roomInfo, fullHistory, personalHistory, title } = viewData;
     const images = imagesArr; // alias cho dễ đọc ở dưới
 
-    console.log('auctioninfo', roomInfo);
-
     return (
         <div className="auction-page-container">
             <Header />

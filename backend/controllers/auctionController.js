@@ -18,7 +18,7 @@ class AuctionController {
     // GET /api/auction/:auctionId
     static async getAuctionById(req, res) {
         const auctionId = req.params.auctionId;
-        console.log('GET /api/auction/' + auctionId);
+        // console.log('GET /api/auction/' + auctionId);
 
         try {
             const auction = await AuctionModel.getAuctionDetails(auctionId);
@@ -50,15 +50,15 @@ class AuctionController {
         const status = req.query.status || 'active';
         const limit = req.query.limit || 15;
         
-        console.log('GET /api/auction/province=' + provinceCode);
-        console.log('Parameters received:', {
-            provinceCode: provinceCode,
-            provinceCodeType: typeof provinceCode,
-            status: status,
-            statusType: typeof status,
-            limit: limit,
-            limitType: typeof limit
-        });
+        // console.log('GET /api/auction/province=' + provinceCode);
+        // console.log('Parameters received:', {
+        //     provinceCode: provinceCode,
+        //     provinceCodeType: typeof provinceCode,
+        //     status: status,
+        //     statusType: typeof status,
+        //     limit: limit,
+        //     limitType: typeof limit
+        // });
 
         try {
             let auctions;
@@ -68,7 +68,7 @@ class AuctionController {
                 parseInt(limit)
             );
 
-            console.log('Auctions returned from model:', auctions);
+            // console.log('Auctions returned from model:', auctions);
 
             // Remove ProductID, ExternalID from each auction
             // auctions = auctions.map(({ ProductID: _, ExternalID: __, ...auction }) => auction);
@@ -100,7 +100,7 @@ class AuctionController {
         const districtCode = req.params.districtCode;
         const status = req.query.status || 'active';
         const limit = req.query.limit || 15;
-        console.log('GET /api/auction/district=' + districtCode);
+        // console.log('GET /api/auction/district=' + districtCode);
 
         try {
             let auctions;
@@ -267,7 +267,7 @@ class AuctionController {
     
     // GET /api/auction/ending-soon
     static async getEndingSoonAuctions(req, res) {
-        console.log('GET /api/auction/ending-soon');
+        // console.log('GET /api/auction/ending-soon');
         const limit = req.query.limit || 15;
 
         try {
@@ -295,7 +295,7 @@ class AuctionController {
 
     // GET /api/auction/featured
     static async getFeaturedAuctions(req, res) {
-        console.log('GET /api/auction/featured');
+        // console.log('GET /api/auction/featured');
         const limit = req.query.limit || 15;
 
         try {
@@ -323,7 +323,7 @@ class AuctionController {
 
     // GET /api/auction/newest
     static async getNewestAuctions(req, res) {
-        console.log('GET /api/auction/newest');
+        // console.log('GET /api/auction/newest');
         const limit = req.query.limit || 15;
 
         try {
@@ -355,19 +355,19 @@ class AuctionController {
             const { page = 1, limit = 10 } = req.query;
             const offset = (parseInt(page) - 1) * parseInt(limit);
 
-            console.log(`\ngetAllAuctionsForAdmin - page: ${page}, limit: ${limit}, offset: ${offset}`);
+            // console.log(`\ngetAllAuctionsForAdmin - page: ${page}, limit: ${limit}, offset: ${offset}`);
 
             const pool = require('../config/database');
             const countQuery = `SELECT COUNT(*) as total FROM Auction`;
 
-            console.log('Executing count query...');
+            // console.log('Executing count query...');
             const [countResult] = await pool.execute(countQuery);
             const total = countResult[0].total;
-            console.log(`Total auctions: ${total}`);
+            // console.log(`Total auctions: ${total}`);
 
-            console.log('Executing main query with params:', [parseInt(limit), offset]);
+            // console.log('Executing main query with params:', [parseInt(limit), offset]);
             const auctions = await AuctionModel.getAllAuctionsForAdmin(parseInt(limit), parseInt(offset));
-            console.log(`Retrieved ${auctions.length} auctions`);
+            // console.log(`Retrieved ${auctions.length} auctions`);
 
             const totalPages = Math.ceil(total / parseInt(limit));
 
@@ -399,19 +399,19 @@ class AuctionController {
             const { page = 1, limit = 10 } = req.query;
             const offset = (parseInt(page) - 1) * parseInt(limit);
 
-            console.log(`\ngetAllAuctionsByStatusForAdmin - status: ${status}, page: ${page}, limit: ${limit}, offset: ${offset}`);
+            // console.log(`\ngetAllAuctionsByStatusForAdmin - status: ${status}, page: ${page}, limit: ${limit}, offset: ${offset}`);
 
             const pool = require('../config/database');
             const countQuery = `SELECT COUNT(*) as total FROM Auction WHERE status = ?`;
 
-            console.log('Executing count query...');
+            // console.log('Executing count query...');
             const [countResult] = await pool.execute(countQuery, [status]);
             const total = countResult[0].total;
-            console.log(`Total auctions: ${total}`);
+            // console.log(`Total auctions: ${total}`);
 
-            console.log('Executing main query with params:', [parseInt(limit), offset]);
+            // console.log('Executing main query with params:', [parseInt(limit), offset]);
             const auctions = await AuctionModel.getAllAuctionsByStatusForAdmin(status, parseInt(limit), parseInt(offset));
-            console.log(`Retrieved ${auctions.length} ${status} auctions`);
+            // console.log(`Retrieved ${auctions.length} ${status} auctions`);
 
             const totalPages = Math.ceil(total / parseInt(limit));
 
@@ -444,10 +444,10 @@ class AuctionController {
     static async searchAuctionsByUID(req, res) {
         try {
             const { uid } = req.params;
-            console.log(`\nsearchAuctionsByUID - uid: ${uid}`);
+            // console.log(`\nsearchAuctionsByUID - uid: ${uid}`);
 
             const auctions = await AuctionModel.searchAuctionsByUID(uid);
-            console.log(`Found ${auctions.length} auctions matching UID ${uid}`);
+            // console.log(`Found ${auctions.length} auctions matching UID ${uid}`);
 
             return res.status(200).json({
                 success: true,
