@@ -227,9 +227,10 @@ class BookingController {
   async updateBookingForAdmin(req, res) {
     try {
       const { bookingId } = req.params;
-      const updateData = req.body;
-      
-      const result = await bookingModel.updateBookingForAdmin(bookingId, updateData);
+      // body: JSON.stringify({ BookingStatus: updateStatus })
+      const updateStatus = req.body.BookingStatus;
+
+      const result = await bookingModel.updateBookingForAdmin(bookingId, updateStatus);
       
       if (!result) {
         return res.status(404).json({

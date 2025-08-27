@@ -286,29 +286,15 @@ class BookingModel {
         }
     }
 
-    static async updateBookingForAdmin(bookingId, updateData) {
+    static async updateBookingForAdmin(bookingId, updateStatus) {
         try {
-            const allowedFields = ['BookingStatus', 'UnitPrice', 'Amount', 'ServiceFee', 'PaymentMethodID'];
-            const updateFields = [];
-            const updateValues = [];
-
-            for (const [key, value] of Object.entries(updateData)) {
-                if (allowedFields.includes(key)) {
-                    updateFields.push(`${key} = ?`);
-                    updateValues.push(value);
-                }
-            }
-
-            if (updateFields.length === 0) {
-                throw new Error('No valid fields to update');
-            }
-
-            updateFields.push('UpdatedAt = NOW()');
-            updateValues.push(bookingId);
-
-            const query = `UPDATE Booking SET ${updateFields.join(', ')} WHERE BookingID = ?`;
-            
-            const [result] = await db.query(query, updateValues);
+            const updatedAt = new Date();
+            const query = `
+                UPDATE Booking
+                SET BookingStatus = ?, UpdatedAt = ?
+                WHERE BookingID = ?
+            `;
+            const [result] = await db.query(query, [updateStatus, updatedAt, bookingId]);
             return result.affectedRows > 0;
         } catch (error) {
             console.error('Error updating booking for admin:', error);

@@ -5,145 +5,141 @@ import styles from './AdminBookingEditPage.module.css';
 import bookingApi from '../../api/bookingApi';
 
 const AdminBookingEditPage = () => {
-  const { bookingId } = useParams();
-  const navigate = useNavigate();
-  const [booking, setBooking] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState(null);
+    const { bookingId } = useParams();
+    const navigate = useNavigate();
+    const [booking, setBooking] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState(null);
 
-  const [formData, setFormData] = useState({
-    BookingStatus: '',
-    UnitPrice: '',
-    Amount: '',
-    ServiceFee: '',
-    PaymentMethodID: ''
-  });
-
-  const statusOptions = [
-    { value: 'pending', label: 'Chờ xử lý' },
-    { value: 'confirmed', label: 'Đã xác nhận' },
-    { value: 'cancelled', label: 'Đã hủy' },
-    { value: 'completed', label: 'Hoàn thành' },
-    { value: 'expired', label: 'Hết hạn' }
-  ];
-
-  const formatCurrency = (price) => {
-    const v = typeof price === 'number' ? price : Number(price);
-    if (Number.isNaN(v)) return '-';
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(v);
-  };
-
-  const fmtDateTime = (d) => {
-    if (!d) return '-';
-    const date = new Date(d);
-    if (isNaN(date.getTime())) return String(d);
-    return date.toLocaleString('vi-VN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
+    const [formData, setFormData] = useState({
+        BookingStatus: '',
+        UnitPrice: '',
+        Amount: '',
+        ServiceFee: '',
+        PaymentMethodID: ''
     });
-  };
 
-  const fmtDate = (d) => {
-    if (!d) return '-';
-    const date = new Date(d);
-    if (isNaN(date.getTime())) return String(d);
-    return date.toLocaleDateString('vi-VN');
-  };
+    const statusOptions = [
+        { value: 'pending', label: 'Chờ xử lý' },
+        { value: 'confirmed', label: 'Đã xác nhận' },
+        { value: 'cancelled', label: 'Đã hủy' },
+        { value: 'completed', label: 'Hoàn thành' },
+        { value: 'expired', label: 'Hết hạn' }
+    ];
 
-  const getSourceText = (source) => {
-    switch (source) {
-      case 'direct': return 'Đặt trực tiếp';
-      case 'auction_win': return 'Thắng đấu giá';
-      case 'auction_buy_now': return 'Mua ngay từ đấu giá';
-      default: return source;
-    }
-  };
-
-  useEffect(() => {
-    const fetchBookingDetails = async () => {
-      try {
-        setLoading(true);
-        const response = await bookingApi.getBookingDetailsForAdmin(bookingId);
-        
-        if (response?.success) {
-          const bookingData = response.data;
-          setBooking(bookingData);
-          setFormData({
-            BookingStatus: bookingData.BookingStatus || '',
-            UnitPrice: bookingData.UnitPrice || '',
-            Amount: bookingData.Amount || '',
-            ServiceFee: bookingData.ServiceFee || '',
-            PaymentMethodID: bookingData.PaymentMethodID || ''
-          });
-        } else {
-          setError('Không thể tải chi tiết đặt phòng');
-        }
-      } catch (err) {
-        console.error('Error fetching booking details:', err);
-        setError(err.message || 'Đã xảy ra lỗi khi tải chi tiết đặt phòng');
-      } finally {
-        setLoading(false);
-      }
+    const formatCurrency = (price) => {
+        const v = typeof price === 'number' ? price : Number(price);
+        if (Number.isNaN(v)) return '-';
+        return new Intl.NumberFormat('vi-VN', {
+        style: 'currency',
+        currency: 'VND',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+        }).format(v);
     };
 
-    if (bookingId) {
-      fetchBookingDetails();
-    }
-  }, [bookingId]);
+    const fmtDateTime = (d) => {
+        if (!d) return '-';
+        const date = new Date(d);
+        if (isNaN(date.getTime())) return String(d);
+        return date.toLocaleString('vi-VN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        });
+    };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+    const fmtDate = (d) => {
+        if (!d) return '-';
+        const date = new Date(d);
+        if (isNaN(date.getTime())) return String(d);
+        return date.toLocaleDateString('vi-VN');
+    };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+    const getSourceText = (source) => {
+        switch (source) {
+        case 'direct': return 'Đặt trực tiếp';
+        case 'auction_win': return 'Thắng đấu giá';
+        case 'auction_buy_now': return 'Mua ngay từ đấu giá';
+        default: return source;
+        }
+    };
+
+    useEffect(() => {
+        const fetchBookingDetails = async () => {
+            try {
+                setLoading(true);
+                const response = await bookingApi.getBookingDetailsForAdmin(bookingId);
+                
+                if (response?.success) {
+                const bookingData = response.data;
+                setBooking(bookingData);
+                setFormData({
+                    BookingStatus: bookingData.BookingStatus || '',
+                    UnitPrice: bookingData.UnitPrice || '',
+                    Amount: bookingData.Amount || '',
+                    ServiceFee: bookingData.ServiceFee || '',
+                    PaymentMethodID: bookingData.PaymentMethodID || ''
+                });
+                } else {
+                    setError('Không thể tải chi tiết đặt phòng');
+                }
+            } catch (err) {
+                console.error('Error fetching booking details:', err);
+                setError(err.message || 'Đã xảy ra lỗi khi tải chi tiết đặt phòng');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (bookingId) {
+            fetchBookingDetails();
+        }
+    }, [bookingId]);
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+        ...prev,
+        [name]: value
+        }));
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
     
-    try {
-        setSaving(true);
+        try {
+            setSaving(true);
 
-        // Prepare update status
-       let updateStatus;
+            // Prepare update status
+            let updateStatus;
 
-        if (formData.BookingStatus !== booking.BookingStatus) {
-            updateStatus = formData.BookingStatus;
-        }
+            if (formData.BookingStatus !== booking.BookingStatus) {
+                updateStatus = formData.BookingStatus;
+            }
 
-        if (!updateStatus) {
-            alert('Không có thay đổi nào để cập nhật');
-            return;
-        }
+            if (!updateStatus) {
+                alert('Không có thay đổi nào để cập nhật');
+                return;
+            }
 
-        const response = await bookingApi.updateBookingForAdmin(booking.BookingID, updateStatus);
-        
-        if (response?.success) {
-            alert('Cập nhật đặt phòng thành công!');
-            navigate(`/admin/bookings-management/view/${bookingId}`);
-        } else {
-            throw new Error('Cập nhật thất bại');
-        }
+            const response = await bookingApi.updateBookingForAdmin(bookingId, updateStatus);
+            
+            if (response?.success) {
+                alert('Cập nhật đặt phòng thành công!');
+                navigate(`/admin/bookings-management/view/${bookingId}`);
+            } else {
+                throw new Error('Cập nhật thất bại');
+            }
         } catch (err) {
             console.error('Error updating booking:', err);
             alert('Có lỗi xảy ra khi cập nhật: ' + err.message);
         } finally {
             setSaving(false);
         }
-    };
-
-    const handleCancel = () => {
-        navigate(`/admin/bookings-management/view/${bookingId}`);
     };
 
     const handleBack = () => {
@@ -195,7 +191,7 @@ const AdminBookingEditPage = () => {
     return (
         <div className={styles.page}>
             <PageHeader
-                title={`Chi tiết đặt phòng #${booking.BookingID}`}
+                title={`Chỉnh sửa đặt phòng #${booking.BookingID}`}
                 crumbs={[
                     { label: 'Dashboard', to: '/admin/dashboard' },
                     { label: 'Quản lý đặt phòng', to: '/admin/bookings-management' },
@@ -382,7 +378,7 @@ const AdminBookingEditPage = () => {
                 <div className={styles.formActions}>
                     <button
                         type="button"
-                        onClick={handleCancel}
+                        onClick={handleBack}
                         className={styles.cancelBtn}
                         disabled={saving}
                     >

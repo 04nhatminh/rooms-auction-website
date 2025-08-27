@@ -30,7 +30,6 @@ export const bookingApi = {
   },
 
   // ADMIN APIs
-
   // Lấy danh sách tất cả bookings cho admin
   getAllBookingsForAdmin: async (page = 1, limit = 10) => {
     try {
@@ -163,7 +162,7 @@ export const bookingApi = {
   },
 
   // Cập nhật booking
-  updateBookingForAdmin: async (bookingId, updateData, abortSignal = null) => {
+  updateBookingForAdmin: async (bookingId, updateStatus, abortSignal = null) => {
     try {
       const fetchOptions = {
         method: 'PUT',
@@ -171,7 +170,7 @@ export const bookingApi = {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(updateData)
+        body: JSON.stringify({ BookingStatus: updateStatus })
       };
 
       // Thêm AbortSignal nếu được cung cấp
