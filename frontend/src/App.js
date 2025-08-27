@@ -91,7 +91,6 @@ function App() {
               <Route path="bookings-management/edit/:bookingId" element={<AdminBookingEditPage />} />
               <Route path="system-config" element={<SystemConfigPage />} />
               <Route path="data-scraping" element={<DataScrapingPage />} />
-              {/* <Route path="edit-product/:id" element={<AdminEditProductPage />} /> */}
             </Route>
           </Routes>
         </div>

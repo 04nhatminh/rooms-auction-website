@@ -208,164 +208,195 @@ const AdminBookingEditPage = () => {
     );
   }
 
-  return (
-    <div className={styles.page}>
-      <PageHeader
-        title={`Chỉnh sửa đặt phòng #${booking.BookingID}`}
-        crumbs={[
-          { label: 'Dashboard', to: '/admin/dashboard' },
-          { label: 'Quản lý đặt phòng', to: '/admin/bookings-management' },
-          { label: 'Chỉnh sửa đặt phòng' }
-        ]}
-      />
+    return (
+        <div className={styles.page}>
+            <PageHeader
+                title={`Chi tiết đặt phòng #${booking.BookingID}`}
+                crumbs={[
+                    { label: 'Dashboard', to: '/admin/dashboard' },
+                    { label: 'Quản lý đặt phòng', to: '/admin/bookings-management' },
+                    { label: 'Chỉnh sửa đặt phòng' }
+                ]}
+            />
 
-      <div className={styles.actions}>
-        <button onClick={handleBack} className={styles.backBtn}>← Quay lại danh sách</button>
-      </div>
+            <div className={styles.container}>
+                <div className={styles.section}>
+                    <h3 className={styles.sectionTitle}>Thông tin cơ bản</h3>
+                    <div className={styles.grid}>
+                        <div className={styles.field}>
+                            <label>BookingID:</label>
+                            <span>{booking.BookingID}</span>
+                        </div>
+                        <div className={styles.field}>
+                            <label>Trạng thái đặt phòng:</label>
+                            <select
+                                id="BookingStatus"
+                                name="BookingStatus"
+                                value={formData.BookingStatus}
+                                onChange={handleInputChange}
+                                className={styles.select}
+                            >
+                            {statusOptions.map(option => (
+                                <option key={option.value} value={option.value}>
+                                {option.label}
+                                </option>
+                            ))}
+                            </select>
+                        </div>
+                        <div className={styles.field}>
+                            <label>Nguồn:</label>
+                            <span>{getSourceText(booking.Source)}</span>
+                        </div>
+                    </div>
+                </div>
 
-      <div className={styles.container}>
-        {/* Thông tin không thể chỉnh sửa */}
-        <div className={styles.section}>
-          <h3 className={styles.sectionTitle}>Thông tin cơ bản (chỉ xem)</h3>
-          <div className={styles.grid}>
-            <div className={styles.field}>
-              <label>BookingID:</label>
-              <span>{booking.BookingID}</span>
+                <div className={styles.section}>
+                <h3 className={styles.sectionTitle}>Thông tin lưu trú</h3>
+                    <div className={styles.grid}>
+                        <div className={styles.field}>
+                            <label>Ngày nhận phòng:</label>
+                            <span>{fmtDate(booking.StartDate)}</span>
+                        </div>
+                        <div className={styles.field}>
+                            <label>Ngày trả phòng:</label>
+                            <span>{fmtDate(booking.EndDate)}</span>
+                        </div>
+                        <div className={styles.field}>
+                            <label>Số đêm:</label>
+                            <span>
+                                {booking.StartDate && booking.EndDate
+                                ? Math.ceil((new Date(booking.EndDate) - new Date(booking.StartDate)) / (1000 * 60 * 60 * 24))
+                                : '-'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className={styles.section}>
+                <h3 className={styles.sectionTitle}>Thông tin khách hàng</h3>
+                    <div className={styles.grid}>
+                        <div className={styles.field}>
+                            <label>UserID:</label>
+                            <span>{booking.UserID}</span>
+                        </div>
+                        <div className={styles.field}>
+                            <label>Tên khách hàng:</label>
+                            <span>{booking.UserName || '-'}</span>
+                        </div>
+                        <div className={styles.field}>
+                            <label>Email:</label>
+                            <span>{booking.UserEmail || '-'}</span>
+                        </div>
+                        <div className={styles.field}>
+                            <label>Số điện thoại:</label>
+                            <span>{booking.PhoneNumber || '-'}</span>
+                        </div>
+                        <div className={styles.field}>
+                            <label>Ngày sinh:</label>
+                            <span>{booking.DateOfBirth || '-'}</span>
+                        </div>
+                        <div className={styles.field}>
+                            <label>Giới tính:</label>
+                            <span>{booking.Gender || '-'}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className={styles.section}>
+                <h3 className={styles.sectionTitle}>Thông tin sản phẩm</h3>
+                <div className={styles.grid}>
+                    <div className={styles.field}>
+                    <label>Product UID:</label>
+                    <span>{booking.ProductUID || '-'}</span>
+                    </div>
+                    <div className={styles.field}>
+                    <label>Tên phòng:</label>
+                    <span>{booking.ProductName || '-'}</span>
+                    </div>
+                    <div className={styles.field}>
+                    <label>Loại phòng:</label>
+                    <span>{booking.RoomTypeName || '-'}</span>
+                    </div>
+                    <div className={styles.field}>
+                    <label>Hình thức chỗ ở:</label>
+                    <span>{booking.PropertyName || '-'}</span>
+                    </div>
+                    <div className={styles.field} style={{ gridColumn: 'span 2' }}>
+                    <label>Địa chỉ:</label>
+                    <span>{booking.Address != 'N/A' ? booking.Address + ', ' : ''} 
+                        {booking.DistrictName}, {booking.ProvinceName} </span>
+                    </div>
+                </div>
+                </div>
+
+                <div className={styles.section}>
+                <h3 className={styles.sectionTitle}>Thông tin thanh toán</h3>
+                    <div className={styles.grid}>
+                        <div className={styles.field}>
+                            <label>Đơn giá:</label>
+                            <span>{formatCurrency(booking.UnitPrice)}</span>
+                        </div>
+                        <div className={styles.field}>
+                            <label>Phí lưu trú (
+                                        {booking.StartDate && booking.EndDate
+                                        ? Math.ceil((new Date(booking.EndDate) - new Date(booking.StartDate)) / (1000 * 60 * 60 * 24))
+                                        : '-'} đêm):
+                            </label>
+                            <span>{formatCurrency(booking.Amount)}</span>
+                        </div>
+                        <div className={styles.field}>
+                            <label>Phí dịch vụ:</label>
+                            <span>{formatCurrency(booking.ServiceFee)}</span>
+                        </div>
+                        <div className={styles.field}>
+                            <label>Tổng tiền thanh toán:</label>
+                            <span className={styles.amount}>{formatCurrency(booking.ServiceFee + booking.Amount)}</span>
+                        </div>
+                        <div className={styles.field}>
+                            <label>Phương thức thanh toán:</label>
+                            <span>{booking.Provider || '-'}</span>
+                        </div>
+                        <div className={styles.field}>
+                            <label>Ngày thanh toán:</label>
+                            <span>{fmtDateTime(booking.PaidAt)}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className={styles.section}>
+                    <h3 className={styles.sectionTitle}>Thông tin hệ thống</h3>
+                    <div className={styles.grid}>
+                        <div className={styles.field}>
+                            <label>Ngày tạo:</label>
+                            <span>{fmtDateTime(booking.CreatedAt)}</span>
+                        </div>
+                        <div className={styles.field}>
+                            <label>Ngày cập nhật:</label>
+                            <span>{fmtDateTime(booking.UpdatedAt)}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className={styles.formActions}>
+                    <button
+                        type="button"
+                        onClick={handleCancel}
+                        className={styles.cancelBtn}
+                        disabled={saving}
+                    >
+                        Hủy
+                    </button>
+                    <button
+                        type="submit"
+                        className={styles.saveBtn}
+                        disabled={saving}
+                    >
+                        {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
+                    </button>
+                </div>
             </div>
-            <div className={styles.field}>
-              <label>BidID:</label>
-              <span>{booking.BidID || '-'}</span>
-            </div>
-            <div className={styles.field}>
-              <label>Nguồn:</label>
-              <span>{getSourceText(booking.Source)}</span>
-            </div>
-            <div className={styles.field}>
-              <label>Khách hàng:</label>
-              <span>{booking.UserName || '-'} (ID: {booking.UserID})</span>
-            </div>
-            <div className={styles.field}>
-              <label>Sản phẩm:</label>
-              <span>{booking.ProductName || '-'} (ID: {booking.ProductID})</span>
-            </div>
-            <div className={styles.field}>
-              <label>Thời gian lưu trú:</label>
-              <span>{fmtDate(booking.StartDate)} - {fmtDate(booking.EndDate)}</span>
-            </div>
-            <div className={styles.field}>
-              <label>Ngày tạo:</label>
-              <span>{fmtDateTime(booking.CreatedAt)}</span>
-            </div>
-            <div className={styles.field}>
-              <label>Ngày cập nhật:</label>
-              <span>{fmtDateTime(booking.UpdatedAt)}</span>
-            </div>
-          </div>
         </div>
-
-        {/* Form chỉnh sửa */}
-        <div className={styles.section}>
-          <h3 className={styles.sectionTitle}>Thông tin có thể chỉnh sửa</h3>
-          <form onSubmit={handleSubmit} className={styles.form}>
-            <div className={styles.formGrid}>
-              <div className={styles.formField}>
-                <label htmlFor="BookingStatus">Trạng thái đặt phòng:</label>
-                <select
-                  id="BookingStatus"
-                  name="BookingStatus"
-                  value={formData.BookingStatus}
-                  onChange={handleInputChange}
-                  className={styles.select}
-                >
-                  {statusOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className={styles.formField}>
-                <label htmlFor="UnitPrice">Đơn giá (VND):</label>
-                <input
-                  type="number"
-                  id="UnitPrice"
-                  name="UnitPrice"
-                  value={formData.UnitPrice}
-                  onChange={handleInputChange}
-                  className={styles.input}
-                  step="0.01"
-                  min="0"
-                />
-              </div>
-
-              <div className={styles.formField}>
-                <label htmlFor="Amount">Tổng tiền (VND):</label>
-                <input
-                  type="number"
-                  id="Amount"
-                  name="Amount"
-                  value={formData.Amount}
-                  onChange={handleInputChange}
-                  className={styles.input}
-                  step="0.01"
-                  min="0"
-                />
-              </div>
-
-              <div className={styles.formField}>
-                <label htmlFor="ServiceFee">Phí dịch vụ (VND):</label>
-                <input
-                  type="number"
-                  id="ServiceFee"
-                  name="ServiceFee"
-                  value={formData.ServiceFee}
-                  onChange={handleInputChange}
-                  className={styles.input}
-                  step="0.01"
-                  min="0"
-                />
-              </div>
-
-              <div className={styles.formField}>
-                <label htmlFor="PaymentMethodID">Payment Method ID:</label>
-                <input
-                  type="number"
-                  id="PaymentMethodID"
-                  name="PaymentMethodID"
-                  value={formData.PaymentMethodID}
-                  onChange={handleInputChange}
-                  className={styles.input}
-                  min="1"
-                />
-                <small className={styles.helpText}>
-                  Hiện tại: {booking.PaymentMethodName || 'Chưa có'}
-                </small>
-              </div>
-            </div>
-
-            <div className={styles.formActions}>
-              <button
-                type="button"
-                onClick={handleCancel}
-                className={styles.cancelBtn}
-                disabled={saving}
-              >
-                Hủy
-              </button>
-              <button
-                type="submit"
-                className={styles.saveBtn}
-                disabled={saving}
-              >
-                {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default AdminBookingEditPage;

@@ -242,21 +242,27 @@ class BookingModel {
                     b.BookingID,
                     b.BidID,
                     b.UserID,
+                    pm.Provider,
                     u.FullName as UserName,
                     u.Email as UserEmail,
-                    u.Phone as UserPhone,
-                    b.ProductID,
+                    u.PhoneNumber,
+                    u.DateOfBirth,
+                    u.Gender,
                     p.Name as ProductName,
                     p.UID as ProductUID,
-                    p.Description as ProductDescription,
+                    p.Address,
+                    p.ProvinceCode,
+                    p.DistrictCode,
+                    pr.FullName as ProvinceName,
+                    d.FullName as DistrictName,
+                    rt.RoomTypeName,
+                    ppt.PropertyName,
                     b.StartDate,
                     b.EndDate,
                     b.BookingStatus,
                     b.UnitPrice,
                     b.Amount,
                     b.ServiceFee,
-                    b.PaymentMethodID,
-                    pm.MethodName as PaymentMethodName,
                     b.PaidAt,
                     b.Source,
                     b.CreatedAt,
@@ -265,6 +271,10 @@ class BookingModel {
                 LEFT JOIN Users u ON b.UserID = u.UserID
                 LEFT JOIN Products p ON b.ProductID = p.ProductID
                 LEFT JOIN PaymentMethods pm ON b.PaymentMethodID = pm.MethodID
+                LEFT JOIN Provinces pr ON p.ProvinceCode = pr.ProvinceCode
+                LEFT JOIN Districts d ON p.DistrictCode = d.DistrictCode
+                LEFT JOIN RoomTypes rt ON p.RoomType = rt.RoomTypeID
+                LEFT JOIN Properties ppt ON p.PropertyType = ppt.PropertyID
                 WHERE b.BookingID = ?
             `;
             
