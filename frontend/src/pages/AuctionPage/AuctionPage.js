@@ -91,6 +91,7 @@ function mapApiToView(payload, currentUserId) {
         maxGuests: room?.maxGuests || '1',
         location: `${province}, ${district}`,
         title: room?.Title || room?.name || auction?.Title || '',
+        basePrice: room?.basePrice || 0
     };
 
     // Lịch sử đấu giá
@@ -264,6 +265,7 @@ const AuctionPage = () => {
                         <BiddingForm
                             currentPrice={auctionDetails?.currentPrice}
                             bidIncrement={auctionDetails?.bidIncrement}
+                            basePrice={roomInfo.basePrice}
                             checkin={userCheckin}
                             checkout={userCheckout}
                             status={auctionDetails?.status}
