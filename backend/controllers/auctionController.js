@@ -238,7 +238,7 @@ class AuctionController {
             return res.status(200).json({ success:true, message:'Thuê ngay thành công', bookingId });
         } catch (e) {
 
-            console.log(e);
+            // console.log('Error from Man', e);
             // Chuẩn hóa thông điệp lỗi từ SP cho UX
             const m = (e && e.message) ? String(e.message) : '';
 

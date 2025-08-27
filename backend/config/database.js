@@ -2519,6 +2519,8 @@ async function createPlaceBidProcedure() {
             DECLARE v_end TIMESTAMP;
             DECLARE v_sp_start DATE;
             DECLARE v_sp_end DATE;
+            DECLARE v_old_sp_start DATE;
+            DECLARE v_old_sp_end DATE;
             DECLARE v_prod INT;
             DECLARE v_lead INT;
 
@@ -2545,6 +2547,9 @@ async function createPlaceBidProcedure() {
             INTO v_status, v_cur, v_inc, v_end, v_sp_start, v_sp_end, v_prod
             FROM Auction a JOIN Bids b ON a.AuctionID=b.AuctionID AND a.MaxBidID=b.BidID
             WHERE a.AuctionID=p_AuctionID FOR UPDATE;
+
+            SET v_old_sp_start = v_sp_start;
+            SET v_old_sp_end   = v_sp_end;
 
             IF v_status <> 'active' OR v_end IS NULL OR v_end <= v_now THEN
                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Auction not active';
@@ -2600,7 +2605,7 @@ async function createPlaceBidProcedure() {
             END IF;
 
             -- 4) Cập nhật min/max phiên nếu thay đổi
-            IF p_Start <> v_sp_start OR p_End <> v_sp_end THEN
+            IF p_Start <> v_old_sp_start OR p_End <> v_old_sp_end THEN
             UPDATE Auction
                 SET StayPeriodStart=v_sp_start, StayPeriodEnd=v_sp_end
             WHERE AuctionID=p_AuctionID;
@@ -2697,18 +2702,18 @@ async function createPlaceBookingBuyNowProcedure() {
             VALUES(p_UserID, v_prod_id, p_Start, p_End, 'pending', 'auction_buy_now', NOW(), NOW());
             SET p_BookingID = LAST_INSERT_ID();
 
-            -- 4) Đổi subrange sang booked
+            -- 4) Đổi subrange sang reserved
             UPDATE Calendar
-            SET Status='booked', LockReason=NULL, AuctionID=NULL, HoldExpiresAt=p_HoldExpiresAt, BookingID=p_BookingID
+            SET Status='reserved', LockReason='booking_hold', HoldExpiresAt=p_HoldExpiresAt, BookingID=p_BookingID
             WHERE ProductID=v_prod_id AND Day>=p_Start AND Day<p_End;
 
             -- 5) Trả phần còn lại về available
             UPDATE Calendar
-            SET Status='available', LockReason=NULL, AuctionID=NULL, HoldExpiresAt=NULL, BookingID=NULL
+            SET Status='available'
             WHERE ProductID=v_prod_id AND Day>=v_sp_start AND Day<p_Start AND AuctionID=p_AuctionID;
 
             UPDATE Calendar
-            SET Status='available', LockReason=NULL, AuctionID=NULL, HoldExpiresAt=NULL, BookingID=NULL
+            SET Status='available'
             WHERE ProductID=v_prod_id AND Day>=p_End AND Day<v_sp_end AND AuctionID=p_AuctionID;
 
             -- 6) Kết thúc phiên
@@ -2723,6 +2728,103 @@ async function createPlaceBookingBuyNowProcedure() {
         END;
     `);
 }
+
+
+async function dropPlaceBookingFromWinningBidProcedureIfExists() {
+    await pool.query(`DROP PROCEDURE IF EXISTS PlaceBookingFromWinningBid;`);
+}
+
+async function createPlaceBookingFromWinningBidProcedure() {
+    await pool.query(`
+        CREATE PROCEDURE PlaceBookingFromWinningBid(
+            IN  p_BidID       INT UNSIGNED,
+            OUT p_BookingID   INT UNSIGNED,
+            OUT p_HoldExpiresAt DATETIME 
+        )
+        BEGIN
+            DECLARE v_now        DATETIME;
+            DECLARE v_user_id    INT;
+            DECLARE v_auction_id INT UNSIGNED;
+            DECLARE v_product_id INT;
+            DECLARE v_start      DATE;
+            DECLARE v_end        DATE;
+            DECLARE v_sp_start   DATE;
+            DECLARE v_sp_end     DATE;
+            DECLARE v_hold_booking_time INT;
+
+            DECLARE EXIT HANDLER FOR SQLEXCEPTION
+            BEGIN
+                ROLLBACK;
+                RESIGNAL;
+            END;
+
+            SET v_now = NOW();
+            SELECT CAST(ParamValue AS UNSIGNED) INTO v_hold_booking_time FROM SystemParameters WHERE ParamName='PaymentDeadlineTime' LIMIT 1;
+
+            SET p_HoldExpiresAt = v_now + INTERVAL v_hold_booking_time MINUTE;
+
+            START TRANSACTION;
+
+            -- 1) Lấy thông tin Bid + Auction, khóa auction để tránh race conditions
+            SELECT
+                B.UserID,
+                B.AuctionID,
+                A.ProductID,
+                B.StartDate,
+                B.EndDate,
+                A.StayPeriodStart,
+                A.StayPeriodEnd
+            INTO
+                v_user_id,
+                v_auction_id,
+                v_product_id,
+                v_start,
+                v_end,
+                v_sp_start,
+                v_sp_end
+            FROM Bids B
+            JOIN Auction A ON A.AuctionID = B.AuctionID
+            WHERE B.BidID = p_BidID
+            FOR UPDATE;
+
+            -- 2) Xác nhận bid này là winner
+            IF (SELECT MaxBidID FROM Auction WHERE AuctionID = v_auction_id) <> p_BidID THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Bid is not the winning bid of this auction.';
+            END IF;
+
+            -- 3) Tạo Booking (để trigger lo validate & tính giá)
+            INSERT INTO Booking (
+                BidID, UserID, ProductID, StartDate, EndDate,
+                BookingStatus, Source, CreatedAt, UpdatedAt
+            ) VALUES (
+                p_BidID, v_user_id, v_product_id, v_start, v_end,
+                'pending', 'auction_win', v_now, v_now
+            );
+
+            SET p_BookingID = LAST_INSERT_ID();
+
+            -- 4) Đổi subrange sang reserved
+            UPDATE Calendar
+            SET Status='reserved', HoldExpiresAt=p_HoldExpiresAt, BookingID=p_BookingID
+            WHERE ProductID=v_product_id AND Day>=v_start AND Day<v_end;
+
+            -- 5) Trả phần còn lại về available
+            UPDATE Calendar
+            SET Status='available'
+            WHERE ProductID=v_product_id AND Day>=v_sp_start AND Day<v_start AND AuctionID=p_AuctionID;
+
+            UPDATE Calendar
+            SET Status='available'
+            WHERE ProductID=v_product_id AND Day>=v_end AND Day<v_sp_end AND AuctionID=p_AuctionID;
+
+            /*INSERT INTO AuctionEvents(AuctionID, EventType, ActorUserID, BookingID, Note)
+            VALUES(p_AuctionID, 'buy_now', p_UserID, p_BookingID, 'Ended by buy-now (subrange)');*/
+
+            COMMIT;
+        END;
+    `);
+}
+
 
 async function ensureBookingExpiryEvent() {
   const dbname = dbConfig.database;
@@ -2760,7 +2862,6 @@ async function initSchema() {
         
         await pool.query("SET GLOBAL event_scheduler = ON");
         console.log('✅ Event scheduler enabled');
-
         
         console.log('\n📋 Creating tables...');
 
@@ -2956,6 +3057,10 @@ async function initSchema() {
         await dropPlaceBookingBuyNowProcedureIfExists();
         await createPlaceBookingBuyNowProcedure();
         console.log('✅ PlaceBookingBuyNow procedure ready');
+
+        await dropPlaceBookingFromWinningBidProcedureIfExists();
+        await createPlaceBookingFromWinningBidProcedure();
+        console.log('✅ PlaceBookingFromWinningBid procedure ready');
 
         await ensureBookingExpiryEvent();
         console.log('✅ Booking expiry event ready');
