@@ -466,6 +466,80 @@ class AuctionController {
             });
         }
     }
+
+    // Lấy chi tiết auction cho admin
+    static async getAuctionDetailsForAdmin(req, res) {
+        try {
+            const { auctionUID } = req.params;
+            console.log(`\ngetAuctionDetailsForAdmin - auctionUID: ${auctionUID}`);
+
+            const auction = await AuctionModel.getAuctionDetailsForAdmin(auctionUID);
+            
+            if (!auction) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Auction not found'
+                });
+            }
+
+            console.log('Retrieved auction details:', auction);
+
+            return res.status(200).json({
+                success: true,
+                data: auction
+            });
+
+        } catch (error) {
+            console.error('Error in getAuctionDetailsForAdmin:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Internal server error',
+                error: error.message
+            });
+        }
+    }
+
+    // Cập nhật status auction
+    static async updateAuctionStatus(req, res) {
+        try {
+            const { auctionUID } = req.params;
+            const { status, endReason } = req.body;
+
+            console.log(`\nupdateAuctionStatus - auctionUID: ${auctionUID}, status: ${status}, endReason: ${endReason}`);
+
+            if (!status) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Status is required'
+                });
+            }
+
+            // Validate status
+            const validStatuses = ['active', 'ended', 'cancelled'];
+            if (!validStatuses.includes(status)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid status. Valid statuses are: active, ended, cancelled'
+                });
+            }
+
+            const result = await AuctionModel.updateAuctionStatus(auctionUID, status, endReason);
+
+            return res.status(200).json({
+                success: true,
+                message: result.message,
+                data: { auctionUID, status, endReason }
+            });
+
+        } catch (error) {
+            console.error('Error in updateAuctionStatus:', error);
+            return res.status(500).json({
+                success: false,
+                message: error.message.includes('Cannot change status') ? error.message : 'Internal server error',
+                error: error.message
+            });
+        }
+    }
 }
 
 module.exports = AuctionController;

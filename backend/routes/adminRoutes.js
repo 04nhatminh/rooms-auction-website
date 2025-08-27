@@ -22,8 +22,10 @@ router.patch('/users/:id/status', verifyToken, isAdmin, userController.updateUse
 router.get('/auctions', verifyToken, isAdmin, auctionController.getAllAuctionsForAdmin);
 // Lấy danh sách tất cả auction theo status
 router.get('/auctions/status/:status', verifyToken, isAdmin, auctionController.getAllAuctionsByStatusForAdmin);
+// Lấy chi tiết auction cho admin
+router.get('/auctions/:auctionUID', verifyToken, isAdmin, auctionController.getAuctionDetailsForAdmin);
 // Cập nhật trạng thái auction
-// router.patch('/auctions/:id/status', verifyToken, isAdmin, auctionController.updateAuctionStatus);
+router.patch('/auctions/:auctionUID/status', verifyToken, isAdmin, auctionController.updateAuctionStatus);
 // Tìm kiếm auction theo UID
 router.get('/auctions/search/:uid', verifyToken, isAdmin, auctionController.searchAuctionsByUID);
 

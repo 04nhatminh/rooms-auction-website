@@ -399,6 +399,57 @@ export const auctionApi = {
             console.error('Error deleting auction:', error);
             throw error;
         }
+    },
+
+    // Lấy chi tiết auction cho admin
+    getAuctionDetailsForAdmin: async (auctionUID) => {
+        try {
+            const fetchOptions = {
+                method: 'GET',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            };
+
+            const response = await fetch(`${API_BASE_URL}/admin/auctions/${auctionUID}`, fetchOptions);
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error fetching auction details for admin:', error);
+            throw error;
+        }
+    },
+
+    // Cập nhật status auction
+    updateAuctionStatus: async (auctionUID, status, endReason = null) => {
+        try {
+            const fetchOptions = {
+                method: 'PATCH',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ status, endReason })
+            };
+
+            const response = await fetch(`${API_BASE_URL}/admin/auctions/${auctionUID}/status`, fetchOptions);
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error updating auction status:', error);
+            throw error;
+        }
     }
 
 };

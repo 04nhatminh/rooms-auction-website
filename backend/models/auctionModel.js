@@ -77,7 +77,7 @@ class AuctionModel {
                 JOIN Bids b ON a.AuctionID = b.AuctionID AND a.MaxBidID = b.BidID
                 WHERE a.AuctionID = ?`;
             const [rows] = await pool.query(query, [auctionID]);
-            console.log(`Fetched auction details for AuctionID ${auctionID}:`, auctions);
+            console.log(`Fetched auction details for AuctionID ${auctionID}:`, rows);
             return rows[0] || null;
         } catch (error) {
             console.error('Error fetching auction details:', error);
@@ -116,7 +116,7 @@ class AuctionModel {
                 WHERE p.ProvinceCode = ? AND a.Status = ?
                 LIMIT ?`;
             const [rows] = await pool.query(query, [provinceCode, status, Number(limit)]);
-            console.log(`Fetched auctions for ProvinceCode ${provinceCode} and Status ${status}:`, auctions);
+            console.log(`Fetched auctions for ProvinceCode ${provinceCode} and Status ${status}:`, rows);
             return rows;
         } catch (error) {
             console.error('Error fetching auctions by province:', error);
@@ -135,7 +135,7 @@ class AuctionModel {
                     a.StartTime,
                     a.EndTime,
                     a.StartPrice,
-                    b.Amount
+                    b.Amount,
                     a.Status,
                     pr.Name AS ProvinceName,
                     d.Name  AS DistrictName,
@@ -635,6 +635,109 @@ class AuctionModel {
         `;
         const [auctions] = await pool.execute(query, [uid]);
         return auctions;
+    }
+
+    // Lấy chi tiết auction cho admin
+    static async getAuctionDetailsForAdmin(auctionUID) {
+        try {
+            const query = `
+                SELECT 
+                    a.AuctionID,
+                    a.AuctionUID,
+                    a.ProductID,
+                    p.UID AS ProductUID,
+                    p.Name AS ProductName,
+                    a.StayPeriodStart,
+                    a.StayPeriodEnd,
+                    a.StartTime,
+                    a.EndTime,
+                    a.MaxBidID,
+                    a.StartPrice,
+                    a.BidIncrement,
+                    a.Status,
+                    a.EndReason,
+                    b.Amount AS CurrentPrice,
+                    p.Price AS BasePrice,
+                    p.PropertyType,
+                    p.Address,
+                    p.ProvinceCode,
+                    pr.FullName AS ProvinceName,
+                    p.DistrictCode,
+                    d.FullName AS DistrictName,
+                    rt.RoomTypeName,
+                    pt.PropertyName,
+                    COUNT(b.BidID) AS TotalBids
+                FROM Auction a
+                JOIN Products p ON a.ProductID = p.ProductID
+                JOIN Provinces pr ON p.ProvinceCode = pr.ProvinceCode
+                JOIN Districts d ON p.DistrictCode = d.DistrictCode
+                LEFT JOIN RoomTypes rt ON p.RoomType = rt.RoomTypeID
+                LEFT JOIN Properties pt ON p.PropertyType = pt.PropertyID
+                LEFT JOIN Bids b ON a.MaxBidID = b.BidID
+                WHERE a.AuctionUID = ?
+                GROUP BY a.AuctionID
+            `;
+            const [rows] = await pool.execute(query, [auctionUID]);
+            return rows[0] || null;
+        } catch (error) {
+            console.error('Error fetching auction details for admin:', error);
+            throw error;
+        }
+    }
+
+    // Cập nhật status của auction
+    static async updateAuctionStatus(auctionUID, newStatus, endReason = null) {
+        const connection = await pool.getConnection();
+        try {
+            await connection.beginTransaction();
+
+            // Kiểm tra auction tồn tại
+            const [auctionRows] = await connection.execute(
+                'SELECT AuctionID, Status FROM Auction WHERE AuctionUID = ?',
+                [auctionUID]
+            );
+
+            if (auctionRows.length === 0) {
+                throw new Error('Auction not found');
+            }
+
+            const auction = auctionRows[0];
+            const currentStatus = auction.Status;
+
+            // Validate status transition
+            const validTransitions = {
+                'active': ['ended', 'cancelled'],
+                'ended': [], // Không thể thay đổi từ ended
+                'cancelled': ['active'] // Có thể kích hoạt lại
+            };
+
+            if (!validTransitions[currentStatus] || !validTransitions[currentStatus].includes(newStatus)) {
+                throw new Error(`Cannot change status from ${currentStatus} to ${newStatus}`);
+            }
+
+            // Cập nhật status
+            let updateQuery = 'UPDATE Auction SET Status = ?';
+            let params = [newStatus];
+
+            if (endReason && (newStatus === 'ended' || newStatus === 'cancelled')) {
+                updateQuery += ', EndReason = ?';
+                params.push(endReason);
+            }
+
+            updateQuery += ' WHERE AuctionUID = ?';
+            params.push(auctionUID);
+
+            await connection.execute(updateQuery, params);
+
+            await connection.commit();
+            return { success: true, message: `Auction status updated to ${newStatus}` };
+
+        } catch (error) {
+            await connection.rollback();
+            throw error;
+        } finally {
+            connection.release();
+        }
     }
 }
 
