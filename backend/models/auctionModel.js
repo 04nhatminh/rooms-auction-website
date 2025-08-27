@@ -649,15 +649,15 @@ class AuctionModel {
                 r.Name as room,
                 ub.BidID as userBidId,
                 mb.Amount as winAmount -- lấy Amount của bid thắng
-            FROM auction a
+            FROM Auction a
             JOIN Products r ON a.ProductID = r.ProductID
             JOIN (
                 SELECT AuctionID, MAX(BidID) as BidID
-                FROM bids
+                FROM Bids
                 WHERE UserID = ?
                 GROUP BY AuctionID
             ) ub ON ub.AuctionID = a.AuctionID
-            LEFT JOIN bids mb ON mb.BidID = a.MaxBidID -- lấy bid thắng
+            LEFT JOIN Bids mb ON mb.BidID = a.MaxBidID -- lấy bid thắng
             ORDER BY a.EndTime DESC
         `, [userId]);
         // Format ngày và số tiền thắng

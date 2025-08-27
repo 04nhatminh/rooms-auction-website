@@ -11,11 +11,11 @@ const PolicySections = () => {
                         <h3>Quy định đấu giá</h3>
                 </div>
                 <ul>
-                    <li>Phiên đấu giá áp dụng cho khoảng thuê <strong>01/09/2025 – 15/09/2025</strong>.</li>
-                    <li>Người thắng đấu giá được quyền chọn <strong>bất kỳ ngày lưu trú</strong> trong khoảng thời gian này.</li>
-                    <li>Số đêm lưu trú tối thiểu: <strong>1 đêm</strong>, tối đa: <strong>toàn bộ khoảng áp dụng</strong>.</li>
-                    <li>Phiên đấu giá kết thúc khi hết thời gian hoặc không có giá mới.</li>
-                    <li>Người trả giá cao nhất khi kết thúc sẽ thắng.</li>
+                    <li>Phiên đấu giá sẽ áp dụng nếu thời gian thuê bạn chọn <strong>trùng (một phần hoặc toàn bộ)</strong> với thời gian lưu trú của phiên hiện tại..</li>
+                    <li>Người thắng đấu giá sẽ được <strong>tự động tạo booking với thông tin đấu giá thắng</strong> của mình.</li>
+                    {/* <li>Số đêm lưu trú tối thiểu: <strong>1 đêm</strong>, tối đa: <strong>toàn bộ khoảng áp dụng</strong>.</li> */}
+                    <li>Phiên đấu giá kết thúc khi hết thời gian hoặc có người dùng thuê ngay thành công trong phiên đấu giá.</li>
+                    <li>Nếu không có người dùng thuê ngay trong phiên, người trả giá cao nhất khi kết thúc sẽ thắng.</li>
                 </ul>
             </div>
             <div className="policies-section">
