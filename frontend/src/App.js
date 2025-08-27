@@ -42,6 +42,7 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage/ResetPasswordPage';
 import FailedCheckoutPage from './pages/CheckoutPage/FailedCheckoutPage';
 import SuccessfulCheckoutPage from './pages/CheckoutPage/SuccessfulCheckoutPage';
+import AllPhotosPage from './pages/AllPhotosPage/AllPhotoPage';
 
 function App() {
   return (
@@ -54,6 +55,7 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignUpPage />} />
             <Route path="/room/:UID" element={<RoomDetailPage />} />
+            <Route path="/photos" element={<AllPhotosPage />} />
             <Route path="/auction-check/:UID" element={<AuctionCheckPage />} />
             <Route path="/verification-success" element={<VerificationSuccessPage />} />
             <Route path="/search" element={<SearchResult />} />

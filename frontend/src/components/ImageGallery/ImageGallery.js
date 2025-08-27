@@ -1,30 +1,5 @@
-// import React from 'react';
-// import './ImageGallery.css';
-// import dotsMenuIcon from '../assets/dots_menu.png';
-
-// const ImageGallery = () => {
-//   return (
-//     <div className="image-gallery">
-//       <div className="gallery-layout">
-//         <div className="main-image"></div>
-//         <div className="side-images">
-//           <div className="side-image"></div>
-//           <div className="side-image"></div>
-//           <div className="side-image"></div>
-//           <div className="side-image"></div>
-//         </div>
-//       </div>
-//       <button className="show-all-photos">
-//         <img src={dotsMenuIcon} alt="Hiển thị tất cả ảnh" />
-//         Hiển thị tất cả ảnh
-//       </button>
-//     </div>
-//   );
-// };
-
-// export default ImageGallery;
-
 import React, { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './ImageGallery.css';
 import dotsMenuIcon from '../../assets/dots_menu.png';
 import { useProduct } from '../../contexts/ProductContext';
@@ -62,6 +37,7 @@ function pickAlt(obj, idx) {
 
 const ImageGallery = ({ images: imagesProp }) => {
   // const { data } = useProduct();
+  const navigate = useNavigate();
   const ctx = useProduct?.() ?? null;
   const data = ctx?.data;
 
@@ -116,7 +92,9 @@ const ImageGallery = ({ images: imagesProp }) => {
         </div>
       </div>
 
-      <button className="show-all-photos" type="button">
+      < button className="show-all-photos" 
+        type="button"
+        onClick={() => navigate('/photos', { state: { images } })}>
         <img className="button-icon" src={dotsMenuIcon} alt="" />
         Hiển thị tất cả ảnh
       </button>
