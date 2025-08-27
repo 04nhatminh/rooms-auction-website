@@ -106,12 +106,19 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
       actualData = productData.data;
     }
 
-    // 2) Tách các phần dữ liệu
-    const details         = actualData.details || actualData;
-    const amenitiesData   = actualData.amenities || [];
-    const descriptionsRes = actualData.description || [];
-    const imagesData      = actualData.images || [];
-    const roomTourImages  = actualData.roomTourImages || [];
+    // Kiểm tra dữ liệu an toàn
+    if (!actualData) {
+      console.error('Không có dữ liệu sản phẩm');
+      alert('Không thể tải dữ liệu sản phẩm. Vui lòng thử lại.');
+      return;
+    }
+
+    // 2) Tách các phần dữ liệu với kiểm tra an toàn
+    const details         = actualData.details || actualData || {};
+    const amenitiesData   = Array.isArray(actualData.amenities) ? actualData.amenities : [];
+    const descriptionsRes = Array.isArray(actualData.description) ? actualData.description : [];
+    const imagesData      = Array.isArray(actualData.images) ? actualData.images : [];
+    const roomTourImages  = Array.isArray(actualData.roomTourImages) ? actualData.roomTourImages : [];
     const policiesData    = actualData.policies || {};
 
     // 3) Map amenity ids
@@ -139,18 +146,22 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
     // 6) Chuẩn hoá ảnh: tạo map { id -> baseUrl } để tra nhanh
     //    Đồng thời hỗ trợ trường hợp image có field khác (url/src) hoặc đã là string URL.
     const imageMap = {};
-    imagesData.forEach(img => {
-      if (!img) return;
-      const id = img.id || img.imageId || img.ImageID;
-      const url = img.baseUrl || img.url || img.src || (typeof img === 'string' ? img : '');
-      if (id && url) imageMap[id] = url;
-    });
+    if (Array.isArray(imagesData)) {
+      imagesData.forEach(img => {
+        if (!img) return;
+        const id = img.id || img.imageId || img.ImageID;
+        const url = img.baseUrl || img.url || img.src || (typeof img === 'string' ? img : '');
+        if (id && url) imageMap[id] = url;
+      });
+    }
     
     // 7) Tạo imageGroups theo roomTourImages (title + imageIds). Nếu không có thì fallback gom tất cả ảnh vào 1 group.
     let imageGroups = [{ title: '', images: [], files: [] }];
 
     if (Array.isArray(roomTourImages) && roomTourImages.length > 0) {
       imageGroups = roomTourImages.map(rt => {
+        if (!rt) return { title: '', images: [], files: [], hasExistingImages: false };
+        
         const urls = Array.isArray(rt.imageIds)
           ? rt.imageIds
               .map(id => imageMap[id])
@@ -169,21 +180,27 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
       // Trong trường hợp có imageIds không khớp id nào: vẫn giữ group nhưng có thể rỗng
       // Nếu tất cả group đều rỗng (thi thoảng dữ liệu thiếu), fallback gom tất cả ảnh
       const anyHasImage = imageGroups.some(g => g.images.length > 0);
-      if (!anyHasImage && imagesData.length > 0) {
+      if (!anyHasImage && Array.isArray(imagesData) && imagesData.length > 0) {
         imageGroups = [{
           title: 'Hình ảnh sản phẩm',
           imageIds: [],
-          images: imagesData.map(img => img.baseUrl || img.url || img.src).filter(Boolean),
+          images: imagesData.map(img => {
+            if (!img) return '';
+            return img.baseUrl || img.url || img.src || (typeof img === 'string' ? img : '');
+          }).filter(Boolean),
           files: [],
           hasExistingImages: true
         }];
       }
-    } else if (imagesData.length > 0) {
+    } else if (Array.isArray(imagesData) && imagesData.length > 0) {
       // Fallback: không có roomTourImages
       imageGroups = [{
         title: 'Hình ảnh sản phẩm',
         imageIds: [],
-        images: imagesData.map(img => img.baseUrl || img.url || img.src || (typeof img === 'string' ? img : '')).filter(Boolean),
+        images: imagesData.map(img => {
+          if (!img) return '';
+          return img.baseUrl || img.url || img.src || (typeof img === 'string' ? img : '');
+        }).filter(Boolean),
         files: [],
         hasExistingImages: true
       }];
@@ -261,11 +278,15 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
   const loadProvinces = async () => {
     try {
       const response = await LocationAPI.getAllProvinces();
-      if (response.success) {
-        setProvinces(response.data || []);
+      if (response && response.success && Array.isArray(response.data)) {
+        setProvinces(response.data);
+      } else {
+        console.error('Không thể tải danh sách tỉnh:', response);
+        setProvinces([]);
       }
     } catch (error) {
-      console.error('Error loading provinces:', error);
+      console.error('Lỗi khi tải danh sách tỉnh:', error);
+      setProvinces([]);
     } finally {
       setLoadingProvinces(false);
     }
@@ -274,11 +295,15 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
   const loadDistricts = async () => {
     try {
       const response = await LocationAPI.getAllDistricts();
-      if (response.success) {
-        setDistricts(response.data || []);
+      if (response && response.success && Array.isArray(response.data)) {
+        setDistricts(response.data);
+      } else {
+        console.error('Không thể tải danh sách quận/huyện:', response);
+        setDistricts([]);
       }
     } catch (error) {
-      console.error('Error loading districts:', error);
+      console.error('Lỗi khi tải danh sách quận/huyện:', error);
+      setDistricts([]);
     } finally {
       setLoadingDistricts(false);
     }
@@ -287,11 +312,15 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
   const loadPropertyTypes = async () => {
     try {
       const response = await productApi.getPropertyTypes();
-      if (response.success) {
-        setPropertyTypes(response.data || []);
+      if (response && response.success && Array.isArray(response.data)) {
+        setPropertyTypes(response.data);
+      } else {
+        console.error('Không thể tải danh sách loại hình chỗ ở:', response);
+        setPropertyTypes([]);
       }
     } catch (error) {
-      console.error('Error loading property types:', error);
+      console.error('Lỗi khi tải danh sách loại hình chỗ ở:', error);
+      setPropertyTypes([]);
     } finally {
       setLoadingPropertyTypes(false);
     }
@@ -300,11 +329,15 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
   const loadRoomTypes = async () => {
     try {
       const response = await productApi.getRoomTypes();
-      if (response.success) {
-        setRoomTypes(response.data || []);
+      if (response && response.success && Array.isArray(response.data)) {
+        setRoomTypes(response.data);
+      } else {
+        console.error('Không thể tải danh sách loại chỗ ở:', response);
+        setRoomTypes([]);
       }
     } catch (error) {
-      console.error('Error loading room types:', error);
+      console.error('Lỗi khi tải danh sách loại chỗ ở:', error);
+      setRoomTypes([]);
     } finally {
       setLoadingRoomTypes(false);
     }
@@ -313,11 +346,15 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
   const loadAmenityGroups = async () => {
     try {
       const response = await productApi.getAmenityGroups();
-      if (response.success) {
-        setAmenityGroups(response.data || []);
+      if (response && response.success && Array.isArray(response.data)) {
+        setAmenityGroups(response.data);
+      } else {
+        console.error('Không thể tải danh sách nhóm tiện nghi:', response);
+        setAmenityGroups([]);
       }
     } catch (error) {
-      console.error('Error loading amenity groups:', error);
+      console.error('Lỗi khi tải danh sách nhóm tiện nghi:', error);
+      setAmenityGroups([]);
     } finally {
       setLoadingAmenityGroups(false);
     }
@@ -326,11 +363,15 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
   const loadAmenities = async () => {
     try {
       const response = await productApi.getAmenities();
-      if (response.success) {
-        setAmenities(response.data || []);
+      if (response && response.success && Array.isArray(response.data)) {
+        setAmenities(response.data);
+      } else {
+        console.error('Không thể tải danh sách tiện nghi:', response);
+        setAmenities([]);
       }
     } catch (error) {
-      console.error('Error loading amenities:', error);
+      console.error('Lỗi khi tải danh sách tiện nghi:', error);
+      setAmenities([]);
     } finally {
       setLoadingAmenities(false);
     }
@@ -400,17 +441,24 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
   const getAmenitiesByGroup = () => {
     const groupedAmenities = {};
     
+    // Kiểm tra dữ liệu an toàn
+    if (!Array.isArray(amenityGroups) || !Array.isArray(amenities)) {
+      return [];
+    }
+    
     // Khởi tạo các groups
     amenityGroups.forEach(group => {
-      groupedAmenities[group.AmenityGroupID] = {
-        ...group,
-        amenities: []
-      };
+      if (group && group.AmenityGroupID) {
+        groupedAmenities[group.AmenityGroupID] = {
+          ...group,
+          amenities: []
+        };
+      }
     });
     
     // Map amenities vào groups tương ứng
     amenities.forEach(amenity => {
-      if (groupedAmenities[amenity.AmenityGroupID]) {
+      if (amenity && amenity.AmenityGroupID && groupedAmenities[amenity.AmenityGroupID]) {
         groupedAmenities[amenity.AmenityGroupID].amenities.push(amenity);
       }
     });
@@ -933,12 +981,17 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
                       disabled={isDisabled || loadingRoomTypes}
                     >
                       <option value="">
-                        {loadingRoomTypes ? 'Đang tải...' : 'Chọn loại chỗ ở'}
+                        {loadingRoomTypes 
+                          ? 'Đang tải...' 
+                          : 'Chọn loại chỗ ở'
+                        }
                       </option>
-                      {roomTypes.map(roomType => (
-                        <option key={roomType.RoomTypeID} value={roomType.RoomTypeID}>
-                          {roomType.RoomTypeName}
-                        </option>
+                      {Array.isArray(roomTypes) && roomTypes.map(roomType => (
+                        roomType && roomType.RoomTypeID && (
+                          <option key={roomType.RoomTypeID} value={roomType.RoomTypeID}>
+                            {roomType.RoomTypeName || ''}
+                          </option>
+                        )
                       ))}
                     </select>
                   </div>
@@ -956,12 +1009,17 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
                       disabled={isDisabled || loadingPropertyTypes}
                     >
                       <option value="">
-                        {loadingPropertyTypes ? 'Đang tải...' : 'Chọn loại hình'}
+                        {loadingPropertyTypes 
+                          ? 'Đang tải...' 
+                          : 'Chọn loại hình thức chỗ ở'
+                        }
                       </option>
-                      {propertyTypes.map(propertyType => (
-                        <option key={propertyType.PropertyID} value={propertyType.PropertyID}>
-                          {propertyType.PropertyName}
-                        </option>
+                      {Array.isArray(propertyTypes) && propertyTypes.map(propertyType => (
+                        propertyType && propertyType.PropertyID && (
+                          <option key={propertyType.PropertyID} value={propertyType.PropertyID}>
+                            {propertyType.PropertyName || ''}
+                          </option>
+                        )
                       ))}
                     </select>
                   </div>
@@ -1155,12 +1213,17 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
                       disabled={isDisabled || loadingProvinces}
                     >
                       <option value="">
-                        {loadingProvinces ? 'Đang tải...' : 'Chọn tỉnh/thành phố'}
+                        {loadingProvinces 
+                          ? 'Đang tải...' 
+                          : 'Chọn tỉnh/thành phố'
+                        }
                       </option>
-                      {provinces.map(province => (
-                        <option key={province.code} value={province.code}>
-                          {province.Name}
-                        </option>
+                      {Array.isArray(provinces) && provinces.map(province => (
+                        province && province.code && (
+                          <option key={province.code} value={province.code}>
+                            {province.Name || province.name || ''}
+                          </option>
+                        )
                       ))}
                     </select>
                   </div>
@@ -1185,10 +1248,12 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
                           : 'Chọn quận/huyện'
                         }
                       </option>
-                      {filteredDistricts.map(district => (
-                        <option key={district.code} value={district.code}>
-                          {district.Name}
-                        </option>
+                      {Array.isArray(filteredDistricts) && filteredDistricts.map(district => (
+                        district && district.code && (
+                          <option key={district.code} value={district.code}>
+                            {district.Name || district.name || ''}
+                          </option>
+                        )
                       ))}
                     </select>
                   </div>
@@ -1211,15 +1276,17 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
                 <h3 className={styles.sectionTitle}>Tiện nghi</h3>
                 {loadingAmenityGroups || loadingAmenities ? (
                   <p>Đang tải tiện nghi...</p>
+                ) : amenityGroups.length === 0 && amenities.length === 0 ? (
+                  <p className={styles.noDataMessage}>Không có dữ liệu tiện nghi. Vui lòng kiểm tra kết nối cơ sở dữ liệu.</p>
                 ) : (
                   getAmenitiesByGroup().map(group => (
-                    group.amenities.length > 0 && (
+                    group && group.amenities && group.amenities.length > 0 && (
                       <div key={group.AmenityGroupID} className={styles.amenityGroup}>
                         <div 
                           className={styles.amenityGroupHeader}
                           onClick={() => toggleAmenityGroup(group.AmenityGroupID)}
                         >
-                          <label className={styles.label}>{group.AmenityGroupName}</label>
+                          <label className={styles.label}>{group.AmenityGroupName || 'Nhóm tiện nghi'}</label>
                           <img
                             src={collapsedGroups[group.AmenityGroupID] ? ChevronDownIcon : ChevronUpIcon}
                             alt={collapsedGroups[group.AmenityGroupID] ? 'Expand' : 'Collapse'}
@@ -1229,16 +1296,18 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
                         {!collapsedGroups[group.AmenityGroupID] && (
                           <div className={styles.amenitiesGrid}>
                             {group.amenities.map(amenity => (
-                              <label key={amenity.AmenityID} className={styles.checkboxLabel}>
-                                <input
-                                  type="checkbox"
-                                  checked={formData.amenities.includes(amenity.AmenityID)}
-                                  onChange={() => handleAmenityChange(amenity.AmenityID)}
-                                  className={styles.checkbox}
-                                  disabled={isDisabled}
-                                />
-                                <span className={styles.checkboxText}>{amenity.AmenityName}</span>
-                              </label>
+                              amenity && amenity.AmenityID && (
+                                <label key={amenity.AmenityID} className={styles.checkboxLabel}>
+                                  <input
+                                    type="checkbox"
+                                    checked={formData.amenities.includes(amenity.AmenityID)}
+                                    onChange={() => handleAmenityChange(amenity.AmenityID)}
+                                    className={styles.checkbox}
+                                    disabled={isDisabled}
+                                  />
+                                  <span className={styles.checkboxText}>{amenity.AmenityName || 'Tiện nghi'}</span>
+                                </label>
+                              )
                             ))}
                           </div>
                         )}
@@ -1374,38 +1443,47 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
                       </div>
                     )}
 
-                    {group.images.length > 0 && (
+                    {(group.images && group.images.length > 0) ? (
                       <div className={styles.imagePreview}>
                         <h4>Hình ảnh đã chọn</h4>
                         <div className={styles.imageList}>
                           {group.images.map((image, imageIndex) => (
-                            <div key={imageIndex} className={styles.imageItem}>
-                              {(type === 'view' || type === 'edit') && group.hasExistingImages ? (
-                                <img
-                                  src={image}
-                                  alt={`Image ${imageIndex}`}
-                                  className={styles.previewImg}
-                                />
-                              ) : (
-                                <div className={styles.imageNameContainer}>
-                                  <span className={styles.imageName}>{image}</span>
-                                </div>
-                              )}
-                              {!isDisabled && (
-                                <button
-                                  type="button"
-                                  onClick={() => removeImage(groupIndex, imageIndex)}
-                                  className={styles.removeImageBtn}
-                                  title={deletingImage ? "Đang xóa..." : "Xóa ảnh này"}
-                                  disabled={deletingImage}
-                                >
-                                  {deletingImage ? "..." : "×"}
-                                </button>
-                              )}
-                            </div>
+                            image && (
+                              <div key={imageIndex} className={styles.imageItem}>
+                                {(type === 'view' || type === 'edit') && group.hasExistingImages ? (
+                                  <img
+                                    src={image}
+                                    alt={`Image ${imageIndex}`}
+                                    className={styles.previewImg}
+                                    onError={(e) => {
+                                      e.target.src = '';
+                                      e.target.alt = 'Không thể tải ảnh';
+                                      e.target.style.display = 'none';
+                                    }}
+                                  />
+                                ) : (
+                                  <div className={styles.imageNameContainer}>
+                                    <span className={styles.imageName}>{image || 'Không có tên ảnh'}</span>
+                                  </div>
+                                )}
+                                {!isDisabled && (
+                                  <button
+                                    type="button"
+                                    onClick={() => removeImage(groupIndex, imageIndex)}
+                                    className={styles.removeImageBtn}
+                                    title={deletingImage ? "Đang xóa..." : "Xóa ảnh này"}
+                                    disabled={deletingImage}
+                                  >
+                                    {deletingImage ? "..." : "×"}
+                                  </button>
+                                )}
+                              </div>
+                            )
                           ))}
                         </div>
                       </div>
+                    ) : (
+                      <p className={styles.noImagesMessage}>Chưa có ảnh nào được chọn</p>
                     )}
                   </div>
                 ))}
