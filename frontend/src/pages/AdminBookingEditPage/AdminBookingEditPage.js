@@ -112,101 +112,85 @@ const AdminBookingEditPage = () => {
     e.preventDefault();
     
     try {
-      setSaving(true);
-      
-      // Prepare update data
-      const updateData = {};
-      
-      if (formData.BookingStatus !== booking.BookingStatus) {
-        updateData.BookingStatus = formData.BookingStatus;
-      }
-      
-      if (parseFloat(formData.UnitPrice) !== parseFloat(booking.UnitPrice)) {
-        updateData.UnitPrice = parseFloat(formData.UnitPrice);
-      }
-      
-      if (parseFloat(formData.Amount) !== parseFloat(booking.Amount)) {
-        updateData.Amount = parseFloat(formData.Amount);
-      }
-      
-      if (parseFloat(formData.ServiceFee) !== parseFloat(booking.ServiceFee)) {
-        updateData.ServiceFee = parseFloat(formData.ServiceFee);
-      }
-      
-      if (formData.PaymentMethodID !== booking.PaymentMethodID) {
-        updateData.PaymentMethodID = formData.PaymentMethodID ? parseInt(formData.PaymentMethodID) : null;
-      }
+        setSaving(true);
 
-      if (Object.keys(updateData).length === 0) {
-        alert('Không có thay đổi nào để cập nhật');
-        return;
-      }
+        // Prepare update status
+       let updateStatus;
 
-      const response = await bookingApi.updateBookingForAdmin(bookingId, updateData);
-      
-      if (response?.success) {
-        alert('Cập nhật đặt phòng thành công!');
+        if (formData.BookingStatus !== booking.BookingStatus) {
+            updateStatus = formData.BookingStatus;
+        }
+
+        if (!updateStatus) {
+            alert('Không có thay đổi nào để cập nhật');
+            return;
+        }
+
+        const response = await bookingApi.updateBookingForAdmin(booking.BookingID, updateStatus);
+        
+        if (response?.success) {
+            alert('Cập nhật đặt phòng thành công!');
+            navigate(`/admin/bookings-management/view/${bookingId}`);
+        } else {
+            throw new Error('Cập nhật thất bại');
+        }
+        } catch (err) {
+            console.error('Error updating booking:', err);
+            alert('Có lỗi xảy ra khi cập nhật: ' + err.message);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleCancel = () => {
         navigate(`/admin/bookings-management/view/${bookingId}`);
-      } else {
-        throw new Error('Cập nhật thất bại');
-      }
-    } catch (err) {
-      console.error('Error updating booking:', err);
-      alert('Có lỗi xảy ra khi cập nhật: ' + err.message);
-    } finally {
-      setSaving(false);
+    };
+
+    const handleBack = () => {
+        navigate('/admin/bookings-management');
+    };
+
+    if (loading) {
+        return (
+        <div className={styles.page}>
+            <div className={styles.loading}>Đang tải...</div>
+        </div>
+        );
     }
-  };
 
-  const handleCancel = () => {
-    navigate(`/admin/bookings-management/view/${bookingId}`);
-  };
+    if (error) {
+        return (
+        <div className={styles.page}>
+            <PageHeader
+            title="Chỉnh sửa đặt phòng"
+            crumbs={[
+                { label: 'Dashboard', to: '/admin/dashboard' },
+                { label: 'Quản lý đặt phòng', to: '/admin/bookings-management' },
+                { label: 'Chỉnh sửa đặt phòng' }
+            ]}
+            />
+            <div className={styles.error}>Lỗi: {error}</div>
+            <button onClick={handleBack} className={styles.backBtn}>Quay lại</button>
+        </div>
+        );
+    }
 
-  const handleBack = () => {
-    navigate('/admin/bookings-management');
-  };
-
-  if (loading) {
-    return (
-      <div className={styles.page}>
-        <div className={styles.loading}>Đang tải...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className={styles.page}>
-        <PageHeader
-          title="Chỉnh sửa đặt phòng"
-          crumbs={[
-            { label: 'Dashboard', to: '/admin/dashboard' },
-            { label: 'Quản lý đặt phòng', to: '/admin/bookings-management' },
-            { label: 'Chỉnh sửa đặt phòng' }
-          ]}
-        />
-        <div className={styles.error}>Lỗi: {error}</div>
-        <button onClick={handleBack} className={styles.backBtn}>Quay lại</button>
-      </div>
-    );
-  }
-
-  if (!booking) {
-    return (
-      <div className={styles.page}>
-        <PageHeader
-          title="Chỉnh sửa đặt phòng"
-          crumbs={[
-            { label: 'Dashboard', to: '/admin/dashboard' },
-            { label: 'Quản lý đặt phòng', to: '/admin/bookings-management' },
-            { label: 'Chỉnh sửa đặt phòng' }
-          ]}
-        />
-        <div className={styles.error}>Không tìm thấy đặt phòng</div>
-        <button onClick={handleBack} className={styles.backBtn}>Quay lại</button>
-      </div>
-    );
-  }
+    if (!booking) {
+        return (
+        <div className={styles.page}>
+            <PageHeader
+            title="Chỉnh sửa đặt phòng"
+            crumbs={[
+                { label: 'Dashboard', to: '/admin/dashboard' },
+                { label: 'Quản lý đặt phòng', to: '/admin/bookings-management' },
+                { label: 'Chỉnh sửa đặt phòng' }
+            ]}
+            />
+            <div className={styles.error}>Không tìm thấy đặt phòng</div>
+            <button onClick={handleBack} className={styles.backBtn}>Quay lại</button>
+        </div>
+        );
+    }
 
     return (
         <div className={styles.page}>
@@ -227,22 +211,40 @@ const AdminBookingEditPage = () => {
                             <label>BookingID:</label>
                             <span>{booking.BookingID}</span>
                         </div>
+
                         <div className={styles.field}>
                             <label>Trạng thái đặt phòng:</label>
-                            <select
+
+                            <div className={styles.statusRow}>
+                                <select
                                 id="BookingStatus"
                                 name="BookingStatus"
                                 value={formData.BookingStatus}
                                 onChange={handleInputChange}
-                                className={styles.select}
-                            >
-                            {statusOptions.map(option => (
-                                <option key={option.value} value={option.value}>
-                                {option.label}
-                                </option>
-                            ))}
-                            </select>
+                                className={`${styles.select} ${styles.statusSelect}`}
+                                >
+                                {statusOptions.map(option => (
+                                    <option key={option.value} value={option.value}>
+                                    {option.label}
+                                    </option>
+                                ))}
+                                </select>
+
+                                {/* Preview pill theo trạng thái hiện chọn */}
+                                <span
+                                className={`${styles.statusPill} ${
+                                    formData.BookingStatus === 'pending' ? styles['status-pending'] :
+                                    formData.BookingStatus === 'confirmed' ? styles['status-confirmed'] :
+                                    formData.BookingStatus === 'cancelled' ? styles['status-cancelled'] :
+                                    formData.BookingStatus === 'completed' ? styles['status-completed'] :
+                                    styles['status-expired']
+                                }`}
+                                >
+                                {statusOptions.find(o => o.value === formData.BookingStatus)?.label || '—'}
+                                </span>
+                            </div>
                         </div>
+
                         <div className={styles.field}>
                             <label>Nguồn:</label>
                             <span>{getSourceText(booking.Source)}</span>
@@ -388,6 +390,7 @@ const AdminBookingEditPage = () => {
                     </button>
                     <button
                         type="submit"
+                        onClick={handleSubmit}
                         className={styles.saveBtn}
                         disabled={saving}
                     >

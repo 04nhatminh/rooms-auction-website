@@ -424,7 +424,7 @@ const AdminBookingsManagementPage = () => {
 
                     {displayBookings.length === 0 && !isSearching && !isFilteringByStatus && (
                     <tr>
-                        <td colSpan={10} className={styles.empty}>
+                        <td colSpan={100} className={styles.empty}>
                         <div className={styles.emptyText}>Chưa có đặt phòng nào</div>
                         </td>
                     </tr>
@@ -432,7 +432,7 @@ const AdminBookingsManagementPage = () => {
 
                     {displayBookings.length === 0 && isSearching && (
                     <tr>
-                        <td colSpan={10} className={styles.empty}>
+                        <td colSpan={100} className={styles.empty}>
                         <div className={styles.emptyText}>
                             Không tìm thấy đặt phòng nào với ID "{searchBookingId}"
                         </div>
@@ -442,7 +442,7 @@ const AdminBookingsManagementPage = () => {
 
                     {displayBookings.length === 0 && isFilteringByStatus && (
                     <tr>
-                        <td colSpan={10} className={styles.empty}>
+                        <td colSpan={100} className={styles.empty}>
                         <div className={styles.emptyText}>
                             Không có đặt phòng nào với trạng thái "{getStatusText(selectedStatus)}"
                         </div>

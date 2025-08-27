@@ -254,7 +254,12 @@
 .btnDelete { background-color: #fecaca; color: #dc2626; }
 .btnDelete:hover { background-color: #fca5a5; }
 
-.empty { text-align: center; padding: 3rem; }
+.empty { 
+    text-align: center; 
+    justify-content: center; 
+    padding: 3rem; 
+}
+
 .emptyText {
   font-family: Montserrat;
   font-size: 14px;

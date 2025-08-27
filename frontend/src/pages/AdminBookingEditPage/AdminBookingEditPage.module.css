@@ -38,7 +38,7 @@
 .grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 16px;
+    gap: 32px;
 }
 
 .field {
@@ -148,18 +148,69 @@
 }
 
 .saveBtn {
-  background-color: #008489;
-  color: #fff;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  font-family: Montserrat;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+    background-color: #008489;
+    color: #fff;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-family: Montserrat;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 .saveBtn:hover:not(:disabled) { background-color: #006b6f; }
 .saveBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.statusRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.select,
+.statusSelect {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: #fff
+    url("data:image/svg+xml;utf8,<svg fill='none' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><path d='M5.5 7.5l4.5 4.5 4.5-4.5' stroke='%2399A3AD' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+    no-repeat right 12px center / 16px 16px;
+    border: 1px solid #f3f4f6;
+    border-radius: 8px;
+    padding: 8px 40px 8px 12px;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    transition: border-color .2s ease, box-shadow .2s ease;
+    width: 300px;
+}
+
+.statusSelect:focus {
+    outline: none;
+    border-color: #f3f4f6;
+}
+
+.statusSelect:disabled {
+    background-color: #f3f4f6;
+    cursor: not-allowed;
+}
+
+.statusPill {
+    padding: 16px 16px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+    border: 1px solid transparent;
+    background-color: #f9fafb;
+    white-space: nowrap;
+}
+
+.status-pending.statusPill    { padding: 10px; background-color: #fff7ed; border-color: #fed7aa; }  /* cam nhạt */
+.status-confirmed.statusPill  { padding: 10px; background-color: #ecfdf5; border-color: #a7f3d0; }  /* xanh lá nhạt */
+.status-cancelled.statusPill  { padding: 10px; background-color: #fef2f2; border-color: #fecaca; }  /* đỏ nhạt */
+.status-completed.statusPill  { padding: 10px; background-color: #ecfeff; border-color: #a5f3fc; }  /* cyan nhạt */
+.status-expired.statusPill    { padding: 10px; background-color: #f3f4f6; border-color: #e5e7eb; }  /* xám nhạt */
+
 
 
