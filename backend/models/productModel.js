@@ -61,7 +61,7 @@ class ProductModel {
                             JOIN Districts d ON p.DistrictCode = d.DistrictCode
                             WHERE p.UID = ?`;
             const [products] = await pool.execute(query, [productUID]);
-            console.log(`Fetched product details for ProductID ${productUID}:`, products);
+            // console.log(`Fetched product details for ProductID ${productUID}:`, products);
             return products[0]; // Trả về sản phẩm đầu tiên
         } catch (error) {
             console.error('Error fetching product details:', error);
@@ -84,7 +84,7 @@ class ProductModel {
                     pa.ProductID = ?
             `;
             const [amenities] = await pool.execute(query, [productID]);
-            console.log(`Fetched amenities for ProductID ${productID}:`, amenities);
+            // console.log(`Fetched amenities for ProductID ${productID}:`, amenities);
             return amenities;
         } catch (error) {
             console.error('Error fetching product amenities:', error);
@@ -104,8 +104,8 @@ class ProductModel {
 
         // Step 3: Return the MongoDB document
 
-        console.log(`Found description in MongoDB for ExternalID ${productID}`);
-        console.log(`Description: ${matchingDoc.Descriptions}`);
+        // console.log(`Found description in MongoDB for ExternalID ${productID}`);
+        // console.log(`Description: ${matchingDoc.Descriptions}`);
 
         return matchingDoc.Descriptions;
 
@@ -123,9 +123,9 @@ class ProductModel {
 
         // Step 3: Return the MongoDB document
 
-        console.log(`Found reviews in MongoDB for ExternalID ${productID}`);
+        // console.log(`Found reviews in MongoDB for ExternalID ${productID}`);
 
-        console.log(`Reviews:`, matchingDoc);
+        // console.log(`Reviews:`, matchingDoc);
         return matchingDoc;
 
     }
@@ -141,8 +141,8 @@ class ProductModel {
 
         // Step 3: Return the MongoDB document
 
-        console.log(`Found images in MongoDB for ExternalID ${productID}`);
-        console.log(`Images: ${matchingDoc.Images}`);
+        // console.log(`Found images in MongoDB for ExternalID ${productID}`);
+        // console.log(`Images: ${matchingDoc.Images}`);
 
         return matchingDoc.Images || []; // Trả về mảng hình ảnh, nếu không có thì trả về mảng rỗng
 
@@ -159,8 +159,8 @@ class ProductModel {
 
         // Step 3: Return the MongoDB document
 
-        console.log(`Found room tour images in MongoDB for ExternalID ${productID}`);
-        console.log(`Room Tour Images: ${matchingDoc.RoomTourItems}`);
+        // console.log(`Found room tour images in MongoDB for ExternalID ${productID}`);
+        // console.log(`Room Tour Images: ${matchingDoc.RoomTourItems}`);
 
         return matchingDoc.RoomTourItems || []; // Trả về mảng hình ảnh, nếu không có thì trả về mảng rỗng
 
@@ -177,8 +177,8 @@ class ProductModel {
 
         // Step 3: Return the MongoDB document
 
-        console.log(`Found policies in MongoDB for ExternalID ${productID}`);
-        console.log(`Policy: ${matchingDoc.Policies}`);
+        // console.log(`Found policies in MongoDB for ExternalID ${productID}`);
+        // console.log(`Policy: ${matchingDoc.Policies}`);
 
         return matchingDoc.Policies || []; // Trả về mảng hình ảnh, nếu không có thì trả về mảng rỗng
 
@@ -198,7 +198,7 @@ class ProductModel {
                     pr.ProductID = ?
             `;
                 const [provinceName] = await pool.execute(query, [productID]);
-                console.log(`Fetched product province for ProductID ${productID}:`, provinceName);
+                // console.log(`Fetched product province for ProductID ${productID}:`, provinceName);
                 return provinceName[0]; // Trả về sản phẩm đầu tiên
         } catch (error) {
             console.error('Error fetching product province:', error);
@@ -220,7 +220,7 @@ class ProductModel {
                     p.ProductID = ?
             `;
                 const [districtName] = await pool.execute(query, [productID]);
-                console.log(`Fetched product district for ProductID ${productID}:`, districtName);
+                // console.log(`Fetched product district for ProductID ${productID}:`, districtName);
                 return districtName[0]; // Trả về sản phẩm đầu tiên
         } catch (error) {
             console.error('Error fetching product district:', error);
@@ -242,7 +242,7 @@ class ProductModel {
                     p.ProductID = ?
             `;
                 const [property] = await pool.execute(query, [productID]);
-                console.log(`Fetched product property name for ProductID ${productID}:`, property);
+                // console.log(`Fetched product property name for ProductID ${productID}:`, property);
                 return property[0]; // Trả về sản phẩm đầu tiên
         } catch (error) {
             console.error('Error fetching product property name:', error);
@@ -303,7 +303,7 @@ class ProductModel {
             // MySQL stored procedure trả về array of arrays, lấy result set đầu tiên
             const products = Array.isArray(rows[0]) ? rows[0] : rows;
             
-            console.log('Stored procedure result count:', products.length);
+            // console.log('Stored procedure result count:', products.length);
             return products;
             
         } catch (error) {
@@ -469,7 +469,7 @@ class ProductModel {
         }
 
         const uid = this.generateSnowflakeKey();
-        console.log('Generated UID:', uid);
+        // console.log('Generated UID:', uid);
         const now = new Date();
 
         const insertQuery = `

@@ -2674,21 +2674,13 @@ async function createPlaceBookingBuyNowProcedure() {
                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Auction not active';
             END IF;
 
-            -- 1) Tìm phiên bao phủ subrange và khóa
-            /*SELECT AuctionID, StayPeriodStart, StayPeriodEnd
-            INTO v_auc_id, v_sp_start, v_sp_end
-            FROM Auction
-            WHERE ProductID=p_ProductID AND Status='active'
-            AND p_Start >= StayPeriodStart AND p_End <= StayPeriodEnd
-            FOR UPDATE;*/
-
             IF p_AuctionID IS NULL THEN
                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='No covering auction for this stay';
             END IF;
 
             -- 2) Khóa & kiểm tra lịch subrange
             SELECT Day FROM Calendar
-            WHERE ProductID = v_prod_id AND Day >= p_Start AND Day < p_End
+            WHERE ProductID = v_prod_id AND Day >= p_Start AND Day < p_End AND AuctionID = p_AuctionID
             FOR UPDATE;
 
             IF EXISTS(SELECT 1 FROM Calendar
@@ -2766,28 +2758,31 @@ async function createPlaceBookingFromWinningBidProcedure() {
             START TRANSACTION;
 
             -- 1) Lấy thông tin Bid + Auction, khóa auction để tránh race conditions
-            SELECT
-                B.UserID,
-                B.AuctionID,
-                A.ProductID,
-                B.StartDate,
-                B.EndDate,
-                A.StayPeriodStart,
-                A.StayPeriodEnd
-            INTO
-                v_user_id,
-                v_auction_id,
-                v_product_id,
-                v_start,
-                v_end,
-                v_sp_start,
-                v_sp_end
+            SELECT B.UserID, B.AuctionID, A.ProductID, B.StartDate, B.EndDate, A.StayPeriodStart, A.StayPeriodEnd
+            INTO v_user_id, v_auction_id, v_product_id, v_start, v_end, v_sp_start, v_sp_end
             FROM Bids B
             JOIN Auction A ON A.AuctionID = B.AuctionID
             WHERE B.BidID = p_BidID
             FOR UPDATE;
 
-            -- 2) Xác nhận bid này là winner
+            -- 2.1) Xác nhận trạng thái của phiên đấu giá này là ended
+            IF (SELECT Status FROM Auction WHERE AuctionID = v_auction_id) <> 'ended' THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Auction is not ended yet.';
+            END IF;
+
+            -- 2.2) Khóa & kiểm tra lịch đấu giá
+            SELECT Day FROM Calendar
+            WHERE ProductID = v_product_id AND Day >= v_start AND Day < v_end AND AuctionID = v_auction_id
+            FOR UPDATE;
+
+            IF EXISTS(SELECT 1 FROM Calendar
+                    WHERE ProductID=v_product_id AND Day>=v_start AND Day<v_end
+                        AND NOT ((Status = 'available') OR (Status = 'blocked' AND LockReason = 'auction' AND AuctionID = v_auction_id)
+            )) THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Date range already blocked.';
+            END IF;
+
+            -- 2.3) Xác nhận bid này là winner
             IF (SELECT MaxBidID FROM Auction WHERE AuctionID = v_auction_id) <> p_BidID THEN
                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Bid is not the winning bid of this auction.';
             END IF;
@@ -2805,20 +2800,20 @@ async function createPlaceBookingFromWinningBidProcedure() {
 
             -- 4) Đổi subrange sang reserved
             UPDATE Calendar
-            SET Status='reserved', HoldExpiresAt=p_HoldExpiresAt, BookingID=p_BookingID
+            SET Status='reserved', LockReason='booking_hold', HoldExpiresAt=p_HoldExpiresAt, BookingID=p_BookingID
             WHERE ProductID=v_product_id AND Day>=v_start AND Day<v_end;
 
             -- 5) Trả phần còn lại về available
             UPDATE Calendar
             SET Status='available'
-            WHERE ProductID=v_product_id AND Day>=v_sp_start AND Day<v_start AND AuctionID=p_AuctionID;
+            WHERE ProductID=v_product_id AND Day>=v_sp_start AND Day<v_start AND AuctionID=v_auction_id;
 
             UPDATE Calendar
             SET Status='available'
-            WHERE ProductID=v_product_id AND Day>=v_end AND Day<v_sp_end AND AuctionID=p_AuctionID;
+            WHERE ProductID=v_product_id AND Day>=v_end AND Day<v_sp_end AND AuctionID=v_auction_id;
 
             /*INSERT INTO AuctionEvents(AuctionID, EventType, ActorUserID, BookingID, Note)
-            VALUES(p_AuctionID, 'buy_now', p_UserID, p_BookingID, 'Ended by buy-now (subrange)');*/
+            VALUES(v_auction_id, 'buy_now', p_UserID, p_BookingID, 'Ended by buy-now (subrange)');*/
 
             COMMIT;
         END;

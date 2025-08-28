@@ -91,6 +91,7 @@ function mapApiToView(payload, currentUserId) {
         maxGuests: room?.maxGuests || '1',
         location: `${province}, ${district}`,
         title: room?.Title || room?.name || auction?.Title || '',
+        basePrice: room?.basePrice || 0
     };
 
     // Lịch sử đấu giá
@@ -234,8 +235,6 @@ const AuctionPage = () => {
     const { imagesArr, auctionDetails, roomInfo, fullHistory, personalHistory, title } = viewData;
     const images = imagesArr; // alias cho dễ đọc ở dưới
 
-    console.log('auctioninfo', roomInfo);
-
     return (
         <div className="auction-page-container">
             <Header />
@@ -266,6 +265,7 @@ const AuctionPage = () => {
                         <BiddingForm
                             currentPrice={auctionDetails?.currentPrice}
                             bidIncrement={auctionDetails?.bidIncrement}
+                            basePrice={roomInfo.basePrice}
                             checkin={userCheckin}
                             checkout={userCheckout}
                             status={auctionDetails?.status}

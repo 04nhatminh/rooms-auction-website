@@ -68,6 +68,23 @@ class SystemParametersController {
             });
         }
     }
+
+    static async getPaymentDeadlineTime(req, res) {
+        try {
+            const parameter = await SystemParametersModel.getPaymentDeadlineTime();
+            return res.status(200).json({
+                success: true,
+                data: parameter
+            });
+        } catch (error) {
+            console.error('Error in getPaymentDeadlineTime:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Internal server error',
+                error: error.message
+            });
+        }
+    }
 }
 
 module.exports = SystemParametersController;

@@ -3,7 +3,7 @@ const ProductModel = require('../models/productModel');
 class ProductController {
     static async getFullProductDataByProductId(req, res) {
         const productUID = req.params.UID;
-        console.log('GET /api/room/' + productUID);
+        // console.log('GET /api/room/' + productUID);
 
         try {
             // Fetch all in parallel
@@ -322,12 +322,12 @@ class ProductController {
             
             const offset = (parseInt(page) - 1) * parseInt(limit);
             
-            console.log(`\nsearchProductsByUID - uid: ${uid}, page: ${page}, limit: ${limit}, offset: ${offset}`);
+            // console.log(`\nsearchProductsByUID - uid: ${uid}, page: ${page}, limit: ${limit}, offset: ${offset}`);
             
             const result = await ProductModel.searchProductsByUID(uid, parseInt(limit), offset);
             const { products, total } = result;
             
-            console.log(`Found ${products.length} products matching UID: ${uid}`);
+            // console.log(`Found ${products.length} products matching UID: ${uid}`);
             
             const totalPages = Math.ceil(total / parseInt(limit));
             
@@ -528,7 +528,7 @@ function calculateRating(productReviews) {
     const sumRatings = productReviews.reviews.reduce((sum, review) => sum + review.rating, 0);
     const averageRating = (sumRatings / totalReviews).toFixed(2);
 
-    console.log(`Calculated average rating: ${averageRating} based on ${totalReviews} reviews`);
+    // console.log(`Calculated average rating: ${averageRating} based on ${totalReviews} reviews`);
 
     return averageRating;
 }

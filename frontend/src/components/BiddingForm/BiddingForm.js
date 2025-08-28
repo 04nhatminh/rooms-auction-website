@@ -4,65 +4,94 @@ import auctionApi from '../../api/auctionApi';
 import './BiddingForm.css';
 import DownIcon from '../../assets/down.png';
 
+function formatCurrencyVi(n) {
+    const num = Number(n);
+    if (!Number.isFinite(num)) return '';
+    return num.toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function parseBid(str) {
+    if (!str) return null;
+    const s = String(str).trim();
+    const d = Math.max(s.lastIndexOf(','), s.lastIndexOf('.')); // dấu thập phân là dấu xuất hiện cuối
+    if (d >= 0) {
+        const decSep = s[d];
+        const intPart = s.slice(0, d).replace(/[.,]/g, '');
+        const fracPart = s.slice(d + 1);
+        return parseFloat(intPart + '.' + fracPart);
+    }
+    return parseFloat(s.replace(/[.,]/g, ''));
+}
+function unformatForEdit(s) {
+    if (!s) return '';
+    // vi-VN: "100.000,02" -> "100000.02"; nếu đã là "100000.02" thì giữ nguyên
+    return String(s).includes(',')
+        ? String(s).replace(/\./g, '').replace(',', '.')
+        : String(s);
+}
+
 const BiddingForm = ({
-  currentPrice,
-  bidIncrement,
-  checkin,
-  checkout,
-  status,
-  isEnded, // thêm prop này
-  onChangeDates,
-  onSubmit,
-  onBuyNow,
+    currentPrice,
+    bidIncrement,
+    basePrice,
+    checkin,
+    checkout,
+    stayPeriodStart,
+    stayPeriodEnd,
+    status,
+    isEnded, // thêm prop này
+    onChangeDates,
+    onSubmit,
+    onBuyNow,
 }) => {
-  const [bidValue, setBidValue] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const [ci, setCi] = useState(checkin || '');
-  const [co, setCo] = useState(checkout || '');
-  useEffect(() => { setCi(checkin || ''); }, [checkin]);
-  useEffect(() => { setCo(checkout || ''); }, [checkout]);
+    const [bidValue, setBidValue] = useState('');
+    const [focused, setFocused] = React.useState(false);
+    const [submitting, setSubmitting] = useState(false);
+    const [ci, setCi] = useState(checkin || '');
+    const [co, setCo] = useState(checkout || '');
+    useEffect(() => { setCi(checkin || ''); }, [checkin]);
+    useEffect(() => { setCo(checkout || ''); }, [checkout]);
 
-  // Lấy auctionUid từ URL (fallback nếu không có param đặt tên UID)
-  const { UID } = useParams();
-  const auctionUid =
-      UID || (typeof window !== 'undefined'
-      ? window.location.pathname.split('/').filter(Boolean).pop()
-      : '');
+    // Lấy auctionUid từ URL (fallback nếu không có param đặt tên UID)
+    const { UID } = useParams();
+    const auctionUid =
+        UID || (typeof window !== 'undefined'
+        ? window.location.pathname.split('/').filter(Boolean).pop()
+        : '');
 
-  const numPrice = Number(currentPrice) || 0;
-  const numInc   = Number(bidIncrement) || 0;
-  const suggestedBids = [1,2,3,4].map(k => numPrice + numInc * k);
+    const numPrice = Number(currentPrice) || 0;
+    const numInc   = Number(bidIncrement) || 0;
+    const suggestedBids = [1,2,3,4].map(k => numPrice + numInc * k);
 
-  const handleBidSubmit = async (e) => {
-      e?.preventDefault?.();
-      const amount = Number(String(bidValue).replace(/[^0-9.]/g, ''));
-      const min = numPrice + numInc;
-      if (!Number.isFinite(amount) || amount <= 0) {
-          alert('Vui lòng nhập số hợp lệ.');
-          return;
-      }
-      if (amount < min) {
-          alert(`Giá của bạn phải ≥ ${min.toLocaleString('vi-VN')} đ`);
-          return;
-      }
-      if (!ci || !co) {
-          alert('Vui lòng chọn ngày nhận/trả phòng.');
-          return;
-      }
-      if (new Date(co) <= new Date(ci)) {
-          alert('Ngày trả phòng phải sau ngày nhận phòng.');
-          return;
-      }
+    const handleBidSubmit = async (e) => {
+        e?.preventDefault?.();
+        const amount = parseBid(bidValue);
+        const min = numPrice + numInc;
+        if (!Number.isFinite(amount) || amount <= 0) {
+            alert('Vui lòng nhập số hợp lệ.');
+            return;
+        }
+        if (amount < min) {
+            alert(`Giá của bạn phải ≥ ${min.toLocaleString('vi-VN')} đ`);
+            return;
+        }
+        if (!ci || !co) {
+            alert('Vui lòng chọn ngày nhận/trả phòng.');
+            return;
+        }
+        if (new Date(co) <= new Date(ci)) {
+            alert('Ngày trả phòng phải sau ngày nhận phòng.');
+            return;
+        }
 
-      // lấy userId
-      const userData = JSON.parse(sessionStorage.getItem('userData') || 'null');
-      const userId = userData?.id || userData?.userId;
-      if (!userId) {
-          alert('Bạn cần đăng nhập để đặt giá.');
-          return;
-      }
+        // lấy userId
+        const userData = JSON.parse(sessionStorage.getItem('userData') || 'null');
+        const userId = userData?.id || userData?.userId;
+        if (!userId) {
+            alert('Bạn cần đăng nhập để đặt giá.');
+            return;
+        }
 
-      try {
+        try {
             setSubmitting(true);
             // ưu tiên handler từ AuctionPage để refresh dữ liệu
             if (typeof onSubmit === 'function') {
@@ -88,7 +117,7 @@ const BiddingForm = ({
         const userId = userData?.id || userData?.userId;
         if (!userId) return alert('Bạn cần đăng nhập để thuê ngay.');
 
-        if (!window.confirm('Kết thúc phiên và thuê ngay với khoảng ngày đã chọn?')) return;
+        if (!window.confirm(`Kết thúc phiên và thuê ngay với khoảng ngày đã chọn?\nMức giá thuê ngay trong phiên là ${formatCurrencyVi(basePrice)} VNĐ`)) return;
 
         try {
             setSubmitting(true);
@@ -148,21 +177,44 @@ const BiddingForm = ({
                 </div>
             </div>
             <div className="suggested-bids">
-                {suggestedBids.map((price, index) => (
-                    <button key={index} onClick={() => setBidValue(price) } disabled={isEnded}>
-                        {price.toLocaleString('vi-VN')} đ
+                {suggestedBids.map((price, i) => {
+                    const p = Math.round(price * 100) / 100; // làm tròn 2 chữ số
+                    return (
+                    <button
+                        key={i}
+                        onClick={() => {
+                        // Chọn 1 trong 2 cách, cả hai đều OK vì bidValue là string:
+                        // 1) Hiển thị đã format ngay:
+                        setBidValue(formatCurrencyVi(p));
+                        // 2) Hoặc để raw rồi format khi blur:
+                        // setBidValue(String(p));
+                        }}
+                        disabled={isEnded}
+                    >
+                        {p.toLocaleString('vi-VN')} đ
                     </button>
-                ))}
+                    );
+                })}
             </div>
 
             <div className="bid-input-container">
                 <input
-                    type="text"
-                    value={String(bidValue).replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
-                    onChange={(e) => setBidValue(e.target.value.replace(/[^0-9]/g, ''))}
-                    placeholder={isEnded ? 'Đã kết thúc' : 'Nhập giá của bạn'}
                     className="bid-input"
-                    disabled={isEnded}
+                    type="text"
+                    inputMode="decimal"
+                    value={focused ? unformatForEdit(bidValue) : (bidValue ? formatCurrencyVi(parseBid(bidValue)) : '')}
+                    onChange={(e) => {
+                        // cho phép số + , .
+                        let v = e.target.value.replace(/[^0-9.,]/g, '');
+                        // chỉ giữ 1 dấu thập phân
+                        v = v.replace(/([.,].*?)[.,]/g, '$1');
+                        // giới hạn tối đa 2 số phần thập phân
+                        const m = v.match(/^([^.,]*)([.,]?)(\d{0,2}).*$/);
+                        if (m) v = m[1] + m[2] + m[3];
+                        setBidValue(v); // luôn string
+                    }}
+                    onFocus={() => setFocused(true)}
+                    onBlur={() => setFocused(false)}
                 />
                 <button className="submit-bid-button" onClick={handleBidSubmit} disabled={isEnded || submitting}>
                      {isEnded ? 'Đã kết thúc' : 'Đặt giá'}

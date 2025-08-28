@@ -342,6 +342,7 @@ class AuctionModel {
     // === PLACE BID === (gọi SP PlaceBid — cần start/end)
     static async placeBid({ auctionUid, userId, amount, checkin, checkout }) {
         const conn = await pool.getConnection();
+
         try {
             const a = await this._getAuctionByUID(conn, auctionUid, /*forUpdate*/ false);
             if (!a) throw new Error('Auction not found');
@@ -406,11 +407,40 @@ class AuctionModel {
 
     // === UPDATE STATUS ===
     static async setAuctionEnded(auctionUid) {
-        const [result] = await pool.query(
-            'UPDATE Auction SET Status = ? WHERE AuctionUID = ?',
-            ['ended', auctionUid]
-        );
-        return result.affectedRows > 0;
+        const conn = await pool.getConnection();
+        try {
+            // 1) End auction
+            const [upd] = await conn.query(
+            'UPDATE Auction SET Status = ?, EndTime = NOW(), EndReason = ? WHERE AuctionUID = ?',
+            ['ended', 'natural_end', auctionUid]
+            );
+            if (upd.affectedRows === 0) {
+            return false; // không tìm thấy hoặc không cập nhật được
+            }
+
+            // 2) Lấy winner (MaxBidID). Nếu không có thì kết thúc sớm.
+            const [[row]] = await conn.query(
+            'SELECT MaxBidID FROM Auction WHERE AuctionUID = ?',
+            [auctionUid]
+            );
+            const maxBidId = row?.MaxBidID;
+            if (!maxBidId) {
+                return true;
+            }
+
+            // 3) Gọi SP tạo booking từ bid thắng
+            await conn.query('CALL PlaceBookingFromWinningBid(?, @booking_id, @hold_exp)', [maxBidId]);
+
+            const [[out]] = await conn.query('SELECT @booking_id AS BookingID, @hold_exp AS HoldExpiresAt');
+            // console.log('Winner booking:', out);
+
+            return true;
+        } catch (err) {
+            console.log(err);
+            return false;
+        } finally {
+            conn.release();
+        }
     }
     
     static async getEndingSoonAuctions(limit = 15) {
