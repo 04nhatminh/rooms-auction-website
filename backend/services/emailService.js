@@ -17,7 +17,7 @@ class EmailService {
     async sendVerificationEmail(to, fullName, verificationToken) {
         try {
             // Use environment variable or fallback to localhost:3000
-            const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+            const baseUrl = process.env.CLIENT_ORIGIN || 'http://localhost:3000';
             const verificationUrl = `${baseUrl}/user/verify?token=${verificationToken}`;
             
             const mailOptions = {
@@ -77,7 +77,7 @@ class EmailService {
     // Gửi email reset password
     async sendPasswordResetEmail(to, fullName, resetToken) {
         try {
-            const baseUrl = process.env.CLIENT_ORIGIN|| 'http://localhost:3001';
+            const baseUrl = process.env.CLIENT_ORIGIN || 'http://localhost:3000';
             const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
             
             const mailOptions = {
