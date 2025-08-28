@@ -842,50 +842,32 @@ const AdminAddProductPage = ({ type = 'add', product = null }) => {
       console.log('🔍 Updating with UID:', formData.uid);
       console.log('🔍 Amenities:', formData.amenities);
 
+
       // Call update API (productId, productData)
       const updateResponse = await productApi.updateProduct(formData.uid, productDataToSubmit);
       console.log('Product updated:', updateResponse);
 
-      // Xử lý cập nhật room tour: thêm ảnh mới, đổi tên, xóa ảnh...
-      const updates = [];
-      formData.imageGroups.forEach(group => {
-        // Thêm ảnh mới vào room tour
-        if (group.files && group.files.length > 0) {
-          updates.push({
-            title: group.title,
-            newImages: group.files
-          });
-        }
-        // Đổi tên room tour (nếu có field newTitle)
-        if (group.newTitle && group.newTitle !== group.title) {
-          updates.push({
-            title: group.title,
-            newTitle: group.newTitle
-          });
-        }
-        // Nếu có ảnh cần xóa, đã xử lý ở removeImage
-      });
-      
-      if (updates.length > 0) {
+      // Handle image uploads if there are new images
+      const hasNewImages = formData.imageGroups.some(group => 
+        group.files && group.files.length > 0
+      );
+
+      if (hasNewImages) {
         setUploadingImages(true);
         try {
-          const patchResult = await productApi.patchRoomTours(formData.uid, updates);
-          // Sau khi cập nhật thành công, đồng bộ lại state imageGroups
-          if (patchResult && patchResult.data && Array.isArray(patchResult.data.roomTourImages)) {
-            setFormData(prev => ({
-              ...prev,
-              imageGroups: patchResult.data.roomTourImages.map(rt => ({
-                title: rt.title,
-                images: rt.images || [],
-                imageIds: rt.imageIds || [],
-                files: [],
-                hasExistingImages: true
-              }))
-            }));
-          }
+          // Nếu user chọn thay thế ảnh, xóa tất cả ảnh cũ trước
+          // if (replaceImages) {
+          //   console.log('Deleting old images...');
+          //   await productApi.deleteProductImages(formData.uid);
+          // }
+          
+          // Upload ảnh mới
+          console.log('Uploading new images...');
+          const uploadResult = await uploadAllProductImages(formData.productId, formData.imageGroups);
+          console.log('Upload result:', uploadResult);
         } catch (imageError) {
-          console.error('Image update error:', imageError);
-          alert('Sản phẩm đã được cập nhật nhưng có lỗi khi xử lý room tour/ảnh: ' + imageError.message);
+          console.error('Image upload error:', imageError);
+          alert('Sản phẩm đã được cập nhật nhưng có lỗi khi xử lý ảnh: ' + imageError.message);
         } finally {
           setUploadingImages(false);
         }

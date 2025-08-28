@@ -61,7 +61,7 @@ class ProductModel {
                             JOIN Districts d ON p.DistrictCode = d.DistrictCode
                             WHERE p.UID = ?`;
             const [products] = await pool.execute(query, [productUID]);
-            // console.log(`Fetched product details for ProductID ${productUID}:`, products);
+            console.log(`Fetched product details for ProductID ${productUID}:`, products);
             return products[0]; // Trả về sản phẩm đầu tiên
         } catch (error) {
             console.error('Error fetching product details:', error);
@@ -84,7 +84,7 @@ class ProductModel {
                     pa.ProductID = ?
             `;
             const [amenities] = await pool.execute(query, [productID]);
-            // console.log(`Fetched amenities for ProductID ${productID}:`, amenities);
+            console.log(`Fetched amenities for ProductID ${productID}:`, amenities);
             return amenities;
         } catch (error) {
             console.error('Error fetching product amenities:', error);
@@ -104,8 +104,8 @@ class ProductModel {
 
         // Step 3: Return the MongoDB document
 
-        // console.log(`Found description in MongoDB for ExternalID ${productID}`);
-        // console.log(`Description: ${matchingDoc.Descriptions}`);
+        console.log(`Found description in MongoDB for ExternalID ${productID}`);
+        console.log(`Description: ${matchingDoc.Descriptions}`);
 
         return matchingDoc.Descriptions;
 
@@ -123,9 +123,9 @@ class ProductModel {
 
         // Step 3: Return the MongoDB document
 
-        // console.log(`Found reviews in MongoDB for ExternalID ${productID}`);
+        console.log(`Found reviews in MongoDB for ExternalID ${productID}`);
 
-        // console.log(`Reviews:`, matchingDoc);
+        console.log(`Reviews:`, matchingDoc);
         return matchingDoc;
 
     }
@@ -141,8 +141,8 @@ class ProductModel {
 
         // Step 3: Return the MongoDB document
 
-        // console.log(`Found images in MongoDB for ExternalID ${productID}`);
-        // console.log(`Images: ${matchingDoc.Images}`);
+        console.log(`Found images in MongoDB for ExternalID ${productID}`);
+        console.log(`Images: ${matchingDoc.Images}`);
 
         return matchingDoc.Images || []; // Trả về mảng hình ảnh, nếu không có thì trả về mảng rỗng
 
@@ -159,8 +159,8 @@ class ProductModel {
 
         // Step 3: Return the MongoDB document
 
-        // console.log(`Found room tour images in MongoDB for ExternalID ${productID}`);
-        // console.log(`Room Tour Images: ${matchingDoc.RoomTourItems}`);
+        console.log(`Found room tour images in MongoDB for ExternalID ${productID}`);
+        console.log(`Room Tour Images: ${matchingDoc.RoomTourItems}`);
 
         return matchingDoc.RoomTourItems || []; // Trả về mảng hình ảnh, nếu không có thì trả về mảng rỗng
 
@@ -177,8 +177,8 @@ class ProductModel {
 
         // Step 3: Return the MongoDB document
 
-        // console.log(`Found policies in MongoDB for ExternalID ${productID}`);
-        // console.log(`Policy: ${matchingDoc.Policies}`);
+        console.log(`Found policies in MongoDB for ExternalID ${productID}`);
+        console.log(`Policy: ${matchingDoc.Policies}`);
 
         return matchingDoc.Policies || []; // Trả về mảng hình ảnh, nếu không có thì trả về mảng rỗng
 
@@ -198,7 +198,7 @@ class ProductModel {
                     pr.ProductID = ?
             `;
                 const [provinceName] = await pool.execute(query, [productID]);
-                // console.log(`Fetched product province for ProductID ${productID}:`, provinceName);
+                console.log(`Fetched product province for ProductID ${productID}:`, provinceName);
                 return provinceName[0]; // Trả về sản phẩm đầu tiên
         } catch (error) {
             console.error('Error fetching product province:', error);
@@ -220,7 +220,7 @@ class ProductModel {
                     p.ProductID = ?
             `;
                 const [districtName] = await pool.execute(query, [productID]);
-                // console.log(`Fetched product district for ProductID ${productID}:`, districtName);
+                console.log(`Fetched product district for ProductID ${productID}:`, districtName);
                 return districtName[0]; // Trả về sản phẩm đầu tiên
         } catch (error) {
             console.error('Error fetching product district:', error);
@@ -242,7 +242,7 @@ class ProductModel {
                     p.ProductID = ?
             `;
                 const [property] = await pool.execute(query, [productID]);
-                // console.log(`Fetched product property name for ProductID ${productID}:`, property);
+                console.log(`Fetched product property name for ProductID ${productID}:`, property);
                 return property[0]; // Trả về sản phẩm đầu tiên
         } catch (error) {
             console.error('Error fetching product property name:', error);
@@ -303,7 +303,7 @@ class ProductModel {
             // MySQL stored procedure trả về array of arrays, lấy result set đầu tiên
             const products = Array.isArray(rows[0]) ? rows[0] : rows;
             
-            // console.log('Stored procedure result count:', products.length);
+            console.log('Stored procedure result count:', products.length);
             return products;
             
         } catch (error) {
@@ -469,7 +469,7 @@ class ProductModel {
         }
 
         const uid = this.generateSnowflakeKey();
-        // console.log('Generated UID:', uid);
+        console.log('Generated UID:', uid);
         const now = new Date();
 
         const insertQuery = `
@@ -761,165 +761,57 @@ class ProductModel {
     }
 
     // Cập nhật room tour images (MongoDB) 
-    // static async updateRoomTourImages(productId, roomTourData) {
+    static async updateRoomTourImages(productId, roomTourData) {
+        try {
+            if (!this.mongoDb) {
+                throw new Error('MongoDB connection not available');
+            }
+
+            const collection = this.mongoDb.collection('room_tour_images');
+            
+            // Xóa room tour cũ
+            await collection.deleteOne({ ProductID: productId });
+            
+            // Thêm room tour mới nếu có
+            if (roomTourData && roomTourData.length > 0) {
+                const tourData = {
+                    ProductID: productId,
+                    Source: 'bidstay',
+                    RoomTourItems: roomTourData,
+                    updated_at: new Date()
+                };
+                
+                await collection.insertOne(tourData);
+            }
+            
+            console.log(`Updated room tour for ProductID ${productId}: ${roomTourData?.length || 0} items`);
+        } catch (error) {
+            console.error('Error updating room tour images:', error);
+            throw error;
+        }
+    }
+
+    // Xóa tất cả ảnh cũ của sản phẩm (MongoDB)
+    // static async deleteProductImages(productId) {
     //     try {
     //         if (!this.mongoDb) {
     //             throw new Error('MongoDB connection not available');
     //         }
 
-    //         const collection = this.mongoDb.collection('room_tour_images');
+    //         // Xóa từ collection images
+    //         const imagesCollection = this.mongoDb.collection('images');
+    //         await imagesCollection.deleteOne({ ProductID: productId });
             
-    //         // Xóa room tour cũ
-    //         await collection.deleteOne({ ProductID: productId });
-            
-    //         // Thêm room tour mới nếu có
-    //         if (roomTourData && roomTourData.length > 0) {
-    //             const tourData = {
-    //                 ProductID: productId,
-    //                 Source: 'bidstay',
-    //                 RoomTourItems: roomTourData,
-    //                 updated_at: new Date()
-    //             };
-                
-    //             await collection.insertOne(tourData);
-    //         }
-            
-    //         console.log(`Updated room tour for ProductID ${productId}: ${roomTourData?.length || 0} items`);
+    //         // Xóa từ collection room_tour_images
+    //         const roomTourCollection = this.mongoDb.collection('room_tour_images');
+    //         await roomTourCollection.deleteOne({ ProductID: productId });
+
+    //         console.log(`Deleted all images for ProductID ${productId}`);
     //     } catch (error) {
-    //         console.error('Error updating room tour images:', error);
+    //         console.error('Error deleting product images:', error);
     //         throw error;
     //     }
     // }
-
-    static async ensureImagesDoc(productId) {
-        const col = this.mongoDb.collection('images');
-        await col.updateOne(
-            { ProductID: productId },
-            { $setOnInsert: { ProductID: productId, Source: 'bidstay', Images: [], updated_at: new Date() } },
-            { upsert: true }
-        );
-    }
-
-    static async ensureRoomToursDoc(productId) {
-        const col = this.mongoDb.collection('room_tour_images');
-        await col.updateOne(
-            { ProductID: productId },
-            { $setOnInsert: { ProductID: productId, Source: 'bidstay', RoomTourItems: [], updated_at: new Date() } },
-            { upsert: true }
-        );
-    }
-
-    // images = [{ id, orientation, accessibilityLabel, baseUrl }, ...]
-    static async addOrReplaceImages(productId, images = []) {
-        if (!this.mongoDb) throw new Error('MongoDB connection not available');
-        const col = this.mongoDb.collection('images');
-        await this.ensureImagesDoc(productId);
-
-        const ops = [];
-        for (const img of images) {
-            if (!img || !img.id) continue;
-            // thay thế object theo id (tránh trùng id, cập nhật metadata mới)
-            ops.push(
-            { updateOne: { filter: { ProductID: productId }, update: { $pull: { Images: { id: img.id } } } } },
-            { updateOne: { filter: { ProductID: productId }, update: { $push: { Images: img }, $set: { updated_at: new Date() } } } },
-            );
-        }
-        if (ops.length) await col.bulkWrite(ops, { ordered: false });
-        return { success: true, insertedOrReplaced: Math.ceil(ops.length / 2) };
-    }
-
-    // items: [{ title, imageIds: [...] }, ...]
-    // newImages (optional): [{ id, orientation, accessibilityLabel, baseUrl }, ...]
-    static async addRoomTourItems(productId, items = [], newImages = []) {
-        if (!this.mongoDb) throw new Error('MongoDB connection not available');
-        const toursCol = this.mongoDb.collection('room_tour_images');
-
-        // 1) nếu có ảnh mới -> ghi vào 'images' trước
-        if (Array.isArray(newImages) && newImages.length) {
-            await this.addOrReplaceImages(productId, newImages);
-        }
-
-        // 2) thêm room tours
-        await this.ensureRoomToursDoc(productId);
-        const toInsert = (items || [])
-            .filter(it => it && typeof it.title === 'string' && it.title.trim())
-            .map(it => ({ title: it.title.trim(), imageIds: Array.isArray(it.imageIds) ? it.imageIds.filter(Boolean) : [] }))
-            .filter(it => it.imageIds.length > 0);
-
-        if (!toInsert.length) return { success: true, inserted: 0 };
-
-        await toursCol.updateOne(
-            { ProductID: productId },
-            { $push: { RoomTourItems: { $each: toInsert } }, $set: { updated_at: new Date() } }
-        );
-        return { success: true, inserted: toInsert.length };
-    }
-
-    // update: { title, addImageIds?, removeImageIds?, newTitle?, newImages? }
-    static async updateRoomTourItem(productId, update) {
-        if (!this.mongoDb) throw new Error('MongoDB connection not available');
-        const col = this.mongoDb.collection('room_tour_images');
-        const { title, addImageIds = [], removeImageIds = [], newTitle = null, newImages = [] } = (update || {});
-        const titleFilter = (title || '').trim();
-        if (!titleFilter) throw new Error('title is required');
-
-        // 0) nếu có ảnh mới -> ghi vào 'images' trước
-        if (Array.isArray(newImages) && newImages.length) {
-            await this.addOrReplaceImages(productId, newImages);
-        }
-
-        // 1) add
-        if (addImageIds.length) {
-            await col.updateOne(
-            { ProductID: productId, "RoomTourItems.title": titleFilter },
-            { $addToSet: { "RoomTourItems.$.imageIds": { $each: addImageIds.filter(Boolean) } }, $set: { updated_at: new Date() } }
-            );
-        }
-        // 2) remove
-        if (removeImageIds.length) {
-            await col.updateOne(
-            { ProductID: productId, "RoomTourItems.title": titleFilter },
-            { $pullAll: { "RoomTourItems.$.imageIds": removeImageIds.filter(Boolean) }, $set: { updated_at: new Date() } }
-            );
-        }
-        // 3) rename
-        if (newTitle && newTitle.trim()) {
-            await col.updateOne(
-            { ProductID: productId, "RoomTourItems.title": titleFilter },
-            { $set: { "RoomTourItems.$.title": newTitle.trim(), updated_at: new Date() } }
-            );
-        }
-        // 4) cleanup: xoá group rỗng
-        await col.updateOne(
-            { ProductID: productId },
-            [
-            {
-                $set: {
-                RoomTourItems: {
-                    $filter: {
-                    input: "$RoomTourItems",
-                    as: "it",
-                    cond: { $gt: [ { $size: "$$it.imageIds" }, 0 ] }
-                    }
-                },
-                updated_at: "$$NOW"
-                }
-            }
-            ]
-        );
-
-        return { success: true };
-    }
-
-    static async batchUpdateRoomTours(productId, updates = []) {
-        for (const u of (updates || [])) await this.updateRoomTourItem(productId, u);
-        return { success: true, updated: (updates || []).length };
-    }
-
-
-
-
-
 
     // Gỡ 1 imageId: xóa object trong images.Images và pull imageId khỏi mọi RoomTourItems.imageIds
     static async removeImageIdEverywhere(productId, imageId) {
@@ -931,7 +823,7 @@ class ProductModel {
         // 1) Xóa object ảnh có id = imageId
         await imagesCol.updateOne(
             { ProductID: productId },
-            { $pull: { Images: { id: imageId } }, $set: { updated_at: new Date() } }
+            { $pull: { Images: { id: String(imageId) } }, $set: { updated_at: new Date() } }
         );
 
         // 2) Pull imageId khỏi mọi group
@@ -962,28 +854,76 @@ class ProductModel {
 
     // Xóa 1 RoomTourItem theo title (ưu tiên) hoặc index
     static async removeRoomTourItem(productId, { title, index }) {
-        if (!this.mongoDb) throw new Error('MongoDB connection not available');
+    if (!this.mongoDb) throw new Error('MongoDB connection not available');
 
-        const toursCol = this.mongoDb.collection('room_tour_images');
+    const toursCol  = this.mongoDb.collection('room_tour_images');
+    const imagesCol = this.mongoDb.collection('images');
 
-        if (title && title.trim()) {
-            await toursCol.updateOne(
-            { ProductID: productId },
-            { $pull: { RoomTourItems: { title } }, $set: { updated_at: new Date() } }
-            );
-            return;
+    // Chuẩn hóa kiểu (tránh lệch string/number giữa 2 collection)
+    const pidNum = Number(productId);
+    const pidStr = String(productId);
+
+    // ---------- B1) Xác định item cần xóa & thu imageIds ----------
+    let imageIdsToRemove = [];
+
+    if (title && title.trim()) {
+        // Nếu có thể có nhiều item trùng title, gom tất cả imageIds
+        const doc = await toursCol.findOne(
+        { ProductID: { $in: [productId, pidStr] } },
+        { projection: { RoomTourItems: 1 } }
+        );
+        if (!doc?.RoomTourItems?.length) return;
+
+        const targets = doc.RoomTourItems.filter(it => it?.title === title);
+        if (targets.length === 0) return;
+
+        imageIdsToRemove = targets
+        .flatMap(it => Array.isArray(it.imageIds) ? it.imageIds : [])
+        .map(String);
+
+        // ---------- B2) Xóa item theo title ----------
+        await toursCol.updateOne(
+        { ProductID: { $in: [pidNum, pidStr] } },
+        {
+            $pull: { RoomTourItems: { title } },
+            $currentDate: { updated_at: true }
         }
+        );
 
-        // Fallback theo index: load doc rồi splice và $set
-        const doc = await toursCol.findOne({ ProductID: productId });
-        if (!doc || !Array.isArray(doc.RoomTourItems)) return;
+    } else {
+        // Fallback theo index
+        const doc = await toursCol.findOne(
+        { ProductID: { $in: [pidNum, pidStr] } },
+        { projection: { RoomTourItems: 1 } }
+        );
+        if (!doc?.RoomTourItems?.length) return;
+
         const arr = [...doc.RoomTourItems];
         if (index < 0 || index >= arr.length) return;
-        arr.splice(index, 1);
+
+        const removed = arr.splice(index, 1)[0];
+        imageIdsToRemove = (removed?.imageIds || []).map(String);
+
+        // ---------- B2) Set lại mảng sau khi splice ----------
         await toursCol.updateOne(
-            { ProductID: productId },
-            { $set: { RoomTourItems: arr, updated_at: new Date() } }
+        { ProductID: { $in: [pidNum, pidStr] } },
+        { $set: { RoomTourItems: arr }, $currentDate: { updated_at: true } }
         );
+    }
+
+    // ---------- B3) Xóa các imageIds tương ứng trong collection images ----------
+    if (imageIdsToRemove.length > 0) {
+        // Khử trùng lặp
+        const toRemove = [...new Set(imageIdsToRemove)];
+
+        await imagesCol.updateMany(
+        { ProductID: { $in: [pidNum, pidStr] } /* , Source: 'bidstay' */ },
+        {
+            $pull: { Images: { id: { $in: toRemove } } },
+            $currentDate: { updated_at: true }
+        }
+        );
+    }
     }
 
 }

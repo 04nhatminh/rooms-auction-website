@@ -16,8 +16,6 @@ router.get('/admin/search', verifyToken, ProductController.searchProductsByUID);
 router.post('/admin/add', verifyToken, ProductController.addProduct);
 router.put('/admin/update/:id', verifyToken, ProductController.updateProduct);
 router.delete('/admin/delete/:id', verifyToken, ProductController.deleteProduct);
-router.post('/admin/:id/room-tours', verifyToken, ProductController.addRoomTours);
-router.patch('/admin/:id/room-tours/update-images', verifyToken, ProductController.patchRoomTours);
 router.patch('/admin/:id/images/remove', verifyToken, ProductController.removeOneImage);
 router.patch('/admin/:id/room-tours/remove', verifyToken, ProductController.removeOneRoomTour);
 
