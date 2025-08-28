@@ -147,9 +147,15 @@ const AuctionCard = ({ auction }) => {
 
         <div className="auction-rating">
           <img src={StarOutlineIcon} alt="Star Rating" />
-          <span className="rating-text">
-            {auction?.AverageRating?.toFixed(1)} - {auction.totalReviews} đánh giá
-          </span>
+
+          {auction?.AverageRating == 0 ? (
+            <span className="rating-text">Chỗ ở mới mở</span>
+          ) : (
+            <span className="rating-text">
+              {auction?.AverageRating?.toFixed(1)} - {auction.totalReviews} đánh giá
+            </span>
+          )}
+
         </div>
 
         <p className="auction-price">

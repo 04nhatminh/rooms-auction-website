@@ -18,7 +18,7 @@ const TransactionHistoryPage = () => {
   return (
     <>
       <Header />
-      <main className="max-w-7xl mx-auto px-4 py-8">
+      <main>
         <TransactionHistory title="Lịch sử giao dịch" transactions={transactions} />
       </main>
       <Footer />

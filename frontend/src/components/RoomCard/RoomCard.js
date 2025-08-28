@@ -137,9 +137,15 @@ const RoomCard = ({ product, durationDays = 1, isFavorite: initialIsFavorite = f
 
         <div className="room-rating">
           <img src={StarOutlineIcon} alt="Star Rating" />
-          <span className="rating-text">
-            {(product?.avgRating || product?.AverageRating || 0)?.toFixed(1)} - {product.totalReviews} đánh giá
-          </span>
+          
+          {(product?.avgRating == 0 || product?.AverageRating == 0) ? (
+            <span className="rating-text">Chỗ ở mới mở</span>
+          ) : (
+            <span className="rating-text">
+              {(product?.avgRating || product?.AverageRating || 0)?.toFixed(1)} - {product.totalReviews} đánh giá
+            </span>
+          )}
+
         </div>
 
         <p className="room-price">

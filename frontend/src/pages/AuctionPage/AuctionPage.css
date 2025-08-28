@@ -6,12 +6,12 @@
 }
 
 .auction-main-content {
-    margin: 32px 64px 52px 64px;
+    margin: 28px 64px 52px 64px;
 }
 
 .auction-layout-grid {
     display: flex;
-    gap: 64px;
+    gap: 32px;
     align-items: flex-start;
     width: 100%;
 }
@@ -24,7 +24,7 @@
     flex: 5;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 14.25px;
 }
 
 .auction-info-card {

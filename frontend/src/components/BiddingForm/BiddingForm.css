@@ -123,30 +123,41 @@
     background-color: #c9302c;
 }
 
+.bid-dates {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
 .date-field {
   display: flex;
-  align-items: center;   /* canh giữa theo chiều dọc */
-  width: 100%;           /* cho full width thay vì 51% */
-  margin-bottom: 10px;
+  align-items: center;
+  flex: 1;
+  margin-bottom: 16px;
 }
+
+.date-field:last-child {
+    justify-content: flex-end;
+}
+
 
 .date-field label {
     font-family: Montserrat;
     font-size: 14px;
     font-weight: 500;
-    width: 50%;          /* cố định độ rộng cho label */
-    margin-right: 10px;    /* khoảng cách giữa label và input */
+    margin-right: 8px;
 }
 
 .bidding-form-date-inputs {
-    flex: 1;
+    width: 128px;
     border: 1px solid #B0B0B0;
     border-radius: 8px;
     font-family: Montserrat;
     font-size: 14px;
     font-weight: 500;
-    padding: 4px 5px;
+    padding: 4px 4px;
 }
+
 .bidding-form-date-inputs:focus {
     outline: none;
     border-color: #10B981;

@@ -1,52 +1,57 @@
-/* wrapper căn giữa theo viewport (trừ phần header ~80px, chỉnh nếu khác) */
 .result-wrap {
-  min-height: calc(50vh - 80px);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 16px;
+  min-height: 80vh;
 }
 
-/* thẻ nội dung */
-.result-card {
+.result-card{
   width: 100%;
-  max-width: 560px;
+  max-width: 800px;
+  min-width: 400px;
   background: #fff;
-  padding: 24px;
+  padding: 80px 64px;
   border-radius: 16px;
   box-shadow: 0 6px 24px rgba(0,0,0,.08);
   text-align: center;
 }
 
-/* typography */
 .result-title {
   margin: 12px 0 6px;
+  font-family: Montserrat;
   font-size: 24px;
   font-weight: 700;
   color: #111827;
 }
+
 .result-sub {
   margin: 0 0 12px;
+  font-family: Montserrat;
   color: #4B5563;
   line-height: 1.5;
 }
+
 .result-icon > *{
   display: block;
-  margin: 0 auto;        /* canh giữa ngang */
+  margin: 0 auto;
 }
 
-/* nút */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   height: 40px;
-  padding: 0 16px;
+  padding: 24px 16px;
   border-radius: 10px;
   font-weight: 600;
   cursor: pointer;
   transition: transform .02s ease-in;
+  font-family: Montserrat;
+  font-size: 15px;
+  font-weight: 550;
 }
+
 .btn:active { transform: translateY(1px); }
 
 .btn-primary {
@@ -54,6 +59,11 @@
   color: #fff;
   border: none;
 }
+
+.btn-primary:hover {
+  background: #013742;
+}
+
 .btn-outline {
   background: #fff;
   color: #111827;

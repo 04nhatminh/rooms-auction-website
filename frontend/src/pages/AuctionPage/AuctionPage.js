@@ -4,7 +4,7 @@ import './AuctionPage.css';
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
 import AuctionTitle from '../../components/AuctionTitle/AuctionTitle';
-import ImageGallery from '../../components/ImageGallery/ImageGallery';
+import AuctionImageGallery from '../../components/AuctionImageGallery/AuctionImageGallery';
 import productApi from '../../api/productApi';
 import CountdownTimer from '../../components/CountdownTimer/CountdownTimer';
 import AuctionInfo from '../../components/AuctionInfo/AuctionInfo';
@@ -243,7 +243,7 @@ const AuctionPage = () => {
                 <AuctionTitle title={title} />
                 <div className="auction-layout-grid">
                     <div className="left-column">
-                        <ImageGallery images={images} />
+                        <AuctionImageGallery images={images} />
                     </div>
 
                     <div className="right-column auction-info-card">

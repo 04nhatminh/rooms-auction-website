@@ -227,23 +227,6 @@
   line-height: 1.4;
 }
 
-.result-wrap{
-  min-height: calc(100vh - 80px); /* trừ header */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-}
-.result-card{
-  width: 100%;
-  max-width: 560px;
-  background: #fff;
-  padding: 24px;
-  border-radius: 16px;
-  box-shadow: 0 6px 24px rgba(0,0,0,.08);
-  text-align: center;
-}
-
 .expired-alert{
   margin-top: 8px;
   padding: 8px 12px;

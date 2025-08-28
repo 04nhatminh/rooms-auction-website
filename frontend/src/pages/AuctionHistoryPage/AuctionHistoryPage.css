@@ -1,10 +1,9 @@
 .auction-history-page {
-  max-width: 800px;
   margin: 40px auto;
   background: #fff;
   border-radius: 16px;
-  box-shadow: 5px 5px 16px 16px rgba(0,0,0,0.08);
-  padding: 32px 24px;
+  /* box-shadow: 2px 2px 8px 8px rgba(0,0,0,0.08); */
+  margin: 24px 64px 64px 64px;
 }
 
 .auction-history-page h2 {
@@ -20,20 +19,20 @@
   border-radius: 12px;
   overflow: hidden;
   background: #f9fafb;
-  box-shadow: 0 1px 8px rgba(0,0,0,0.04);
+  box-shadow:  2px 2px 16px 16px rgba(0,0,0,0.02);
 }
 
 .auction-table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  background: #f9fafb;
+  background: #fff;
 }
 
 .auction-table th, .auction-table td {
   padding: 16px 10px;
-  border-bottom: 1.5px solid #e2e8f0;
-  border-right: 1.5px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+  border-right: 1px solid #e2e8f0;
   font-family: Montserrat;
   font-size: 15px;
 }
@@ -41,6 +40,7 @@
 .auction-table th {
   background: #278C9F;
   color: #fff;
+  font-family: Montserrat;
   font-weight: 700;
   font-size: 15px;
   letter-spacing: 0.05em;
@@ -50,11 +50,16 @@
 .auction-table th:first-child,
 .auction-table td:first-child {
   text-align: left;
+  padding-left: 24px;
 }
 
 .auction-table th:last-child,
 .auction-table td:last-child {
   border-right: none;
+}
+
+.auction-table tbody tr:last-child td {
+    border-bottom: none;
 }
 
 .auction-row {
@@ -67,11 +72,12 @@
 }
 
 .win-amount {
+  font-family: Montserrat;
   font-weight: 700;
   color: #10b981;
-  background: #e6fffa;
+  background: #e6ffeb;
   padding: 4px 12px;
-  border-radius: 8px;
+  border-radius: 16px;
   font-size: 15px;
   display: inline-block;
 }

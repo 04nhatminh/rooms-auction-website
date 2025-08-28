@@ -1,19 +1,98 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './AuctionImageGallery.css';
+import { useProduct } from '../../contexts/ProductContext';
 
-const AuctionImageGallery = ({ images }) => {
+function isUrlLike(v) {
+  return typeof v === 'string' && (/^https?:\/\//.test(v) || v.startsWith('data:image'));
+}
+
+function pickUrl(obj) {
+  if (!obj || typeof obj !== 'object') return '';
+  const direct =
+    obj.baseUrl ||      // << your schema
+    obj.url ||
+    obj.image_url ||
+    obj.imageUrl ||
+    obj.picture_url ||
+    obj.pictureUrl ||
+    obj.thumbnail_url ||
+    obj.src ||
+    obj.path || '';
+  if (isUrlLike(direct)) return direct;
+
+  const nested = obj.urls?.original || obj.urls?.large || obj.urls?.medium || obj.urls?.small;
+  if (isUrlLike(nested)) return nested;
+
+  for (const v of Object.values(obj)) {
+    if (isUrlLike(v)) return v;
+  }
+  return '';
+}
+
+function pickAlt(obj, idx) {
+  return obj?.accessibilityLabel || obj?.alt || `Ảnh ${idx + 1}`;
+}
+
+const ImageGallery = ({ images: imagesProp }) => {
+  // const { data } = useProduct();
+  const navigate = useNavigate();
+  const ctx = useProduct?.() ?? null;
+  const data = ctx?.data;
+
+  const raw = imagesProp ?? data?.images ?? data?.Images ?? [];
+
+  // Support both "images" and "Images"
+  // const rawFromCtx = data?.images ?? data?.Images ?? [];
+  // const raw = imagesProp ?? rawFromCtx;
+
+  const images = useMemo(() => {
+    return raw
+      .map((it, i) => {
+        if (typeof it === "string") return { src: it, alt: `Ảnh ${i + 1}` };
+        const src = pickUrl(it);
+        const alt = pickAlt(it, i);
+        return src ? { src, alt } : null;
+      })
+      .filter(Boolean);
+  }, [raw]);
+
+  if (!images.length) {
     return (
-        <div className="auction-image-gallery">
-            <div className="auction-main-image">
-                <img src={images.main} alt="Main room view" />
-            </div>
-            <div className="auction-thumbnail-grid">
-                {images.thumbnails.map((thumb, index) => (
-                    <img key={index} src={thumb} alt={`Thumbnail ${index + 1}`} />
-                ))}
-            </div>
-        </div>
+      <div className="image-gallery empty">
+        <div className="placeholder">Chưa có ảnh</div>
+      </div>
     );
+  }
+
+  const main = images[0];
+  const side = images.slice(1, 3);
+
+  if (!images.length) {
+    return (
+      <div className="image-gallery empty">
+        <div className="placeholder">Chưa có ảnh</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="auction-image-gallery">
+      <div className="auction-gallery-layout">
+        <div className="auction-main-image">
+          <img src={main.src} alt={main.alt} />
+        </div>
+        <div className="auction-side-images">
+          {side.map((img, i) => (
+            <div className="auction-side-image" key={i}>
+              <img src={img.src} alt={img.alt} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 };
 
-export default AuctionImageGallery;
+export default ImageGallery;
+
