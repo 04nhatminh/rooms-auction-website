@@ -2235,6 +2235,11 @@ async function createPlaceBookingDraftProcedure() {
                 RESIGNAL;
             END;
 
+            -- Validate trạng thái tài khoảng người dùng
+            IF (SELECT Status FROM Users WHERE UserID = p_UserID) <> 'active' THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='User account is locked';
+            END IF;
+
             -- Validate ngày
             IF p_End <= p_Start THEN
                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='End>Start required';
@@ -2346,6 +2351,11 @@ async function createCreateAuctionForStayProcedure() {
                 RESIGNAL;
             END;
 
+            -- Validate trạng thái tài khoảng người dùng
+            IF (SELECT Status FROM Users WHERE UserID = p_UserID) <> 'active' THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='User account is locked';
+            END IF;
+
             IF p_End <= p_Start THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='End>Start required'; END IF;
 
             SET v_now = NOW();
@@ -2434,6 +2444,11 @@ async function createCreateAuctionAndInitialBidProcedure() {
 
             IF p_UserID IS NULL THEN
                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='UserID required for initial bid';
+            END IF;
+
+            -- Validate trạng thái tài khoảng người dùng
+            IF (SELECT Status FROM Users WHERE UserID = p_UserID) <> 'active' THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='User account is locked';
             END IF;
 
             SET v_now = NOW();
@@ -2531,6 +2546,11 @@ async function createPlaceBidProcedure() {
             END;
 
             SET v_now = NOW();
+
+            -- Validate trạng thái tài khoảng người dùng
+            IF (SELECT Status FROM Users WHERE UserID = p_UserID) <> 'active' THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='User account is locked';
+            END IF;
 
             IF p_End <= p_Start THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='End>Start required'; END IF;
 
@@ -2653,6 +2673,11 @@ async function createPlaceBookingBuyNowProcedure() {
                 ROLLBACK;
                 RESIGNAL;
             END;
+
+            -- Validate trạng thái tài khoảng người dùng
+            IF (SELECT Status FROM Users WHERE UserID = p_UserID) <> 'active' THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='User account is locked';
+            END IF;
             
             IF p_End <= p_Start THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='End>Start required'; END IF;
             

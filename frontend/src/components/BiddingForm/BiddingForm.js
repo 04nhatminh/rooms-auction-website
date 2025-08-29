@@ -9,6 +9,7 @@ function formatCurrencyVi(n) {
     if (!Number.isFinite(num)) return '';
     return num.toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
+
 function parseBid(str) {
     if (!str) return null;
     const s = String(str).trim();
@@ -21,12 +22,58 @@ function parseBid(str) {
     }
     return parseFloat(s.replace(/[.,]/g, ''));
 }
+
 function unformatForEdit(s) {
     if (!s) return '';
     // vi-VN: "100.000,02" -> "100000.02"; nếu đã là "100000.02" thì giữ nguyên
     return String(s).includes(',')
         ? String(s).replace(/\./g, '').replace(',', '.')
         : String(s);
+}
+
+const toCents  = (n) => Math.round(Number(n) * 100); // number -> int
+
+const fromCents = (c) => c / 100;                     // int -> number
+
+function toLocalDate(dstr) {
+    // dstr: 'YYYY-MM-DD' -> Date local 00:00
+    if (!dstr) return null;
+    const [y, m, d] = dstr.split('-').map(Number);
+    return new Date(y, (m || 1) - 1, d || 1);
+}
+
+function overlapsStay(ciStr, coStr, spStartStr, spEndStr) {
+    // Thiếu dữ liệu phiên -> cho qua (tránh chặn nhầm)
+    if (!spStartStr || !spEndStr) return true;
+    const ci = toLocalDate(ciStr);
+    const co = toLocalDate(coStr);
+    const spS = toLocalDate(spStartStr);
+    const spE = toLocalDate(spEndStr);
+
+    if (!ci || !co || !spS || !spE) return false;
+
+    // Giao theo nửa-mở: [checkin, checkout) ∩ [spS, spE) ≠ ∅
+    return ci < spE && co > spS;
+}
+
+function toDMY(value) {
+    if (!value) return '';
+    // Ưu tiên xử lý thủ công khi là YYYY-MM-DD để tránh lệch timezone
+    if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+        const [y, m, d] = value.split('-');
+        return `${d}/${m}/${y}`;
+    }
+    // Fallback cho Date/ISO khác
+    try {
+        const dt = new Date(value);
+        if (Number.isNaN(dt.getTime())) return String(value);
+        const dd = String(dt.getDate()).padStart(2, '0');
+        const mm = String(dt.getMonth() + 1).padStart(2, '0');
+        const yyyy = dt.getFullYear();
+        return `${dd}/${mm}/${yyyy}`;
+    } catch {
+        return String(value);
+    }
 }
 
 const BiddingForm = ({
@@ -58,20 +105,33 @@ const BiddingForm = ({
         ? window.location.pathname.split('/').filter(Boolean).pop()
         : '');
 
-    const numPrice = Number(currentPrice) || 0;
-    const numInc   = Number(bidIncrement) || 0;
-    const suggestedBids = [1,2,3,4].map(k => numPrice + numInc * k);
+    // const numPrice = Number(currentPrice) || 0;
+    // const numInc   = Number(bidIncrement) || 0;
+    // const suggestedBids = [1,2,3,4].map(k => numPrice + numInc * k);
+
+    // Tính bằng cents để tránh sai số dấu chấm động
+    const priceC = toCents(currentPrice || 0);   // currentPrice -> int
+    const incC   = toCents(bidIncrement || 0);   // bidIncrement -> int
+
+    // Gợi ý giá: quy về number khi hiển thị
+    const suggestedBids = [1,2,3,4].map(k => fromCents(priceC + incC * k));
 
     const handleBidSubmit = async (e) => {
         e?.preventDefault?.();
         const amount = parseBid(bidValue);
-        const min = numPrice + numInc;
+        // const min = numPrice + numInc;
+
         if (!Number.isFinite(amount) || amount <= 0) {
             alert('Vui lòng nhập số hợp lệ.');
             return;
         }
-        if (amount < min) {
-            alert(`Giá của bạn phải ≥ ${min.toLocaleString('vi-VN')} đ`);
+
+        // So sánh bằng cents (int) để tránh .0000001
+        const amountC = toCents(amount);
+        const minC    = priceC + incC;
+
+        if (amountC < minC) {
+            alert(`Giá của bạn phải ≥ ${fromCents(minC).toLocaleString('vi-VN')} đ`);
             return;
         }
         if (!ci || !co) {
@@ -80,6 +140,14 @@ const BiddingForm = ({
         }
         if (new Date(co) <= new Date(ci)) {
             alert('Ngày trả phòng phải sau ngày nhận phòng.');
+            return;
+        }
+        if (!overlapsStay(ci, co, stayPeriodStart, stayPeriodEnd)) {
+            alert(
+                `Khoảng ngày bạn chọn không trùng (một phần hoặc toàn bộ) với khoảng lưu trú của phiên: ` +
+                `${toDMY(stayPeriodStart)} - ${toDMY(stayPeriodEnd)}.\n` +
+                `Hãy chọn khoảng có ít nhất 1 đêm nằm trong khoảng trên.`
+            );
             return;
         }
 
@@ -111,6 +179,15 @@ const BiddingForm = ({
         e?.preventDefault?.();
         if (!ci || !co) return alert('Vui lòng chọn ngày nhận/trả phòng.');
         if (new Date(co) <= new Date(ci)) return alert('Ngày trả phòng phải sau ngày nhận phòng.');
+
+        if (!overlapsStay(ci, co, stayPeriodStart, stayPeriodEnd)) {
+            alert(
+                `Khoảng ngày bạn chọn không trùng (một phần hoặc toàn bộ) với khoảng lưu trú của phiên: ` +
+                `${toDMY(stayPeriodStart)} - ${toDMY(stayPeriodEnd)}.\n` +
+                `Hãy chọn khoảng có ít nhất 1 đêm nằm trong khoảng trên.`
+            );
+            return;
+        }
 
         // yêu cầu đăng nhập giống luồng đặt giá
         const userData = JSON.parse(sessionStorage.getItem('userData') || 'null');

@@ -242,11 +242,12 @@ const BookingCard = () => {
         },
       });
     } catch (e) {
-      console.error(e);
+      // console.error(e);
       setStatus({
         tag: 'soldout',
         level: 'error',
-        message: 'Khoảng thời gian bạn chọn hiện không khả dụng. Vui lòng chọn ngày khác.',
+        // message: 'Khoảng thời gian bạn chọn hiện không khả dụng. Vui lòng chọn ngày khác.',
+        message: `${e?.message || 'Không thể tạo booking.'}`,
       });
     }
   };
@@ -300,8 +301,8 @@ const BookingCard = () => {
 
       const ok = window.confirm(
         `Mở phiên đấu giá trong ${p.durationDays} ngày?\n` +
-        `Giá khởi điểm: ${p.startingPrice.toLocaleString()} ${data?.details?.Currency || 'VND'}\n` +
-        `Bước nhảy: ${p.bidIncrement.toLocaleString()}`
+        `Giá khởi điểm: ${p.startingPrice.toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${data?.details?.Currency || 'VNĐ'}\n` +
+        `Bước nhảy: ${p.bidIncrement.toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${data?.details?.Currency || 'VNĐ'}`
       );
       if (!ok) return;
 
