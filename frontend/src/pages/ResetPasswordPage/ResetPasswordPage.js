@@ -20,10 +20,11 @@ export default function ResetPasswordPage() {
     "Có số (0-9)",
     "Có ký tự đặc biệt (!@#$%^&*)"
   ];
-  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*]).{8,}$/;
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setShowPasswordPopup(false); // Ẩn popup khi submit
     if (!password) {
       setStatus('Vui lòng nhập mật khẩu mới.');
       return;
@@ -57,29 +58,46 @@ export default function ResetPasswordPage() {
     <div className="reset-password-page">
         <div className="reset-password-container">
             <h1>Đặt lại mật khẩu</h1>
-            <form onSubmit={handleSubmit}>
-                <label>Mật khẩu mới:</label>
+            <form onSubmit={handleSubmit} style={{ position: 'relative' }}>
+              <label>Mật khẩu mới:</label>
+              <div style={{ position: 'relative' }}>
                 <input
-                type="password"
-                value={password}
-                onFocus={() => setShowPasswordPopup(true)}
-                onBlur={() => setShowPasswordPopup(false)}
-                onChange={e => setPassword(e.target.value)}
-                required
+                  type="password"
+                  value={password}
+                  onFocus={() => setShowPasswordPopup(true)}
+                  onBlur={() => setShowPasswordPopup(false)}
+                  onChange={e => setPassword(e.target.value)}
+                  required
+                  style={{ width: '100%' }}
                 />
                 {showPasswordPopup && (
-                  <div className="password-popup">
+                  <div
+                    className="password-popup"
+                    style={{
+                      position: 'absolute',
+                      top: '110%',
+                      left: 0,
+                      background: '#fff',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                      padding: '16px',
+                      zIndex: 10,
+                      width: '320px',
+                    }}
+                  >
                     <strong>Yêu cầu mật khẩu:</strong>
-                    <ul>
+                    <ul style={{margin: '8px 0 0 0', padding: 0, listStyle: 'disc inside'}}>
                       {passwordRequirements.map((req, idx) => (
-                        <li key={idx}>{req}</li>
+                        <li key={idx} style={{fontSize: '14px', color: '#374151'}}>{req}</li>
                       ))}
                     </ul>
                   </div>
                 )}
-                <button type="submit" disabled={loading}>
+              </div>
+              <button type="submit" disabled={loading}>
                 {loading ? 'Đang đổi...' : 'Đổi mật khẩu'}
-                </button>
+              </button>
             </form>
             {status && <div style={{ marginTop: 16 }}>{status}</div>}
             <button onClick={() => navigate('/login')}>Quay lại đăng nhập</button>
