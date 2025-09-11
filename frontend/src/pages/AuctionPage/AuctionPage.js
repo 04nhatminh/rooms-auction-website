@@ -23,7 +23,10 @@ function fmtDate(d) {
         const hh = String(date.getHours()).padStart(2, '0');
         const mi = String(date.getMinutes()).padStart(2, '0');
         const ss = String(date.getSeconds()).padStart(2, '0');
-        return { dmy: `${dd}/${mm}/${yyyy}`, hms_dmy: `${hh}:${mi}:${ss} - ${dd}/${mm}/${yyyy}` };
+        return { 
+            dmy: `${dd}/${mm}/${yyyy}`,
+            hms_dmy: `${hh}:${mi}:${ss} - ${dd}/${mm}/${yyyy}`,
+            ymd: `${yyyy}-${mm}-${dd}`, };
     } catch (_) {
         return { dmy: '', hms_dmy: '' };
     }
@@ -39,8 +42,6 @@ function maskBidder(nameOrId) {
 // Map payload từ API sang đúng format UI hiện tại của AuctionPage mock
 function mapApiToView(payload, currentUserId) {
     const { auction = {}, room = {}, fullHistory = [] } = payload?.data || {};
-
-    console.log('room', room);
 
     // Ảnh
     const imagesArr = Array.isArray(room?.Images ?? room?.images)
@@ -62,6 +63,7 @@ function mapApiToView(payload, currentUserId) {
     const auctionDetails = {
         endDate: end ? new Date(end) : undefined,
         stayPeriod: stayStartDMY && stayEndDMY ? `${stayStartDMY} - ${stayEndDMY}` : '',
+        stayPeriodYMD: {stayStartYMD: fmtDate(stayStart).ymd, stayEndYMD: fmtDate(stayEnd).ymd},
         startTime: startFmt,
         endTime: endFmt,
         duration: (() => {
@@ -268,6 +270,8 @@ const AuctionPage = () => {
                             basePrice={roomInfo.basePrice}
                             checkin={userCheckin}
                             checkout={userCheckout}
+                            stayPeriodStart={auctionDetails.stayPeriodYMD.stayStartYMD}
+                            stayPeriodEnd={auctionDetails.stayPeriodYMD.stayEndYMD}
                             status={auctionDetails?.status}
                             isEnded={isEnded}
                             onChangeDates={(ci, co) => { setUserCheckin(ci); setUserCheckout(co); }}
@@ -312,7 +316,7 @@ const AuctionPage = () => {
                                     alert('Thuê ngay thành công! Phiên đã kết thúc.');
                                 } catch (e) {
                                     // Map thông điệp để tránh lộ chi tiết
-                                    let msg = 'Không thể thuê ngay. Vui lòng chọn khoảng thời gian khác.';
+                                    let msg = e?.message || 'Không thể thuê ngay. Vui lòng chọn khoảng thời gian khác.';
                                     const t = e.message || '';
                                     if (t.includes('giữ/chặn') || t.includes('trùng lịch')) {
                                         msg = 'Khoảng thời gian bạn chọn hiện không khả dụng. Vui lòng chọn ngày khác.';

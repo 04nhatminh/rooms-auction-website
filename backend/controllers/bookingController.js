@@ -65,6 +65,9 @@ class BookingController {
       if (msg.includes('End>Start required')) {
         return res.status(400).json({ ok: false, message: 'checkout phải lớn hơn checkin' });
       }
+      if (msg.includes('User account is locked')) {
+        return res.status(423).json({ ok: false, message: 'Tài khoản người dùng hiện đang bị khóa' });
+      }
 
       // default
       return res.status(409).json({ ok: false, message: 'Không thể tạo giữ chỗ/đơn' });

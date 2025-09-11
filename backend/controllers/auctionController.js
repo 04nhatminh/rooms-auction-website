@@ -165,6 +165,9 @@ class AuctionController {
                 return res.status(409).json({ success:false, message:'Chưa đủ thời gian mở phiên' });
             if (m.includes('Date range not free') || m.includes('Active auction'))
                 return res.status(409).json({ success:false, message:'Đã có phiên trùng khoảng lưu trú' });
+            if (m.includes('User account is locked')) {
+                return res.status(423).json({ success:false, message: 'Tài khoản người dùng hiện đang bị khóa' });
+            }
             console.log(m);
             return res.status(500).json({ success:false, message:'Không thể tạo phiên' });
         }
@@ -214,6 +217,9 @@ class AuctionController {
                 return res.status(409).json({ success:false, message:'Khoảng ngày bạn chọn xung đột lịch' });
             if (m.includes('Stay start too soon'))
                 return res.status(409).json({ success:false, message:'Thời gian lưu trú quá sớm so với quy định đấu giá' });
+            if (m.includes('User account is locked')) {
+                return res.status(423).json({ success:false, message: 'Tài khoản người dùng hiện đang bị khóa' });
+            }
             return res.status(500).json({ success:false, message:'Đặt giá thất bại' });
         }
     }
@@ -258,6 +264,9 @@ class AuctionController {
             }
             if (m.includes('booking not created') || m.includes('BuyNow failed')) {
                 return res.status(500).json({ success:false, message:'Không thể tạo booking. Vui lòng thử lại.' });
+            }
+            if (m.includes('User account is locked')) {
+                return res.status(423).json({ success:false, message: 'Tài khoản người dùng hiện đang bị khóa' });
             }
 
             // Mặc định

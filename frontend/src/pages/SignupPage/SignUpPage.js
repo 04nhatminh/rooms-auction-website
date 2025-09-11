@@ -7,6 +7,9 @@ import viewIcon from '../../assets/view.png';
 import downIcon from '../../assets/down.png';
 import backgroundImage from '../../assets/login_bg.jpg';
 
+const API_BASE_URL =
+  (process.env.REACT_APP_API_BASE_URL?.replace(/\/$/, '')) || 'http://localhost:3000';
+
 const SignUp = () => {
   const [showPasswordPopup, setShowPasswordPopup] = useState(false);
   const navigate = useNavigate();
@@ -80,7 +83,7 @@ const SignUp = () => {
     setIsLoading(true);
     
     try {
-      const response = await fetch('http://localhost:3000/user/register', {
+      const response = await fetch(`${API_BASE_URL}/user/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

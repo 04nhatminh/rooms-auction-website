@@ -189,8 +189,8 @@ class AuctionModel {
             const leadOk = daysBetween(today, start) >= Number(params.BidLeadTimeDays ?? 0);
             const base = Number(p.Price || 0);
             
-            const startingPrice = roundTo(base * Number(params.StartPriceFactor ?? 0.7), 1000);
-            const bidIncrement  = Math.max(roundTo(base * Number(params.BidIncrementFactor ?? 0.05), 1000), 1000);
+            const startingPrice = base * Number(params.StartPriceFactor ?? 0.7);
+            const bidIncrement  = Math.max(base * Number(params.BidIncrementFactor ?? 0.05), 15000);
 
             return {
                 eligible: leadOk,
