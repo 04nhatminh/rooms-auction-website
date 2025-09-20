@@ -65,7 +65,6 @@ class BookingModel {
                           WHERE b.BookingID = ?`;
 
             const [bookings] = await db.query(query, [bookingID]);
-            console.log(`Fetched booking details for ${bookingID}:`, bookings);
             return bookings[0] || null;
 
         } catch (error) {
@@ -83,16 +82,12 @@ class BookingModel {
                 console.error(`Booking ${bookingID} not found or already paid`);
                 throw new Error(`Booking ${bookingID} not found or already paid`);
             }
-            console.log(`Updating booking paid status for ${bookingID} with methodID ${methodID}`);
 
             const query =   `UPDATE Booking
                         SET PaymentMethodID = ?, PaidAt = NOW(), BookingStatus = 'completed', UpdatedAt = NOW()
                         WHERE BookingID = ?`;
            
             await db.query(query, [methodID, bookingID]);
-
-            console.log(`Updated booking paid successfully`);
-
         } catch (error) {
             console.error ('Error updating booking paid:', error)
             throw error;
@@ -148,7 +143,6 @@ class BookingModel {
                 console.error(`Booking ${bookingID} not found or already paid`);
                 throw new Error(`Booking ${bookingID} not found or already paid`);
             }
-            console.log(`Updating booking paid status for ${bookingID}`);
 
             const query =   `UPDATE Booking
                             SET  BookingStatus = 'cancelled', UpdatedAt = NOW()
@@ -168,8 +162,6 @@ class BookingModel {
                                 AND b.BookingID = ?;`;
            
             await db.query(query, [bookingID, bookingID]);
-
-            console.log(`Updated booking cancelled successfully`);
 
         } catch (error) {
             console.error ('Error cancelling booking paid:', error)

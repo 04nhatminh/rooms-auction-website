@@ -81,7 +81,6 @@ class ReviewController {
                 });
             }
 
-            console.log(`Processing batch reviews request for ${productIds.length} productIds`);
             const reviewsMap = await ReviewModel.getBatchTotalReviews(productIds);
 
             const reviewsMapByUID = {};

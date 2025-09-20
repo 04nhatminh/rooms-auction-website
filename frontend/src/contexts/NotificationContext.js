@@ -19,7 +19,7 @@ export function NotificationProvider({ children }) {
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/user/notifications`, {
+        const res = await fetch(`${process.env.BASE_URL}/user/notifications`, {
           credentials: 'include'
         });
         const data = await res.json();
@@ -31,7 +31,7 @@ export function NotificationProvider({ children }) {
             if (n.Type === 'win') showNoti('Chúc mừng! Bạn đã thắng phiên đấu giá.', 'success');
             else if (n.Type === 'lose') showNoti('Rất tiếc! Bạn đã không thắng phiên đấu giá.', 'failed');
             // Đánh dấu đã đọc (gọi API)
-            fetch(`${process.env.REACT_APP_API_BASE_URL}/user/notifications/${n.NotificationID}/read`, {
+            fetch(`${process.env.BASE_URL}/user/notifications/${n.NotificationID}/read`, {
               method: 'POST',
               credentials: 'include'
             });

@@ -84,7 +84,6 @@ class ImageController {
                 });
             }
 
-            console.log(`Processing batch image request for ${productIds.length} ProductIDs`);
             const imageMap = await ImageModel.getBatchFirstImages(productIds);
 
             const imagesMapByUID = {};

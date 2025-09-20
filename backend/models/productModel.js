@@ -21,7 +21,6 @@ class ProductModel {
             const mongoUri = process.env.MONGODB_URI || 'mongodb+srv://11_a2airbnb:anhmanminhnhu@cluster0.cyihew1.mongodb.net/';
             const client = await MongoClient.connect(mongoUri);
             this.mongoDb = client.db('a2airbnb');
-            console.log('MongoDB connected successfully');
         } catch (err) {
             console.error("MongoDB connection failed:", err);
         }
@@ -61,7 +60,6 @@ class ProductModel {
                             JOIN Districts d ON p.DistrictCode = d.DistrictCode
                             WHERE p.UID = ?`;
             const [products] = await pool.execute(query, [productUID]);
-            console.log(`Fetched product details for ProductID ${productUID}:`, products);
             return products[0]; // Trả về sản phẩm đầu tiên
         } catch (error) {
             console.error('Error fetching product details:', error);
@@ -84,7 +82,6 @@ class ProductModel {
                     pa.ProductID = ?
             `;
             const [amenities] = await pool.execute(query, [productID]);
-            console.log(`Fetched amenities for ProductID ${productID}:`, amenities);
             return amenities;
         } catch (error) {
             console.error('Error fetching product amenities:', error);
@@ -93,45 +90,28 @@ class ProductModel {
     }
 
     static async getProductDescription(productID) {
-
-        // Step 2: Fetch matching document from MongoDB
         const collection = this.mongoDb.collection('descriptions');
         const matchingDoc = await collection.findOne({ ProductID: productID });
 
         if (!matchingDoc) {
-        return { success: false, message: 'No description found in MongoDB' };
+            return { success: false, message: 'No description found in MongoDB' };
         }
 
-        // Step 3: Return the MongoDB document
-
-        console.log(`Found description in MongoDB for ExternalID ${productID}`);
-        console.log(`Description: ${matchingDoc.Descriptions}`);
-
         return matchingDoc.Descriptions;
-
     }
 
     static async getProductReviews(productID) {
-
-        // Step 2: Fetch matching document from MongoDB
         const collection = this.mongoDb.collection('reviews');
         const matchingDoc = await collection.findOne({ ProductID: productID });
 
         if (!matchingDoc) {
-        return { success: false, message: 'No reviews found in MongoDB' };
+            return { success: false, message: 'No reviews found in MongoDB' };
         }
 
-        // Step 3: Return the MongoDB document
-
-        console.log(`Found reviews in MongoDB for ExternalID ${productID}`);
-
-        console.log(`Reviews:`, matchingDoc);
         return matchingDoc;
-
     }
 
     static async getProductImages(productID) {
-        // Step 2: Fetch matching document from MongoDB
         const collection = this.mongoDb.collection('images');
         const matchingDoc = await collection.findOne({ ProductID: productID });
 
@@ -139,17 +119,10 @@ class ProductModel {
         return { success: false, message: 'No images found in MongoDB' };
         }
 
-        // Step 3: Return the MongoDB document
-
-        console.log(`Found images in MongoDB for ExternalID ${productID}`);
-        console.log(`Images: ${matchingDoc.Images}`);
-
         return matchingDoc.Images || []; // Trả về mảng hình ảnh, nếu không có thì trả về mảng rỗng
-
     }
 
     static async getRoomTourImages(productID) {
-        // Step 2: Fetch matching document from MongoDB
         const collection = this.mongoDb.collection('room_tour_images');
         const matchingDoc = await collection.findOne({ ProductID: productID });
 
@@ -157,31 +130,18 @@ class ProductModel {
             return { success: false, message: 'No room tour images found in MongoDB' };
         }
 
-        // Step 3: Return the MongoDB document
-
-        console.log(`Found room tour images in MongoDB for ExternalID ${productID}`);
-        console.log(`Room Tour Images: ${matchingDoc.RoomTourItems}`);
-
         return matchingDoc.RoomTourItems || []; // Trả về mảng hình ảnh, nếu không có thì trả về mảng rỗng
-
     }
 
     static async getProductPolicies(productID) {
-        // Step 2: Fetch matching document from MongoDB
         const collection = this.mongoDb.collection('policies');
         const matchingDoc = await collection.findOne({ ProductID: productID });
 
         if (!matchingDoc) {
-        return { success: false, message: 'No policies found in MongoDB' };
+            return { success: false, message: 'No policies found in MongoDB' };
         }
 
-        // Step 3: Return the MongoDB document
-
-        console.log(`Found policies in MongoDB for ExternalID ${productID}`);
-        console.log(`Policy: ${matchingDoc.Policies}`);
-
         return matchingDoc.Policies || []; // Trả về mảng hình ảnh, nếu không có thì trả về mảng rỗng
-
     }
 
     static async getProductProvinceName(productID) 
@@ -198,7 +158,6 @@ class ProductModel {
                     pr.ProductID = ?
             `;
                 const [provinceName] = await pool.execute(query, [productID]);
-                console.log(`Fetched product province for ProductID ${productID}:`, provinceName);
                 return provinceName[0]; // Trả về sản phẩm đầu tiên
         } catch (error) {
             console.error('Error fetching product province:', error);
@@ -220,7 +179,6 @@ class ProductModel {
                     p.ProductID = ?
             `;
                 const [districtName] = await pool.execute(query, [productID]);
-                console.log(`Fetched product district for ProductID ${productID}:`, districtName);
                 return districtName[0]; // Trả về sản phẩm đầu tiên
         } catch (error) {
             console.error('Error fetching product district:', error);
@@ -242,7 +200,6 @@ class ProductModel {
                     p.ProductID = ?
             `;
                 const [property] = await pool.execute(query, [productID]);
-                console.log(`Fetched product property name for ProductID ${productID}:`, property);
                 return property[0]; // Trả về sản phẩm đầu tiên
         } catch (error) {
             console.error('Error fetching product property name:', error);
@@ -302,8 +259,7 @@ class ProductModel {
             
             // MySQL stored procedure trả về array of arrays, lấy result set đầu tiên
             const products = Array.isArray(rows[0]) ? rows[0] : rows;
-            
-            console.log('Stored procedure result count:', products.length);
+
             return products;
             
         } catch (error) {
@@ -469,7 +425,6 @@ class ProductModel {
         }
 
         const uid = this.generateSnowflakeKey();
-        console.log('Generated UID:', uid);
         const now = new Date();
 
         const insertQuery = `
@@ -661,8 +616,6 @@ class ProductModel {
         if (houseRules.length > 0 || safetyProps.length > 0) {
             await this.updateProductPolicies(productId, houseRules, safetyProps);
         }
-
-        console.log(`Product ${uid} updated successfully`);
     }
 
     static async findProductIdByUID(uid) {
@@ -685,8 +638,6 @@ class ProductModel {
                 const insertQuery = 'INSERT INTO ProductAmenities (ProductID, AmenityID) VALUES ?';
                 await pool.query(insertQuery, [insertValues]);
             }
-            
-            console.log(`Updated amenities for ProductID ${productId}: ${amenityIds.length} items`);
         } catch (error) {
             console.error('Error updating product amenities:', error);
             throw error;
@@ -701,7 +652,6 @@ class ProductModel {
             }
 
             const collection = this.mongoDb.collection('descriptions');
-            console.log(`Updating descriptions for ProductID ${productId}: ${descriptions.length} items`);
 
             // Xóa descriptions cũ
             await collection.deleteOne({ ProductID: productId });
@@ -720,8 +670,6 @@ class ProductModel {
                 
                 await collection.insertOne(descriptionsData);
             }
-            
-            console.log(`Updated descriptions for ProductID ${productId}: ${descriptions.length} items`);
         } catch (error) {
             console.error('Error updating product descriptions:', error);
             throw error;
@@ -752,8 +700,6 @@ class ProductModel {
             };
             
             await collection.insertOne(policiesData);
-            
-            console.log(`Updated policies for ProductID ${productId}: ${houseRules.length} house rules, ${safetyProperties.length} safety properties`);
         } catch (error) {
             console.error('Error updating product policies:', error);
             throw error;
@@ -783,8 +729,6 @@ class ProductModel {
                 
                 await collection.insertOne(tourData);
             }
-            
-            console.log(`Updated room tour for ProductID ${productId}: ${roomTourData?.length || 0} items`);
         } catch (error) {
             console.error('Error updating room tour images:', error);
             throw error;
@@ -805,8 +749,6 @@ class ProductModel {
     //         // Xóa từ collection room_tour_images
     //         const roomTourCollection = this.mongoDb.collection('room_tour_images');
     //         await roomTourCollection.deleteOne({ ProductID: productId });
-
-    //         console.log(`Deleted all images for ProductID ${productId}`);
     //     } catch (error) {
     //         console.error('Error deleting product images:', error);
     //         throw error;

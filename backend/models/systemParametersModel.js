@@ -8,7 +8,6 @@ class SystemParametersModel {
                 FROM SystemParameters
             `;
             const [parameters] = await pool.execute(query);
-            console.log(`Fetched system parameters:`, parameters);
             return parameters;
         } catch (error) {
             console.error('Error fetching system parameters:', error);
@@ -24,7 +23,6 @@ class SystemParametersModel {
                 WHERE ParamName = ?
             `;
             const [result] = await pool.execute(query, [paramValue, paramName]);
-            console.log(`Updated parameter ${paramName} with value:`, paramValue);
             return result;
         } catch (error) {
             console.error('Error updating system parameter:', error);

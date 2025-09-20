@@ -20,8 +20,6 @@ class CalendarController {
             const conflict = await calendarModel.isRangeAvailable(productId, checkin, checkout);
             const days = await calendarModel.getRange(productId, checkin, checkout);
 
-            console.log(days);
-
             // phát hiện auction trong khoảng
             const dayHasAuction = Array.isArray(days) && days.find(d => d.AuctionID);
             // ưu tiên lấy từ conflict.auction (nếu model có trả), fallback từ days[]

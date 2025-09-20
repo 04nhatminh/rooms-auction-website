@@ -1,6 +1,6 @@
 // src/controllers/checkout.controller.js
-const BASE_URL = process.env.FRONTEND_URL || 'https://9652ce827ae8.ngrok-free.app '; //frontend
-const BACKEND_URL = process.env.BACKEND_URL || 'https://9c379e4a5fdc.ngrok-free.app'; //backend
+const BASE_URL = process.env.FRONTEND_URL || 'https://3119da295461.ngrok-free.app '; //frontend
+const BACKEND_URL = process.env.BACKEND_URL || 'https://c6c98d281916.ngrok-free.app'; //backend
 const PaypalService = require('../services/paypalService');
 const ZaloPayService = require('../services/zalopayService');
 const BookingModel = require('../models/bookingModel');
@@ -16,13 +16,6 @@ class CheckoutController {
    */  
 
   static async getBookingDetails(req, res) {
-      console.log(
-      '[getBookingDetails] URL=%s  method=%s',
-      req.originalUrl,
-      req.method
-    );
-    console.log('[getBookingDetails] params=%o  query=%o', req.params, req.query);
-
     const bookingId = req.params.bookingId;
     if(!bookingId) {
       return res.status(400).json({error: 'bookingId is required'});
@@ -149,8 +142,6 @@ class CheckoutController {
       // 1) Capture — yêu cầu VAULT tại đây (saveMethod = true)
       const cap = await PaypalService.captureOrder(bookingId, orderID, /* saveMethod */ false);
 
-      console.log('Paypal capture result:', cap);
-
       // if (cap.status !== 'APPROVED') {
       //   return res.status(400).json({ 
       //     ok: false, 
@@ -237,10 +228,6 @@ class CheckoutController {
 
         // Ensure amount is an integer for VND (no decimal places)
         const amountVND = Math.round(amount);
-        
-        console.log('[ZP createOrder] bookingId:', bookingId);
-        console.log('[ZP createOrder] amount:', amountVND);
-        console.log('[ZP createOrder] userId:', booking.UserID);
 
         // 1) Tạo/đọc sẵn method ZaloPay cho user này (idempotent)
         const methodId = await PaymentMethodModel.upsertZaloPayMethod(booking.UserID);
@@ -255,9 +242,6 @@ class CheckoutController {
         const returnUrl = `${BASE_URL}/checkout/zalopay/return?bookingId=${bookingId}`;
         const callbackUrl = `${BACKEND_URL}/api/checkout/webhooks/zalopay`;
 
-        console.log('[ZP createOrder] returnUrl =', returnUrl);
-        console.log('[ZP createOrder] callbackUrl =', callbackUrl);
-
         const zaloOrder = await ZaloPayService.createOrder({
           bookingId,
           amount: amountVND,
@@ -269,8 +253,6 @@ class CheckoutController {
           // service sẽ JSON.stringify embed_data, ở đó có {redirecturl, bookingId, methodId}
           methodId
         });
-
-        console.log('[ZP createOrder] created:', zaloOrder);
 
         return res.json({ ok:true, zalo: zaloOrder });
       } catch (err) {
@@ -309,12 +291,8 @@ class CheckoutController {
    */
     static async webhookZaloPay(req, res) {
     try {
-      console.log('[ZP webhook] CT=', req.headers['content-type']);
-      console.log('[ZP webhook] BODY=', req.body);
-
       // 1) Verify MAC bằng KEY2
       const { verified, data } = ZaloPayService.verifyCallback(req.body);
-      console.log('[ZP webhook] verified =', verified);
       if (!verified) {
         return res.json({ return_code: -1, return_message: 'mac not matched' });
       }
@@ -340,7 +318,6 @@ class CheckoutController {
           try {
             // Query trạng thái bằng KEY1
             const q = await ZaloPayService.queryOrder(appTransId);
-            console.log('[ZP post-ack query]', q);
 
             const ok = Number(q?.return_code) === 1 || q?.is_success === true;
             const zpTid = captureId || q?.zp_trans_id;
@@ -368,11 +345,7 @@ class CheckoutController {
       }
 
       // --- FINAL IPN: có return_code ---
-      console.log('Final callback');
       const success = Number(data.return_code) === 1 || data?.is_success === true;
-      console.log('[ZP webhook] final callback: return_code=%s success=%s', data.return_code, success);
-
-      console.log('BookingId in webhook:', bookingId);
       const booking = await BookingModel.findBookingById(bookingId);
       if (!booking) {
         return res.json({ return_code: 2, return_message: 'booking not found' });
@@ -405,8 +378,6 @@ class CheckoutController {
 
       // 2) Rút bookingId từ app_trans_id: yymmdd_<bookingId>_<rand>
       const bookingId = appTransId.split('_')[1];
-
-      console.log('[ZP query] result for bookingId=%s :', bookingId, qr);
 
       // 3) Nếu thanh toán thành công -> cập nhật DB (idempotent theo zp_trans_id)
       if (Number(qr.return_code) === 1) {

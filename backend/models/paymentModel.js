@@ -13,7 +13,6 @@ class PaymentModel {
          VALUES (?, ?, ?, ?, ?, NULL, 'initiated')`,
         [bookingID, userID, amount, currency, provider]
       );
-      console.log(`Inserted initiated payment for BookingID: ${bookingID}, UserID: ${userID}`);
       return { success: true };
     } catch (error) {
       console.error('Error inserting initiated payment:', error);
@@ -29,7 +28,6 @@ class PaymentModel {
   static async updateCapturedByBooking(bookingID,  captureId) {
     const conn = await pool.getConnection();
     try {
-      console.log(`Marked payment as captured for BookingID ${bookingID}, CaptureID: ${captureId}`);
       await conn.beginTransaction();
 
       // Find most recent payment that is not finalized yet
@@ -49,7 +47,6 @@ class PaymentModel {
       }
 
       const paymentID = rows[0].PaymentID
-      console.log(`PaymentID for ${bookingID}:`, paymentID)
 
       await conn.query(
         `UPDATE Payments 
@@ -59,7 +56,6 @@ class PaymentModel {
       );
 
       await conn.commit();
-      console.log(`Marked payment as captured for BookingID ${bookingID}, CaptureID: ${captureId}`);
       return { success: true };
     } catch (error) {
       await conn.rollback();

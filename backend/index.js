@@ -9,7 +9,7 @@ const { autoEndAuctions } = require('./services/auctionScheduler');
 const app = express();
 const PORT = process.env.APP_PORT || 3000;const CLIENT_ORIGIN = [
   process.env.CLIENT_ORIGIN || 'http://localhost:3001',
-  'https://9652ce827ae8.ngrok-free.app'
+  'https://3119da295461.ngrok-free.app'
 ];
 
 

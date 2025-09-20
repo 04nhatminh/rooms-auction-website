@@ -234,9 +234,6 @@ class UserModel {
             limit = parseInt(limit);
             offset = parseInt(offset);
 
-            console.log('Limit:', limit, 'Type:', typeof limit);
-            console.log('Offset:', offset, 'Type:', typeof offset);
-
             const sql = `
             SELECT UserID, FullName, Email, PhoneNumber, AvatarURL, IsVerified, Role, Rating, CreatedAt, UpdatedAt 
             FROM Users 

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import './RoomCard.css';
 import LocationIcon from '../../assets/location.png';
 import StarOutlineIcon from '../../assets/star_outline.png';
@@ -10,7 +9,6 @@ import favoriteFilledIcon from '../../assets/favorite_filled.png';
 import FavoritesApi from '../../api/favoritesApi';
 
 const RoomCard = ({ product, durationDays = 1, isFavorite: initialIsFavorite = false }) => {
-  const navigate = useNavigate();
   const defaultImage = PlaceHolderImg;
   const [isFavorite, setIsFavorite] = useState(initialIsFavorite);
   const [loadingFavorite, setLoadingFavorite] = useState(false);
@@ -58,19 +56,9 @@ const RoomCard = ({ product, durationDays = 1, isFavorite: initialIsFavorite = f
     return `${productType} tại ${location}`;
   };
 
-  // Xử lý sự kiện click vào card
-  const handleCardClick = () => {
-    if (product) {
-      const roomId = product.UID;
-      if (roomId) {
-        navigate(`/room/${roomId}`);
-        window.scrollTo(0, 0);
-      }
-    }
-  };
-
   // Toggle favorite
   const handleToggleFavorite = async (e) => {
+    e.preventDefault();
     e.stopPropagation();
     if (loadingFavorite) return;
     if (!product?.UID) {
@@ -94,8 +82,15 @@ const RoomCard = ({ product, durationDays = 1, isFavorite: initialIsFavorite = f
     }
   };
 
+  const roomId = product?.UID;
+
   return (
-    <div className="room-card" onClick={handleCardClick}>
+    <a 
+      href={roomId ? `/room/${roomId}` : '#'} 
+      className="room-card" 
+      style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
+      onClick={() => window.scrollTo(0, 0)}
+    >
       <div className="room-card-image-container" style={{ position: 'relative' }}>
         <img
           src={
@@ -155,7 +150,7 @@ const RoomCard = ({ product, durationDays = 1, isFavorite: initialIsFavorite = f
         </p>
 
       </div>
-    </div>
+    </a>
   );
 };
 

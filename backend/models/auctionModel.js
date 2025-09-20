@@ -77,7 +77,6 @@ class AuctionModel {
                 JOIN Bids b ON a.AuctionID = b.AuctionID AND a.MaxBidID = b.BidID
                 WHERE a.AuctionID = ?`;
             const [rows] = await pool.query(query, [auctionID]);
-            console.log(`Fetched auction details for AuctionID ${auctionID}:`, rows);
             return rows[0] || null;
         } catch (error) {
             console.error('Error fetching auction details:', error);
@@ -116,7 +115,6 @@ class AuctionModel {
                 WHERE p.ProvinceCode = ? AND a.Status = ?
                 LIMIT ?`;
             const [rows] = await pool.query(query, [provinceCode, status, Number(limit)]);
-            console.log(`Fetched auctions for ProvinceCode ${provinceCode} and Status ${status}:`, rows);
             return rows;
         } catch (error) {
             console.error('Error fetching auctions by province:', error);
@@ -155,7 +153,6 @@ class AuctionModel {
                 WHERE p.DistrictCode = ? AND a.Status = ?
                 LIMIT ?`;
             const [rows] = await pool.query(query, [districtCode, status, Number(limit)]);
-            console.log(`Fetched auctions for DistrictCode ${districtCode} and Status ${status}:`, auctions);
             return rows;
         } catch (error) {
             console.error('Error fetching auctions by district:', error);
@@ -378,8 +375,6 @@ class AuctionModel {
         try {
             const a = await this._getAuctionByUID(conn, auctionUid, /*forUpdate*/ false);
             if (!a) throw new Error('Auction not found');
-
-            console.log(a);
            
             const ci = toDateStr(checkin);
             const co = toDateStr(checkout);
@@ -432,7 +427,6 @@ class AuctionModel {
             await conn.query('CALL PlaceBookingFromWinningBid(?, @booking_id, @hold_exp)', [maxBidId]);
 
             const [[out]] = await conn.query('SELECT @booking_id AS BookingID, @hold_exp AS HoldExpiresAt');
-            // console.log('Winner booking:', out);
 
             return true;
         } catch (err) {
@@ -482,7 +476,6 @@ class AuctionModel {
                 LIMIT ${safeLimit}
             `;
             const [auctions] = await pool.execute(query);
-            console.log(`Fetched ending soon auctions:`, auctions);
             return auctions;
         } catch (error) {
             console.error('Error fetching ending soon auctions:', error);
@@ -535,7 +528,6 @@ class AuctionModel {
                 LIMIT ${safeLimit}
             `;
             const [auctions] = await pool.execute(query);
-            console.log(`Fetched featured auctions:`, auctions);
             return auctions;
         } catch (error) {
             console.error('Error fetching featured auctions:', error);
@@ -582,7 +574,6 @@ class AuctionModel {
                 LIMIT ${safeLimit}
             `;
             const [auctions] = await pool.execute(query);
-            console.log(`Fetched newest auctions:`, auctions);
             return auctions;
         } catch (error) {
             console.error('Error fetching newest auctions:', error);
@@ -823,7 +814,6 @@ class AuctionModel {
     }
 
     static async notifyAuctionResult(auctionUid) {
-        console.log('notifyAuctionResult called for auctionUid:', auctionUid);
         // Lấy MaxBidID và user thắng
         const [[auction]] = await pool.query(
         `SELECT AuctionID, MaxBidID FROM Auction WHERE AuctionUID = ?`, [auctionUid]
@@ -840,7 +830,6 @@ class AuctionModel {
         `SELECT DISTINCT UserID FROM Bids WHERE AuctionID = ?`, [auction.AuctionID]
         );
 
-        console.log('Bidders:', bidders);
         // Gửi thông báo cho từng user
         for (const b of bidders) {
         const type = b.UserID === winnerId ? 'win' : 'lose';

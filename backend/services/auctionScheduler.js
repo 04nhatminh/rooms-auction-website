@@ -10,7 +10,6 @@ async function autoEndAuctions() {
     await AuctionModel.setAuctionEnded(row.AuctionUID);
     await AuctionModel.notifyAuctionResult(row.AuctionUID);
   }
-  console.log(`[AuctionScheduler] Đã kết thúc ${rows.length} phiên.`);
 }
 
 module.exports = { autoEndAuctions };

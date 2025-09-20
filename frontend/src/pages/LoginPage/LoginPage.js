@@ -92,7 +92,7 @@ const Login = () => {
       if (res.ok) {
         alert('✅ Đăng nhập thành công!');
         persistUser(data.user, data.token);
-        if (data.user.role === 'admin') navigate('/admin/users-management');
+        if (data.user.role === 'admin') navigate('/admin/dashboard');
         else navigate('/');
       } else {
         if (data.needsVerification) {

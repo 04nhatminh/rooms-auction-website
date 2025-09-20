@@ -10,7 +10,6 @@ async function connectToMongoDB() {
             const client = new MongoClient(mongoUri);
             await client.connect();
             db = client.db('a2airbnb');
-            console.log('Connected to MongoDB to fetch images');
         } catch (error) {
             console.error('MongoDB connection failed when fetching images:', error);
             throw error;
@@ -45,8 +44,6 @@ class ImageModel {
     // Lấy ảnh đầu tiên cho nhiều ProductID
     static async getBatchFirstImages(productIds) {
         try {
-            console.log(`\nFetching batch images for ${productIds.length} ProductIDs`);
-            
             const database = await connectToMongoDB();
             const collection = database.collection('images');
             
@@ -69,7 +66,6 @@ class ImageModel {
                 }
             });
             
-            console.log(`Found images for ${Object.keys(imageMap).length}/${productIds.length} ProductIDs`);
             return imageMap;
             
         } catch (error) {

@@ -93,7 +93,7 @@ class UserController {
             
             if (verified) {
                 // Redirect về frontend SPA route
-                const frontendUrl = process.env.CLIENT_ORIGIN || 'http://localhost:3000';
+                const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
                 return res.redirect(`${frontendUrl}/verification-success`);
             } else {
                 return res.status(400).json({ 

@@ -31,7 +31,6 @@ class PaymentMethodModel {
                 VALUES (?, ?, ?, ?, 0, ?, NOW());`,
                 [nextId, identifier, token, provider, userId]
             );
-            console.log(`Upserted successfully for payment method ${nextId}`);
             return nextId;
 
         } catch (error) {
@@ -73,8 +72,7 @@ class PaymentMethodModel {
         VALUES (?, ?, ?, ?, 0, ?, NOW());`,
         [nextId, identifier, token, provider, userId]
     );
-
-    console.log(`Upserted PayPal VAULT for user ${userId} -> method ${nextId}`);
+    
     return nextId;
     } catch (err) {
         console.error('Error upserting PayPal VAULT method:', err);

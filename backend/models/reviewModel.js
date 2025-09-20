@@ -10,7 +10,6 @@ async function connectToMongoDB() {
             const client = new MongoClient(mongoUri);
             await client.connect();
             db = client.db('a2airbnb');
-            console.log('Connected to MongoDB to fetch reviews');
         } catch (error) {
             console.error('MongoDB connection failed when fetching reviews:', error);
             throw error;
@@ -25,7 +24,6 @@ class ReviewModel {
     // @returns {Object} - Object với key là product_id và value là total_reviews
     async getBatchTotalReviews(productIds) {
         try {
-            console.log(`Fetching batch reviews for ${productIds.length} product_ids`);
             const db = await connectToMongoDB();
 
             if (!db) {
@@ -44,8 +42,6 @@ class ReviewModel {
                 }
             ).toArray();
 
-            console.log(`MongoDB batch reviews query found ${results.length} results out of ${productIds.length} requested`);
-
             const reviewsMap = {};
             results.forEach(result => {
                 if (result.ProductID && typeof result.total_reviews === 'number') {
@@ -53,7 +49,6 @@ class ReviewModel {
                 }
             });
 
-            console.log(`Successfully mapped ${Object.keys(reviewsMap).length} review counts`);
             return reviewsMap;
 
         } catch (error) {
